@@ -9,7 +9,7 @@
   <meta name="author" content="Federico Paolinelli">
 
   
-  <meta name="description" content="Edit 2013-03-10: I&#8217;ve performed a substancial refactoring of postmanlib, and the details can be found in this new postWith the development of &hellip;">
+  <meta name="description" content="Or how to keep your app connected and stop worrying.&nbsp;Disclaimer:This is not another place where you can find java code snippet to open a socket &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -77,6 +77,36 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/05/01/tcp-connections-in-android/">Tcp Connections in Android</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2012-05-01'><span class='date'><span class='date-month'>May</span> <span class='date-day'>1</span><span class='date-suffix'>st</span>, <span class='date-year'>2012</span></span> <span class='time'>12:00 am</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><div class='post'>
+<span style="font-size: large;">Or how to keep your app connected and stop worrying.&nbsp;</span><br /><br /><i>Disclaimer</i>:<br />This is not another place where you can find java code snippet to open a socket and read and write to some server.<br />If you need that, go back to your favorite search engine and look for another result. <u>But be careful</u>: while looking for &#8220;inspiration&#8221; I found a lot of examples where the connection was held inside the UI thread. Please, don&#8217;t do that. At least use an asynctask.<br /><br /><br /><span style="font-size: large;"><i>Short version of this post (spolier warning):</i></span><br /><br /><ul><li>If you need to interact with a tcp server, use a singleton object that contains the socket&nbsp;</li><li>You can access it from all the activities of your app</li><li>If you want to be connected only while in foreground, have a counter that gets incremented on onStart() and gets decremented on onStop() of any client activity. Connect when the counter is &gt; 0, disconnect when the counter is &lt; 0<br /><div><br /></div></li></ul><br /><br /><br /><span style="font-size: large;">Background:</span><br />As a side project, I am developing a simple turn based multiplayer game, with a tcp server as backend (python twisted).<br /><br />In order to make my life easier, I wanted the interaction with the server to work as follows:<br /><br /><br /><ul><li>if the player gets disconnected while playing, it can&#8217;t reconnect and he is out of the current game</li><li>if the app goes background for any reason, it will disconnect from the server</li></ul><div><br /></div><div>The way the app interacts with the server is not the subject of the current post (hint: a thread for sending, one for receiving AND google protobuf for serialization), but it will probably be the subject for some code on github and another blogpost.</div><div><br /></div><div>What I am writing about is <b>how to share a tcp connection between several android activities.</b></div><div><b><br /></b></div><div><br /></div><div><span style="font-size: large;">Using a service to share the socket between android activities:</span></div><div><br /></div><div><ul><li>if you think about something that needs to survive between activities transition, a service is the first&nbsp;thing you think about</li><li>the code to interact with the server was self contained, so in every activity I had to bind to the service, wait for the bind to be done, call the service that called my code</li><li>because of the constraint I imposed to make the tcp server easier, I had to stop the service and restart it whenever my app went background</li><li>I was risking to keep the service around, consuming resources with no reason</li></ul><div>So, use a service ONLY if you really need to keep the connection even if your app is no longer visible.</div></div><div>If you need to do periodical tasks, or if you need to perform one shot operations, please consider using intent services.&nbsp;</div><div>Be kind and let your users know that you are draining their battery, using a notification icon when the service is alive and your app gets backgrounded.</div><div><br /></div><div><span style="font-size: large;">Using a singleton to share the tcp socket:</span></div><div><ul><li>A singleton object resides in your process, and so once started it&#8217;s accessible from all the activities</li><li>You can even run one or more threads inside of it, and they will be running no matter which activity is visible</li><li>Not using a service, you authorize the os to suspend your application (or even to kill it) when it runs out of resources.</li><li>There is no need to have the service layer to bind from the activity, you can access directly your singleton object</li></ul><div>So, this is the BEST WAY to share a tcp connection between activities.</div></div><div><br /></div><div>But what if you want to connect only when the application is foregrounded?</div><div><br /></div><div><span style="font-size: large;">How to check when your application is active:</span></div><div>Have a global counter (a good place might be the singleton itself) that gets incremented every time an onStart() is called from one of your activities, and decremented when onStop() gets called.&nbsp;</div><div><br /></div><div>If that counter is &gt; 0, that means the (at least) one activity is active and then the socket must be connected.</div><div>On the other hand, if the counter gets to 0, no activity is visible and so you need to disconnect.</div><div><br /></div><div>If you are afraid that the counter might go to 0 only because an activity is starting another one and so its onStop() gets called before onStart of the next one, please note that the official android documentation assures us that when starting one activity from another, &nbsp;onStop gets called AFTER onStart() of the started activity <a href="http://developer.android.com/guide/topics/fundamentals/activities.html">http://developer.android.com/guide/topics/fundamentals/activities.html</a>.</div><div><br /></div><div>With that in mind, we are sure that the only time the counter will get to 0 is when the ALL the activities are stopped.</div><div><br /></div><div><br /></div><div>If you liked this post, please consider following me on twitter @fedepaol .</div><div><br /></div><div><br /></div><div><br /></div><div><br /></div><div><br /></div><div><br /></div></div>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -356,36 +386,6 @@ Another thing I always wanted to do was game programming. Moving objects and int
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2011/01/13/why-i-do-like-developing-mobile/">Why I Do Like Developing Mobile</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2011-01-13'><span class='date'><span class='date-month'>Jan</span> <span class='date-day'>13</span><span class='date-suffix'>th</span>, <span class='date-year'>2011</span></span> <span class='time'>12:00 am</span></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><div class='post'>
-Well, I stopped and started thinking what&#8217;s so cool about mobile development and mobile apps, and I would like to share my thoughts.<br /><br />Before modern smartphones, most software was written to be consumed in desktop environment, where the user was sitting in front of his computer interacting with it.<br /><br />Smartphones make now easy doing something new: interacting with the environment the user belongs to. That is what I think is the most exciting thing of mobile dev. You have a bunch of information from all different sensors like gps, camera, accelerometers (and now nfc with android), and then you can mix them all and build whatever comes into your mind.<br />If this is not enough, you can even implement some service and put it somewhere in the internet, make your app a client of it and interact with other client applications.<br /><br />It now takes a reasonable amount of time to implement something that before was seen as science fiction or 007 gadgets, like video calls or augmented reality or location based service.<br /><br />I don&#8217;t mean it couldn&#8217;t be done before, but it&#8217;s not an embedded stuff nieche with custom hardware and sensors anymore. With a 200$ smartphone and a 900$ laptop, you don&#8217;t need anything else to implement a location based service with photosharing, istant messaging and all the stuff you want. And the new model of distribution makes easy to reach the users as well.<br /><br />This just from a mere technical point of view, you obviously need a good recepit to mix all the ingredients and come out with a successful product.<br /></div>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/3">&larr; Older</a>
@@ -403,6 +403,10 @@ Well, I stopped and started thinking what&#8217;s so cool about mobile developme
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2014/08/24/migrating-from-blogger-to-octopress-done/">Migrating From Blogger to Octopress (Done!)</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/04/08/preloading-localized-data-in-sqllte/">Generating Preloaded Sqlite Data</a>
       </li>
     
@@ -416,10 +420,6 @@ Well, I stopped and started thinking what&#8217;s so cool about mobile developme
     
       <li class="post">
         <a href="/blog/2013/03/06/postman-ringstwice-reloaded-android/">PostMan (RingsTwice) Reloaded - Android Rest and Oauth Make Easy(er)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2012/11/25/droidalone-reloaded/">DroidAlone - Reloaded</a>
       </li>
     
   </ul>
