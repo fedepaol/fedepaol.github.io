@@ -2,19 +2,383 @@
 <urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   
+  <url>
+    <loc>http://fedepaol.github.io/blog/2014/04/08/preloading-localized-data-in-sqllte/</loc>
+    <lastmod>2014-04-08T00:00:00+02:00</lastmod>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/blog/2014/02/20/rest-interaction-in-android/</loc>
+    <lastmod>2014-02-20T00:00:00+01:00</lastmod>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/blog/2013/07/29/contributing-to-firefox-for-android/</loc>
+    <lastmod>2013-07-29T00:00:00+02:00</lastmod>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/blog/2013/03/06/postman-ringstwice-reloaded-android/</loc>
+    <lastmod>2013-03-06T00:00:00+01:00</lastmod>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/blog/2012/11/25/droidalone-reloaded/</loc>
+    <lastmod>2012-11-25T00:00:00+01:00</lastmod>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/blog/2012/11/11/android-content-providers-generator/</loc>
+    <lastmod>2012-11-11T00:00:00+01:00</lastmod>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/blog/2012/10/29/droidconuk-2012/</loc>
+    <lastmod>2012-10-29T00:00:00+01:00</lastmod>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/blog/2012/09/15/gridlayout-support-library-with-maven/</loc>
+    <lastmod>2012-09-15T00:00:00+02:00</lastmod>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/blog/2012/07/23/intellij-robolectric-and-android/</loc>
+    <lastmod>2012-07-23T00:00:00+02:00</lastmod>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/blog/2012/05/01/tcp-connections-in-android/</loc>
+    <lastmod>2012-05-01T00:00:00+02:00</lastmod>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/blog/2012/01/30/postmanlib-android-and-rest-web/</loc>
+    <lastmod>2012-01-30T00:00:00+01:00</lastmod>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/blog/2012/01/22/pastimer-android-kitchen-timer-released/</loc>
+    <lastmod>2012-01-22T00:00:00+01:00</lastmod>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/blog/2011/12/05/mydearsanta/</loc>
+    <lastmod>2011-12-05T00:00:00+01:00</lastmod>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/blog/2011/10/18/new-app-android-kitchen-timer/</loc>
+    <lastmod>2011-10-18T00:00:00+02:00</lastmod>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/blog/2011/06/24/what-i-have-been-working-on/</loc>
+    <lastmod>2011-06-24T00:00:00+02:00</lastmod>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/blog/2011/04/25/behind-activities-android-services/</loc>
+    <lastmod>2011-04-25T00:00:00+02:00</lastmod>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/blog/2011/03/21/first-18-days-of-pegdroid/</loc>
+    <lastmod>2011-03-21T00:00:00+01:00</lastmod>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/blog/2011/03/03/pegdroid/</loc>
+    <lastmod>2011-03-03T00:00:00+01:00</lastmod>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/blog/2011/02/18/mobile-game-development/</loc>
+    <lastmod>2011-02-18T00:00:00+01:00</lastmod>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/blog/2011/01/13/why-i-do-like-developing-mobile/</loc>
+    <lastmod>2011-01-13T00:00:00+01:00</lastmod>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/blog/2010/12/27/droidalone-opensourced/</loc>
+    <lastmod>2010-12-27T00:00:00+01:00</lastmod>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/blog/2010/12/08/importance-of-being-polished/</loc>
+    <lastmod>2010-12-08T00:00:00+01:00</lastmod>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/blog/2010/11/25/testing-intent-service/</loc>
+    <lastmod>2010-11-25T00:00:00+01:00</lastmod>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/blog/2010/11/18/my-sqllite-helper-builder/</loc>
+    <lastmod>2010-11-18T00:00:00+01:00</lastmod>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/blog/2010/11/10/something-more-about-me/</loc>
+    <lastmod>2010-11-10T00:00:00+01:00</lastmod>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/blog/2010/07/06/its-been-long-time/</loc>
+    <lastmod>2010-07-06T00:00:00+02:00</lastmod>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/blog/2008/06/10/why-this-blog/</loc>
+    <lastmod>2008-06-10T00:00:00+02:00</lastmod>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/blog/2008/06/10/developing-python-on-symbian-from-linux/</loc>
+    <lastmod>2008-06-10T00:00:00+02:00</lastmod>
+    <priority>0.8</priority>
+  </url>
+  
   
   <url>
     <loc>http://fedepaol.github.io/blog/archives/</loc>
-    <lastmod>2014-08-23T02:31:38+02:00</lastmod>
+    <lastmod>2014-08-24T19:07:02+02:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   
   <url>
     <loc>http://fedepaol.github.io/</loc>
-    <lastmod>2014-08-23T02:31:38+02:00</lastmod>
+    <lastmod>2014-08-24T19:07:02+02:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/blog/4783553897631152735/</loc>
+    <lastmod>2014-08-24T19:07:02+02:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/blog/5762890793565473334/</loc>
+    <lastmod>2014-08-24T19:07:02+02:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/blog/590326769262851523/</loc>
+    <lastmod>2014-08-24T19:07:02+02:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/blog/8794328744855879928/</loc>
+    <lastmod>2014-08-24T19:07:02+02:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/blog/2754186384217597996/</loc>
+    <lastmod>2014-08-24T19:07:02+02:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/blog/8737900959698458588/</loc>
+    <lastmod>2014-08-24T19:07:02+02:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/blog/5902215682602815342/</loc>
+    <lastmod>2014-08-24T19:07:02+02:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/blog/8781357746552137209/</loc>
+    <lastmod>2014-08-24T19:07:02+02:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/blog/7479647635384002140/</loc>
+    <lastmod>2014-08-24T19:07:02+02:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/blog/1551618135281241130/</loc>
+    <lastmod>2014-08-24T19:07:02+02:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/blog/7070509365041121514/</loc>
+    <lastmod>2014-08-24T19:07:02+02:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/blog/6456115941251927422/</loc>
+    <lastmod>2014-08-24T19:07:02+02:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/blog/5201583741384943452/</loc>
+    <lastmod>2014-08-24T19:07:02+02:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/blog/4777712813568508533/</loc>
+    <lastmod>2014-08-24T19:07:02+02:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/blog/6272453597377267519/</loc>
+    <lastmod>2014-08-24T19:07:02+02:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/blog/3564390031003544393/</loc>
+    <lastmod>2014-08-24T19:07:02+02:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/blog/4240941061519127174/</loc>
+    <lastmod>2014-08-24T19:07:02+02:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/blog/8486493198053451506/</loc>
+    <lastmod>2014-08-24T19:07:02+02:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/blog/3267861477715978257/</loc>
+    <lastmod>2014-08-24T19:07:02+02:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/blog/6707001740082933324/</loc>
+    <lastmod>2014-08-24T19:07:02+02:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/blog/4988090025749838356/</loc>
+    <lastmod>2014-08-24T19:07:02+02:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/blog/1914804411039776893/</loc>
+    <lastmod>2014-08-24T19:07:02+02:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/blog/5138520721999641157/</loc>
+    <lastmod>2014-08-24T19:07:02+02:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/blog/2720348173809612935/</loc>
+    <lastmod>2014-08-24T19:07:02+02:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/blog/2178971980224893826/</loc>
+    <lastmod>2014-08-24T19:07:02+02:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/blog/1893110970736947154/</loc>
+    <lastmod>2014-08-24T19:07:02+02:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/blog/4978881524588459317/</loc>
+    <lastmod>2014-08-24T19:07:02+02:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/blog/6452616553315626607/</loc>
+    <lastmod>2014-08-24T19:07:02+02:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
   </url>
   
   

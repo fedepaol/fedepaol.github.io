@@ -1,0 +1,283 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Testing an Intent Service - My little Android warehouse</title>
+  <meta name="author" content="Federico Paolinelli">
+
+  
+  <meta name="description" content="It may sound weird, but I discovered java development while trying to learn android development itself.Along with Java, eclipse and all this nice &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://fedepaol.github.io/blog/2010/11/25/testing-intent-service">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="My little Android warehouse" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-16514009-2']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">My little Android warehouse</a></h1>
+  
+    <h2>Random thoughts about my experience as moonlight android developer.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:fedepaol.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Testing an Intent Service</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2010-11-25'><span class='date'><span class='date-month'>Nov</span> <span class='date-day'>25</span><span class='date-suffix'>th</span>, <span class='date-year'>2010</span></span> <span class='time'>12:00 am</span></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><div class='post'>
+It may sound weird, but I discovered java development while trying to learn android development itself.<br />Along with Java, eclipse and all this nice stuff, I discovered junit too.<br /><br />One of the problems I encountered while developing my second app, droidalone, was to test intent services.<br /><br />Intent services are a powerful way to handle background task. They basically are services that run in their own thread and die (like non sticky services) after they finished their job. They don't have all the problems related to running an async task inside an activity (like knowing the result of the task if the activity goes in background). DroidAlone makes an intensive use of intentservices, because every event is handled by an intent service.<br /><br />A problem with testing the intent service itself (and in general, with a class that offers a "do in background, call a callback when finished" interface) is that the single test finishes when its caller function returns.  I had to find a way to make the test function hang and wait while the background service (or thread) performs its job. Then the test function has to be waken up in order to evaluate if the job result is consistent with what is expected from the test.<br /><br />The idea is pretty simple, a semaphore is locked until the task is done. When the task is done, the result is evaluated and then the semaphore is released.<br /><br />Let's see an example.<br /><br />Here the base class to perform this actions:<br /><br /><br /><pre style="font-family: Andale Mono,Lucida Console,Monaco,fixed,monospace; color: rgb(0, 0, 0); background-color: rgb(238, 238, 238); font-size: 12px; border: 1px dashed rgb(153, 153, 153); line-height: 14px; padding: 5px; overflow: auto; "><code>package com.wyb.testhelper;<br /><br />import java.util.concurrent.Semaphore;<br /><br />import android.content.BroadcastReceiver;<br />import android.content.Context;<br /><br />/**<br />* Asynchronous calls tester class<br />* @author fede<br />*<br />*/<br />public class AsyncCallTestClass {<br />/**<br /> * Interface to be implemented by the test implementation<br /> * @author fede<br /> *<br /> */<br />public interface AsyncCallTest{<br />    /**<br />     * The call to execute the test<br />     */<br />    public void execTest();<br />}<br /><br />private Semaphore mSem;<br />private AsyncCallTest mTest;<br /><br />public AsyncCallTestClass(Context c,<br />                          AsyncCallTest test) {<br />    mSem = new Semaphore(0);<br />    mTest = test;<br /><br /><br />}<br /><br />/**<br /> * must be called when the test is finished and the result was evaluated<br /> */<br />public void testFinished(){<br />    mSem.release();<br />}<br /><br /><br />/**<br /> * Runs the test itself<br /> */<br />public void runTest(){<br />    mTest.execTest();<br />    try{<br />        mSem.acquire();<br />    }catch(InterruptedException e){<br />    <br />    }<br />}<br /><br /><br /><br />}<br /><br /></code></pre><br />It accepts an interface that exposes execTest method, and offers a "testFinished" method to be called when the test result is evaluated.<br /><br />My intent service helper class accept a message to be processed in background, and offers a ResultNotify interface whose methods will be called when the task is finished.<br />Several kinds of messages can be processed, and I had to test all of them.<br /><br /><pre style="font-family: Andale Mono,Lucida Console,Monaco,fixed,monospace; color: rgb(0, 0, 0); background-color: rgb(238, 238, 238); font-size: 12px; border: 1px dashed rgb(153, 153, 153); line-height: 14px; padding: 5px; overflow: auto; width: 100%;"><code>/**<br />* Helper class to test several kinds of messages<br />* @author fede<br />*<br />*/<br />public class ServiceHelperTestClass {<br />     /**<br />      * Callbacks will be called when the test is finished<br />      * @author fede<br />      *<br />      */<br />     public interface ServiceTestFinishedInterface{<br />             /**<br />              * Asynchronous task finished (result needs to be evaluated)<br />              */<br />             public void onCallFinished();<br /><br />             /**<br />              * Asyncronous task returned an error<br />              * @param message<br />              */<br />             public void onError(String message);<br />     }<br /><br />     Context mContext;<br />     ServiceTestFinishedInterface mFinish;<br /><br /><br />     /**<br />      * Constructor<br />      * @param m     message to be tested<br />      * @param context context to run the test against<br />      * @param finish interface that will be called when the task will finish<br />      */<br />     public ServiceHelperTestClass(MessageToIntentService m, <br />                                   Context context, <br />                                   ServiceTestFinishedInterface finish) {<br />             mContext = context;<br />             mFinish = finish;<br />             final MessageToIntentService mess = m;<br />             final IntentServiceHelper helper = IntentServiceHelper.getInstance();<br />             final AsyncCallTestClass c =  new AsyncCallTestClass(mContext,<br />                                 new AsyncCallTest(){<br />                                        @Override<br />                                        public void execTest() {<br />                                           try{<br />                                             helper.processMessage(mContext, mess);<br />                                           }catch (Exception e){<br />                                             mFinish.onError(e.getMessage());<br />                                           }<br />                                        }<br /><br />                              });<br /><br />             // A result interface needs to be registered<br />             helper.registerResultListener(new IntentServiceResultNotify(){<br /><br />                     @Override<br />                     public void onIntentServiceError(String result) {<br />                             mFinish.onError(result);<br />                             c.testFinished();<br />                     }<br /><br />                     @Override<br />                     public void onIntentServiceResult(String result) {<br />                             mFinish.onCallFinished();<br />                             c.testFinished();<br />                     }<br /><br />             }, mContext);<br /><br /><br /><br />             c.runTest();<br /><br />     }<br /><br />}<br /><br /></code></pre><br /><br /><br />In this way, to test all the types of messages, OR to test the intent service under different scenarios, all I have to do in my test class is to implement a method like:<br /><br /><br /><pre style="font-family: Andale Mono,Lucida Console,Monaco,fixed,monospace; color: rgb(0, 0, 0); background-color: rgb(238, 238, 238); font-size: 12px; border: 1px dashed rgb(153, 153, 153); line-height: 14px; padding: 5px; overflow: auto; width: 100%;"><code>public void testHelloMessage() {<br />  ServiceHelperTestClass t = <br /><br />        new ServiceHelperTestClass(new HelloMessasge(), <br />                                   mContext,<br />                                   new ServiceTestFinishedInterface(){<br /><br />                                      @Override<br />                                      public void onCallFinished() {<br />                                              // Test Result here<br />                                              ;<br />                                      }<br /><br />                                      @Override<br />                                      public void onError(String message) {<br />                                              fail(message);<br />                                      }<br /><br />                              });<br />                     }<br /><br /></code></pre><br />This was just an example. However the basic idea is to make the test call block, and to unblock it (with a callback or with a broadcast receiver) when the task is finished.</div>
+<h2>Comments</h2>
+<div class='comments'>
+<div class='comment'>
+<div class='author'>bgenchel</div>
+<div class='content'>
+its hard to follow your code. why declare an interface. is that of type interface or did you define it yourself? where is AsyncTest defined? I&#39;m trying this myself and its not working.</div>
+</div>
+</div>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Federico Paolinelli</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2010-11-25'><span class='date'><span class='date-month'>Nov</span> <span class='date-day'>25</span><span class='date-suffix'>th</span>, <span class='date-year'>2010</span></span> <span class='time'>12:00 am</span></time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/android/'>android</a>, <a class='category' href='/blog/categories/junit/'>junit</a>, <a class='category' href='/blog/categories/test/'>test</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://fedepaol.github.io/blog/2010/11/25/testing-intent-service/" data-via="fedepaol" data-counturl="http://fedepaol.github.io/blog/2010/11/25/testing-intent-service/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2010/11/18/my-sqllite-helper-builder/" title="Previous Post: My sqllite helper builder">&laquo; My sqllite helper builder</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2010/12/08/importance-of-being-polished/" title="Next Post: The importance of little details">The importance of little details &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/04/08/preloading-localized-data-in-sqllte/">Generating Preloaded Sqlite Data</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/02/20/rest-interaction-in-android/">Rest Interaction in Android</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/07/29/contributing-to-firefox-for-android/">Contributing to Firefox for Android</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/03/06/postman-ringstwice-reloaded-android/">PostMan (RingsTwice) Reloaded - Android Rest and Oauth Make Easy(er)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/11/25/droidalone-reloaded/">DroidAlone - Reloaded</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/fedepaol">@fedepaol</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'fedepaol',
+            count: 0,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+<section class="googleplus">
+  <h1>
+    <a href="https://plus.google.com/+FedericoPaolinelli?rel=author">
+      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
+      Google+
+    </a>
+  </h1>
+</section>
+
+
+
+<section>
+	<h1>On Twitter:</h1>
+	<div>
+		<p><br /><a href="http://twitter.com/fedepaol" target="_blank">My Tweets, on Twitter.</a></p>
+		<a href="http://twitter.com/fedepaol" class="twitter-follow-button" data-show-count="">Follow @fedepaol</a>
+	</div>
+</section>
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - Federico Paolinelli -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

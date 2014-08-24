@@ -1,0 +1,286 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Developing Python on Symbian From a Linux Box - My little Android warehouse</title>
+  <meta name="author" content="Federico Paolinelli">
+
+  
+  <meta name="description" content="Since my mobile device is a s60v3 one (Nokia E61), I found particulary difficult to develop any simple python script on the phone. The hardest thing &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://fedepaol.github.io/blog/2008/06/10/developing-python-on-symbian-from-linux">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="My little Android warehouse" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-16514009-2']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">My little Android warehouse</a></h1>
+  
+    <h2>Random thoughts about my experience as moonlight android developer.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:fedepaol.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Developing Python on Symbian From a Linux Box</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2008-06-10'><span class='date'><span class='date-month'>Jun</span> <span class='date-day'>10</span><span class='date-suffix'>th</span>, <span class='date-year'>2008</span></span> <span class='time'>12:00 am</span></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><div class='post'>
+Since my mobile device is a s60v3 one (Nokia E61), I found particulary difficult to develop any simple python script on the phone. The hardest thing to do was the write - test cycle.<br /><br />On linux you can't simply send the file to the phone with obex, since it will be stored in your incoming messages.<br /><br />From the excellent<a href="http://www.mobilenin.com/"> Jürgen Scheible</a>'s tutorial website I discovered the existance of the nice putools for making easier the development cycle <a href="http://people.csail.mit.edu/kapu/symbian/python.html">here</a><br /><br />It allows you to sync and reload the scripts on the phone directly from the pc.<br /><br />Unfortunately, the instructions in the website are for a windows machine, but the whole tool is python based, so it is supposed do be (and it is) multiplatform.<br /><br />In the sync.config file you are asked to choose the right serial port over bluetooth file, which can be one of /dev/rfcommxx<br />ie: COM_PORT = '/dev/rfcomm2' instead of windows COMxx port<br /><br />The first problem I had then was related to a bug of my ubuntu distribution (8.04) described <a href="https://bugs.launchpad.net/ubuntu/+source/bluez-utils/+bug/227429">here</a>  which can be easly fixed installing the bluez-utils package from Debian Sid<br /><br />At this point, you can follow the instruction on the putools website by opening a serial port<br /><span style="font-family:trebuchet ms;"> $ sdptool add --channel=2 SP</span><br /><br /><span style="font-family:trebuchet ms;"> $ rfcomm listen rfcomm2 2 </span><br /><br />and launching the script on the phone and finally launching from another shell the push command from the pcfiles folder.</div>
+<h2>Comments</h2>
+<div class='comments'>
+<div class='comment'>
+<div class='author'>Deuce868</div>
+<div class='content'>
+nvm, got it working by changing the com port in the config from just 3 to the entire /dev... path<BR/><BR/>Thanks for the excellent post.</div>
+</div>
+<div class='comment'>
+<div class='author'>Deuce868</div>
+<div class='content'>
+Other than the bug in the ubuntu package, any idea why I'd get the "port not open" exception? <BR/><BR/>I'm running intrepid which has the updated bluez-utils package, but wheneven I try push I get:<BR/>python push<BR/>file /home/rharding/.push/config<BR/>Connecting to serial port /dev/ttyS2<BR/>Traceback (most recent call last):<BR/>  File "push", line 75, in module<BR/>    main()<BR/>  File "push", line 55, in main<BR/>    app = App(0)<BR/>  File "/usr/lib/python2.5/site-packages/wx-2.8-gtk2-unicode/wx/_core.py", line 7912, in __init__<BR/>    self._BootstrapApp()<BR/>  File "/usr/lib/python2.5/site-packages/wx-2.8-gtk2-unicode/wx/_core.py", line 7487, in _BootstrapApp<BR/>    return _core_.PyApp__BootstrapApp(*args, **kwargs)<BR/>  File "push", line 38, in OnInit<BR/>    title='push' )<BR/>  File "/home/rharding/Desktop/putools/pcfiles/phoneshell.py", line 56, in __init__<BR/>    *args, **kwds)<BR/>  File "/home/rharding/Desktop/putools/pcfiles/phoneshell.py", line 243, in __init__<BR/>    *args, **kwds)<BR/>  File "/home/rharding/Desktop/putools/pcfiles/btinterpreter.py", line 105, in __init__<BR/>    self.bt.send( 'reset' )<BR/>  File "/home/rharding/Desktop/putools/pcfiles/../libs/phcomm.py", line 339, in send<BR/>    self.write( cmd )<BR/>  File "/home/rharding/Desktop/putools/pcfiles/../libs/phcomm.py", line 367, in write<BR/>    self.sock.send(msg)<BR/>  File "/home/rharding/Desktop/putools/pcfiles/../libs/phcomm.py", line 147, in send<BR/>    self.file.write( msg )<BR/>  File "/usr/lib/python2.5/site-packages/serial/serialposix.py", line 328, in write<BR/>    if self.fd is None: raise portNotOpenError<BR/>serial.serialutil.SerialException: Port not open</div>
+</div>
+</div>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Federico Paolinelli</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2008-06-10'><span class='date'><span class='date-month'>Jun</span> <span class='date-day'>10</span><span class='date-suffix'>th</span>, <span class='date-year'>2008</span></span> <span class='time'>12:00 am</span></time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/python-symbian/'>python symbian</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://fedepaol.github.io/blog/2008/06/10/developing-python-on-symbian-from-linux/" data-via="fedepaol" data-counturl="http://fedepaol.github.io/blog/2008/06/10/developing-python-on-symbian-from-linux/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+      
+        <a class="basic-alignment right" href="/blog/2008/06/10/why-this-blog/" title="Next Post: Why this blog">Why this blog &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/04/08/preloading-localized-data-in-sqllte/">Generating Preloaded Sqlite Data</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/02/20/rest-interaction-in-android/">Rest Interaction in Android</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/07/29/contributing-to-firefox-for-android/">Contributing to Firefox for Android</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/03/06/postman-ringstwice-reloaded-android/">PostMan (RingsTwice) Reloaded - Android Rest and Oauth Make Easy(er)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/11/25/droidalone-reloaded/">DroidAlone - Reloaded</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/fedepaol">@fedepaol</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'fedepaol',
+            count: 0,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+<section class="googleplus">
+  <h1>
+    <a href="https://plus.google.com/+FedericoPaolinelli?rel=author">
+      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
+      Google+
+    </a>
+  </h1>
+</section>
+
+
+
+<section>
+	<h1>On Twitter:</h1>
+	<div>
+		<p><br /><a href="http://twitter.com/fedepaol" target="_blank">My Tweets, on Twitter.</a></p>
+		<a href="http://twitter.com/fedepaol" class="twitter-follow-button" data-show-count="">Follow @fedepaol</a>
+	</div>
+</section>
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - Federico Paolinelli -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>
