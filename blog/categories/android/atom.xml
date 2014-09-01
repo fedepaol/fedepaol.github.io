@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Android | My little Android warehouse]]></title>
   <link href="http://fedepaol.github.io/blog/categories/android/atom.xml" rel="self"/>
   <link href="http://fedepaol.github.io/"/>
-  <updated>2014-09-01T12:24:39+02:00</updated>
+  <updated>2014-09-01T23:13:00+02:00</updated>
   <id>http://fedepaol.github.io/</id>
   <author>
     <name><![CDATA[Federico Paolinelli]]></name>
@@ -18,7 +18,9 @@
     <link href="http://fedepaol.github.io/blog/2014/09/01/dragging-with-viewdraghelper/"/>
     <updated>2014-09-01T20:48:20+02:00</updated>
     <id>http://fedepaol.github.io/blog/2014/09/01/dragging-with-viewdraghelper</id>
-    <content type="html"><![CDATA[<p>While working on my <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=909434">last side gig</a>, a patch to Firefox for Android to allow the urlbar to be dragged in order to show content hidden behind the main view, I had to deal with ViewDragHelper and understand how it works.</p>
+    <content type="html"><![CDATA[<p><a href="https://developer.android.com/reference/android/support/v4/widget/ViewDragHelper.html">ViewDragHelper</a> is an helper class available on Support Library v4, that makes it easier to drag child views of a ViewGroup. It is used in the <a href="https://developer.android.com/design/patterns/navigation-drawer.html">NavigationDrawer</a> too.</p>
+
+<p>While working on my <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=909434">last side gig</a>, a patch to Firefox for Android to allow the urlbar to be dragged in order to show content hidden behind the main view, I had to deal with ViewDragHelper and understand how it works.</p>
 
 <p>The final result (please note that the patch is still under review) is something like this:</p>
 
