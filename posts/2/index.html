@@ -9,7 +9,7 @@
   <meta name="author" content="Federico Paolinelli">
 
   
-  <meta name="description" content="Or how to keep your app connected and stop worrying.&nbsp;Disclaimer:This is not another place where you can find java code snippet to open a socket &hellip;">
+  <meta name="description" content="I have been curious about intellij since droicon uk 2011, where I noticed that some of the speakers were using IntelliJ instead of eclipse.A post &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -77,6 +77,54 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/07/23/intellij-robolectric-and-android/">Intellij, Robolectric and Android</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2012-07-23'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>23</span><span class='date-suffix'>rd</span>, <span class='date-year'>2012</span></span> <span class='time'>12:00 am</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><div class='post'>
+<br /><br />I have been curious about intellij since droicon uk 2011, where I noticed that some of the speakers were using IntelliJ instead of eclipse.<br /><br />A <a href="https://plus.google.com/115995639636688350464/posts/CgPZkFGvbm3">post</a> from Richard Hyndman, who is a developer advocate from Google, was the final straw that pushed me to download IntelliJ and give it a try.<br /><br />The first thing an eclipse user will notice in intellij is how slick and fast compares to the behemoth which is eclipse. On the other hand, an you can feel a bit disoriented at first.<br /><br /><br />Setting up a new android project using IntelliJ is pretty straightforward. You can follow the nice tutorial from jetbrains website http://wiki.jetbrains.net/intellij/Android.<br />For this reason, I will not write about how to set up an Android project in intellij here.<br /><br /><br />What I am going to write about is how to setup an <b>android project with intellij and integrate robolectric</b> with it.<br /><br />I really like robolectric. It makes unit testing for android a lot faster as it would be on the emulator. What&#8217;s more, you can use mockito with it.<br />Mockito is a mocking framework that makes a lot easier to mock your java objects.<br />Mockito does not work with dalvik jvm, but robolectric makes your tests run on your pc&#8217;s jvm.<br /><br /><br />Despite robolectric provides instruction on how to setup an intellij project manually, I have tried that process a lot of times, carefully checking if I was missing a step.<br />However, I did not manage to get it working. The guys from Pivotal provide also an intellij starter project, which you can configure to point a git repository https://github.com/pivotal/AndroidIntelliJStarter<br /><br /><br />However, I was not either satisfied with this solution and, inspired by this <a href="https://groups.google.com/forum/?fromgroups#!topic/robolectric/QN6dskFjrHc">post</a>&nbsp;,&nbsp;I tried to setup a maven solution and to import it in intellij afterwards.<br /><br />This provides another great benefit, which is the fact that I can import the same project in my linux netbook without bothering for relative paths in eclipse projects.<br /><br />So, here are the steps I had to follow in order to get it working:<br /><br />- Install the android sdk. This is trivial, I assume you are comfortable with that<br />- Let the ANDROID_HOME environment variable point the path where you uncompressed the android sdk<br />- You need to have at least one version of the sdk installed, so if you haven&#8217;t yet, you should launch the sdk manager that is the &#8220;android&#8221; executable on ANDROID_HOME/tools/android. Install also the extras, such as the compatibility library, admob stuff and all the libraries you find at the bottom<br /><br /><br />- install the maven android sdk deployer you can find at <a href="https://github.com/mosabua/maven-android-sdk-deployer">https://github.com/mosabua/maven-android-sdk-deployer </a>and then install it.<br /><br />I read somewhere that you can get android jar without relying on it, but in any case, if you need google maps or other private apis like that you still need to use this tool.<br />&nbsp;I use the latest (almost) version which is 4.0.3, so I run mvn install -P 4.0.3<br /><br /><br />- Install maven android plugin. The easiest way is to use android archetypes from here:<br />https://github.com/akquinet/android-archetypes<br /><br /><br />Finally, you are now ready to generate your first maven android project:<br /><br /><br /><br /><br /><br />mvn archetype:generate \<br />&nbsp; -DarchetypeArtifactId=android-quickstart \<br />&nbsp; -DarchetypeGroupId=de.akquinet.android.archetypes \<br />&nbsp; -DarchetypeVersion=1.0.8 \<br />&nbsp; -DgroupId=your.company \<br />&nbsp; -DartifactId=my-android-application<br /><br /><br /><br />You <i>could</i> find an issue. &nbsp;Recently the tree of the android sdk folders has been slightly changed. Maven android plugin expects them to be in the updated version (I don&#8217;t remember what the differences where). However, if maven complains it cannot find android related stuff, and your sdk has been installed for some time, a good option would be to remove the sdk and reinstall it from scratch (at least the part you download with the sdk manager).<br /><br /><br /><br />At this point, you have a working maven project, which you could already open with intellij. What is still missing is the robolectric dependencies.<br />Nothing more easy, all you have to do is to add<br /><br /><br /><br /><br /><script src="https://gist.github.com/3165830.js?file=aaa.xml"></script> right below android dependencies.  You should also create the test folder, under <i>src/test/your/package/ </i><br /><br />Now, a problem I had was that I had to change the pointer of the repository in order to have robolectric 1.2 working.<br /><div><br /></div><div><br /></div><div><br /></div><br /><script src="https://gist.github.com/3165854.js?file=bbb.xml"></script><br /><br /><br /><br /><br />At this point, you should be able to open the pom.xml with intellij.<br /><br /><br />Now, to have robolectric working from intellij, you still need to make a couple of changes:<br />- the order of include of jars does not respect the one you specified. What&#8217;s more, you will likely to get the STUB! error because android jar is included before junit and robolectric.<br />All you need to do is to move the android jar below junit and robolectric<br /><br />- you need to manually specify the javadocs for android. You do this by highlighting android jar, pressing the little edit in the lower left corner.<br /><br /><div class="separator" style="clear: both; text-align: center;"><a href="http://3.bp.blogspot.com/-Cix5eHOX7ik/UA2uDjBWp2I/AAAAAAAAHso/ctXgbFyx8Tg/s1600/intellij1.png" imageanchor="1" style="margin-left: 1em; margin-right: 1em;"><img border="0" height="200" src="http://3.bp.blogspot.com/-Cix5eHOX7ik/UA2uDjBWp2I/AAAAAAAAHso/ctXgbFyx8Tg/s320/intellij1.png" width="320" /></a></div><br /><br /><br />and pressing the plus sign. Then you choose &#8220;Attach files or directories&#8221;, point the path related to your android docs,<br />which is /docs/references under your ANDROID_HOME. Finally, you declare that it&#8217;s related to javadoc.<br /><br /><br /><br /><br />Now you are _almost_ ready to start. You made all this mess because you want to have robolectric working with intellij.<br /><br />You need to create, right under src/ folder, the following path:<br /><i>src/test/java/ YOUR_PACKAGE&nbsp;</i><br /><i><br /></i><br />where you are going to include your unit tests, and you are done!<br /><br /><br />If you liked this post, please consider following me @fedepaol .<br /><br /><br /><br /><br /><div><br /></div><br /><div><br /></div></div>
+<h2>Comments</h2>
+<div class='comments'>
+<div class='comment'>
+<div class='author'>Federico Paolinelli</div>
+<div class='content'>
+I added here https://dl.dropbox.com/u/3092639/pom.xml a working pom.xml I am currently using. I just tried to mvn clean install from a clean checkout and it looks to be finding robolectric. I hope you are missing something which you can correct using this example. Ping me if you can&#39;t</div>
+</div>
+<div class='comment'>
+<div class='author'>Christopher Perry</div>
+<div class='content'>
+I added the sonatype repository stuff, and it&#39;s not finding robolectric. Not sure why.</div>
+</div>
+<div class='comment'>
+<div class='author'>Christopher Perry</div>
+<div class='content'>
+This comment has been removed by the author.</div>
+</div>
+</div>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -356,36 +404,6 @@ I just released a new game. It&#8217;s (yet another) version of the popular soli
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2011/02/18/mobile-game-development/">Mobile Game Development</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2011-02-18'><span class='date'><span class='date-month'>Feb</span> <span class='date-day'>18</span><span class='date-suffix'>th</span>, <span class='date-year'>2011</span></span> <span class='time'>12:00 am</span></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><div class='post'>
-Another thing I always wanted to do was game programming. Moving objects and interacting with the game, as well as having fun with them, gives great satisfaction.<br />I think the fun part is that you have immediate feedback of what is happening, it&#8217;s just not like filling an edit text and pressing a button (or server side programming).<br /><br />Given that I am spending much of my spare time in (trying to) learning mobile development, I tried to merge the two things, and I came across to andengine framework.<br /><br />Andengine is an opensource framework for android game development, and it comes with a lot of nice features like physics and automatic scaling. I started developing my first game in January, and it&#8217;s a simple peg solitaire. It&#8217;s almost done but it still need to have some gui polishment (I mean I still need to have all the assets done :-) ), in any case it was a nice start. If anybody is interested, the sources are available under apache license on my github repo, which is <a href="http://github.com/fedepaol">http://github.com/fedepaol</a><br /><br />Andengine is quite powerful, but it&#8217;s main weakness is its lack of documentation. However, if you are brave enough you can look at the sources, and there is a nice forum where the author and other people give a lot of support.<br /><br />Next steps:<br /><br />One thing I still need to learn very fast, is how to perform unit tests in a game development environment, I already found a couple of links but still need to read them.<br /><br />Once I feel comfortable with TDD on games, the next step (but I am moving very slow) will be to try to implement some kind of multiplayer game (or at least a one vs one game) using all the appengine stuff I learned during my experiments.<br /><br />I will be posting again when I officially release the peg solitaire game.</div>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/3">&larr; Older</a>
@@ -399,8 +417,17 @@ Another thing I always wanted to do was game programming. Moving objects and int
 <aside class="sidebar">
   
     <section>
+  <h1>About Me</h1>
+  <p>Lead developer with electronic trading software by day, passionate about mobile. I spend a lot of my spare time writing software for android. Table Tennis player, snowboarder, dad. I also contribute to Firefox for Android.</p>
+  <a href="mailto:fedepaol@gmail.com" target="_top">fedepaol@gmail.com</a>
+</section>
+<section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/09/01/dragging-with-viewdraghelper/">Dragging With ViewDragHelper</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2014/08/24/migrating-from-blogger-to-octopress-done/">Migrating From Blogger to Octopress (Done!)</a>
@@ -416,10 +443,6 @@ Another thing I always wanted to do was game programming. Moving objects and int
     
       <li class="post">
         <a href="/blog/2013/07/29/contributing-to-firefox-for-android/">Contributing to Firefox for Android</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/03/06/postman-ringstwice-reloaded-android/">PostMan (RingsTwice) Reloaded - Android Rest and Oauth Make Easy(er)</a>
       </li>
     
   </ul>
