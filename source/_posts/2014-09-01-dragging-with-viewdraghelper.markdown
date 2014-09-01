@@ -9,7 +9,7 @@ categories:
  - mozilla
 ---
 
-While working on my [last endeavour](https://bugzilla.mozilla.org/show_bug.cgi?id=909434), a patch to Firefox for Android to allow the urlbar to be dragged in order to show content hidden behind the main view, I had to deal with ViewDragHelper and understand how it works.
+While working on my [last side gig](https://bugzilla.mozilla.org/show_bug.cgi?id=909434), a patch to Firefox for Android to allow the urlbar to be dragged in order to show content hidden behind the main view, I had to deal with ViewDragHelper and understand how it works.
 
 The final result (please note that the patch is still under review) is something like this:
 
@@ -34,7 +34,7 @@ Children view can also rebel against their parent tiranny, and disable this mech
 
 {% img /images/touches.png 350 350 'touches' 'images' %}
 
-##How does ViewDragHelper work
+##How ViewDragHelper works
 The idea behind it is pretty simple. You register a draghelper on a container view
 
 ```java
@@ -147,7 +147,7 @@ In any case, checking if Queen is targeted is quite easy:
 
 which gives draghelper the permission to drag main layout). You *must* return true up there for the view you want to be dragged.
 
-####getViewVerticalDragRange && clampViewPositionVertical (there are *Horizontal* too)
+####getViewVerticalDragRange && clampViewPositionVertical (there are *Horizontal* flavours too)
 ```java
         public int getViewVerticalDragRange(View child) {
             return mVerticalRange;
