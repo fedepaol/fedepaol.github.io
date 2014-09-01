@@ -4,7 +4,7 @@
   <title><![CDATA[My little Android warehouse]]></title>
   <link href="http://fedepaol.github.io/atom.xml" rel="self"/>
   <link href="http://fedepaol.github.io/"/>
-  <updated>2014-09-01T11:02:44+02:00</updated>
+  <updated>2014-09-01T12:19:31+02:00</updated>
   <id>http://fedepaol.github.io/</id>
   <author>
     <name><![CDATA[Federico Paolinelli]]></name>
@@ -45,7 +45,7 @@
 
 <p><img src="http://fedepaol.github.io/images/touches.png" width="350" height="350" title="touches" alt="images"></p>
 
-<h2>How does ViewDragHelper work</h2>
+<h2>How ViewDragHelper works</h2>
 
 <p>The idea behind it is pretty simple. You register a draghelper on a container view</p>
 
@@ -219,7 +219,7 @@ As I wrote before, the two methods ViewDragHelper needs to hook into are</p>
 
 <p>which gives draghelper the permission to drag main layout). You <em>must</em> return true up there for the view you want to be dragged.</p>
 
-<h4>getViewVerticalDragRange &amp;&amp; clampViewPositionVertical (there are <em>Horizontal</em> too)</h4>
+<h4>getViewVerticalDragRange &amp;&amp; clampViewPositionVertical (there are <em>Horizontal</em> flavours too)</h4>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
