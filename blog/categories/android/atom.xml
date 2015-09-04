@@ -1,0 +1,459 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Android | My little Android warehouse]]></title>
+  <link href="http://fedepaol.github.io/blog/categories/android/atom.xml" rel="self"/>
+  <link href="http://fedepaol.github.io/"/>
+  <updated>2014-09-01T23:13:00+02:00</updated>
+  <id>http://fedepaol.github.io/</id>
+  <author>
+    <name><![CDATA[Federico Paolinelli]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Dragging With ViewDragHelper]]></title>
+    <link href="http://fedepaol.github.io/blog/2014/09/01/dragging-with-viewdraghelper/"/>
+    <updated>2014-09-01T20:48:20+02:00</updated>
+    <id>http://fedepaol.github.io/blog/2014/09/01/dragging-with-viewdraghelper</id>
+    <content type="html"><![CDATA[<p><a href="https://developer.android.com/reference/android/support/v4/widget/ViewDragHelper.html">ViewDragHelper</a> is an helper class available on Support Library v4, that makes it easier to drag child views of a ViewGroup. It is used in the <a href="https://developer.android.com/design/patterns/navigation-drawer.html">NavigationDrawer</a> too.</p>
+
+<p>While working on my <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=909434">last side gig</a>, a patch to Firefox for Android to allow the urlbar to be dragged in order to show content hidden behind the main view, I had to deal with ViewDragHelper and understand how it works.</p>
+
+<p>The final result (please note that the patch is still under review) is something like this:</p>
+
+<p><div class="embed-video-container"><iframe src="http://www.youtube.com/embed/rKRIZB6nQfg" allowfullscreen></iframe></div></p>
+
+<p>It caused me more than one headache, and for this reason I am writing this post hoping it might be helpful to anybody wanting to tinker with it.</p>
+
+<p>ViewDragHelper&rsquo;s usage is not well documented, but <a href="http://flavienlaurent.com/blog/2013/08/28/each-navigation-drawer-hides-a-viewdraghelper">this post</a> by Flavien Laurent is the best place you could start from.</p>
+
+<p>In order to provide a simpler example for this post, I&rsquo;ll introduce a simplified version of what I have done on Firefox, without all the extra code needed to interact with the rest of the app.</p>
+
+<p>Let&rsquo;s start with..</p>
+
+<h2>How touch events are handled</h2>
+
+<p>A good source of information is the <a href="http://developer.android.com/training/gestures/viewgroup.html">official documentation</a>. However, I&rsquo;ll write a short introduction here.</p>
+
+<p>Whenever a touch event happens, the parent view is being asked if it wants to handle that event in place of its children. This is done by calling its <code>onInterceptTouchEvent()</code> method, which should return true if the parent view wants to handle the event.</p>
+
+<p>In case the event is trapped by the parent, its <code>onTouchEvent()</code> method gets called and it must return true if the event is handled.</p>
+
+<p>Children view can also rebel against their parent tiranny, and disable this mechanism by calling <code>requestDisallowInterceptTouchEvent()</code>. By doing that, they ensure that the touch event wont be passed to the parent view.</p>
+
+<p><img src="/images/touches.png" width="350" height="350" title="&lsquo;touches&rsquo; &lsquo;images&rsquo;" ></p>
+
+<h2>How ViewDragHelper works</h2>
+
+<p>The idea behind it is pretty simple. You register a draghelper on a container view</p>
+
+<pre><code class="java">    mDragHelper = ViewDragHelper.create(this, 1.0f, new DragHelperCallback());
+</code></pre>
+
+<p>and then you set a couple of entry points, one to listen if a drag is being started (or is in progress), the other to handle the motion events and perform the dragging when the event is being passed to the view it registered against:
+&#8220;`java
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent event) {
+        if (mDragHelper.shouldInterceptTouchEvent(event)) {
+                return true;
+        }
+        return super.onInterceptTouchEvent(event);
+    }</p>
+
+<pre><code>@Override
+public boolean onTouchEvent(MotionEvent event) {
+    mDragHelper.processTouchEvent(event);
+    return true;
+}
+</code></pre>
+
+<pre><code>
+ViewDragHelper will be asked to check if a motion event is part of a dragging process. The behaviour of the whole dragging process is ruled by a `DragHelperCallback` instance passed on creation.
+`DragHelperCallback` has method that need to be implemented to be notified of particular evens, such as:
+
+* a change in the dragging state
+* a change in the dragged view location
+* when and where the dragged view was released
+
+It also has methods used to influence the dragging behaviour:  
+
+* clamp the position of the view / the range it can be dragged within
+* check whether a particular subview can be dragged
+
+A whole drag process is intended a sequence of `Down` / `Move` / `Up` events over a particular target view.
+Whenever a drag process starts, ViewDragHelper finds the topmost child that contains the location of the motion event, and asks us if that particular view can be dragged or not in `tryToCaptureView()` method.  
+This is *more or less* the theory involved in the dragging process. On top of that, ViewDragHelper offers also `settleAt` methods to let the views settle to their rest location gracefully.
+
+Since explaining in words it's not the easiest thing (nor I am particularly good to explain), I'll introduce the simplified app I used to understand (a bit) how ViewDragHelper works.
+
+#Enters DragQueen
+
+<img src="https://farm6.staticflickr.com/5128/5356147569_686637006e.jpg" width="350" height="350" title="dragqueen" alt="images"> [Licensed under commons creative](https://www.flickr.com/photos/kbyte/5356147569/in/photolist-9aiE4T-oZtA-6YfGh-ebJmp8-jCeRGT-7xRKgx-7csUvo-nFTXP8-nFTXNg-9DAWnB-dbWyHz-m2FLMf-6x5QY2-5vkGLh-9jwh4a-KCBSK-dJTFb-4XRtDY-ouiHNw-od7U9J-oiKnUm-6DTq9a-6d1uXV-ocLauF-7VXBD4-n4y95v-ouj2w5-oaD6SK-owCHq3-6xQaS8-je4k6-ng25wJ-oDWV9V-os7FZk-8oeWRF-oRT83M-2PtLZZ-6x5Pkt-49vCUN-49rtdk-S9buU-f5Wr7L-49vCQw-nVMgN7-6wABHo-fX91x-6x5PQH-51DtKg-7mVAco-miQ2Q/)
+
+(Just kidding). DragQueen is a (ultra) simplified version of what I implemented on fennec with a button named queen that you can drag. 
+
+<div class="embed-video-container"><iframe src="http://www.youtube.com/embed/Vo4381SSNn0" allowfullscreen></iframe></div> 
+
+It consists of:
+
++ OuterLayout (the root element of our activity, the one that contains the views we want to drag)
++ a front panel which can be dragged
+
+<img src="/images/draghelper.png" width="350" height="350" title="draghelper" alt="images">
+
+To make the things a bit more complex we want to enable the dragging only from a particular subview, Queen. To make the things even more complex, we want to be also able to interact with Queen button while the dragging is not happening.
+
+We also allow only two rest locations, so if the view is released mid-way it will settle to its open / close location depending on the speed and the location of when the view is released.
+Finally, note that OuterLayout contains also a button that is hidden when main layout is in its closed state.
+
+### OuterLayout
+Outerlayout is a ViewGroup that extends a RelativeLayout.  
+As I wrote before, the two methods ViewDragHelper needs to hook into are
+</code></pre>
+
+<pre><code>@Override
+public boolean onInterceptTouchEvent(MotionEvent event) {
+    if (isQueenTarget(event) &amp;&amp; mDragHelper.shouldInterceptTouchEvent(event)) {
+            return true;
+    } else {
+        return false;
+    }
+}
+
+@Override
+public boolean onTouchEvent(MotionEvent event) {
+    if (isQueenTarget(event) || isMoving()) {
+        mDragHelper.processTouchEvent(event);
+        return true;
+    } else {
+        return super.onTouchEvent(event);
+    }
+}
+</code></pre>
+
+<pre><code>
+You may notice that `onInterceptTouchEvent` if has another condition. This is because we want to drag mainlayout only if the touch targets the Queen (it would not be drag-queen otherwise). This is a simplified version of what happens in Fennec, where we want to intercept the drag only if it starts from the toolbar to avoid to interfere with the web content.
+
+In any case, checking if Queen is targeted is quite easy:
+</code></pre>
+
+<pre><code>private boolean isQueenTarget(MotionEvent event) {
+    int[] queenLocation = new int[2];
+    mQueenButton.getLocationOnScreen(queenLocation);
+    int upperLimit = queenLocation[1] + mQueenButton.getMeasuredHeight();
+    int lowerLimit = queenLocation[1];
+    int y = (int) event.getRawY();
+    return (y &gt; lowerLimit &amp;&amp; y &lt; upperLimit);
+}
+</code></pre>
+
+<pre><code>
+##Other methods that influence the behaviour of the dragging are:
+####tryCaptureView
+</code></pre>
+
+<pre><code>@Override
+    public boolean tryCaptureView(View view, int i) {
+        return (view.getId() == R.id.main_layout);
+    }
+</code></pre>
+
+<pre><code>
+which gives draghelper the permission to drag main layout). You *must* return true up there for the view you want to be dragged.
+
+####getViewVerticalDragRange &amp;&amp; clampViewPositionVertical (there are *Horizontal* flavours too)
+</code></pre>
+
+<pre><code>    public int getViewVerticalDragRange(View child) {
+        return mVerticalRange;
+    }
+
+    @Override
+    public int clampViewPositionVertical(View child, int top, int dy) {
+        final int topBound = getPaddingTop();
+        final int bottomBound = mVerticalRange;
+        return Math.min(Math.max(top, topBound), bottomBound);
+    }
+</code></pre>
+
+<pre><code>which do what you expect them to do, setting limit for the dragging. In this particular case, vertical range is set to half the size of screen.
+
+### DragQueen 
+
+Note also how ```mMainLayout``` is set as clickable with ```android:clickable="true"```. This prevents touch events to be passed down to the view below when it is closed..
+
+---
+
+## Callbacks
+There are several callbacks you will want to implement in order to react to the events related to the dragging:
+
+####onViewDragStateChanged
+</code></pre>
+
+<pre><code>@Override
+    public void onViewDragStateChanged(int state) {
+        if (state == mDraggingState) { // no change
+            return;
+        }
+        if ((mDraggingState == ViewDragHelper.STATE_DRAGGING || mDraggingState == ViewDragHelper.STATE_SETTLING) &amp;&amp;
+             state == ViewDragHelper.STATE_IDLE) {
+            // the view stopped from moving.
+
+            if (mDraggingBorder == 0) {
+                onStopDraggingToClosed();
+            } else if (mDraggingBorder == mVerticalRange) {
+                mIsOpen = true;
+            }
+        }
+        if (state == ViewDragHelper.STATE_DRAGGING) {
+            onStartDragging();
+        }
+        mDraggingState = state;
+    }
+</code></pre>
+
+<pre><code>notifies the state transitions of DragHelper between `DRAGGING`, `IDLE` or `SETTLING` state.
+
+
+####onViewPositionChanged
+</code></pre>
+
+<pre><code>public void onViewPositionChanged(View changedView, int left, int top, int dx, int dy) {
+</code></pre>
+
+<pre><code>whose purpouse is pretty clear.
+
+####onViewReleased
+</code></pre>
+
+<pre><code>    @Override
+    public void onViewReleased(View releasedChild, float xvel, float yvel) {
+        final float rangeToCheck = mVerticalRange;
+        if (mDraggingBorder == 0) {
+            mIsOpen = false;
+            return;
+        }
+        if (mDraggingBorder == rangeToCheck) {
+            mIsOpen = true;
+            return;
+        }
+        boolean settleToOpen = false;
+        if (yvel &gt; AUTO_OPEN_SPEED_LIMIT) { // speed has priority over position
+            settleToOpen = true;
+        } else if (yvel &lt; -AUTO_OPEN_SPEED_LIMIT) {
+            settleToOpen = false;
+        } else if (mDraggingBorder &gt; rangeToCheck / 2) {
+            settleToOpen = true;
+        } else if (mDraggingBorder &lt; rangeToCheck / 2) {
+            settleToOpen = false;
+        }
+
+        final int settleDestY = settleToOpen ? mVerticalRange : 0;
+
+        if(mDragHelper.settleCapturedViewAt(0, settleDestY)) {
+            ViewCompat.postInvalidateOnAnimation(OuterLayout.this);
+        }
+    }
+</code></pre>
+
+<pre><code>is where you (_might_) want to let the view go into its rest place. I made it behave in such way that dragging speed (and direction) is more important than the place you are releasing the view.
+
+---
+
+## Bonus methods
+</code></pre>
+
+<pre><code>mDragHelper.settleCapturedViewAt(0, settleDestY))
+</code></pre>
+
+<pre><code>
+is a helper method that will make your view smoothly settle at the given destination.
+
+---
+
+## Quirks and reasons for headaches
+
+#### ViewDragHelper sets the offset of the target view ..
+  .. by calling ``offsetTopAndBottom``, which is ok *but* you have to remember that a layout round called by any of the children of outerLayout (or the parent view you are passing to the draghelper) will reset that offset. What you are going to see in that case is your dragged view getting back at its rest position.
+
+A possibile solution to this is to force back the parent where it was before:
+</code></pre>
+
+<pre><code>mMainLayout.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+        @Override
+        public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
+            if (mOuterLayout.isMoving()) {
+                v.setTop(oldTop);
+                v.setBottom(oldBottom);
+                v.setLeft(oldLeft);
+                v.setRight(oldRight);
+            }
+        }
+    });
+</code></pre>
+
+<pre><code>
+#### ViewDragHelper always want to intercept the top most child in z order
+If you have some view in between, but you want to be able to drag a lower one, you have to let ViewDragHelper think that your view is the topmost one.
+</code></pre>
+
+<pre><code>    @Override
+    public int getOrderedChildIndex(int index) {
+        int mainLayoutIndex = indexOfChild(mMainLayout);
+        if (index &gt; mainLayoutIndex) {
+            return mainLayoutIndex;
+        } else {
+            return index;
+        }
+    }
+</code></pre>
+
+<pre><code>
+---
+
+
+#What's more
+
+ViewDragHelper offers a lot more features than those I just presented. *DragQueen* implements only vertical dragging, but you can drag your views horizontally too. Again, refer to the excellent post by Flavien for more details.
+
+Moreover, ViewDragHelper allows you to intercept drag events that start from the edge of the screen, which is the way its used in the `NavigationDrawer`.
+
+All it needs to enable it is to call 
+</code></pre>
+
+<p>mDragHelper.setEdgeTrackingEnabled(ViewDragHelper.EDGE_LEFT);
+<code>
+and to implement
+</code>java
+@Override
+public void onEdgeDragStarted(int edgeFlags, int pointerId) {
+    mDragHelper.captureChildView(mMainLayout, pointerId);
+}
+&#8220;`</p>
+
+<h1>TL;DR</h1>
+
+<p>ViewDragHelper is a bit complex and as I said before not well documented. However it allows you to drag views around with very little code, and it can be used to implement nice effects. In any case you can <del>unrestrainedly copy</del> <em>take inspiration</em> from DragQueen source code on <a href="https://github.com/fedepaol/dragqueen">GitHub</a> (it seems to work).
+I really hope this post does not contain too many errors and that you enjoyed reading it as much as I did writing.</p>
+
+<p>If you liked this post, consider following me on twitter <a href="https://twitter.com/fedepaol">@fedepaol</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Rest Interaction in Android]]></title>
+    <link href="http://fedepaol.github.io/blog/2014/02/20/rest-interaction-in-android/"/>
+    <updated>2014-02-20T00:00:00+01:00</updated>
+    <id>http://fedepaol.github.io/blog/2014/02/20/rest-interaction-in-android</id>
+    <content type="html"><![CDATA[<div class='post'>
+<div style="text-align: justify;">In last December (&#8216;13) I was asked to submit a talk proposal for the first <a href="http://it.droidcon.com/2014/lineup/">Italian Droidcon</a>, which I did. It got accepted, so in Febraury I gave my first public speech speaking of &#8220;(O)Authenticated Rest Interaction in Android&#8221; in front of real people. <br /><br />This post is meant to be a follow up with the information that can&#8217;t be found in the slides<br /><br /></div><script async="" class="speakerdeck-embed" data-id="ddbb3d50725001312be21e64c86b5257" data-ratio="1.33333333333333" src="//speakerdeck.com/assets/embed.js"></script> <br /><div style="text-align: justify;"><br /></div><div style="text-align: justify;"><br /></div><div style="text-align: justify;"><br /></div><div style="text-align: justify;">I hoped to sum all the talk up in a post, but it got too long so I am going to split it in several pieces. This one will cover the asynchronous interaction with a remote webservice.&nbsp; </div><div style="text-align: justify;"><br /><br /></div><div style="text-align: justify;"><span style="font-size: small;">Disclaimer: I am not inventing anything new here, most of the content can be found on the internet. A great source of inspiration is <a href="http://www.youtube.com/watch?v=xHXn3Kg2IQE">this talk</a>, from where I took the inspiration for the approach I am going to explain, probably in a worse way. </span></div><div style="text-align: justify;"><br /><br /></div><h2 style="text-align: justify;"><span style="font-size: x-large;">Rule #1: decouple the interaction with the web service from UI components (activities / fragment)</span></h2><div style="text-align: justify;"><br /></div><div style="text-align: justify;">This means that <b><i>cut and past</i>ing that <i>AsyncTask that contains an HttpUrlConnection</i> code you found on google directly inside your activity is a bad idea</b> (I don&#8217;t even want to remind you that you should NOT host the HttpUrlConnection directly inside your activity, if you are doing that you probably won&#8217;t understand the rest of this post and you should restart your android journey <a href="http://developer.android.com/guide/index.html">here</a>).</div><div style="text-align: justify;"><br /></div><div style="text-align: justify;"><span style="font-size: large;">There are several reasons for that.&nbsp;</span></div><div style="text-align: justify;">You should start thinking that any network operation has a cost, in terms of bandwith and cpu power. Every time you turn the radio on involves consuming (a lot of) battery power, performing the request and parsing the result involves cpu (and therefore) battery power, <b>so any network operation is precious and you do not want to waste any performed request result</b>.</div><div style="text-align: justify;"><br /></div><div style="text-align: justify;">Said that, you should (must?) be aware that your activity might be killed at any time.. well, not at any time but as soon as it&#8217;s not foregrounded anymore, which is something that is likely to happen if your beloved user chooses to leave your application in favour of candy crush, or if he receives an incoming phone call. </div><div style="text-align: justify;">BUT, the <b>result of a request started inside that activity might still be useful for a latter use</b>, so you do not want your request to be killed together with the activity that hosted it.</div><div style="text-align: justify;"><br /></div><div style="text-align: justify;">Moreover, you should be aware that every time a &#8220;configuration change&#8221; occurs, which is what commonly happens when the device gets rotated, the current activity gets killed and recreated.&nbsp;</div><div style="text-align: justify;">Well, guess what? <b>That ongoing request that costed you a lot of power / cpu is lost, and its result with that</b>. Even worse, it&#8217;s not completely lost, but it might be notified to a leaked activity that nobody will look at anymore because the current one is the one which was recreated. There are ways to circumvent this, like hosting the components that you want to survive to a configuration change inside a <a href="http://www.vogella.com/tutorials/AndroidFragments/article.html#headlessfragments">headless fragment</a>, but again, you should be very careful.</div><div style="text-align: justify;"><br /></div><div style="text-align: justify;">Finally, given that you want to host the interaction with the service inside the activity, and because the activity is guaranteed to be active only as long as it is in foreground, it is obvious that in this way <b>is impossible to schedule requests</b> to be performed while the application is not being used.</div><div style="text-align: justify;"><br /></div><div style="text-align: justify;">Malus point: if you have a <i>god activity</i> that handles the UI interaction, a component like a AsyncTask or a Thread that is in charge of performing the request, the real interaction with the service AND the interaction with the activity in order to update the UI, well, you are likely to have a poor encapsulation of your code and you might have some issues while testing your code.</div><br /><br /><div class="separator" style="clear: both; text-align: center;"><a href="http://4.bp.blogspot.com/-uv98YZgJtOA/UwZwlqMlBKI/AAAAAAAAMWY/i68I8z_M-uE/s1600/fry.png" imageanchor="1" style="margin-left: 1em; margin-right: 1em;"><img border="0" src="http://4.bp.blogspot.com/-uv98YZgJtOA/UwZwlqMlBKI/AAAAAAAAMWY/i68I8z_M-uE/s1600/fry.png" height="240" width="320" /></a></div><h2 style="text-align: center;"><span style="font-size: large;">So where am I supposed to perform the calls?</span></h2><h3 style="text-align: center;">&nbsp;</h3><div style="text-align: justify;">The answer is pretty simple. Use a Service, which is <i>&#8220;is an application component that can perform long-running operations in the background and does not provide a user interface&#8221;</i>, so it&#8217;s just right for our purpouse. The idea here is to host that <b>rest call inside a service</b>, so it can survive to any activity lifecycle event. </div><div style="text-align: justify;">There are a couple of ways to interact with a service, you can throw intents at it, or you can bind your activities to it. In the latter case, you&#8217;ll get back a reference to the whole service object, and so you are able to implement a rich api your activity can interact with.</div><div style="text-align: justify;">On the other hand, you should be careful and stop your service when you do not need it anymore (ie when all the requests are satisfied), and you should also remember that you (still) need to host your asynchronous interaction inside of some kind of threaded component.&nbsp;</div><div style="text-align: justify;"><br /></div><h3 style="text-align: justify;"><span style="font-size: large;">IntentService!</span></h3><div style="text-align: justify;">Are my favourite flavour of services when speaking of rest interaction. Why is that?</div><ul><li>IntentService(s) provide only a <i>onHandleIntent</i> method, which is performed inside a different thread. No need to spawn an asynctask</li><li>IntentService(s) get destroyed as soon as <i>onHandleIntent</i> returns. No need to understand (or risk to forget) when the service needs to be shut down.</li></ul>Have you ever heard of <a href="http://en.wikipedia.org/wiki/Command_pattern">Command Pattern</a> ? You can just embed your requests parameter inside the intent, parse them in <i>onHandleIntent</i> and let the <i>intentservice</i> execute the request for you. Isn&#8217;t that cool?<br /><br /><br /><h2><span style="font-size: large;">Cool! Now I have the data I retrieved from the service, what should I do with that?</span></h2><div style="text-align: center;"><br /></div><div style="text-align: justify;"><span style="font-size: large;">Store it!</span> The two most common alternatives are <b>plain sqllite or using a content provider</b>. The first benefit of using some kind of persistant storage is that <b>you don&#8217;t want to perform the same costly request twice in order to retrieve the same data</b>.</div><div style="text-align: justify;">Moreover, storing the data enforces the decoupling of your service with the activity, since the activity will fetch the data from the storage, regarless of when the storage was filled. This is also better in terms of user experience, because it&#8217;s better to find some kind of data instead of an empty listview if the device is offline.</div><div style="text-align: justify;"><br /></div><div style="text-align: justify;">Bonus point! If you want to perform the inserts a bit faster, check if you can fetch only new data, if the apis you are consuming are offering any kind of timestamp parameter. Plus, remember to use transactions and bulkinserts in order to speed up your inserts.</div><h2 style="text-align: justify;"></h2><h2 style="text-align: justify;"><span style="font-size: large;">Anything missing?</span></h2><div style="text-align: justify;">Ok, your activity asked to the service to perform the request, the request was performed, the result parsed and stored in your content provider. You should now notify the activity that the storage contains something new.&nbsp;</div><div style="text-align: justify;">You have some options:</div><ul><li>Bind the activity to the service and pass a callback</li><li>Use <a href="http://developer.android.com/reference/android/support/v4/content/LocalBroadcastManager.html">(local) broadcasts </a></li><li>Use a message bus (<a href="http://square.github.io/otto/">Otto</a>, <a href="https://github.com/greenrobot/EventBus">eventbus</a>)</li></ul>Or if you are using a content provider, you could take advantage of CursorLoader / <a href="http://www.grokkingandroid.com/use-contentobserver-to-listen-to-changes/">Observers </a>, which I think are the less error prone way to feed a listview out of a content provider&#8217;s data.<br /><br />You just need to remember to add a couple of lines of code:<br /><div class="separator" style="clear: both; text-align: center;"><a href="http://3.bp.blogspot.com/-hX1BW7VBeHo/UwZ43lS-BBI/AAAAAAAAMWo/N5b4R1G8AGM/s1600/DroidconIt.034.jpg" imageanchor="1" style="margin-left: 1em; margin-right: 1em;"><img border="0" src="http://3.bp.blogspot.com/-hX1BW7VBeHo/UwZ43lS-BBI/AAAAAAAAMWo/N5b4R1G8AGM/s1600/DroidconIt.034.jpg" height="480" width="640" /></a></div><br /><h2><span style="font-size: large;">Final result:</span></h2><br />The final picture of this kind of architecture is the following (please forgive my extremely bad design skills):<br /><br /><div class="separator" style="clear: both; text-align: center;"><a href="http://3.bp.blogspot.com/-GZBxeNRISk0/UwZ5O3Q8D0I/AAAAAAAAMWw/JzGE9krKL88/s1600/DroidconIt.035.jpg" imageanchor="1" style="margin-left: 1em; margin-right: 1em;"><img border="0" src="http://3.bp.blogspot.com/-GZBxeNRISk0/UwZ5O3Q8D0I/AAAAAAAAMWw/JzGE9krKL88/s1600/DroidconIt.035.jpg" height="480" width="640" /></a></div><br />Please note how the the activity asks the Service to perform the request with the webservice and then forgets about it. Any time the data needs to be displayed, it&#8217;s always fetched from the storage.<br />The only other interaction happens when the service tells the activity it needs to reload the data.<br />In this way, any ongoing request will survive even if the activity gets killed. When the user will return to your application, the newly created activity will load the latest fetched data from the storage.<br /><br /><br />This was the first post related to the <b>Rest Interaction in Android</b>. I really hope I did not say too many wrong things&#8230;<br /><br />If you liked this post, consider following me on twitter @fedepaol. <br /><br /><br /><br /></div>
+
+
+<h2>Comments</h2>
+
+
+<div class='comments'>
+<div class='comment'>
+<div class='author'>kalyanblog</div>
+<div class='content'>
+HI<br />Nice article.<br />I got a question about one of the common situations, when you get some data from server, that is already sorted on the server, and we don&#39;t have enough fields to sort it on the client. Should we persist this data? And what should we do on another request? Clear table?<br />Thanks</div>
+</div>
+<div class='comment'>
+<div class='author'>Federico Paolinelli</div>
+<div class='content'>
+@Michal:<br />Let&#39;s distinguish between notifying the activity and then having it update itself. ContentProviders plus loaders offer a full solution via observers, so you don&#39;t have to worry about anything.<br /><br />On the other hand, if you want to notify the activity in some other way, you can:<br />- use a messagebus<br />- use (local) broadcasts<br /><br />Once the activity knows that the underlying storage has new content, again, you have a lot of ways depending on how you stored the data. <br />Again, you can use custom loaders (my favourite one is https://github.com/commonsguy/cwac-loaderex . Alternatively, you can use asynctask, native threads or any async way to interact with your storage.</div>
+</div>
+<div class='comment'>
+<div class='author'>Federico Paolinelli</div>
+<div class='content'>
+@CristianC:<br />Gave a quick look at your groundy lib, it looks like it&#39;s a slick way to perform async interaction inside a service. My only concern is about passing a callback object instead of registering / unregistering a listener. By doing that, you can only return the result to the calling activity. Worse than that, it looks like (if I understood correctly, sorry it&#39;s a bit late here) you are not using weak references, so you might leak the activity in case the reference is being held but the activity is not active anymore.</div>
+</div>
+<div class='comment'>
+<div class='author'>Michal Kejzlar</div>
+<div class='content'>
+Thank you for your post, good points there. What would you recommend for observing changes in storage without having Content Provider and loaders? E.g. storing data via dao objects telling to activity via EventBus and then what? Having ugly AsyncTask for querying the database?</div>
+</div>
+<div class='comment'>
+<div class='author'>Cristian C</div>
+<div class='content'>
+Hi Federico.<br /><br />Have you taken a look at github.com/telly/groundy ?<br /><br />It makes interaction between Service and Activity easier.<br /><br />Disclamer: I wrote the library.</div>
+</div>
+<div class='comment'>
+<div class='author'>Federico Paolinelli</div>
+<div class='content'>
+@Andy Res:<br /><br />I don&#39;t think you can &quot;natively&quot; stop an intentservice once you launched it. However, what you can do is letting it discover that you are not interested in it anymore. This http://stackoverflow.com/a/7893398/504596 sounds like a reasonable solution. However, despite being a big fan of them, I admit that this is a big limit of IntentService. Another limitation is that you cannot prioritize requests. This is because you are implicitly relying on the Intent queue instead of explicitly using one (or a library that use a queue). In any case, I would also say that in most common use cases, once you start a request you are unlikely to want to delete it. Still, think about updating your twitter feed. If you launch an update, you want the request to be completed even if the user leaves the application.<br />Hope my reply makes sense :-)</div>
+</div>
+<div class='comment'>
+<div class='author'>Federico Paolinelli</div>
+<div class='content'>
+@Vang:<br /><br />I assume you are talking about how to handle the endless data, not how to display it by using some kind of endless listview. In any case, I&#39;d say that how you want to handle it depends on the data you want to display and on the kind of your application. If you really have an &quot;endless&quot; == almost infinite amount of content, what you can do is just provide a &quot;window&quot; on the data that is held on the server, the same way any twitter client does by showing only the latest tweets and by performing a new get whenever you approach the end of the list. If, on the other hand, you have a HUGE amount of content you always want to be synched on your device, this is a more complex topic to discuss. The &quot;easiest&quot; way would be letting the remote server be the master of your data, and perform a full delete before you download all the new data. From that, several optimizations can be implemented. One can be having a timestamp related to the whole resource, and not performing the sync if your device already has the latest version. More complex optimizations are harder to implement by using a restful interface, because you can&#39;t tell it &quot;just send me the data changed since xxx or even the data deleted since xxx&quot; in order to allow you to apply those differences (at least, not that I am aware of). Sorry for the delay in the reply, but I have been a bit busy in the latest couple of days.<br /><br /></div>
+</div>
+<div class='comment'>
+<div class='author'>Andy Res</div>
+<div class='content'>
+Thank you for the very useful info.<br /><br />What could you tell in regards to requests cancelation while using IntentService?<br /><br /><br /><br /></div>
+</div>
+<div class='comment'>
+<div class='author'>Vang</div>
+<div class='content'>
+Hello, Federico. Could you explain how can we handle a case with endless list of content? As i understand we should download all content and find changes to persist. In general the main question is: How to maintain consistency beetween remote and local database? Thank you.</div>
+</div>
+</div>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Contributing to Firefox for Android]]></title>
+    <link href="http://fedepaol.github.io/blog/2013/07/29/contributing-to-firefox-for-android/"/>
+    <updated>2013-07-29T00:00:00+02:00</updated>
+    <id>http://fedepaol.github.io/blog/2013/07/29/contributing-to-firefox-for-android</id>
+    <content type="html"><![CDATA[<div class='post'>
+<br />In the past two / three years I have been (mostly) developing Android code, <a href="http://fedepaol.github.io/blog/2010/11/10/something-more-about-me">even before it was cool</a>(tm), as a way to do something different from what I do during my day time job.<br /><br />I wrote some <a href="https://play.google.com/store/search?q=federico+paolinelli&amp;c=apps">apps</a>, a couple of <a href="https://github.com/fedepaol">libraries</a>, and some 80% finished projects I really hope I will finish some day.<br /><br />Recently I thought that joining some big android related open source project could have been interesting, and I went for them.<br /><br /><br />That&#8217;s <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=731491">when</a> I found <a href="https://play.google.com/store/apps/details?id=org.mozilla.firefox">Firefox for Android</a> (code name fennec). There are several reasons why I choose it. It&#8217;s one of the most complex / active open source projects, I <a href="http://www.joshmatthews.net/fosdem/">spotted these slides</a> on my g+ stream and I decided to give it a spin.<br /><br /><a href="http://www.flickr.com/photos/tambako/5964400251/"><img src="http://farm7.staticflickr.com/6126/5964400251_8dd37a206a.jpg" /></a><br /><br /><span style="font-size: xx-small;">(Some rights reserved, cc licenze by &#8220;Tambako the Jaguar&#8221;)</span><br /><br /><br /> I must admit that I was not using fennec as my primary browser on android.<br /><br />This is my first experience in a (quite) big open source software project, and now I spend on fennec all of the free time I devote to developing (and I really like it).<br /><br /> <br /><h3> What was *totally* a surprise,</h3>&nbsp; is the fact that fennec is very far from a &#8220;plain android&#8221; project. When I first started, I (wrongly) expected to find an android project where I could reuse the stuff I knew from before, and I ended up working on a lot of javascript (which I never used before).  The project is various and I like the mixture of js, c++ and regular android, and I find this challenging, even if the code read / written ratio has become really huge. Hope this will get better with time.<br /><br /><br /><br /><h3> Working on it is harder than a regular android project.</h3>&nbsp; Forget intellij, eclipse or android studio. Forget debugging, or at least expect attaching a command line debugger to your code to be tricky. Slow build time (a full build takes something like 2 hour and half on my laptop).<br />Incremental builds time and upload to the device may take up to 2-3 minutes. I got back to the really old times when I wrote most of my code using vim and figuring out what was happening through logs.<br /><br /><br /><h3> You can get a lot of help from the mobile team,</h3>&nbsp; but you need to ask. A lot. Think of your average day. A lot of work to be done. Bugs coming, code to be written. Now think about some guy, who never wrote a line of code on the project you are working on, coming and asking some dumb or obvious questions. You are that guy.<br />That&#8217;s what must be their point of view (hope I am making less dumb questions). But they are helpful, even on monday mornings. You just have to ping <a href="https://wiki.mozilla.org/IRC">them on irc.</a><br /><br /><br /><h3> Did I say it is hard at first?</h3>&nbsp; The <a href="http://www.joshmatthews.net/bugsahoy/?mobile=1">bugs ahoy page</a> makes it quite easy to find a bug to start with, and the <a href="https://wiki.mozilla.org/Mobile/Fennec/Android">build instructions</a> are dumb proof. But then, it feels like being thrown in the middle of the jungle with a pocket knife. A huge codebase, xul interfaces, javascript, C++ code, Xpcom interfaces, no idea of which function is calling what. <br />The documentation is there, but it&#8217;s hard to figure out where to start from.<br />But if you are not worried about pinging and pinging people on irc, you will be given all the answers you need in order to get better and go ahead, and you will learn about all the tools at your disposal that help a distributed team to work better, such as <a href="http://mxr.mozilla.org/">mxr</a>, <a href="http://pastebin.mozilla.org/">pastebin</a> and <a href="https://etherpad.mozilla.org/">mopad</a>, or <a href="https://developer.mozilla.org/en-US/docs/Developer_Guide/How_to_Submit_a_Patch">how to submit a patch</a>&nbsp;using <a href="https://developer.mozilla.org/en-US/docs/Mercurial_Queues">hg queues</a>.<br /><br /><br /><h3> Is it worth it?</h3><b>&nbsp; Definetely</b>. As I wrote before, I am currently spending all the spare time I devote to side projects writing code for Fennec. Or I should say, reading a lot of code and writing some code. The &#8220;aha&#8221; moment when you realize that you understand how things work after grepping and digging into interfaces and callbacks has no price and it&#8217;s something I haven&#8217;t experienced for a long time.<br />Moreover, it&#8217;s exciting to interact with the mobile team, they all are passionate about what they are doing and very capable, not to mention that you will be forced to produce high quality code in order to pass the reviews.<br /><b>&nbsp; Finally</b>, the fact that you are contributing something bigger than that <a href="https://play.google.com/store/apps/details?id=com.whiterabbit.pastimer.lite">pasta cooking timer app</a> , and that your code will run in the hands of a lot of users is huge. I am not an opensource software integralist, despite having written a decent amount of it, but the <b>freedom message shared by the mozilla foundation is something it feels nice to be part of.</b><br /><br /><br /> <br /> Not to mention the tshirt I received and the &#8221;<a href="https://badges.mozilla.org/en-US/badges/badge/Friends-of-the-Mobile-Team/awards/1002">friend of mobile team</a>&#8221; badge I was awarded :-)<br /><br /><a href="http://1.bp.blogspot.com/-Qrsy0iSfC-w/UfbaCd153iI/AAAAAAAAMCA/iW7Pa0xXMFI/s1600/IMG_20130729_224220.jpg"><img border="0" src="http://1.bp.blogspot.com/-Qrsy0iSfC-w/UfbaCd153iI/AAAAAAAAMCA/iW7Pa0xXMFI/s320/IMG_20130729_224220.jpg" /></a><br /><br /><br /><br /><br /></div>
+
+
+<h2>Comments</h2>
+
+
+<div class='comments'>
+<div class='comment'>
+<div class='author'>Federico Paolinelli</div>
+<div class='content'>
+Thanks mrlachatte. Did not realize that my first contribution was getting live until now!</div>
+</div>
+<div class='comment'>
+<div class='author'>mrlachatte</div>
+<div class='content'>
+It&#39;s FF 23 release day, and I saw your name in the list on https://blog.mozilla.org/community/2013/08/05/firefox-23-new-contributors/. Congratulations on having your first contribution be released to our many users!</div>
+</div>
+</div>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[DroidAlone - Reloaded]]></title>
+    <link href="http://fedepaol.github.io/blog/2012/11/25/droidalone-reloaded/"/>
+    <updated>2012-11-25T00:00:00+01:00</updated>
+    <id>http://fedepaol.github.io/blog/2012/11/25/droidalone-reloaded</id>
+    <content type="html"><![CDATA[<div class='post'>
+Whenever I speak with another android developer, the occasional chat goes to &#8220;what did you develop?&#8221; question.<br />Last time it happened at droidcon uk, and for the first time I felt something wasn&#8217;t completely right when I showed my DroidAlone app.<br /><br />DroidAlone is a useful app (so they say) that comes into play whenever you forget your phone at home. With a simple sms protected by a password choosen by the user, it can be activated. From that moment, it will start notifying you of any missed calls and sms. It also ships a lot of other nice features, such as phone location retrieval and auto reply via sms (if you want to inform the caller that he can reach you to another number).<br />The full description of DroidAlone can be found at&nbsp;<a href="http://www.fedepaolapps.com/app/droidalone/">Missed Calls for Android</a>&nbsp;.<br /><br />Everything seems to work well, it has a lot of good reviews and the few users are happy.<br />Except one thing. It looks (looked) like this:<br /><br /><div class="separator" style="clear: both; text-align: center;"><a href="http://www.fedepaolapps.com/wp-content/uploads/2012/09/main_screen1.jpg" imageanchor="1" style="margin-left: 1em; margin-right: 1em;"><img border="0" height="320" src="http://www.fedepaolapps.com/wp-content/uploads/2012/09/main_screen1.jpg" width="213" /></a></div><a href="http://www.blogger.com/"></a><span id="goog_1451563458"></span><span id="goog_1451563459"></span><br />It also had another view with the list of events. The other developer&#8217;s reaction was &#8220;ugh&#8221;. And then I realized that I can&#8217;t keep producing new stuff ignoring what I have around, especially if this is the case of the only app I manage to sell a bit.<br /><br />So, when I got home I decided to change the ui &#8220;just to make it more pleasant&#8221;. &nbsp;Then I opened the code, and I realized that my two year&#8217;s old code needed a bit more than a refresh.<br /><br />Here what was wrong:<br /><br /><ul><li>it used tabactivity, which is very old fashioned. I decided to add the actionbar.</li><li>from the event list view, you had to click on the item to see the details of the event. The details where shown into a dialog. Ugh (again). In the new version I wanted all the details to be visible since they are not so long.</li><li>All the properties of the views in the layouts where explicit. No styles anywhere. The color resources where &#8220;background_color&#8221;, or &#8220;title_color&#8221; instead of some name that remind you the color. I had to put a heavy hand on that.</li><li>I tried to use gridlayout a lot since it seem to be the more efficient way to dispose a layout.</li><li>There was no empty list information.</li><li>A lot of calls where deprecated. I switched to the most modern versions.</li><li>All the data was contained in a sqllite storage without using a content provider. I switched to using a content provider and a cursorloader, which ended up in a more compact code. I didn&#8217;t need anymore to use a broadcast to notify the ui that the data was changed.</li><li>DroidAlone uses broadcast receivers to be notified of incoming calls / sms. Even tough the sms receiver must be enabled because an activation sms can be received at anytime, the call receiver is needed only when the app is active. I then used the package manager to disable it when not needed.</li><li>I wanted to refactor a lot of code. A lot of brackets where on the new line instead of the same line of the method (a la C), and it bothered me a lot. I also trusted lint and changed a lot here and there.&nbsp;</li></ul><div><br /></div><div>Other than these things, I redraw (by my self) a lot of the assets using inkscape. Because I soon got bored to export the resources in 4 different resolutions folders, I wrote a simple python script to do that for me. You can find it <a href="https://gist.github.com/4127778">here</a>&nbsp;.</div><div><br /></div><div>More than that, I got REALLY REALLY bored while writing the content provider, so I ended up writing another python script to automatically generate the content provider for me, as described in my previous <a href="http://fedepaol.github.io/blog/2012/11/11/android-content-providers-generator">post</a>. You can find the <a href="https://github.com/fedepaol/Android-sql-lite-helper">android content provider generator here</a>.&nbsp;</div><div><br /></div><div>Finally, I switched the project to maven because I am getting used to that solution, especially in case I want to add robolectric tests and keep working with intellij.</div><div><br /></div><div>The new version of the app hasn&#8217;t been released yet (I want to have it running for a while on my phone before releasing it, just to be sure that I didn&#8217;t break anything).</div><div><br /></div><div>This is how the new version will look like&nbsp;</div><div><br /></div><div class="separator" style="clear: both; text-align: center;"><a href="http://1.bp.blogspot.com/-KFbMTLsxs5w/ULKCXaGOnLI/AAAAAAAAJS4/CVeElRWX6wA/s1600/screen3.tiff" imageanchor="1" style="margin-left: 1em; margin-right: 1em;"><img border="0" height="320" src="http://1.bp.blogspot.com/-KFbMTLsxs5w/ULKCXaGOnLI/AAAAAAAAJS4/CVeElRWX6wA/s320/screen3.tiff" width="194" /></a></div><div class="separator" style="clear: both; text-align: center;"><br /></div><div class="separator" style="clear: both; text-align: left;">So, this is how a &#8220;little ui polishing&#8221; ended lasting more than two weeks (of my spare time). I am also glad that I think my old code is not that good. I like to think that I am better than two years ago.</div><div><br /></div><br /><div class="separator" style="clear: both; text-align: center;"><br /></div><br /></div>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Android Content Providers Generator]]></title>
+    <link href="http://fedepaol.github.io/blog/2012/11/11/android-content-providers-generator/"/>
+    <updated>2012-11-11T00:00:00+01:00</updated>
+    <id>http://fedepaol.github.io/blog/2012/11/11/android-content-providers-generator</id>
+    <content type="html"><![CDATA[<div class='post'>
+During the refactoring of my two years old app DroidAlone, I decided to try to access to the storage through a ContentProvider.<br /><br />Even if the official documentation warns that there is no need to use content providers if your app does not want to export it&#8217;s data against other apps, there are a bunch of advantages in using a content provider in your app.<br /><br />The main and more obvious advantage is that you can use a Loader with your data. Using loaders relieve you from managing the cursor, forgetting open cursors here and there and most of all, makes a lot easier for your ui to react to changes in your model. Well, more than easier, you don&#8217;t have to do anything.<br /><br />However, I am not writing this post to describe how to interact with an android content provider, nor how to implement a content provider. There are a lot of content provider tutorials out there that probably can explain how them work better than I could possibly ever do (and in a better English).<br /><br />I am writing this post because while writing the content provider, I got bored.<br />It&#8217;s a lot of code, always the same, that cannot be avoided, and you don&#8217;t have to add any value to it. The best thing you can do is not getting distracted and write it with no errors. And it&#8217;s loong (ok, not that long).<br /><br />Given the &#8220;boilerplateness&#8221; of this problem, I thought I could take off some dust from my old <a href="http://fedepaol.github.io/blog/2010/11/18/my-sqllite-helper-builder">SqliteHelper builder script</a>&nbsp;and maybe make it able to generate the content provider class for me. And that&#8217;s what I did.<br /><br /><h3>Android Content Provider Generator</h3><br /><a href="https://github.com/fedepaol/Android-sql-lite-helper">https://github.com/fedepaol/Android-sql-lite-helper</a><br /><br />I added a couple of options to it, and now it can generate automatically for you (no more cut/paste, no more forgotten columns) the content provider class AND a client class with a bunch of methods you can use to add / update / delete / query your data.<br />A sample of the generated code is already included in the beta of my app and it seems to work properly.<br /><br />I won&#8217;t write any instructions or examples here, they are already in the github repo.<br /><b>All you need to know is that with a 10 rows text file that describes your data, you can generate the whole content provider</b>.<br /><br />As <a href="https://plus.google.com/105096943850026101634/posts/RTbp2zVPZQq">I wrote on G+</a>, it&#8217;s certainly not the most elegant piece of python I wrote, but it makes it&#8217;s job.<br /><br /><br /><br />If you liked this post (or my script), consider following me on twitter @fedepaol<br /><br /></div>
+
+]]></content>
+  </entry>
+  
+</feed>

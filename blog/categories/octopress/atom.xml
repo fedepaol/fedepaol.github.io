@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Octopress | My little Android warehouse]]></title>
+  <link href="http://fedepaol.github.io/blog/categories/octopress/atom.xml" rel="self"/>
+  <link href="http://fedepaol.github.io/"/>
+  <updated>2014-09-01T23:13:00+02:00</updated>
+  <id>http://fedepaol.github.io/</id>
+  <author>
+    <name><![CDATA[Federico Paolinelli]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Migrating From Blogger to Octopress (Done!)]]></title>
+    <link href="http://fedepaol.github.io/blog/2014/08/24/migrating-from-blogger-to-octopress-done/"/>
+    <updated>2014-08-24T19:29:46+02:00</updated>
+    <id>http://fedepaol.github.io/blog/2014/08/24/migrating-from-blogger-to-octopress-done</id>
+    <content type="html"><![CDATA[<p>It feels a bit like this <img src="http://i.imgur.com/t0XHtgJ.gif" alt="Light bulb" /></p>
+
+<p>but when I had to write a new blogpost and had to embed some code snippets into my blogger hosted blog, I got so pissed of that I chose to migrate my existing blog to a github hosted instance of octopress.</p>
+
+<p>Jason Jarrett made a pretty nice tutorial about the whole process <a href="http://staxmanade.com/2014/04/migrating-blogspot-to-octopress-part-1-introduction/i">here</a>.
+However, I had to change a couple of things and I thought those might be helpful to anybody who faces the same problems.</p>
+
+<p>The overall process is something like:</p>
+
+<ul>
+<li>setup octopress</li>
+<li>import an exported dump of blogger</li>
+<li>fix internal links</li>
+<li>setup redirects from blogger to your new blog</li>
+</ul>
+
+
+<h2>Setting octopress up</h2>
+
+<p>Nothing to say here. Just go to octopress website and follow the instructions.</p>
+
+<h2>Importing posts from blogger</h2>
+
+<p>This is pretty straightforward too. Export your blogger content as xml, and use <a href="https://gist.github.com/juniorz/1564581">this ruby script</a> that generates a <em>posts</em> folder containing all the posts exported from blogger. Anyway, refer to <a href="http://staxmanade.com/2014/04/migrating-blogspot-to-octopress-part-4-import-content-into-ctopress/">Jason&rsquo;s blog</a>, everything is described accurately there.</p>
+
+<h2>Fix internal links</h2>
+
+<p>You&rsquo;ll have to play a bit with <em>sed</em> in order to fix internal links, otherwise they will keep pointing to blogspot.</p>
+
+<h2>Setup redirects</h2>
+
+<p>Here is where things get interesting, because you will want to make visitors of the old url be redirected to the new blog (possibily with 301). The whole process is a bit tricky due to blogger limitation (for more details check <a href="http://staxmanade.com/2014/04/migrating-blogspot-to-octopress-part-6-301-redirect-old-posts-to-new-location/">here</a>).</p>
+
+<p>There are a couple of other obstacles too: the script available is powershell only. Moreover, Jason suggets to use the alias plugin <a href="https://github.com/imathis/octopress/issues/1610">which seems to be broken at the moment</a>.</p>
+
+<p>However, <a href="https://github.com/jekyll/jekyll-redirect-from">jekyll-redirect</a> seems to work fine, so I chose to use it in my solution.</p>
+
+<p>And finally, since powershell is not an option, here is my python version of the script. It binds the post id with the title of the posts, loop all the html files in your post folder, injects the redirection in the yaml header.</p>
+
+<p>Using it is as easy as calling:
+<code>sh
+python blogger_import.py -p octopress/source/_posts/ -b ./blog-08-22-2014.xml
+</code></p>
+
+<p>where p is the path of your posts folder, b is the xml file produced by blogspot.</p>
+
+<p>Here is the script:</p>
+
+<p><div><script src='https://gist.github.com/e46635e3d7de475b0546.js'></script>
+<noscript><pre><code>import argparse
+import xml.etree.cElementTree as ET
+import os
+
+
+def is_post(node):
+    t = node.find('{http://www.w3.org/2005/Atom}category').get('term')
+    d = node.find('{http://purl.org/atom/app#}control')
+    return (not d) and (t == 'http://schemas.google.com/blogger/2008/kind#post')
+
+def get_posts_id(blogger_dump):
+    title_map = {}
+    tree = ET.parse(blogger_dump)
+    elem = tree.getroot()
+    feed = elem.findall('{http://www.w3.org/2005/Atom}entry')
+    for f in filter(is_post, feed):
+        post_id = f.find('{http://www.w3.org/2005/Atom}id')
+        id_number = post_id.text.split('-')[2]
+        post_title = f.find('{http://www.w3.org/2005/Atom}title').text
+        title_map[post_title] = id_number
+    return title_map
+
+def inject_redirect(file_name, title_map):
+    yaml_separator = 0
+    old_file = file_name + 'old'
+    print file_name
+    print old_file
+    os.rename(file_name, old_file)
+    f = open(old_file, 'r')
+    n = open(file_name, 'w+')
+    for line in f:
+        if line == '---':
+            yaml_separator = yaml_separator + 1
+        if yaml_separator == 2:
+            n.write(line)
+            continue
+        if line.startswith('title'):
+            title = line.split('&quot;')[1]
+            try:
+                post_id = title_map[title]
+                n.write('redirect_from:\n')
+                n.write('  - /blog/%s/\n'%post_id)
+            except KeyError:
+                print 'id not found for ' + title
+        n.write(line)
+
+def set_redirect(posts_path, titles_map):
+    for file_name in os.listdir(posts_path):
+        if (file_name.endswith('html')):
+            inject_redirect(os.path.join(posts_path, file_name), titles_map)
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-p', '--posts', dest='posts_path', help='path of the converted _posts')
+    parser.add_argument('-b', '--blogger', dest='blogger_dump', help='blogger dump file')
+    args = parser.parse_args()
+
+    titles_map = get_posts_id(args.blogger_dump)
+    set_redirect(args.posts_path, titles_map)
+</code></pre></noscript></div>
+</p>
+
+<h2>TL;DR</h2>
+
+<ul>
+<li>Read <a href="http://staxmanade.com/2014/04/migrating-blogspot-to-octopress-part-1-introduction/">Jason&rsquo;s blog</a></li>
+<li>When setting up redirection, install <a href="https://github.com/jekyll/jekyll-redirect-from">jekyll-redirect</a></li>
+<li>Use my script to inject redirection in the header of exported blogposts</li>
+<li>Setup blogger template as described in Jason&rsquo;s blog</li>
+</ul>
+
+
+<p>PS: I still need to write the blogpost that made me switch to octopress.</p>
+]]></content>
+  </entry>
+  
+</feed>

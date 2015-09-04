@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Firefox | My little Android warehouse]]></title>
+  <link href="http://fedepaol.github.io/blog/categories/firefox/atom.xml" rel="self"/>
+  <link href="http://fedepaol.github.io/"/>
+  <updated>2014-09-01T23:13:00+02:00</updated>
+  <id>http://fedepaol.github.io/</id>
+  <author>
+    <name><![CDATA[Federico Paolinelli]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Contributing to Firefox for Android]]></title>
+    <link href="http://fedepaol.github.io/blog/2013/07/29/contributing-to-firefox-for-android/"/>
+    <updated>2013-07-29T00:00:00+02:00</updated>
+    <id>http://fedepaol.github.io/blog/2013/07/29/contributing-to-firefox-for-android</id>
+    <content type="html"><![CDATA[<div class='post'>
+<br />In the past two / three years I have been (mostly) developing Android code, <a href="http://fedepaol.github.io/blog/2010/11/10/something-more-about-me">even before it was cool</a>(tm), as a way to do something different from what I do during my day time job.<br /><br />I wrote some <a href="https://play.google.com/store/search?q=federico+paolinelli&amp;c=apps">apps</a>, a couple of <a href="https://github.com/fedepaol">libraries</a>, and some 80% finished projects I really hope I will finish some day.<br /><br />Recently I thought that joining some big android related open source project could have been interesting, and I went for them.<br /><br /><br />That&#8217;s <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=731491">when</a> I found <a href="https://play.google.com/store/apps/details?id=org.mozilla.firefox">Firefox for Android</a> (code name fennec). There are several reasons why I choose it. It&#8217;s one of the most complex / active open source projects, I <a href="http://www.joshmatthews.net/fosdem/">spotted these slides</a> on my g+ stream and I decided to give it a spin.<br /><br /><a href="http://www.flickr.com/photos/tambako/5964400251/"><img src="http://farm7.staticflickr.com/6126/5964400251_8dd37a206a.jpg" /></a><br /><br /><span style="font-size: xx-small;">(Some rights reserved, cc licenze by &#8220;Tambako the Jaguar&#8221;)</span><br /><br /><br /> I must admit that I was not using fennec as my primary browser on android.<br /><br />This is my first experience in a (quite) big open source software project, and now I spend on fennec all of the free time I devote to developing (and I really like it).<br /><br /> <br /><h3> What was *totally* a surprise,</h3>&nbsp; is the fact that fennec is very far from a &#8220;plain android&#8221; project. When I first started, I (wrongly) expected to find an android project where I could reuse the stuff I knew from before, and I ended up working on a lot of javascript (which I never used before).  The project is various and I like the mixture of js, c++ and regular android, and I find this challenging, even if the code read / written ratio has become really huge. Hope this will get better with time.<br /><br /><br /><br /><h3> Working on it is harder than a regular android project.</h3>&nbsp; Forget intellij, eclipse or android studio. Forget debugging, or at least expect attaching a command line debugger to your code to be tricky. Slow build time (a full build takes something like 2 hour and half on my laptop).<br />Incremental builds time and upload to the device may take up to 2-3 minutes. I got back to the really old times when I wrote most of my code using vim and figuring out what was happening through logs.<br /><br /><br /><h3> You can get a lot of help from the mobile team,</h3>&nbsp; but you need to ask. A lot. Think of your average day. A lot of work to be done. Bugs coming, code to be written. Now think about some guy, who never wrote a line of code on the project you are working on, coming and asking some dumb or obvious questions. You are that guy.<br />That&#8217;s what must be their point of view (hope I am making less dumb questions). But they are helpful, even on monday mornings. You just have to ping <a href="https://wiki.mozilla.org/IRC">them on irc.</a><br /><br /><br /><h3> Did I say it is hard at first?</h3>&nbsp; The <a href="http://www.joshmatthews.net/bugsahoy/?mobile=1">bugs ahoy page</a> makes it quite easy to find a bug to start with, and the <a href="https://wiki.mozilla.org/Mobile/Fennec/Android">build instructions</a> are dumb proof. But then, it feels like being thrown in the middle of the jungle with a pocket knife. A huge codebase, xul interfaces, javascript, C++ code, Xpcom interfaces, no idea of which function is calling what. <br />The documentation is there, but it&#8217;s hard to figure out where to start from.<br />But if you are not worried about pinging and pinging people on irc, you will be given all the answers you need in order to get better and go ahead, and you will learn about all the tools at your disposal that help a distributed team to work better, such as <a href="http://mxr.mozilla.org/">mxr</a>, <a href="http://pastebin.mozilla.org/">pastebin</a> and <a href="https://etherpad.mozilla.org/">mopad</a>, or <a href="https://developer.mozilla.org/en-US/docs/Developer_Guide/How_to_Submit_a_Patch">how to submit a patch</a>&nbsp;using <a href="https://developer.mozilla.org/en-US/docs/Mercurial_Queues">hg queues</a>.<br /><br /><br /><h3> Is it worth it?</h3><b>&nbsp; Definetely</b>. As I wrote before, I am currently spending all the spare time I devote to side projects writing code for Fennec. Or I should say, reading a lot of code and writing some code. The &#8220;aha&#8221; moment when you realize that you understand how things work after grepping and digging into interfaces and callbacks has no price and it&#8217;s something I haven&#8217;t experienced for a long time.<br />Moreover, it&#8217;s exciting to interact with the mobile team, they all are passionate about what they are doing and very capable, not to mention that you will be forced to produce high quality code in order to pass the reviews.<br /><b>&nbsp; Finally</b>, the fact that you are contributing something bigger than that <a href="https://play.google.com/store/apps/details?id=com.whiterabbit.pastimer.lite">pasta cooking timer app</a> , and that your code will run in the hands of a lot of users is huge. I am not an opensource software integralist, despite having written a decent amount of it, but the <b>freedom message shared by the mozilla foundation is something it feels nice to be part of.</b><br /><br /><br /> <br /> Not to mention the tshirt I received and the &#8221;<a href="https://badges.mozilla.org/en-US/badges/badge/Friends-of-the-Mobile-Team/awards/1002">friend of mobile team</a>&#8221; badge I was awarded :-)<br /><br /><a href="http://1.bp.blogspot.com/-Qrsy0iSfC-w/UfbaCd153iI/AAAAAAAAMCA/iW7Pa0xXMFI/s1600/IMG_20130729_224220.jpg"><img border="0" src="http://1.bp.blogspot.com/-Qrsy0iSfC-w/UfbaCd153iI/AAAAAAAAMCA/iW7Pa0xXMFI/s320/IMG_20130729_224220.jpg" /></a><br /><br /><br /><br /><br /></div>
+
+
+<h2>Comments</h2>
+
+
+<div class='comments'>
+<div class='comment'>
+<div class='author'>Federico Paolinelli</div>
+<div class='content'>
+Thanks mrlachatte. Did not realize that my first contribution was getting live until now!</div>
+</div>
+<div class='comment'>
+<div class='author'>mrlachatte</div>
+<div class='content'>
+It&#39;s FF 23 release day, and I saw your name in the list on https://blog.mozilla.org/community/2013/08/05/firefox-23-new-contributors/. Congratulations on having your first contribution be released to our many users!</div>
+</div>
+</div>
+
+]]></content>
+  </entry>
+  
+</feed>

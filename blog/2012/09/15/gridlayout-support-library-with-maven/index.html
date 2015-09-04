@@ -1,0 +1,288 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Gridlayout Support Library With Maven - My little Android warehouse</title>
+  <meta name="author" content="Federico Paolinelli">
+
+  
+  <meta name="description" content="EDIT 17/10/2012:Gridlayout support is now working natively with maven android deployer. I strongly suggest to use it instead of my method &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://fedepaol.github.io/blog/2012/09/15/gridlayout-support-library-with-maven">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="My little Android warehouse" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-16514009-2']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">My little Android warehouse</a></h1>
+  
+    <h2>Random thoughts about my experience as moonlight android developer.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:fedepaol.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Gridlayout Support Library With Maven</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2012-09-15'><span class='date'><span class='date-month'>Sep</span> <span class='date-day'>15</span><span class='date-suffix'>th</span>, <span class='date-year'>2012</span></span> <span class='time'>12:00 am</span></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><div class='post'>
+<br /><span style="font-size: x-large;">EDIT 17/10/2012:</span><br />Gridlayout support is now working natively with maven android deployer. I strongly suggest to use it instead of my method.<br /><span style="font-size: x-large;"><br /></span><span style="font-size: x-large;">---------------------------</span><br /><span style="font-size: x-large;"><br /></span><br /><a href="http://developer.android.com/reference/android/widget/GridLayout.html">Gridlayout</a> has been introduced since api level 14, and is being suggested layout as a more efficient alternative over nested linear layouts and relative layout.<br /><br />It has also been recently added as part of the android support library, in order to have it available on older devices.<br /><br />Trying to use it in a maven setup is a bit tricky.<br />At the time of writing, the version added by <a href="https://github.com/mosabua/maven-android-sdk-deployer">maven android deployer</a> won't work because of this <a href="https://github.com/mosabua/maven-android-sdk-deployer/issues/50">issue</a>&nbsp;.<br />The problem is, you can't just add the jar because the library is intended to be an android project library, which means that brings with itself a couple of resources.<br /><br /><br />The error you might get is<br /><br /><b><span style="font-size: large;">java.lang.NoClassDefFoundError: android/support/v7/gridlayout/R$dimen</span></b><br /><br />I don't know if the following is the best "mavenic" way to solve the problem, however it worked for me and I am sharing it here.<br /><br />What you need to do is to build your own apk lib to add to your maven repo to link against.<br /><br /><h3>Step 1: building an apk lib</h3><div>The information you can find on android maven plugin <a href="http://code.google.com/p/maven-android-plugin/wiki/ApkLib">website</a>&nbsp;wasn't very clear to me. However they ship a couple of <a href="https://github.com/jayway/maven-android-plugin-samples/archives/stable">examples</a> you can take inspiration from.</div><div><br /></div><div><br /></div><div>Assuming that you have a proper ANDROID_HOME variable set up, and you already used maven android deployer to have a working setup, the first thing you have to do is to download the support library.&nbsp;</div><div>You will find it under $ANDROID_HOME/extras/android/support/v7/gridlayout</div><div><br /></div><div>Make your own copy somewhere else in your hard disk.</div><div><br /></div><div><br /></div><div>Now copy my pom.xml file:</div><!-- HTML generated using hilite.me --><br /><div style="background: #ffffff; background: white; border-width: .1em .1em .1em .8em; border: solid gray; color: black; overflow: auto; padding: .2em .6em; width: auto;"><pre style="line-height: 125%; margin: 0;"><span style="color: #507090;">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span><br /><span style="color: #007000;">&lt;project</span> <span style="color: #0000c0;">xmlns=</span><span style="background-color: #fff0f0;">"http://maven.apache.org/POM/4.0.0"</span> <span style="color: #0000c0;">xmlns:xsi=</span><span style="background-color: #fff0f0;">"http://www.w3.org/2001/XMLSchema-instance"</span><br />         <span style="color: #0000c0;">xsi:schemaLocation=</span><span style="background-color: #fff0f0;">"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd"</span><span style="color: #007000;">&gt;</span><br />    <span style="color: #007000;">&lt;modelVersion&gt;</span>4.0.0<span style="color: #007000;">&lt;/modelVersion&gt;</span><br /><br /><br />    <span style="color: #007000;">&lt;version&gt;</span>1.0.0-SNAPSHOT<span style="color: #007000;">&lt;/version&gt;</span><br />    <span style="color: #007000;">&lt;groupId&gt;</span>com.support.gridlayout<span style="color: #007000;">&lt;/groupId&gt;</span><br />    <span style="color: #007000;">&lt;artifactId&gt;</span>gridlayout_compat<span style="color: #007000;">&lt;/artifactId&gt;</span><br />    <span style="color: #007000;">&lt;packaging&gt;</span>apklib<span style="color: #007000;">&lt;/packaging&gt;</span><br />    <span style="color: #007000;">&lt;name&gt;</span>Gridlayout compatibility library<span style="color: #007000;">&lt;/name&gt;</span><br /><br />    <span style="color: #007000;">&lt;dependencies&gt;</span><br />        <span style="color: #007000;">&lt;dependency&gt;</span><br />            <span style="color: #007000;">&lt;groupId&gt;</span>android<span style="color: #007000;">&lt;/groupId&gt;</span><br />            <span style="color: #007000;">&lt;artifactId&gt;</span>android<span style="color: #007000;">&lt;/artifactId&gt;</span><br />            <span style="color: #007000;">&lt;scope&gt;</span>provided<span style="color: #007000;">&lt;/scope&gt;</span><br />            <span style="color: #007000;">&lt;version&gt;</span>4.0.3_r3<span style="color: #007000;">&lt;/version&gt;</span><br />        <span style="color: #007000;">&lt;/dependency&gt;</span><br /><br />        <span style="color: #007000;">&lt;dependency&gt;</span><br />            <span style="color: #007000;">&lt;groupId&gt;</span>com.grid<span style="color: #007000;">&lt;/groupId&gt;</span><br />            <span style="color: #007000;">&lt;artifactId&gt;</span>gridlayout<span style="color: #007000;">&lt;/artifactId&gt;</span><br />            <span style="color: #007000;">&lt;version&gt;</span>1.0<span style="color: #007000;">&lt;/version&gt;</span><br />        <span style="color: #007000;">&lt;/dependency&gt;</span><br />    <span style="color: #007000;">&lt;/dependencies&gt;</span><br /><br />    <span style="color: #007000;">&lt;build&gt;</span><br />        <span style="color: #007000;">&lt;plugins&gt;</span><br />            <span style="color: #007000;">&lt;plugin&gt;</span><br />                <span style="color: #007000;">&lt;groupId&gt;</span>com.jayway.maven.plugins.android.generation2<span style="color: #007000;">&lt;/groupId&gt;</span><br />                <span style="color: #007000;">&lt;version&gt;</span>3.1.1<span style="color: #007000;">&lt;/version&gt;</span><br />                <span style="color: #007000;">&lt;artifactId&gt;</span>android-maven-plugin<span style="color: #007000;">&lt;/artifactId&gt;</span><br />                <span style="color: #007000;">&lt;extensions&gt;</span>true<span style="color: #007000;">&lt;/extensions&gt;</span><br />            <span style="color: #007000;">&lt;/plugin&gt;</span><br />        <span style="color: #007000;">&lt;/plugins&gt;</span><br />    <span style="color: #007000;">&lt;/build&gt;</span><br />    <span style="color: #007000;">&lt;repositories&gt;</span><br />        <span style="color: #007000;">&lt;repository&gt;</span><br />            <span style="color: #007000;">&lt;id&gt;</span>repo<span style="color: #007000;">&lt;/id&gt;</span><br />            <span style="color: #007000;">&lt;releases&gt;</span><br />                <span style="color: #007000;">&lt;enabled&gt;</span>true<span style="color: #007000;">&lt;/enabled&gt;</span><br />                <span style="color: #007000;">&lt;checksumPolicy&gt;</span>ignore<span style="color: #007000;">&lt;/checksumPolicy&gt;</span><br />            <span style="color: #007000;">&lt;/releases&gt;</span><br />            <span style="color: #007000;">&lt;snapshots&gt;</span><br />                <span style="color: #007000;">&lt;enabled&gt;</span>false<span style="color: #007000;">&lt;/enabled&gt;</span><br />            <span style="color: #007000;">&lt;/snapshots&gt;</span><br />            <span style="color: #007000;">&lt;url&gt;</span>file://${project.basedir}/repo<span style="color: #007000;">&lt;/url&gt;</span><br />        <span style="color: #007000;">&lt;/repository&gt;</span><br />    <span style="color: #007000;">&lt;/repositories&gt;</span><br /><br /><span style="color: #007000;">&lt;/project&gt;</span><br /></pre></div><div><br /></div><div><br /></div><div>You will have another thing to do. Since you cannot include jar files directly but you have to specify them as depedencies, you can:</div><div><ul><li>refer to the jar provided by maven android deployer</li><li>have a dependency pointing a local repo, as described <a href="http://stackoverflow.com/questions/364114/can-i-add-jars-to-maven-2-build-classpath-without-installing-them">here</a></li></ul><div><br /></div></div><div>I chose the second approach.<br /><br />As you can see in the lower part of the pom file, I add a local repository.<br />You need to put the jar file in that repository. As suggested by the stackoverflow answer, you can let maven build it for you with<br /><!-- HTML generated using hilite.me --><br /><div style="background: #ffffff; background: white; border-width: .1em .1em .1em .8em; border: solid gray; color: black; overflow: auto; padding: .2em .6em; width: auto;"><pre style="line-height: 125%; margin: 0;">mvn install:install-file -DlocalRepositoryPath=repo -DcreateChecksum=true -Dpackaging=jar -Dfile=libs/android-support-v7-gridlayout.jar -DgroupId=com.grid -DartifactId=gridlayout -Dversion=1.0<br /></pre></div><br /><h3>Step 2: Including the apklib to your project</h3><br />Now you have your apklib ready to use. You can add it as a dependency in the pom.xml of your app<br /><br /><!-- HTML generated using hilite.me --><br /><div style="background: #ffffff; background: white; border-width: .1em .1em .1em .8em; border: solid gray; color: black; overflow: auto; padding: .2em .6em; width: auto;"><pre style="line-height: 125%; margin: 0;">       <span style="color: #007000;">&lt;dependency&gt;</span><br />          <span style="color: #007000;">&lt;groupId&gt;</span>com.support.gridlayout<span style="color: #007000;">&lt;/groupId&gt;</span><br />          <span style="color: #007000;">&lt;artifactId&gt;</span>gridlayout_compat<span style="color: #007000;">&lt;/artifactId&gt;</span><br />          <span style="color: #007000;">&lt;version&gt;</span>1.0.0-SNAPSHOT<span style="color: #007000;">&lt;/version&gt;</span><br />          <span style="color: #007000;">&lt;type&gt;</span>apklib<span style="color: #007000;">&lt;/type&gt;</span><br />        <span style="color: #007000;">&lt;/dependency&gt;</span><br /></pre></div><br /><br /><br />This costed me a couple of sleepless nights figuring out why it was not working...<br /><br /><h3>Edit:</h3><div>As markus pointed out in his comment, I forgot the last trivial step which is to run</div><div><i>mvn install&nbsp;</i><br /><i><br /></i><i><br /></i><i><br /></i><i><br /></i></div><h4>Epilogue:</h4><div>Please read the README file included in the gridlayout support library BEFORE trying to use it. It will save you a bit of extra headache.</div><div><br /></div><br />If you liked this post, you might be interested in following me on twitter <a href="https://twitter.com/fedepaol">@fedepaol</a><br /><br /><br /><br /></div><div><br /></div></div>
+<h2>Comments</h2>
+<div class='comments'>
+<div class='comment'>
+<div class='author'>Markus</div>
+<div class='content'>
+Last Step is mvn install.</div>
+</div>
+</div>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Federico Paolinelli</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2012-09-15'><span class='date'><span class='date-month'>Sep</span> <span class='date-day'>15</span><span class='date-suffix'>th</span>, <span class='date-year'>2012</span></span> <span class='time'>12:00 am</span></time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/android/'>android</a>, <a class='category' href='/blog/categories/gridlayout/'>gridlayout</a>, <a class='category' href='/blog/categories/maven/'>maven</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://fedepaol.github.io/blog/2012/09/15/gridlayout-support-library-with-maven/" data-via="fedepaol" data-counturl="http://fedepaol.github.io/blog/2012/09/15/gridlayout-support-library-with-maven/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2012/07/23/intellij-robolectric-and-android/" title="Previous Post: Intellij, Robolectric and Android">&laquo; Intellij, Robolectric and Android</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2012/10/29/droidconuk-2012/" title="Next Post: DroidconUk 2012">DroidconUk 2012 &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>About Me</h1>
+  <p>Lead developer with electronic trading software by day, passionate about mobile. I spend a lot of my spare time writing software for android. Table Tennis player, snowboarder, dad. I also contribute to Firefox for Android.</p>
+  <a href="mailto:fedepaol@gmail.com" target="_top">fedepaol@gmail.com</a>
+</section>
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/09/01/dragging-with-viewdraghelper/">Dragging With ViewDragHelper</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/08/24/migrating-from-blogger-to-octopress-done/">Migrating From Blogger to Octopress (Done!)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/04/08/preloading-localized-data-in-sqllte/">Generating Preloaded Sqlite Data</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/02/20/rest-interaction-in-android/">Rest Interaction in Android</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/07/29/contributing-to-firefox-for-android/">Contributing to Firefox for Android</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/fedepaol">@fedepaol</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'fedepaol',
+            count: 0,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+<section class="googleplus">
+  <h1>
+    <a href="https://plus.google.com/+FedericoPaolinelli?rel=author">
+      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
+      Google+
+    </a>
+  </h1>
+</section>
+
+
+
+<section>
+	<h1>On Twitter:</h1>
+	<div>
+		<p><br /><a href="http://twitter.com/fedepaol" target="_blank">My Tweets, on Twitter.</a></p>
+		<a href="http://twitter.com/fedepaol" class="twitter-follow-button" data-show-count="">Follow @fedepaol</a>
+	</div>
+</section>
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - Federico Paolinelli -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

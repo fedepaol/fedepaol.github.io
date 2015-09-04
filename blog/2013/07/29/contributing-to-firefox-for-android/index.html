@@ -1,0 +1,293 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Contributing to Firefox for Android - My little Android warehouse</title>
+  <meta name="author" content="Federico Paolinelli">
+
+  
+  <meta name="description" content="In the past two / three years I have been (mostly) developing Android code, even before it was cool(tm), as a way to do something different from &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://fedepaol.github.io/blog/2013/07/29/contributing-to-firefox-for-android">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="My little Android warehouse" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-16514009-2']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">My little Android warehouse</a></h1>
+  
+    <h2>Random thoughts about my experience as moonlight android developer.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:fedepaol.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Contributing to Firefox for Android</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2013-07-29'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>29</span><span class='date-suffix'>th</span>, <span class='date-year'>2013</span></span> <span class='time'>12:00 am</span></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><div class='post'>
+<br />In the past two / three years I have been (mostly) developing Android code, <a href="/blog/2010/11/10/something-more-about-me">even before it was cool</a>(tm), as a way to do something different from what I do during my day time job.<br /><br />I wrote some <a href="https://play.google.com/store/search?q=federico+paolinelli&amp;c=apps">apps</a>, a couple of <a href="https://github.com/fedepaol">libraries</a>, and some 80% finished projects I really hope I will finish some day.<br /><br />Recently I thought that joining some big android related open source project could have been interesting, and I went for them.<br /><br /><br />That's <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=731491">when</a> I found <a href="https://play.google.com/store/apps/details?id=org.mozilla.firefox">Firefox for Android</a> (code name fennec). There are several reasons why I choose it. It's one of the most complex / active open source projects, I <a href="http://www.joshmatthews.net/fosdem/">spotted these slides</a> on my g+ stream and I decided to give it a spin.<br /><br /><a href="http://www.flickr.com/photos/tambako/5964400251/"><img src="http://farm7.staticflickr.com/6126/5964400251_8dd37a206a.jpg" /></a><br /><br /><span style="font-size: xx-small;">(Some rights reserved, cc licenze by "Tambako the Jaguar")</span><br /><br /><br /> I must admit that I was not using fennec as my primary browser on android.<br /><br />This is my first experience in a (quite) big open source software project, and now I spend on fennec all of the free time I devote to developing (and I really like it).<br /><br /> <br /><h3> What was *totally* a surprise,</h3>&nbsp; is the fact that fennec is very far from a "plain android" project. When I first started, I (wrongly) expected to find an android project where I could reuse the stuff I knew from before, and I ended up working on a lot of javascript (which I never used before).  The project is various and I like the mixture of js, c++ and regular android, and I find this challenging, even if the code read / written ratio has become really huge. Hope this will get better with time.<br /><br /><br /><br /><h3> Working on it is harder than a regular android project.</h3>&nbsp; Forget intellij, eclipse or android studio. Forget debugging, or at least expect attaching a command line debugger to your code to be tricky. Slow build time (a full build takes something like 2 hour and half on my laptop).<br />Incremental builds time and upload to the device may take up to 2-3 minutes. I got back to the really old times when I wrote most of my code using vim and figuring out what was happening through logs.<br /><br /><br /><h3> You can get a lot of help from the mobile team,</h3>&nbsp; but you need to ask. A lot. Think of your average day. A lot of work to be done. Bugs coming, code to be written. Now think about some guy, who never wrote a line of code on the project you are working on, coming and asking some dumb or obvious questions. You are that guy.<br />That's what must be their point of view (hope I am making less dumb questions). But they are helpful, even on monday mornings. You just have to ping <a href="https://wiki.mozilla.org/IRC">them on irc.</a><br /><br /><br /><h3> Did I say it is hard at first?</h3>&nbsp; The <a href="http://www.joshmatthews.net/bugsahoy/?mobile=1">bugs ahoy page</a> makes it quite easy to find a bug to start with, and the <a href="https://wiki.mozilla.org/Mobile/Fennec/Android">build instructions</a> are dumb proof. But then, it feels like being thrown in the middle of the jungle with a pocket knife. A huge codebase, xul interfaces, javascript, C++ code, Xpcom interfaces, no idea of which function is calling what. <br />The documentation is there, but it's hard to figure out where to start from.<br />But if you are not worried about pinging and pinging people on irc, you will be given all the answers you need in order to get better and go ahead, and you will learn about all the tools at your disposal that help a distributed team to work better, such as <a href="http://mxr.mozilla.org/">mxr</a>, <a href="http://pastebin.mozilla.org/">pastebin</a> and <a href="https://etherpad.mozilla.org/">mopad</a>, or <a href="https://developer.mozilla.org/en-US/docs/Developer_Guide/How_to_Submit_a_Patch">how to submit a patch</a>&nbsp;using <a href="https://developer.mozilla.org/en-US/docs/Mercurial_Queues">hg queues</a>.<br /><br /><br /><h3> Is it worth it?</h3><b>&nbsp; Definetely</b>. As I wrote before, I am currently spending all the spare time I devote to side projects writing code for Fennec. Or I should say, reading a lot of code and writing some code. The "aha" moment when you realize that you understand how things work after grepping and digging into interfaces and callbacks has no price and it's something I haven't experienced for a long time.<br />Moreover, it's exciting to interact with the mobile team, they all are passionate about what they are doing and very capable, not to mention that you will be forced to produce high quality code in order to pass the reviews.<br /><b>&nbsp; Finally</b>, the fact that you are contributing something bigger than that <a href="https://play.google.com/store/apps/details?id=com.whiterabbit.pastimer.lite">pasta cooking timer app</a> , and that your code will run in the hands of a lot of users is huge. I am not an opensource software integralist, despite having written a decent amount of it, but the <b>freedom message shared by the mozilla foundation is something it feels nice to be part of.</b><br /><br /><br /> <br /> Not to mention the tshirt I received and the "<a href="https://badges.mozilla.org/en-US/badges/badge/Friends-of-the-Mobile-Team/awards/1002">friend of mobile team</a>" badge I was awarded :-)<br /><br /><a href="http://1.bp.blogspot.com/-Qrsy0iSfC-w/UfbaCd153iI/AAAAAAAAMCA/iW7Pa0xXMFI/s1600/IMG_20130729_224220.jpg"><img border="0" src="http://1.bp.blogspot.com/-Qrsy0iSfC-w/UfbaCd153iI/AAAAAAAAMCA/iW7Pa0xXMFI/s320/IMG_20130729_224220.jpg" /></a><br /><br /><br /><br /><br /></div>
+<h2>Comments</h2>
+<div class='comments'>
+<div class='comment'>
+<div class='author'>Federico Paolinelli</div>
+<div class='content'>
+Thanks mrlachatte. Did not realize that my first contribution was getting live until now!</div>
+</div>
+<div class='comment'>
+<div class='author'>mrlachatte</div>
+<div class='content'>
+It&#39;s FF 23 release day, and I saw your name in the list on https://blog.mozilla.org/community/2013/08/05/firefox-23-new-contributors/. Congratulations on having your first contribution be released to our many users!</div>
+</div>
+</div>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Federico Paolinelli</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2013-07-29'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>29</span><span class='date-suffix'>th</span>, <span class='date-year'>2013</span></span> <span class='time'>12:00 am</span></time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/android/'>android</a>, <a class='category' href='/blog/categories/firefox/'>firefox</a>, <a class='category' href='/blog/categories/opensource/'>opensource</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://fedepaol.github.io/blog/2013/07/29/contributing-to-firefox-for-android/" data-via="fedepaol" data-counturl="http://fedepaol.github.io/blog/2013/07/29/contributing-to-firefox-for-android/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2013/03/06/postman-ringstwice-reloaded-android/" title="Previous Post: PostMan (RingsTwice) Reloaded - Android rest and oauth make easy(er) ">&laquo; PostMan (RingsTwice) Reloaded - Android rest and oauth make easy(er) </a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2014/02/20/rest-interaction-in-android/" title="Next Post: Rest interaction in Android ">Rest interaction in Android  &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>About Me</h1>
+  <p>Lead developer with electronic trading software by day, passionate about mobile. I spend a lot of my spare time writing software for android. Table Tennis player, snowboarder, dad. I also contribute to Firefox for Android.</p>
+  <a href="mailto:fedepaol@gmail.com" target="_top">fedepaol@gmail.com</a>
+</section>
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/09/01/dragging-with-viewdraghelper/">Dragging With ViewDragHelper</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/08/24/migrating-from-blogger-to-octopress-done/">Migrating From Blogger to Octopress (Done!)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/04/08/preloading-localized-data-in-sqllte/">Generating Preloaded Sqlite Data</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/02/20/rest-interaction-in-android/">Rest Interaction in Android</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/07/29/contributing-to-firefox-for-android/">Contributing to Firefox for Android</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/fedepaol">@fedepaol</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'fedepaol',
+            count: 0,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+<section class="googleplus">
+  <h1>
+    <a href="https://plus.google.com/+FedericoPaolinelli?rel=author">
+      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
+      Google+
+    </a>
+  </h1>
+</section>
+
+
+
+<section>
+	<h1>On Twitter:</h1>
+	<div>
+		<p><br /><a href="http://twitter.com/fedepaol" target="_blank">My Tweets, on Twitter.</a></p>
+		<a href="http://twitter.com/fedepaol" class="twitter-follow-button" data-show-count="">Follow @fedepaol</a>
+	</div>
+</section>
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - Federico Paolinelli -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

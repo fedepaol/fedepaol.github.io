@@ -1,0 +1,293 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>PostMan (RingsTwice) Reloaded - Android Rest and Oauth Make Easy(er) - My little Android warehouse</title>
+  <meta name="author" content="Federico Paolinelli">
+
+  
+  <meta name="description" content="Android and RestMy PostManLib android library had a quite troubled genesis. Some infos can be found in this old post&nbsp;, but bear in mind that I &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://fedepaol.github.io/blog/2013/03/06/postman-ringstwice-reloaded-android">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="My little Android warehouse" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-16514009-2']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">My little Android warehouse</a></h1>
+  
+    <h2>Random thoughts about my experience as moonlight android developer.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:fedepaol.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">PostMan (RingsTwice) Reloaded - Android Rest and Oauth Make Easy(er)</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2013-03-06'><span class='date'><span class='date-month'>Mar</span> <span class='date-day'>6</span><span class='date-suffix'>th</span>, <span class='date-year'>2013</span></span> <span class='time'>12:00 am</span></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><div class='post'>
+<h3><span style="font-size: large;"><br /></span></h3><h3><span style="font-size: large;">Android and Rest</span></h3><div><span style="font-size: large;"><br /></span></div><div><span style="font-size: large;"><br /></span></div>My <a href="https://github.com/fedepaol/PostmanLib--Rings-Twice--Android">PostManLib android library</a> had a quite troubled genesis. Some infos can be found in this <a href="/blog/2012/01/30/postmanlib-android-and-rest-web">old post</a>&nbsp;, but bear in mind that I only kept the skeleton of what I wrote at that time (which, by the way, was inspired by&nbsp;<a href="http://www.youtube.com/watch?v=xHXn3Kg2IQE">this</a>&nbsp;talk).<br /><br />The api was (to be kind) a bit clunky, and I recently chose to rewrite / finish it. Apart from its clunkyness, one thing was missing:<br /><br /><h3>OAuth Authentication</h3><div>OAuth authentication is quite common for android apps, since it is a widely supported authentication system. Looking for "inspiration" I came across&nbsp;<a href="https://github.com/fernandezpablo85/scribe-java">https://github.com/fernandezpablo85/scribe-java</a>&nbsp;which not only provides oauth out of the box, but already provides a good and well tested abstraction for http rest interactions. I then chose not to reinvent the wheel and to delegate oauth and http interaction entirely to scribe.</div><div><br /></div><h3>Why asynchronous rest calls in android are important:</h3><div><br /></div><div>In android, performing time consuming work in the ui thread may result in ANR errors, and obviously rest calls belong to this category. What postmanlib does is to decouple the requests and execute them inside intent services, providing a way to get notified of calls results.</div><h3></h3><h3>What postmanlib offers:</h3><div><br /></div><div><ul><li>OAuth login using a webview hosted inside a fragment dialog. Every interaction is performed asynchronously. Just call registerOAuthService<span style="color: #333333; font-family: Consolas, 'Liberation Mono', Courier, monospace; font-size: 12px; line-height: 19px;">&nbsp;</span>and the registration will happen</li><li>Asynchronous rest calls (oauth-ed or not) performed inside an intent service</li><li>Multiple api handling - token storage</li></ul><div><br /></div></div><div>Given that the interaction is performed inside an intent service, all the well known problems related to asynctasks are avoided.&nbsp;</div><div><br /></div><h3></h3><h3>What postmanlib does not offer:</h3><div><br /></div><div><ul><li>Storage: the data received in background can be stored in the user's favorite storage. I strongly suggest to use a content provider, using my automatic <a href="blog/2012/11/11/android-content-providers-generator.html">content provider generator</a></li><li>Parsing: the plain text received must be interpreted. There is plenty of json / xml parsing library, just pick one</li></ul></div><div><br /></div><h2><span style="font-weight: normal;"><span style="font-size: x-large;"><br /></span></span></h2><h2><span style="font-weight: normal;"><span style="font-size: x-large;"><br /></span></span></h2><h2><span style="font-weight: normal;"><span style="font-size: x-large;">Library Architecture</span></span></h2><div><span style="font-weight: normal;"><br /></span></div><div><br /></div><div class="separator" style="clear: both; text-align: center;"><a href="https://raw.github.com/fedepaol/PostmanLib--Rings-Twice--Android/master/images/postman.png" imageanchor="1" style="margin-left: 1em; margin-right: 1em;"><img border="0" height="400" src="https://raw.github.com/fedepaol/PostmanLib--Rings-Twice--Android/master/images/postman.png" width="352" /></a></div><div class="separator" style="clear: both; text-align: center;"><br /></div><div class="separator" style="clear: both; text-align: center;"><br /></div><div class="separator" style="clear: both; text-align: left;">A singleton object collects the requests to perform the rest calls in background.&nbsp;</div><div class="separator" style="clear: both; text-align: left;">The requests are parcelable objects that are passed inside an intent to the intent services. Using the command pattern along with the strategy pattern to implement the interaction resulted in a much cleaner api (more details about the structure can be found in the <a href="https://github.com/fedepaol/PostmanLib--Rings-Twice--Android">git repository</a>).</div><div class="separator" style="clear: both; text-align: left;"><br /></div><div class="separator" style="clear: both; text-align: left;"><br /></div><div class="separator" style="clear: both; text-align: left;">All the client application has to do is to perform oauth requests is to create and register a oauthservice builder.&nbsp;</div><div class="separator" style="clear: both; text-align: left;">I had to wrap the original scribe oauth service builder because I had to store all the tokens in order to restore them whenever the singleton is garbage collected.</div><div class="separator" style="clear: both; text-align: left;"><br /></div><div class="separator" style="clear: both; text-align: left;">After performing the registration (which is done using a OAuthHelper class), a registered api can be used to sign any request sent. The only difference between oauth-ed and plain requests is that in the first case we specify a signer.</div><div class="separator" style="clear: both; text-align: left;"><br /></div><div class="separator" style="clear: both; text-align: left;"><br /></div><div class="separator" style="clear: both; text-align: left;"><br /></div><h2></h2><h2 id="yui_3_7_3_1_1362605099013_692" style="background-color: #dedede; color: #222222; font-family: 'Bree Serif'; font-size: 26px; font-weight: 400; line-height: 28px; margin: 1.5em 0px; text-transform: capitalize;">TL;DR</h2><div><br /></div><div class="p4" style="background-color: #dedede; color: #2b2b2b; font-family: 'Source Sans Pro'; font-size: 22px; font-weight: normal; line-height: 33px; margin-bottom: 1.5em;"><strong style="margin-bottom: 0px; margin-top: 0px;"></strong></div><div class="separator" style="clear: both; text-align: left;">I really like the way the library grew up (not just because I wrote it :-) ). Scribe performs an excellent job in abstracting oauth registration and http interaction, so I could focus on asynchronous interaction with it.</div><div class="separator" style="clear: both; text-align: left;">The registration process is more than trivial, and rest requests are strongly decoupled from the activities.</div><div class="separator" style="clear: both; text-align: left;">As told earlier, it can be found here:&nbsp;<a href="https://github.com/fedepaol/PostmanLib--Rings-Twice--Android">https://github.com/fedepaol/PostmanLib--Rings-Twice--Android</a></div><div class="separator" style="clear: both; text-align: left;"><br /></div><div class="separator" style="clear: both; text-align: left;">I think this library might be of some help to anybody who wants to interact with webservices and want to go beyond the too often badly used async tasks.</div><div class="separator" style="clear: both; text-align: left;">A real world sample (with no oauth, sorry) can be found in my <a href="https://github.com/fedepaol/AndAppennino">AndAppennino application</a>.&nbsp;</div><div class="separator" style="clear: both; text-align: left;"><br /></div><div class="separator" style="clear: both; text-align: left;"><br /></div><div class="separator" style="clear: both; text-align: left;"><br /></div><div><br /></div></div>
+<h2>Comments</h2>
+<div class='comments'>
+<div class='comment'>
+<div class='author'>Federico Paolinelli</div>
+<div class='content'>
+Grazie mille :-), cerco di darmi da fare come riesco, troppo buono a mettermi sullo stesso piano di Gabriele.. <br />Ho visto la pull request, appena ho un attimo ci faccio un giro e la mergio, adesso sono un po&#39; preso dall&#39;arrivo di una figlia :-)<br /><br />Grazie ancora per le (troppo) buone parole.</div>
+</div>
+<div class='comment'>
+<div class='author'>Alessandro Bellesia</div>
+<div class='content'>
+Ciao Federico! Innanzitutto ti faccio i miei complimenti per l&#39;ottimo progetto. Si tratta di una soluzione davvero molto completa e comoda perché già pronta out-of-the-box. <br /><br />Grazie a te ed a Gabriele Mariotti praticamente l&#39;Android Weekly è tutta italiana! Sono davvero molto contento. <br /><br />Giocando un po con la libreria mi sono accorto che la funzione isServiceEnabled nel ServerInteractionHelper non funziona nel modo corretto. I numero di Services infatti risulta sempre 4 a prescindere dai servizi effettivamente impostati nel manifest dell&#39;app.<br /><br />Mi sono permesso di fare una piccola pull request su GitHub con la mia proposta di correzione!<br /><br />Grazie mille ed ancora complimenti!<br /><br />Saluti,<br />Alessandro.<br /><br /><br /><br /></div>
+</div>
+</div>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Federico Paolinelli</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2013-03-06'><span class='date'><span class='date-month'>Mar</span> <span class='date-day'>6</span><span class='date-suffix'>th</span>, <span class='date-year'>2013</span></span> <span class='time'>12:00 am</span></time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/android-oauth-rest/'>android oauth rest</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://fedepaol.github.io/blog/2013/03/06/postman-ringstwice-reloaded-android/" data-via="fedepaol" data-counturl="http://fedepaol.github.io/blog/2013/03/06/postman-ringstwice-reloaded-android/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2012/11/25/droidalone-reloaded/" title="Previous Post: DroidAlone - reloaded">&laquo; DroidAlone - reloaded</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2013/07/29/contributing-to-firefox-for-android/" title="Next Post: Contributing to Firefox for Android">Contributing to Firefox for Android &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>About Me</h1>
+  <p>Lead developer with electronic trading software by day, passionate about mobile. I spend a lot of my spare time writing software for android. Table Tennis player, snowboarder, dad. I also contribute to Firefox for Android.</p>
+  <a href="mailto:fedepaol@gmail.com" target="_top">fedepaol@gmail.com</a>
+</section>
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/09/01/dragging-with-viewdraghelper/">Dragging With ViewDragHelper</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/08/24/migrating-from-blogger-to-octopress-done/">Migrating From Blogger to Octopress (Done!)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/04/08/preloading-localized-data-in-sqllte/">Generating Preloaded Sqlite Data</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/02/20/rest-interaction-in-android/">Rest Interaction in Android</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/07/29/contributing-to-firefox-for-android/">Contributing to Firefox for Android</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/fedepaol">@fedepaol</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'fedepaol',
+            count: 0,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+<section class="googleplus">
+  <h1>
+    <a href="https://plus.google.com/+FedericoPaolinelli?rel=author">
+      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
+      Google+
+    </a>
+  </h1>
+</section>
+
+
+
+<section>
+	<h1>On Twitter:</h1>
+	<div>
+		<p><br /><a href="http://twitter.com/fedepaol" target="_blank">My Tweets, on Twitter.</a></p>
+		<a href="http://twitter.com/fedepaol" class="twitter-follow-button" data-show-count="">Follow @fedepaol</a>
+	</div>
+</section>
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - Federico Paolinelli -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>
