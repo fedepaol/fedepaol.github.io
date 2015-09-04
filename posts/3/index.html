@@ -9,7 +9,7 @@
   <meta name="author" content="Federico Paolinelli">
 
   
-  <meta name="description" content="Another thing I always wanted to do was game programming. Moving objects and interacting with the game, as well as having fun with them, gives great &hellip;">
+  <meta name="description" content="I just released a new game. It&#8217;s (yet another) version of the popular solitaire game. I thought its name was &#8220;Chinese checkers&#8221;, &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -77,6 +77,36 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2011/03/03/pegdroid/">PegDroid - Android Simple Game</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2011-03-03'><span class='date'><span class='date-month'>Mar</span> <span class='date-day'>3</span><span class='date-suffix'>rd</span>, <span class='date-year'>2011</span></span> <span class='time'>12:00 am</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><div class='post'>
+I just released a new game. It&#8217;s (yet another) version of the popular solitaire game. I thought its name was &#8220;Chinese checkers&#8221;, but it looks like it&#8217;s most common name is &#8220;Peg&#8221;. Anyway, it didn&#8217;t take (too) much to develop it, I really enjoyed learning something about the powerful andengine framework, but I am still proceeding at a slow pace since I can work on android only after my daytime job.<br /><div><br /></div><div>I am releasing it with ads, but in any case I think I will update the sources on github very soon. Now it&#8217;s quite late and I&#8217;m afraid to make some mistake. </div><div><br /></div><div>Good points: the framework and the assets. I think my favourite designer (yes, still my gf) has done a good job in drawing all the assets. Very far from what I would have been done alone.</div><div><br /></div><div>Another thing I tried to include in this app is google analytics. I can see which are the most played boards, and who downloads my app. I must say I am pretty curious.</div><div><br /></div><div>Next time I promise to post some technical stuff, for example how I handled andengine stuff in a more structured way in my new app. </div><div><br /></div><div>I will end including the demo video of PegDroid down here:</div><div><br /></div><div><br /><iframe allowfullscreen="" frameborder="0" height="390" src="http://www.youtube.com/embed/HOXvHJUKfb4" title="YouTube video player" width="480"></iframe></div></div>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -356,50 +386,9 @@ I often try to do something with various tech stuff. I thought that this could b
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2008/06/10/developing-python-on-symbian-from-linux/">Developing Python on Symbian From a Linux Box</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2008-06-10'><span class='date'><span class='date-month'>Jun</span> <span class='date-day'>10</span><span class='date-suffix'>th</span>, <span class='date-year'>2008</span></span> <span class='time'>12:00 am</span></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><div class='post'>
-Since my mobile device is a s60v3 one (Nokia E61), I found particulary difficult to develop any simple python script on the phone. The hardest thing to do was the write - test cycle.<br /><br />On linux you can&#8217;t simply send the file to the phone with obex, since it will be stored in your incoming messages.<br /><br />From the excellent<a href="http://www.mobilenin.com/"> Jürgen Scheible</a>&#8217;s tutorial website I discovered the existance of the nice putools for making easier the development cycle <a href="http://people.csail.mit.edu/kapu/symbian/python.html">here</a><br /><br />It allows you to sync and reload the scripts on the phone directly from the pc.<br /><br />Unfortunately, the instructions in the website are for a windows machine, but the whole tool is python based, so it is supposed do be (and it is) multiplatform.<br /><br />In the sync.config file you are asked to choose the right serial port over bluetooth file, which can be one of /dev/rfcommxx<br />ie: COM_PORT = &#8216;/dev/rfcomm2&#8217; instead of windows COMxx port<br /><br />The first problem I had then was related to a bug of my ubuntu distribution (8.04) described <a href="https://bugs.launchpad.net/ubuntu/+source/bluez-utils/+bug/227429">here</a>  which can be easly fixed installing the bluez-utils package from Debian Sid<br /><br />At this point, you can follow the instruction on the putools website by opening a serial port<br /><span style="font-family:trebuchet ms;"> $ sdptool add &#8211;channel=2 SP</span><br /><br /><span style="font-family:trebuchet ms;"> $ rfcomm listen rfcomm2 2 </span><br /><br />and launching the script on the phone and finally launching from another shell the push command from the pcfiles folder.</div>
-<h2>Comments</h2>
-<div class='comments'>
-<div class='comment'>
-<div class='author'>Deuce868</div>
-<div class='content'>
-nvm, got it working by changing the com port in the config from just 3 to the entire /dev&#8230; path<BR/><BR/>Thanks for the excellent post.</div>
-</div>
-<div class='comment'>
-<div class='author'>Deuce868</div>
-<div class='content'>
-Other than the bug in the ubuntu package, any idea why I&#8217;d get the &#8220;port not open&#8221; exception? <BR/><BR/>I&#8217;m running intrepid which has the updated bluez-utils package, but wheneven I try push I get:<BR/>python push<BR/>file /home/rharding/.push/config<BR/>Connecting to serial port /dev/ttyS2<BR/>Traceback (most recent call last):<BR/>  File &#8220;push&#8221;, line 75, in module<BR/>    main()<BR/>  File &#8220;push&#8221;, line 55, in main<BR/>    app = App(0)<BR/>  File &#8220;/usr/lib/python2.5/site-packages/wx-2.8-gtk2-unicode/wx/_core.py&#8221;, line 7912, in __init__<BR/>    self._BootstrapApp()<BR/>  File &#8220;/usr/lib/python2.5/site-packages/wx-2.8-gtk2-unicode/wx/_core.py&#8221;, line 7487, in _BootstrapApp<BR/>    return _core_.PyApp__BootstrapApp(*args, **kwargs)<BR/>  File &#8220;push&#8221;, line 38, in OnInit<BR/>    title=&#8217;push&#8217; )<BR/>  File &#8220;/home/rharding/Desktop/putools/pcfiles/phoneshell.py&#8221;, line 56, in __init__<BR/>    *args, **kwds)<BR/>  File &#8220;/home/rharding/Desktop/putools/pcfiles/phoneshell.py&#8221;, line 243, in __init__<BR/>    *args, **kwds)<BR/>  File &#8220;/home/rharding/Desktop/putools/pcfiles/btinterpreter.py&#8221;, line 105, in __init__<BR/>    self.bt.send( &#8216;reset&#8217; )<BR/>  File &#8220;/home/rharding/Desktop/putools/pcfiles/../libs/phcomm.py&#8221;, line 339, in send<BR/>    self.write( cmd )<BR/>  File &#8220;/home/rharding/Desktop/putools/pcfiles/../libs/phcomm.py&#8221;, line 367, in write<BR/>    self.sock.send(msg)<BR/>  File &#8220;/home/rharding/Desktop/putools/pcfiles/../libs/phcomm.py&#8221;, line 147, in send<BR/>    self.file.write( msg )<BR/>  File &#8220;/usr/lib/python2.5/site-packages/serial/serialposix.py&#8221;, line 328, in write<BR/>    if self.fd is None: raise portNotOpenError<BR/>serial.serialutil.SerialException: Port not open</div>
-</div>
-</div>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
+    
+      <a class="prev" href="/posts/4">&larr; Older</a>
     
     <a href="/blog/archives">Blog Archives</a>
     
@@ -419,6 +408,10 @@ Other than the bug in the ubuntu package, any idea why I&#8217;d get the &#8220;
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/09/04/its-been-a-while/">It's Been a While</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/09/01/dragging-with-viewdraghelper/">Dragging With ViewDragHelper</a>
       </li>
     
@@ -432,10 +425,6 @@ Other than the bug in the ubuntu package, any idea why I&#8217;d get the &#8220;
     
       <li class="post">
         <a href="/blog/2014/02/20/rest-interaction-in-android/">Rest Interaction in Android</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/07/29/contributing-to-firefox-for-android/">Contributing to Firefox for Android</a>
       </li>
     
   </ul>
@@ -498,7 +487,7 @@ Other than the bug in the ubuntu package, any idea why I&#8217;d get the &#8220;
     </div>
   </div>
   <footer role="contentinfo"><p>
-  Copyright &copy; 2014 - Federico Paolinelli -
+  Copyright &copy; 2015 - Federico Paolinelli -
   <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
 </p>
 
