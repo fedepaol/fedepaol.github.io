@@ -123,7 +123,7 @@
 </pre></td><td class='code'><pre><code class='java'><span class='line'><span class="nd">@Override</span>
 </span><span class='line'><span class="kd">protected</span> <span class="kt">void</span> <span class="nf">onCreate</span><span class="o">(</span><span class="n">Bundle</span> <span class="n">savedInstanceState</span><span class="o">)</span> <span class="o">{</span>
 </span><span class='line'>    <span class="c1">// stuff </span>
-</span><span class='line'>    <span class="o">((</span><span class="n">RobolectricApplication</span><span class="o">)</span> <span class="n">getApplication</span><span class="o">()).</span><span class="na">getComponent</span><span class="o">().</span><span class="na">inject</span><span class="o">(</span><span class="k">this</span><span class="o">);</span>
+</span><span class='line'>    <span class="o">((</span><span class="n">MyApplication</span><span class="o">)</span> <span class="n">getApplication</span><span class="o">()).</span><span class="na">getComponent</span><span class="o">().</span><span class="na">inject</span><span class="o">(</span><span class="k">this</span><span class="o">);</span>
 </span><span class='line'><span class="o">}</span>
 </span></code></pre></td></tr></table></div></figure>
 
@@ -213,11 +213,11 @@
 <span class='line-number'>13</span>
 </pre></td><td class='code'><pre><code class='java'><span class='line'><span class="nd">@RunWith</span><span class="o">(</span><span class="n">RobolectricGradleTestRunner</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
 </span><span class='line'><span class="nd">@Config</span><span class="o">(</span><span class="n">constants</span> <span class="o">=</span> <span class="n">BuildConfig</span><span class="o">.</span><span class="na">class</span><span class="o">,</span>
-</span><span class='line'>        <span class="n">application</span> <span class="o">=</span> <span class="n">TestRobolectricApplication</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
+</span><span class='line'>        <span class="n">application</span> <span class="o">=</span> <span class="n">TestApplication</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
 </span><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">SampleTest</span> <span class="o">{</span>
 </span><span class='line'>    <span class="nd">@Before</span>
 </span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setup</span><span class="o">()</span> <span class="o">{</span>
-</span><span class='line'>        <span class="n">TestRobolectricApplication</span> <span class="n">app</span> <span class="o">=</span> <span class="o">(</span><span class="n">TestRobolectricApplication</span><span class="o">)</span> <span class="n">RuntimeEnvironment</span><span class="o">.</span><span class="na">application</span><span class="o">;</span>
+</span><span class='line'>        <span class="n">TestApplication</span> <span class="n">app</span> <span class="o">=</span> <span class="o">(</span><span class="n">TestApplication</span><span class="o">)</span> <span class="n">RuntimeEnvironment</span><span class="o">.</span><span class="na">application</span><span class="o">;</span>
 </span><span class='line'>        <span class="c1">// Setting up the mock module</span>
 </span><span class='line'>        <span class="n">MockApplicationModule</span> <span class="n">module</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">MockApplicationModule</span><span class="o">(</span><span class="n">app</span><span class="o">);</span>
 </span><span class='line'>        <span class="n">module</span><span class="o">.</span><span class="na">setResult</span><span class="o">(</span><span class="n">mockedResult</span><span class="o">);</span>
@@ -241,7 +241,7 @@
 <span class='line-number'>6</span>
 <span class='line-number'>7</span>
 <span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestRobolectricApplication</span> <span class="kd">extends</span> <span class="n">RobolectricApplication</span> <span class="o">{</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestApplication</span> <span class="kd">extends</span> <span class="n">MyApplication</span> <span class="o">{</span>
 </span><span class='line'>    <span class="nd">@Override</span>
 </span><span class='line'>    <span class="n">ApplicationModule</span> <span class="nf">getApplicationModule</span><span class="o">()</span> <span class="o">{</span>
 </span><span class='line'>        <span class="k">if</span> <span class="o">(</span><span class="n">mApplicationModule</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
@@ -270,7 +270,7 @@
 <span class='line-number'>12</span>
 <span class='line-number'>13</span>
 <span class='line-number'>14</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">RobolectricApplication</span> <span class="kd">extends</span> <span class="n">Application</span> <span class="o">{</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">MyApplication</span> <span class="kd">extends</span> <span class="n">Application</span> <span class="o">{</span>
 </span><span class='line'>    <span class="c1">// Stuff </span>
 </span><span class='line'>    <span class="nd">@Override</span>
 </span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onCreate</span><span class="o">()</span> <span class="o">{</span>
