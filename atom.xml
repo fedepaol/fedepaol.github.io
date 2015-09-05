@@ -4,7 +4,7 @@
   <title><![CDATA[My little Android warehouse]]></title>
   <link href="http://fedepaol.github.io/atom.xml" rel="self"/>
   <link href="http://fedepaol.github.io/"/>
-  <updated>2015-09-05T14:38:47+02:00</updated>
+  <updated>2015-09-05T14:42:57+02:00</updated>
   <id>http://fedepaol.github.io/</id>
   <author>
     <name><![CDATA[Federico Paolinelli]]></name>
@@ -211,6 +211,8 @@
 <p>The fact that robolectric allows you to use a custom test application object (even a different one for different tests) together with dagger is an easy way to inject mock object without having to rely on ugly setters.</p>
 
 <p>Robolectric is a fast and effective way to speed up your tdd process. All the time spent to set the tests and the mocks app is well repaid in code coverage and writing and debugging speed afterwards.</p>
+
+<h2>See it in action (and have something to copy from)</h2>
 
 <p><a href="https://github.com/fedepaol/RobolectricDependenyInjection">Here on github</a> I put a working example that demonstrates how to inject a mocked module using robolectring.</p>
 ]]></content>
