@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Blog | My little Android warehouse]]></title>
   <link href="http://fedepaol.github.io/blog/categories/blog/atom.xml" rel="self"/>
   <link href="http://fedepaol.github.io/"/>
-  <updated>2015-09-05T14:42:57+02:00</updated>
+  <updated>2015-09-09T21:44:08+02:00</updated>
   <id>http://fedepaol.github.io/</id>
   <author>
     <name><![CDATA[Federico Paolinelli]]></name>
@@ -22,7 +22,7 @@
 
 <p>but when I had to write a new blogpost and had to embed some code snippets into my blogger hosted blog, I got so pissed of that I chose to migrate my existing blog to a github hosted instance of octopress.</p>
 
-<p>Jason Jarrett made a pretty nice tutorial about the whole process <a href="http://staxmanade.com/2014/04/migrating-blogspot-to-octopress-part-1-introduction/i">here</a>.
+<p>Jason Jarrett made a pretty nice tutorial about the whole process <a href="http://staxmanade.com/2014/04/migrating-blogspot-to-octopress-part-1-introduction/">here</a>.
 However, I had to change a couple of things and I thought those might be helpful to anybody who faces the same problems.</p>
 
 <p>The overall process is something like:</p>
