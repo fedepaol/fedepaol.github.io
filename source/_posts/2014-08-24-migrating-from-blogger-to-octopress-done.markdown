@@ -13,7 +13,7 @@ It feels a bit like this ![Light bulb](http://i.imgur.com/t0XHtgJ.gif)
 
 but when I had to write a new blogpost and had to embed some code snippets into my blogger hosted blog, I got so pissed of that I chose to migrate my existing blog to a github hosted instance of octopress. 
 
-Jason Jarrett made a pretty nice tutorial about the whole process [here](http://staxmanade.com/2014/04/migrating-blogspot-to-octopress-part-1-introduction/i). 
+Jason Jarrett made a pretty nice tutorial about the whole process [here](http://staxmanade.com/2014/04/migrating-blogspot-to-octopress-part-1-introduction/). 
 However, I had to change a couple of things and I thought those might be helpful to anybody who faces the same problems.
 
 The overall process is something like:
