@@ -4,6 +4,9 @@ title: "Mocking with Robolectric and Dagger 2"
 date: 2015-09-05 08:22:47 +0200
 comments: true
 categories: 
+ - android
+ - testing
+ - robolectric 
 ---
 ## Why robolectric
 I've been a fan of robolectric since the old days, since [when Android Studio was not an option and few developers embraced IntelliJ](http://fedepaol.github.io/blog/2012/07/23/intellij-robolectric-and-android/). I left it a bit behind after the introduction of Android Studio, since its support was far from optimal.
