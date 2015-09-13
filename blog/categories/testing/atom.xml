@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Testing | My little Android warehouse]]></title>
   <link href="http://fedepaol.github.io/blog/categories/testing/atom.xml" rel="self"/>
   <link href="http://fedepaol.github.io/"/>
-  <updated>2015-09-13T21:57:36+02:00</updated>
+  <updated>2015-09-13T22:05:05+02:00</updated>
   <id>http://fedepaol.github.io/</id>
   <author>
     <name><![CDATA[Federico Paolinelli]]></name>
@@ -14,7 +14,7 @@
 
   
   <entry>
-    <title type="html"><![CDATA[Testing RxJava]]></title>
+    <title type="html"><![CDATA[Unit Testing RxJava Observables and Subscriptions]]></title>
     <link href="http://fedepaol.github.io/blog/2015/09/13/testing-rxjava-with-robolectric-and-dagger-2/"/>
     <updated>2015-09-13T21:26:15+02:00</updated>
     <id>http://fedepaol.github.io/blog/2015/09/13/testing-rxjava-with-robolectric-and-dagger-2</id>
