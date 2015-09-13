@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Testing RxJava (and Dagger 2)"
+title: "Testing RxJava"
 date: 2015-09-13 21:26:15 +0200
 comments: true
 categories: 
