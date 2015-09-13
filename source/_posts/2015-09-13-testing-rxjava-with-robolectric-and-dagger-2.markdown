@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Testing RxJava"
+title: "Unit testing RxJava observables and subscriptions"
 date: 2015-09-13 21:26:15 +0200
 comments: true
 categories: 
