@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>http://fedepaol.github.io/blog/2015/09/13/testing-rxjava-with-robolectric-and-dagger-2/</loc>
+    <loc>http://fedepaol.github.io/blog/2015/09/13/testing-rxjava-observables-subscriptions/</loc>
     <lastmod>2015-09-13T21:26:15+02:00</lastmod>
   </url>
   <url>
@@ -257,14 +257,5 @@
   </url>
   <url>
     <loc>http://fedepaol.github.io/blog/categories/rxjava/</loc>
-  </url>
-  <url>
-    <loc>http://fedepaol.github.io/posts/2/</loc>
-  </url>
-  <url>
-    <loc>http://fedepaol.github.io/posts/3/</loc>
-  </url>
-  <url>
-    <loc>http://fedepaol.github.io/posts/4/</loc>
   </url>
 </urlset>
