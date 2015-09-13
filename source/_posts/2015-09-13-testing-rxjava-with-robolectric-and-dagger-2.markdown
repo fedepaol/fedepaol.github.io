@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Testing RxJava with Robolectric (and Dagger 2)"
+title: "Testing RxJava (and Dagger 2)"
 date: 2015-09-13 21:26:15 +0200
 comments: true
 categories: 
@@ -71,7 +71,7 @@ public class RxJavaTestPlugins extends RxJavaPlugins {
 ```
 
 Registering a scheduler hook that provides a custom implemetation (Schedulers.immediate()) will end up in overriding the schedulers we are using.
-This is how the `setup()` and `teardown()` methods will look like:
+This is how the `setup()` and `teardown()` methods will look like (here I am using robolectric but it makes no difference with AndroidTests):
 
 ```Java
 @RunWith(RobolectricGradleTestRunner.class)
