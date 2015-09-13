@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>http://fedepaol.github.io/blog/2015/09/13/testing-rxjava-with-robolectric-and-dagger-2/</loc>
+    <lastmod>2015-09-13T21:26:15+02:00</lastmod>
+  </url>
+  <url>
     <loc>http://fedepaol.github.io/blog/2015/09/05/mocking-with-robolectric-and-dagger-2/</loc>
     <lastmod>2015-09-05T08:22:47+02:00</lastmod>
   </url>
@@ -247,5 +251,11 @@
   </url>
   <url>
     <loc>http://fedepaol.github.io/blog/categories/mozilla/</loc>
+  </url>
+  <url>
+    <loc>http://fedepaol.github.io/blog/categories/testing/</loc>
+  </url>
+  <url>
+    <loc>http://fedepaol.github.io/blog/categories/rxjava/</loc>
   </url>
 </urlset>
