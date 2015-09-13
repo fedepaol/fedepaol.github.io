@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Testing | My little Android warehouse]]></title>
   <link href="http://fedepaol.github.io/blog/categories/testing/atom.xml" rel="self"/>
   <link href="http://fedepaol.github.io/"/>
-  <updated>2015-09-13T21:07:20+02:00</updated>
+  <updated>2015-09-13T21:54:52+02:00</updated>
   <id>http://fedepaol.github.io/</id>
   <author>
     <name><![CDATA[Federico Paolinelli]]></name>
@@ -14,7 +14,7 @@
 
   
   <entry>
-    <title type="html"><![CDATA[Testing RxJava With Robolectric (and Dagger 2)]]></title>
+    <title type="html"><![CDATA[Testing RxJava (and Dagger 2)]]></title>
     <link href="http://fedepaol.github.io/blog/2015/09/13/testing-rxjava-with-robolectric-and-dagger-2/"/>
     <updated>2015-09-13T21:26:15+02:00</updated>
     <id>http://fedepaol.github.io/blog/2015/09/13/testing-rxjava-with-robolectric-and-dagger-2</id>
@@ -88,7 +88,7 @@ package rx.plugins;</p>
 
 <pre><code>
 Registering a scheduler hook that provides a custom implemetation (Schedulers.immediate()) will end up in overriding the schedulers we are using.
-This is how the `setup()` and `teardown()` methods will look like:
+This is how the `setup()` and `teardown()` methods will look like (here I am using robolectric but it makes no difference with AndroidTests):
 </code></pre>
 
 <p>@RunWith(RobolectricGradleTestRunner.class)

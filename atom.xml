@@ -4,7 +4,7 @@
   <title><![CDATA[My little Android warehouse]]></title>
   <link href="http://fedepaol.github.io/atom.xml" rel="self"/>
   <link href="http://fedepaol.github.io/"/>
-  <updated>2015-09-13T21:07:20+02:00</updated>
+  <updated>2015-09-13T21:54:52+02:00</updated>
   <id>http://fedepaol.github.io/</id>
   <author>
     <name><![CDATA[Federico Paolinelli]]></name>
@@ -14,7 +14,7 @@
 
   
   <entry>
-    <title type="html"><![CDATA[Testing RxJava With Robolectric (and Dagger 2)]]></title>
+    <title type="html"><![CDATA[Testing RxJava (and Dagger 2)]]></title>
     <link href="http://fedepaol.github.io/blog/2015/09/13/testing-rxjava-with-robolectric-and-dagger-2/"/>
     <updated>2015-09-13T21:26:15+02:00</updated>
     <id>http://fedepaol.github.io/blog/2015/09/13/testing-rxjava-with-robolectric-and-dagger-2</id>
@@ -108,7 +108,7 @@ This is a neat way to test not only your observers, but also to check if the com
 
 
 <p>Registering a scheduler hook that provides a custom implemetation (Schedulers.immediate()) will end up in overriding the schedulers we are using.
-This is how the <code>setup()</code> and <code>teardown()</code> methods will look like:</p>
+This is how the <code>setup()</code> and <code>teardown()</code> methods will look like (here I am using robolectric but it makes no difference with AndroidTests):</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>

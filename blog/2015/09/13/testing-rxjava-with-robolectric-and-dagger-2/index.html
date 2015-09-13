@@ -5,7 +5,7 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Testing RxJava With Robolectric (and Dagger 2) - My little Android warehouse</title>
+  <title>Testing RxJava (and Dagger 2) - My little Android warehouse</title>
   <meta name="author" content="Federico Paolinelli">
 
   
@@ -80,7 +80,7 @@
   
   <header>
     
-      <h1 class="entry-title">Testing RxJava With Robolectric (and Dagger 2)</h1>
+      <h1 class="entry-title">Testing RxJava (and Dagger 2)</h1>
     
     
       <p class="meta">
@@ -186,7 +186,7 @@ This is a neat way to test not only your observers, but also to check if the com
 
 
 <p>Registering a scheduler hook that provides a custom implemetation (Schedulers.immediate()) will end up in overriding the schedulers we are using.
-This is how the <code>setup()</code> and <code>teardown()</code> methods will look like:</p>
+This is how the <code>setup()</code> and <code>teardown()</code> methods will look like (here I am using robolectric but it makes no difference with AndroidTests):</p>
 
 <div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -406,7 +406,7 @@ This is how the <code>setup()</code> and <code>teardown()</code> methods will lo
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2015/09/13/testing-rxjava-with-robolectric-and-dagger-2/">Testing RxJava With Robolectric (and Dagger 2)</a>
+        <a href="/blog/2015/09/13/testing-rxjava-with-robolectric-and-dagger-2/">Testing RxJava (and Dagger 2)</a>
       </li>
     
       <li class="post">
