@@ -147,7 +147,7 @@ If the unit tests are not enough, and you want to check what is happening inside
 
 #TL;DR:
 - Use TestSubscriber when testing how an observable (or a composition of observables) behaves
-- Mock your observable and override the default schedulers to test how the subscription works
+- Mock your observable and override the default schedulers to test how the subscribing class works
 - Enable the tracking of your observables by registering an observable execution hook
 
 A working example (rubber chickens included) can be found on my [github repo](https://github.com/fedepaol/TestingRxJava).
