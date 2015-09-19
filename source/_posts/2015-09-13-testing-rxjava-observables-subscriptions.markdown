@@ -71,24 +71,26 @@ public class RxJavaTestPlugins extends RxJavaPlugins {
 ```
 
 Registering a scheduler hook that provides a custom implemetation (Schedulers.immediate()) will end up in overriding the schedulers we are using.
-This is how the `setup()` and `teardown()` methods will look like (here I am using robolectric but it makes no difference with AndroidTests):
+This is how the `BeforeClass`, `setup()` and `teardown()` methods will look like (here I am using robolectric but it makes no difference with AndroidTests):
 
 ```Java
 @RunWith(RobolectricGradleTestRunner.class)
 @Config(constants = BuildConfig.class,
 application = TestRobolectricApplication.class)
 public class SubscriberTest {
-    private void forceImmediateScheduler() {
-        RxJavaTestPlugins.resetPlugins();
+    @BeforeClass
+    public static void startSetup() {
         RxAndroidPlugins.getInstance().registerSchedulersHook(new RxAndroidSchedulersHook() {
             @Override
             public Scheduler getMainThreadScheduler() {
                 return Schedulers.immediate();
             }
         });
+    }
 
+    private void forceImmediateScheduler() {
+        RxJavaTestPlugins.resetPlugins();
         RxJavaPlugins.getInstance().registerSchedulersHook(new RxJavaSchedulersHook() {
-
             @Override
             public Scheduler getIOScheduler() {
                 return Schedulers.immediate();
@@ -108,6 +110,8 @@ public class SubscriberTest {
     /* Your tests here */
 }
 ```
+
+Note that since RxAndroid does not come with a reset method, the overriding of the scheduler must be done once for all the tests.
 
 This, together with a non blocking observable (for instance by replacing your long taking observable with a mocked `Observable.just()`) will make our test synchronous.
 
