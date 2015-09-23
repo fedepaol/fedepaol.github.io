@@ -32,7 +32,7 @@ ResultToCheck res = myObservable.toBlocking().first();
 This works because [toBlocking](http://reactivex.io/RxJava/javadoc/rx/Observable.html#toBlocking%28%29) converts the observable to a blocking one, while [first](http://reactivex.io/documentation/operators/first.html) returns the first emitted element.
 The calling code will wait synchronously until the observer calls onCompleted().
 
-**The official way to test an observable** is by using a [TestSubscriber](http://reactivex.io/RxJava/javadoc/rx/observers/TestSubscriber.html), an helper subscriber provided directly by the RxJava framework.
+**The official way to test an observable** is by using a [TestSubscriber](http://reactivex.io/RxJava/javadoc/rx/observers/TestSubscriber.html), an helper subscriber provided directly by the RxJava library.
 As with toBlocking, a test subscription is synchronous. 
 Here you can find an example:
 
@@ -71,24 +71,18 @@ public class RxJavaTestPlugins extends RxJavaPlugins {
 ```
 
 Registering a scheduler hook that provides a custom implemetation (Schedulers.immediate()) will end up in overriding the schedulers we are using.
-This is how the `BeforeClass`, `setup()` and `teardown()` methods will look like (here I am using robolectric but it makes no difference with AndroidTests):
+
+As pointed out by [Patrik Åkerfeldt](https://twitter.com/pakerfeldt) in the comments, since the hooks are asked to provide a scheduler implementation during the initialization of the Schedulers class, we have only one chance to override the default schedulers. For this reason, there is no point in setting them up in the `setup` phases of all our tests.
+
+The best place to override them once seems to be the `TestRunner`'s constructor. 
+
+The custom `TestRunner` will look like this:
 
 ```Java
-@RunWith(RobolectricGradleTestRunner.class)
-@Config(constants = BuildConfig.class,
-application = TestRobolectricApplication.class)
-public class SubscriberTest {
-    @BeforeClass
-    public static void startSetup() {
-        RxAndroidPlugins.getInstance().registerSchedulersHook(new RxAndroidSchedulersHook() {
-            @Override
-            public Scheduler getMainThreadScheduler() {
-                return Schedulers.immediate();
-            }
-        });
-    }
+public class RxJavaTestRunner extends RobolectricGradleTestRunner {
+    public RxJavaTestRunner(Class<?> testClass) throws InitializationError {
+        super(testClass);
 
-    private void forceImmediateScheduler() {
         RxJavaTestPlugins.resetPlugins();
         RxJavaPlugins.getInstance().registerSchedulersHook(new RxJavaSchedulersHook() {
             @Override
@@ -97,21 +91,36 @@ public class SubscriberTest {
             }
         });
     }
+}
+```
 
+And this is how the `setup()` and `teardown()` methods will look like (here I am using robolectric but it makes no difference with AndroidTests):
+
+```Java
+@RunWith(RxJavaTestRunner.class)
+@Config(constants = BuildConfig.class,
+application = TestRobolectricApplication.class)
+public class SubscriberTest {
     @Before
-    public void setUp() {
-        forceImmediateScheduler();
+    public void setup() {
+        RxAndroidPlugins.getInstance().registerSchedulersHook(new RxAndroidSchedulersHook() {
+            @Override
+            public Scheduler getMainThreadScheduler() {
+                return Schedulers.immediate();
+            }
+        });
     }
 
     @After
     public void tearDown() {
-        RxJavaTestPlugins.resetPlugins();
+        RxAndroidPlugins.getInstance().reset();
     }}
+
     /* Your tests here */
 }
 ```
 
-Note that since RxAndroid does not come with a reset method, the overriding of the scheduler must be done once for all the tests.
+As I already mentioned, you can inject the custom schedulers only once per test session. On the other hand, RxAndroidPlugins come with a reset method that will allow us to hook in different schedulers in different threads.
 
 This, together with a non blocking observable (for instance by replacing your long taking observable with a mocked `Observable.just()`) will make our test synchronous.
 
@@ -160,4 +169,5 @@ A working example (rubber chickens included) can be found on my [github repo](ht
 * [Unit testing rxjava (observables)](https://medium.com/ribot-labs/unit-testing-rxjava-6e9540d4a329) by Iván Carballo
 * [Unit testing rxjava (subscription)](http://alexismas.com/blog/2015/05/20/unit-testing-rxjava/) by Alexis Mas
 * [This](http://fragmentedpodcast.com/episodes/3/) and [this](http://fragmentedpodcast.com/episodes/4/) episodes of [Fragmented Podcast](http://fragmentedpodcast.com) where Dan Lew gave some insights about RxJava, where I heard about the scheduler overriding trick  
+* Patrik Åkerfeldt's example that demonstrates how the scheduler injection works only before Scheduler class initialization
 
