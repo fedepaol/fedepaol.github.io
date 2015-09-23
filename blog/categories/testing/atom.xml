@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Testing | My little Android warehouse]]></title>
   <link href="http://fedepaol.github.io/blog/categories/testing/atom.xml" rel="self"/>
   <link href="http://fedepaol.github.io/"/>
-  <updated>2015-09-23T21:39:05+02:00</updated>
+  <updated>2015-09-23T21:40:04+02:00</updated>
   <id>http://fedepaol.github.io/</id>
   <author>
     <name><![CDATA[Federico Paolinelli]]></name>
@@ -48,7 +48,7 @@ ResultToCheck res = myObservable.toBlocking().first();
 <p>This works because <a href="http://reactivex.io/RxJava/javadoc/rx/Observable.html#toBlocking%28%29">toBlocking</a> converts the observable to a blocking one, while <a href="http://reactivex.io/documentation/operators/first.html">first</a> returns the first emitted element.
 The calling code will wait synchronously until the observer calls onCompleted().</p>
 
-<p><strong>The official way to test an observable</strong> is by using a <a href="http://reactivex.io/RxJava/javadoc/rx/observers/TestSubscriber.html">TestSubscriber</a>, an helper subscriber provided directly by the RxJava framework.
+<p><strong>The official way to test an observable</strong> is by using a <a href="http://reactivex.io/RxJava/javadoc/rx/observers/TestSubscriber.html">TestSubscriber</a>, an helper subscriber provided directly by the RxJava library.
 As with toBlocking, a test subscription is synchronous.
 Here you can find an example:</p>
 
