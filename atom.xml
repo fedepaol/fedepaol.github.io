@@ -4,7 +4,7 @@
   <title><![CDATA[My little Android warehouse]]></title>
   <link href="http://fedepaol.github.io/atom.xml" rel="self"/>
   <link href="http://fedepaol.github.io/"/>
-  <updated>2015-09-19T10:43:04+02:00</updated>
+  <updated>2015-09-23T21:39:05+02:00</updated>
   <id>http://fedepaol.github.io/</id>
   <author>
     <name><![CDATA[Federico Paolinelli]]></name>
@@ -107,8 +107,44 @@ This is a neat way to test not only your observers, but also to check if the com
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>Registering a scheduler hook that provides a custom implemetation (Schedulers.immediate()) will end up in overriding the schedulers we are using.
-This is how the <code>BeforeClass</code>, <code>setup()</code> and <code>teardown()</code> methods will look like (here I am using robolectric but it makes no difference with AndroidTests):</p>
+<p>Registering a scheduler hook that provides a custom implemetation (Schedulers.immediate()) will end up in overriding the schedulers we are using.</p>
+
+<p>As pointed out by <a href="https://twitter.com/pakerfeldt">Patrik Åkerfeldt</a> in the comments, since the hooks are asked to provide a scheduler implementation during the initialization of the Schedulers class, we have only one chance to override the default schedulers. For this reason, there is no point in setting them up in the <code>setup</code> phases of all our tests.</p>
+
+<p>The best place to override them once seems to be the <code>TestRunner</code>&rsquo;s constructor.</p>
+
+<p>The custom <code>TestRunner</code> will look like this:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='Java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">RxJavaTestRunner</span> <span class="kd">extends</span> <span class="n">RobolectricGradleTestRunner</span> <span class="o">{</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="nf">RxJavaTestRunner</span><span class="o">(</span><span class="n">Class</span><span class="o">&lt;?&gt;</span> <span class="n">testClass</span><span class="o">)</span> <span class="kd">throws</span> <span class="n">InitializationError</span> <span class="o">{</span>
+</span><span class='line'>        <span class="kd">super</span><span class="o">(</span><span class="n">testClass</span><span class="o">);</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">RxJavaTestPlugins</span><span class="o">.</span><span class="na">resetPlugins</span><span class="o">();</span>
+</span><span class='line'>        <span class="n">RxJavaPlugins</span><span class="o">.</span><span class="na">getInstance</span><span class="o">().</span><span class="na">registerSchedulersHook</span><span class="o">(</span><span class="k">new</span> <span class="nf">RxJavaSchedulersHook</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>            <span class="nd">@Override</span>
+</span><span class='line'>            <span class="kd">public</span> <span class="n">Scheduler</span> <span class="nf">getIOScheduler</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>                <span class="k">return</span> <span class="n">Schedulers</span><span class="o">.</span><span class="na">immediate</span><span class="o">();</span>
+</span><span class='line'>            <span class="o">}</span>
+</span><span class='line'>        <span class="o">});</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>And this is how the <code>setup()</code> and <code>teardown()</code> methods will look like (here I am using robolectric but it makes no difference with AndroidTests):</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -131,26 +167,12 @@ This is how the <code>BeforeClass</code>, <code>setup()</code> and <code>teardow
 <span class='line-number'>19</span>
 <span class='line-number'>20</span>
 <span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-</pre></td><td class='code'><pre><code class='Java'><span class='line'><span class="nd">@RunWith</span><span class="o">(</span><span class="n">RobolectricGradleTestRunner</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
+</pre></td><td class='code'><pre><code class='Java'><span class='line'><span class="nd">@RunWith</span><span class="o">(</span><span class="n">RxJavaTestRunner</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
 </span><span class='line'><span class="nd">@Config</span><span class="o">(</span><span class="n">constants</span> <span class="o">=</span> <span class="n">BuildConfig</span><span class="o">.</span><span class="na">class</span><span class="o">,</span>
 </span><span class='line'><span class="n">application</span> <span class="o">=</span> <span class="n">TestRobolectricApplication</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
 </span><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">SubscriberTest</span> <span class="o">{</span>
-</span><span class='line'>    <span class="nd">@BeforeClass</span>
-</span><span class='line'>    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">startSetup</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>    <span class="nd">@Before</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setup</span><span class="o">()</span> <span class="o">{</span>
 </span><span class='line'>        <span class="n">RxAndroidPlugins</span><span class="o">.</span><span class="na">getInstance</span><span class="o">().</span><span class="na">registerSchedulersHook</span><span class="o">(</span><span class="k">new</span> <span class="nf">RxAndroidSchedulersHook</span><span class="o">()</span> <span class="o">{</span>
 </span><span class='line'>            <span class="nd">@Override</span>
 </span><span class='line'>            <span class="kd">public</span> <span class="n">Scheduler</span> <span class="nf">getMainThreadScheduler</span><span class="o">()</span> <span class="o">{</span>
@@ -159,31 +181,17 @@ This is how the <code>BeforeClass</code>, <code>setup()</code> and <code>teardow
 </span><span class='line'>        <span class="o">});</span>
 </span><span class='line'>    <span class="o">}</span>
 </span><span class='line'>
-</span><span class='line'>    <span class="kd">private</span> <span class="kt">void</span> <span class="nf">forceImmediateScheduler</span><span class="o">()</span> <span class="o">{</span>
-</span><span class='line'>        <span class="n">RxJavaTestPlugins</span><span class="o">.</span><span class="na">resetPlugins</span><span class="o">();</span>
-</span><span class='line'>        <span class="n">RxJavaPlugins</span><span class="o">.</span><span class="na">getInstance</span><span class="o">().</span><span class="na">registerSchedulersHook</span><span class="o">(</span><span class="k">new</span> <span class="nf">RxJavaSchedulersHook</span><span class="o">()</span> <span class="o">{</span>
-</span><span class='line'>            <span class="nd">@Override</span>
-</span><span class='line'>            <span class="kd">public</span> <span class="n">Scheduler</span> <span class="nf">getIOScheduler</span><span class="o">()</span> <span class="o">{</span>
-</span><span class='line'>                <span class="k">return</span> <span class="n">Schedulers</span><span class="o">.</span><span class="na">immediate</span><span class="o">();</span>
-</span><span class='line'>            <span class="o">}</span>
-</span><span class='line'>        <span class="o">});</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="nd">@Before</span>
-</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setUp</span><span class="o">()</span> <span class="o">{</span>
-</span><span class='line'>        <span class="n">forceImmediateScheduler</span><span class="o">();</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'>
 </span><span class='line'>    <span class="nd">@After</span>
 </span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">tearDown</span><span class="o">()</span> <span class="o">{</span>
-</span><span class='line'>        <span class="n">RxJavaTestPlugins</span><span class="o">.</span><span class="na">resetPlugins</span><span class="o">();</span>
+</span><span class='line'>        <span class="n">RxAndroidPlugins</span><span class="o">.</span><span class="na">getInstance</span><span class="o">().</span><span class="na">reset</span><span class="o">();</span>
 </span><span class='line'>    <span class="o">}}</span>
+</span><span class='line'>
 </span><span class='line'>    <span class="cm">/* Your tests here */</span>
 </span><span class='line'><span class="o">}</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>Note that since RxAndroid does not come with a reset method, the overriding of the main thread scheduler must be done once for all the tests, otherwise a <code>IllegalStateException</code> will be thrown.</p>
+<p>As I already mentioned, you can inject the custom schedulers only once per test session. On the other hand, RxAndroidPlugins come with a reset method that will allow us to hook in different schedulers in different threads.</p>
 
 <p>This, together with a non blocking observable (for instance by replacing your long taking observable with a mocked <code>Observable.just()</code>) will make our test synchronous.</p>
 
@@ -265,6 +273,7 @@ This is how the <code>BeforeClass</code>, <code>setup()</code> and <code>teardow
 <li><a href="https://medium.com/ribot-labs/unit-testing-rxjava-6e9540d4a329">Unit testing rxjava (observables)</a> by Iván Carballo</li>
 <li><a href="http://alexismas.com/blog/2015/05/20/unit-testing-rxjava/">Unit testing rxjava (subscription)</a> by Alexis Mas</li>
 <li><a href="http://fragmentedpodcast.com/episodes/3/">This</a> and <a href="http://fragmentedpodcast.com/episodes/4/">this</a> episodes of <a href="http://fragmentedpodcast.com">Fragmented Podcast</a> where Dan Lew gave some insights about RxJava, where I heard about the scheduler overriding trick</li>
+<li>Patrik Åkerfeldt&rsquo;s example that demonstrates how the scheduler injection works only before Scheduler class initialization</li>
 </ul>
 
 ]]></content>

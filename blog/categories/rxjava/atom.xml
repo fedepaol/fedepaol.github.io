@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Rxjava | My little Android warehouse]]></title>
   <link href="http://fedepaol.github.io/blog/categories/rxjava/atom.xml" rel="self"/>
   <link href="http://fedepaol.github.io/"/>
-  <updated>2015-09-19T10:43:04+02:00</updated>
+  <updated>2015-09-23T21:39:05+02:00</updated>
   <id>http://fedepaol.github.io/</id>
   <author>
     <name><![CDATA[Federico Paolinelli]]></name>
@@ -88,25 +88,19 @@ package rx.plugins;</p>
 
 <pre><code>
 Registering a scheduler hook that provides a custom implemetation (Schedulers.immediate()) will end up in overriding the schedulers we are using.
-This is how the `BeforeClass`, `setup()` and `teardown()` methods will look like (here I am using robolectric but it makes no difference with AndroidTests):
+
+As pointed out by [Patrik Åkerfeldt](https://twitter.com/pakerfeldt) in the comments, since the hooks are asked to provide a scheduler implementation during the initialization of the Schedulers class, we have only one chance to override the default schedulers. For this reason, there is no point in setting them up in the `setup` phases of all our tests.
+
+The best place to override them once seems to be the `TestRunner`'s constructor. 
+
+The custom `TestRunner` will look like this:
 </code></pre>
 
-<p>@RunWith(RobolectricGradleTestRunner.class)
-@Config(constants = BuildConfig.class,
-application = TestRobolectricApplication.class)
-public class SubscriberTest {
-    @BeforeClass
-    public static void startSetup() {
-        RxAndroidPlugins.getInstance().registerSchedulersHook(new RxAndroidSchedulersHook() {
-            @Override
-            public Scheduler getMainThreadScheduler() {
-                return Schedulers.immediate();
-            }
-        });
-    }</p>
+<p>public class RxJavaTestRunner extends RobolectricGradleTestRunner {
+    public RxJavaTestRunner(Class&lt;?> testClass) throws InitializationError {
+        super(testClass);</p>
 
-<pre><code>private void forceImmediateScheduler() {
-    RxJavaTestPlugins.resetPlugins();
+<pre><code>    RxJavaTestPlugins.resetPlugins();
     RxJavaPlugins.getInstance().registerSchedulersHook(new RxJavaSchedulersHook() {
         @Override
         public Scheduler getIOScheduler() {
@@ -114,23 +108,37 @@ public class SubscriberTest {
         }
     });
 }
-
-@Before
-public void setUp() {
-    forceImmediateScheduler();
-}
-
-@After
-public void tearDown() {
-    RxJavaTestPlugins.resetPlugins();
-}}
-/* Your tests here */
 </code></pre>
 
 <p>}
 &#8220;`</p>
 
-<p>Note that since RxAndroid does not come with a reset method, the overriding of the main thread scheduler must be done once for all the tests, otherwise a <code>IllegalStateException</code> will be thrown.</p>
+<p>And this is how the <code>setup()</code> and <code>teardown()</code> methods will look like (here I am using robolectric but it makes no difference with AndroidTests):</p>
+
+<pre><code class="Java">@RunWith(RxJavaTestRunner.class)
+@Config(constants = BuildConfig.class,
+application = TestRobolectricApplication.class)
+public class SubscriberTest {
+    @Before
+    public void setup() {
+        RxAndroidPlugins.getInstance().registerSchedulersHook(new RxAndroidSchedulersHook() {
+            @Override
+            public Scheduler getMainThreadScheduler() {
+                return Schedulers.immediate();
+            }
+        });
+    }
+
+    @After
+    public void tearDown() {
+        RxAndroidPlugins.getInstance().reset();
+    }}
+
+    /* Your tests here */
+}
+</code></pre>
+
+<p>As I already mentioned, you can inject the custom schedulers only once per test session. On the other hand, RxAndroidPlugins come with a reset method that will allow us to hook in different schedulers in different threads.</p>
 
 <p>This, together with a non blocking observable (for instance by replacing your long taking observable with a mocked <code>Observable.just()</code>) will make our test synchronous.</p>
 
@@ -185,6 +193,7 @@ public void tearDown() {
 <li><a href="https://medium.com/ribot-labs/unit-testing-rxjava-6e9540d4a329">Unit testing rxjava (observables)</a> by Iván Carballo</li>
 <li><a href="http://alexismas.com/blog/2015/05/20/unit-testing-rxjava/">Unit testing rxjava (subscription)</a> by Alexis Mas</li>
 <li><a href="http://fragmentedpodcast.com/episodes/3/">This</a> and <a href="http://fragmentedpodcast.com/episodes/4/">this</a> episodes of <a href="http://fragmentedpodcast.com">Fragmented Podcast</a> where Dan Lew gave some insights about RxJava, where I heard about the scheduler overriding trick</li>
+<li>Patrik Åkerfeldt&rsquo;s example that demonstrates how the scheduler injection works only before Scheduler class initialization</li>
 </ul>
 
 ]]></content>
