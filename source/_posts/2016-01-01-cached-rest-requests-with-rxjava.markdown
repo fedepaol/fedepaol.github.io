@@ -21,16 +21,20 @@ Going straight from rest result to the UI is appropriate in many cases, for exam
 
 *However*, there are cases when the results fetched earlier are still significant and displaying them can improve the user experience significantly, compared to a spinning wheel or a white page. Those cases include your twitter feed, a local weather forecast that was fetched just 5 minutes before, or the list of the github repos of a given user. 
 
+Here you can see the difference between a non cached version and a cached version of the same activity: 
+
+{% img /images/uncached.gif 300 %}      {% img /images/cached.gif 300 %}
+
 For this reason I tried to figure out what could have been a clean way to cache the results of a request while keeping the flow in a reactive fashion.
 
 ### The storage as the unique source of the truth
 ####All reactive
-The result of the request is thrown at the UI and the response is also stored in the storage. The UI subscribes also to the storage but checks who came first and if the data is too old:
+If we want to cache the data while keeping everything inside the same subscription, things get a bit messy. The result of the request is thrown at the UI and the response is also stored in the storage. The UI subscribes from the storage too but checks which result came first and if the data is too old.
 {% img /images/messy.jpg 500 %}
 
 
 ####Cached
-The UI subscribes only to the storage, and a facade class holds the storage and the http calls that feed the storage. By feeding the storage the UI thread is automatically notified of every change.
+In this _hybrid_ variant, the UI subscribes only to the storage, and a facade class wraps the storage and the subscription to the retrofit client that feeds the storage. Once the storage is filled with new data, the UI thread is automatically notified of every change.
 {% img /images/clean.jpg 500 %}
 
 In this scenario the observable acts as a _hot_ observable, the first time it gets subscribed it emits the content of the storage, and any other change it might happen to it.
@@ -148,6 +152,6 @@ If all this wrapping seems too laboruous, the prolific guys from Square wrote [S
 
 ## Conclusion
 I don't know if this is an healthy way to use RxJava. Maybe I ended up with this scenario only because I am not 100% confident with RxJava and I am putting some non rx-ness in the middle to better control it. 
-Here we need to choose where to place the operators, if we want to change the flow that feeds the storage, or if we want to change the flow that comes out of it.
+Here we need to choose where to place the operators, since we can modify the flow that feeds the storage from the http client, or the flow that comes out of the storage itself.
 
-In any case, having an unique source of truth seems reasonable, and I feel that in this way it would be a lot easier to do stuff like prefetching, scheduling updates so the user is presented with fresh data (remember having your [app work like magic?](https://www.youtube.com/watch?v=GcNNx2zdXN4), checking if an update is worth to be done at all (such as displaying a 5 minutes old weather forecast) and stuff like that.
+In any case, having an unique source of truth seems more clear, and I feel that in this way it would be a lot easier to do stuff like prefetching, scheduling updates so the user is presented with fresh data (remember having your [app work like magic?](https://www.youtube.com/watch?v=GcNNx2zdXN4), checking if an update is worth to be done at all (such as displaying a 5 minutes old weather forecast) and stuff like that.
