@@ -10,7 +10,7 @@ categories:
 ---
 
 ####Disclaimer: 
-In this post I am trying to cover a proper approach to a common problem. I am still trying to understand RxJava so what I write here might not be the best way to solve the problem.
+In this post I am trying to cover a proper approach to a common problem. I am still in the process of wrapping my head around RxJava so what I write here might not be the best way to solve the problem.
 
 # Cached requests with RxJava
 Lately I've been trying to develop a rest backed app using RxJava. I must admit that once you get in the proper mental mood, RxJava almost feels like cheating. Everything looks cleaner, multiple requests can be composed and manipulated easily, the StrictMode gets satisfied by observing on the ui thread and subscribing on a different thread, and all the nice things that can be read about how cool is RxJava with Android.
@@ -44,7 +44,7 @@ In this scenario the observable acts as a _hot_ observable, the first time it ge
 A working example of the following code can be found [in my github repo here](https://github.com/fedepaol/RxRestSample)
 To write this sample, I started from the abused Github apis which seems to power the 99% of the rest related examples. Sorry about that.
 
-First there is the storage. I wrapped a sqllite helper (which I happily generated with [my handy script](https://github.com/fedepaol/Android-sql-lite-helper)) with a class that contains a [PublishSubject](http://reactivex.io/RxJava/javadoc/rx/subjects/PublishSubject.html) which can be subscribed to and which we will notify when the insertion methods are called:
+First there is the storage. I wrapped a SQLite helper (which I happily generated with [my handy script](https://github.com/fedepaol/Android-sql-lite-helper)) with a class that contains a [PublishSubject](http://reactivex.io/RxJava/javadoc/rx/subjects/PublishSubject.html) which can be subscribed to and which we will notify when the insertion methods are called:
 
 ```Java
 public class ObservableRepoDb {
@@ -57,7 +57,7 @@ public class ObservableRepoDb {
 
     public void insertRepo(Repo r) {
         // ...
-        // performs the insertion on the sqllite helper
+        // performs the insertion on the SQLite helper
         // ...
         List<Repo> result = getAllReposFromDb();
         mSubject.onNext(result);
