@@ -30,6 +30,7 @@ For this reason I tried to figure out what could have been a clean way to cache 
 ### The storage as the unique source of the truth
 ####All reactive
 If we want to cache the data while keeping everything inside the same subscription, things get a bit messy. The result of the request is thrown at the UI and the response is also stored in the storage. The UI subscribes from the storage too but checks which result came first and if the data is too old.
+
 {% img /images/messy.jpg 500 %}
 
 
@@ -52,7 +53,11 @@ public class ObservableRepoDb {
     private RepoDbHelper mDbHelper;
 
     public Observable<List<Repo>> getObservable() {
-        return mSubject.startWith(getAllReposFromDb());
+        Observable<List<Repo>> firstTimeObservable =
+                Observable.create((Observable.OnSubscribe<List<Repo>>)
+                        subscriber -> subscriber.onNext(getAllReposFromDb()));
+
+        return firstTimeObservable.concatWith(mSubject);
     }
 
     public void insertRepo(Repo r) {
@@ -65,7 +70,7 @@ public class ObservableRepoDb {
 }
 ```
 
-What we have here is the first piece of the puzzle: a storage that can be subscribed to.
+What we have here is the first piece of the puzzle: a storage that can be subscribed to. The concatenation is needed because we want it to emit the content of the storage as soon as it gets subscribed.
 
 Then there is the facade class, where we get the observable from and to which we start a new update:
 
@@ -96,35 +101,28 @@ What we need is another subject that can be bound to the update request, so here
 ```Java 
 public class ObservableGithubRepos {
     // ...
-    private BehaviorSubject<String> mRequestSubject;
-
-    @Inject
-    public CachedRepoDbObservable() {
-        mRequestSubject = BehaviorSubject.create();
-    }
 
     public Observable<List<Repo>> getDbObservable() {
         return mDatabase.getObservable();
     }
 
-    public Observable<String> getProgressObservable() {
-        return mRequestSubject;
-    }
+    public Observable<String> updateRepo(String userName) {
+        BehaviorSubject<String> requestSubject = BehaviorSubject.create();
 
-    public void updateRepo(String userName) {
         Observable<List<Repo>> observable = mClient.getRepos(userName);
         observable.subscribeOn(Schedulers.io())
                   .observeOn(Schedulers.io())
                   .subscribe(l -> {
                                     mDatabase.insertRepoList(l);
-                                    mRestSubject.onNext(userName);},
-                             e -> mRequestSubject.onError(e),
-                             () -> mRequestSubject.onCompleted());
+                                    requestSubject.onNext(userName);},
+                             e -> requestSubject.onError(e),
+                             () -> requestSubject.onCompleted());
+        return requestSubject;
     }
 }
 ```
 
-In the UI client (activity or fragment) we'll need to subscribe to the storage in order to get the data and to the request observable in order to stop the progress indicators:
+In the UI client (activity or fragment) we'll need to subscribe to the storage in order to get the data and to the request observable in order to stop the progress indicators. An observable that emits the state of the pending request is returned every time an update is being requested.
 
 ```Java
     mObservable = mRepo.getDbObservable();
@@ -135,14 +133,14 @@ In the UI client (activity or fragment) we'll need to subscribe to the storage i
                     mAdapter.updateData(l);
                 });
 
-    mProgressObservable.subscribeOn(Schedulers.io())
+    Observable<List<Repo>> progressObservable = mRepo.updateRepo("fedepaol");
+    progressObservable.subscribeOn(Schedulers.io())
                            .observeOn(AndroidSchedulers.mainThread())
                            .subscribe(s -> {},
                                       e -> { Log.d("RX", "There has been an error");
                                             mSwipeLayout.setRefreshing(false);
                                       },
                                       () -> mSwipeLayout.setRefreshing(false));
-     mRepo.updateRepo("fedepaol");
 ```
 
 Please remember that the DbObservable is a hot one, so every time a call to updateRepo happens, the db will be fed with the result of the query and the ui will get subsequently notified. 
@@ -155,3 +153,5 @@ I don't know if this is an healthy way to use RxJava. Maybe I ended up with this
 Here we need to choose where to place the operators, since we can modify the flow that feeds the storage from the http client, or the flow that comes out of the storage itself.
 
 In any case, having an unique source of truth seems more clear, and I feel that in this way it would be a lot easier to do stuff like prefetching, scheduling updates so the user is presented with fresh data (remember having your [app work like magic?](https://www.youtube.com/watch?v=GcNNx2zdXN4)), checking if an update is worth to be done at all (such as displaying a 5 minutes old weather forecast) and stuff like that.
+
+Thanks to Fabio Collini for spotting a lot of mistakes in the first draft of this posts, and to Riccardo Ciovati for proof reading it.
