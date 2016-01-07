@@ -9,7 +9,7 @@
   <meta name="author" content="Federico Paolinelli">
 
   
-  <meta name="description" content="Testing RxJava While catching up with the latest Android novelties I could not ignore RxJava, which seems to grow in popularity between android &hellip;">
+  <meta name="description" content="Disclaimer: In this post I am trying to cover a proper approach to a common problem. I am still in the process of wrapping my head around RxJava so &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -77,6 +77,270 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2016/01/01/cached-rest-requests-with-rxjava/">Subscribe It While It's Hot: Cached Rest Requests With RxJava</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2016-01-01T17:54:21+01:00'><span class='date'><span class='date-month'>Jan</span> <span class='date-day'>1</span><span class='date-suffix'>st</span>, <span class='date-year'>2016</span></span> <span class='time'>5:54 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h4>Disclaimer:</h4>
+
+<p>In this post I am trying to cover a proper approach to a common problem. I am still in the process of wrapping my head around RxJava so what I write here might not be the best way to solve the problem.</p>
+
+<h1>Cached requests with RxJava</h1>
+
+<p>Lately I&rsquo;ve been trying to develop a rest backed app using RxJava. I must admit that once you get in the proper mental mood, RxJava almost feels like cheating. Everything looks cleaner, multiple requests can be composed and manipulated easily, the StrictMode gets satisfied by observing on the ui thread and subscribing on a different thread, and all the nice things that can be read about how cool is RxJava with Android.
+What I could not find easily, was how to store the result of a request and be sure that even in case of no network, a cached content was available for the user, while still handling everything in a reactive fashion.</p>
+
+<h3>Caching vs non caching</h3>
+
+<p>Going straight from rest result to the UI is appropriate in many cases, for example when displaying the result of a search whose arguments are not predictable (think about Ebay, or Amazon where the user is looking for something different every time).</p>
+
+<p><em>However</em>, there are cases when the results fetched earlier are still significant and displaying them can improve the user experience significantly, compared to a spinning wheel or a white page. Those cases include your twitter feed, a local weather forecast that was fetched just 5 minutes before, or the list of the github repos of a given user.</p>
+
+<p>Here you can see the difference between a non cached version and a cached version of the same activity:</p>
+
+<p><img src="/images/uncached.gif" width="300">      <img src="/images/cached.gif" width="300"></p>
+
+<p>For this reason I tried to figure out what could have been a clean way to cache the results of a request while keeping the flow in a reactive fashion.</p>
+
+<h3>The storage as the unique source of the truth</h3>
+
+<h4>All reactive</h4>
+
+<p>If we want to cache the data while keeping everything inside the same subscription, things get a bit messy. The result of the request is thrown at the UI and the response is also stored in the storage. The UI subscribes from the storage too but checks which result came first and if the data is too old.</p>
+
+<p><img src="/images/messy.jpg" width="500"></p>
+
+<h4>Cached</h4>
+
+<p>In this <em>hybrid</em> variant, the UI subscribes only to the storage, and a facade class wraps the storage and the subscription to the retrofit client that feeds the storage. Once the storage is filled with new data, the UI thread is automatically notified of every change.
+<img src="/images/clean.jpg" width="500"></p>
+
+<p>In this scenario the observable acts as a <em>hot</em> observable, the first time it gets subscribed it emits the content of the storage, and any other change it might happen to it.</p>
+
+<h3>Talk is cheap, show me the code</h3>
+
+<p>A working example of the following code can be found <a href="https://github.com/fedepaol/RxRestSample">in my github repo here</a>
+To write this sample, I started from the abused Github apis which seems to power the 99% of the rest related examples. Sorry about that.</p>
+
+<p>First there is the storage. I wrapped a SQLite helper (which I happily generated with <a href="https://github.com/fedepaol/Android-sql-lite-helper">my handy script</a>) with a class that contains a <a href="http://reactivex.io/RxJava/javadoc/rx/subjects/PublishSubject.html">PublishSubject</a> which can be subscribed to and which we will notify when the insertion methods are called:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+</pre></td><td class='code'><pre><code class='Java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">ObservableRepoDb</span> <span class="o">{</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">PublishSubject</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">Repo</span><span class="o">&gt;&gt;</span> <span class="n">mSubject</span> <span class="o">=</span> <span class="n">PublishSubject</span><span class="o">.</span><span class="na">create</span><span class="o">();</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">RepoDbHelper</span> <span class="n">mDbHelper</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">Repo</span><span class="o">&gt;</span> <span class="nf">getAllReposFromDb</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">List</span><span class="o">&lt;</span><span class="n">Repo</span><span class="o">&gt;</span> <span class="n">repos</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ArrayList</span><span class="o">&lt;&gt;();</span>
+</span><span class='line'>        <span class="c1">// .. performs the query and fills the result</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">repos</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="n">Observable</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">Repo</span><span class="o">&gt;&gt;</span> <span class="nf">getObservable</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">Observable</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">Repo</span><span class="o">&gt;&gt;</span> <span class="n">firstTimeObservable</span> <span class="o">=</span>
+</span><span class='line'>                <span class="n">Observable</span><span class="o">.</span><span class="na">fromCallable</span><span class="o">(</span><span class="k">this</span><span class="o">::</span><span class="n">getAllReposFromDb</span><span class="o">);</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">return</span> <span class="n">firstTimeObservable</span><span class="o">.</span><span class="na">concatWith</span><span class="o">(</span><span class="n">mSubject</span><span class="o">);</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">insertRepo</span><span class="o">(</span><span class="n">Repo</span> <span class="n">r</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="c1">// ...</span>
+</span><span class='line'>        <span class="c1">// performs the insertion on the SQLite helper</span>
+</span><span class='line'>        <span class="c1">// ...</span>
+</span><span class='line'>        <span class="n">List</span><span class="o">&lt;</span><span class="n">Repo</span><span class="o">&gt;</span> <span class="n">result</span> <span class="o">=</span> <span class="n">getAllReposFromDb</span><span class="o">();</span>
+</span><span class='line'>        <span class="n">mSubject</span><span class="o">.</span><span class="na">onNext</span><span class="o">(</span><span class="n">result</span><span class="o">);</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>What we have here is the first piece of the puzzle: a storage that can be subscribed to. The concatenation is needed because we want it to emit the content of the storage as soon as it gets subscribed.</p>
+
+<p>Then there is the facade class, where we get the observable from and to which we start a new update:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='Java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">ObservableGithubRepos</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">ObservableRepoDb</span> <span class="n">mDatabase</span><span class="o">;</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">BehaviorSubject</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span> <span class="n">mRestSubject</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// ...</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="n">Observable</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">Repo</span><span class="o">&gt;&gt;</span> <span class="nf">getDbObservable</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">mDatabase</span><span class="o">.</span><span class="na">getObservable</span><span class="o">();</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">updateRepo</span><span class="o">(</span><span class="n">String</span> <span class="n">userName</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">Observable</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">Repo</span><span class="o">&gt;&gt;</span> <span class="n">observable</span> <span class="o">=</span> <span class="n">mClient</span><span class="o">.</span><span class="na">getRepos</span><span class="o">(</span><span class="n">userName</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">observable</span><span class="o">.</span><span class="na">subscribeOn</span><span class="o">(</span><span class="n">Schedulers</span><span class="o">.</span><span class="na">io</span><span class="o">())</span>
+</span><span class='line'>                  <span class="o">.</span><span class="na">observeOn</span><span class="o">(</span><span class="n">Schedulers</span><span class="o">.</span><span class="na">io</span><span class="o">())</span>
+</span><span class='line'>                  <span class="o">.</span><span class="na">subscribe</span><span class="o">(</span><span class="n">l</span> <span class="o">-&gt;</span> <span class="n">mDatabase</span><span class="o">.</span><span class="na">insertRepoList</span><span class="o">(</span><span class="n">l</span><span class="o">));</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Note that everything happens far from the UI thread. This is because we are going to subscribe to the database observable as the unique source of truth.</p>
+
+<p>Now, given that the observable is now <em>hot</em>, we can&rsquo;t listen for its <em>onComplete</em> in order to stop any progress indicators we might put in place.
+What we need is another subject that can be bound to the update request, so here it is the new facade class:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+</pre></td><td class='code'><pre><code class='Java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">ObservableGithubRepos</span> <span class="o">{</span>
+</span><span class='line'>    <span class="c1">// ...</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="n">Observable</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">Repo</span><span class="o">&gt;&gt;</span> <span class="nf">getDbObservable</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">mDatabase</span><span class="o">.</span><span class="na">getObservable</span><span class="o">();</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="n">Observable</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span> <span class="nf">updateRepo</span><span class="o">(</span><span class="n">String</span> <span class="n">userName</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">BehaviorSubject</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span> <span class="n">requestSubject</span> <span class="o">=</span> <span class="n">BehaviorSubject</span><span class="o">.</span><span class="na">create</span><span class="o">();</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">Observable</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">Repo</span><span class="o">&gt;&gt;</span> <span class="n">observable</span> <span class="o">=</span> <span class="n">mClient</span><span class="o">.</span><span class="na">getRepos</span><span class="o">(</span><span class="n">userName</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">observable</span><span class="o">.</span><span class="na">subscribeOn</span><span class="o">(</span><span class="n">Schedulers</span><span class="o">.</span><span class="na">io</span><span class="o">())</span>
+</span><span class='line'>                  <span class="o">.</span><span class="na">observeOn</span><span class="o">(</span><span class="n">Schedulers</span><span class="o">.</span><span class="na">io</span><span class="o">())</span>
+</span><span class='line'>                  <span class="o">.</span><span class="na">subscribe</span><span class="o">(</span><span class="n">l</span> <span class="o">-&gt;</span> <span class="o">{</span>
+</span><span class='line'>                                    <span class="n">mDatabase</span><span class="o">.</span><span class="na">insertRepoList</span><span class="o">(</span><span class="n">l</span><span class="o">);</span>
+</span><span class='line'>                                    <span class="n">requestSubject</span><span class="o">.</span><span class="na">onNext</span><span class="o">(</span><span class="n">userName</span><span class="o">);},</span>
+</span><span class='line'>                             <span class="n">e</span> <span class="o">-&gt;</span> <span class="n">requestSubject</span><span class="o">.</span><span class="na">onError</span><span class="o">(</span><span class="n">e</span><span class="o">),</span>
+</span><span class='line'>                             <span class="o">()</span> <span class="o">-&gt;</span> <span class="n">requestSubject</span><span class="o">.</span><span class="na">onCompleted</span><span class="o">());</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">requestSubject</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>In the UI client (activity or fragment) we&rsquo;ll need to subscribe to the storage in order to get the data and to the request observable in order to stop the progress indicators. An observable that emits the state of the pending request is returned every time an update is being requested.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='Java'><span class='line'><span class="n">mObservable</span> <span class="o">=</span> <span class="n">mRepo</span><span class="o">.</span><span class="na">getDbObservable</span><span class="o">();</span>
+</span><span class='line'><span class="n">mProgressObservable</span> <span class="o">=</span> <span class="n">mRepo</span><span class="o">.</span><span class="na">getProgressObservable</span><span class="o">()</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">mObservable</span><span class="o">.</span><span class="na">subscribeOn</span><span class="o">(</span><span class="n">Schedulers</span><span class="o">.</span><span class="na">io</span><span class="o">())</span>
+</span><span class='line'>               <span class="o">.</span><span class="na">observeOn</span><span class="o">(</span><span class="n">AndroidSchedulers</span><span class="o">.</span><span class="na">mainThread</span><span class="o">()).</span><span class="na">subscribe</span><span class="o">(</span><span class="n">l</span> <span class="o">-&gt;</span> <span class="o">{</span>
+</span><span class='line'>                <span class="n">mAdapter</span><span class="o">.</span><span class="na">updateData</span><span class="o">(</span><span class="n">l</span><span class="o">);</span>
+</span><span class='line'>            <span class="o">});</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">Observable</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">Repo</span><span class="o">&gt;&gt;</span> <span class="n">progressObservable</span> <span class="o">=</span> <span class="n">mRepo</span><span class="o">.</span><span class="na">updateRepo</span><span class="o">(</span><span class="s">&quot;fedepaol&quot;</span><span class="o">);</span>
+</span><span class='line'><span class="n">progressObservable</span><span class="o">.</span><span class="na">subscribeOn</span><span class="o">(</span><span class="n">Schedulers</span><span class="o">.</span><span class="na">io</span><span class="o">())</span>
+</span><span class='line'>                       <span class="o">.</span><span class="na">observeOn</span><span class="o">(</span><span class="n">AndroidSchedulers</span><span class="o">.</span><span class="na">mainThread</span><span class="o">())</span>
+</span><span class='line'>                       <span class="o">.</span><span class="na">subscribe</span><span class="o">(</span><span class="n">s</span> <span class="o">-&gt;</span> <span class="o">{},</span>
+</span><span class='line'>                                  <span class="n">e</span> <span class="o">-&gt;</span> <span class="o">{</span> <span class="n">Log</span><span class="o">.</span><span class="na">d</span><span class="o">(</span><span class="s">&quot;RX&quot;</span><span class="o">,</span> <span class="s">&quot;There has been an error&quot;</span><span class="o">);</span>
+</span><span class='line'>                                        <span class="n">mSwipeLayout</span><span class="o">.</span><span class="na">setRefreshing</span><span class="o">(</span><span class="kc">false</span><span class="o">);</span>
+</span><span class='line'>                                  <span class="o">},</span>
+</span><span class='line'>                                  <span class="o">()</span> <span class="o">-&gt;</span> <span class="n">mSwipeLayout</span><span class="o">.</span><span class="na">setRefreshing</span><span class="o">(</span><span class="kc">false</span><span class="o">));</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Please remember that the DbObservable is a hot one, so every time a call to updateRepo happens, the db will be fed with the result of the query and the ui will get subsequently notified.</p>
+
+<h3>SqlBrite</h3>
+
+<p>If all this wrapping seems too laboruous, the prolific guys from Square wrote <a href="https://github.com/square/sqlbrite">SqlBrite</a> which is a super generic database wrapper that was written for this same purpouse. I am sure it&rsquo;s better and more battle field tested than the poor man&rsquo;s version we can write by ourselves.</p>
+
+<h2>Conclusion</h2>
+
+<p>I don&rsquo;t know if this is an healthy way to use RxJava. Maybe I ended up with this scenario only because I am not 100% confident with RxJava and I am putting some non rx-ness in the middle to better control it.
+Here we need to choose where to place the operators, since we can modify the flow that feeds the storage from the http client, or the flow that comes out of the storage itself.</p>
+
+<p>In any case, having an unique source of truth seems more clear, and I feel that in this way it would be a lot easier to do stuff like prefetching, scheduling updates so the user is presented with fresh data (remember having your <a href="https://www.youtube.com/watch?v=GcNNx2zdXN4">app work like magic?</a>), checking if an update is worth to be done at all (such as displaying a 5 minutes old weather forecast) and stuff like that.</p>
+
+<p>Thanks to Fabio Collini for spotting a lot of mistakes in the first draft of this posts, and to Riccardo Ciovati for proof reading it.</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1462,36 +1726,6 @@ Ciao Federico! Innanzitutto ti faccio i miei complimenti per l&#39;ottimo proget
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/11/25/droidalone-reloaded/">DroidAlone - Reloaded</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2012-11-25'><span class='date'><span class='date-month'>Nov</span> <span class='date-day'>25</span><span class='date-suffix'>th</span>, <span class='date-year'>2012</span></span> <span class='time'>12:00 am</span></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><div class='post'>
-Whenever I speak with another android developer, the occasional chat goes to &#8220;what did you develop?&#8221; question.<br />Last time it happened at droidcon uk, and for the first time I felt something wasn&#8217;t completely right when I showed my DroidAlone app.<br /><br />DroidAlone is a useful app (so they say) that comes into play whenever you forget your phone at home. With a simple sms protected by a password choosen by the user, it can be activated. From that moment, it will start notifying you of any missed calls and sms. It also ships a lot of other nice features, such as phone location retrieval and auto reply via sms (if you want to inform the caller that he can reach you to another number).<br />The full description of DroidAlone can be found at&nbsp;<a href="http://www.fedepaolapps.com/app/droidalone/">Missed Calls for Android</a>&nbsp;.<br /><br />Everything seems to work well, it has a lot of good reviews and the few users are happy.<br />Except one thing. It looks (looked) like this:<br /><br /><div class="separator" style="clear: both; text-align: center;"><a href="http://www.fedepaolapps.com/wp-content/uploads/2012/09/main_screen1.jpg" imageanchor="1" style="margin-left: 1em; margin-right: 1em;"><img border="0" height="320" src="http://www.fedepaolapps.com/wp-content/uploads/2012/09/main_screen1.jpg" width="213" /></a></div><a href="http://www.blogger.com/"></a><span id="goog_1451563458"></span><span id="goog_1451563459"></span><br />It also had another view with the list of events. The other developer&#8217;s reaction was &#8220;ugh&#8221;. And then I realized that I can&#8217;t keep producing new stuff ignoring what I have around, especially if this is the case of the only app I manage to sell a bit.<br /><br />So, when I got home I decided to change the ui &#8220;just to make it more pleasant&#8221;. &nbsp;Then I opened the code, and I realized that my two year&#8217;s old code needed a bit more than a refresh.<br /><br />Here what was wrong:<br /><br /><ul><li>it used tabactivity, which is very old fashioned. I decided to add the actionbar.</li><li>from the event list view, you had to click on the item to see the details of the event. The details where shown into a dialog. Ugh (again). In the new version I wanted all the details to be visible since they are not so long.</li><li>All the properties of the views in the layouts where explicit. No styles anywhere. The color resources where &#8220;background_color&#8221;, or &#8220;title_color&#8221; instead of some name that remind you the color. I had to put a heavy hand on that.</li><li>I tried to use gridlayout a lot since it seem to be the more efficient way to dispose a layout.</li><li>There was no empty list information.</li><li>A lot of calls where deprecated. I switched to the most modern versions.</li><li>All the data was contained in a sqllite storage without using a content provider. I switched to using a content provider and a cursorloader, which ended up in a more compact code. I didn&#8217;t need anymore to use a broadcast to notify the ui that the data was changed.</li><li>DroidAlone uses broadcast receivers to be notified of incoming calls / sms. Even tough the sms receiver must be enabled because an activation sms can be received at anytime, the call receiver is needed only when the app is active. I then used the package manager to disable it when not needed.</li><li>I wanted to refactor a lot of code. A lot of brackets where on the new line instead of the same line of the method (a la C), and it bothered me a lot. I also trusted lint and changed a lot here and there.&nbsp;</li></ul><div><br /></div><div>Other than these things, I redraw (by my self) a lot of the assets using inkscape. Because I soon got bored to export the resources in 4 different resolutions folders, I wrote a simple python script to do that for me. You can find it <a href="https://gist.github.com/4127778">here</a>&nbsp;.</div><div><br /></div><div>More than that, I got REALLY REALLY bored while writing the content provider, so I ended up writing another python script to automatically generate the content provider for me, as described in my previous <a href="/blog/2012/11/11/android-content-providers-generator">post</a>. You can find the <a href="https://github.com/fedepaol/Android-sql-lite-helper">android content provider generator here</a>.&nbsp;</div><div><br /></div><div>Finally, I switched the project to maven because I am getting used to that solution, especially in case I want to add robolectric tests and keep working with intellij.</div><div><br /></div><div>The new version of the app hasn&#8217;t been released yet (I want to have it running for a while on my phone before releasing it, just to be sure that I didn&#8217;t break anything).</div><div><br /></div><div>This is how the new version will look like&nbsp;</div><div><br /></div><div class="separator" style="clear: both; text-align: center;"><a href="http://1.bp.blogspot.com/-KFbMTLsxs5w/ULKCXaGOnLI/AAAAAAAAJS4/CVeElRWX6wA/s1600/screen3.tiff" imageanchor="1" style="margin-left: 1em; margin-right: 1em;"><img border="0" height="320" src="http://1.bp.blogspot.com/-KFbMTLsxs5w/ULKCXaGOnLI/AAAAAAAAJS4/CVeElRWX6wA/s320/screen3.tiff" width="194" /></a></div><div class="separator" style="clear: both; text-align: center;"><br /></div><div class="separator" style="clear: both; text-align: left;">So, this is how a &#8220;little ui polishing&#8221; ended lasting more than two weeks (of my spare time). I am also glad that I think my old code is not that good. I like to think that I am better than two years ago.</div><div><br /></div><br /><div class="separator" style="clear: both; text-align: center;"><br /></div><br /></div>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/2">&larr; Older</a>
@@ -1512,6 +1746,10 @@ Whenever I speak with another android developer, the occasional chat goes to &#8
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2016/01/01/cached-rest-requests-with-rxjava/">Subscribe It While It's Hot: Cached Rest Requests With RxJava</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/09/13/testing-rxjava-observables-subscriptions/">Unit Testing RxJava Observables and Subscriptions</a>
       </li>
     
@@ -1525,10 +1763,6 @@ Whenever I speak with another android developer, the occasional chat goes to &#8
     
       <li class="post">
         <a href="/blog/2014/09/01/dragging-with-viewdraghelper/">Dragging With ViewDragHelper</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/08/24/migrating-from-blogger-to-octopress-done/">Migrating From Blogger to Octopress (Done!)</a>
       </li>
     
   </ul>
@@ -1591,7 +1825,7 @@ Whenever I speak with another android developer, the occasional chat goes to &#8
     </div>
   </div>
   <footer role="contentinfo"><p>
-  Copyright &copy; 2015 - Federico Paolinelli -
+  Copyright &copy; 2016 - Federico Paolinelli -
   <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
 </p>
 

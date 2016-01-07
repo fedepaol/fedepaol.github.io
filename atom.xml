@@ -4,7 +4,7 @@
   <title><![CDATA[My little Android warehouse]]></title>
   <link href="http://fedepaol.github.io/atom.xml" rel="self"/>
   <link href="http://fedepaol.github.io/"/>
-  <updated>2015-09-23T21:40:04+02:00</updated>
+  <updated>2016-01-07T12:10:41+01:00</updated>
   <id>http://fedepaol.github.io/</id>
   <author>
     <name><![CDATA[Federico Paolinelli]]></name>
@@ -12,6 +12,250 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Subscribe It While It's Hot: Cached Rest Requests With RxJava]]></title>
+    <link href="http://fedepaol.github.io/blog/2016/01/01/cached-rest-requests-with-rxjava/"/>
+    <updated>2016-01-01T17:54:21+01:00</updated>
+    <id>http://fedepaol.github.io/blog/2016/01/01/cached-rest-requests-with-rxjava</id>
+    <content type="html"><![CDATA[<h4>Disclaimer:</h4>
+
+<p>In this post I am trying to cover a proper approach to a common problem. I am still in the process of wrapping my head around RxJava so what I write here might not be the best way to solve the problem.</p>
+
+<h1>Cached requests with RxJava</h1>
+
+<p>Lately I&rsquo;ve been trying to develop a rest backed app using RxJava. I must admit that once you get in the proper mental mood, RxJava almost feels like cheating. Everything looks cleaner, multiple requests can be composed and manipulated easily, the StrictMode gets satisfied by observing on the ui thread and subscribing on a different thread, and all the nice things that can be read about how cool is RxJava with Android.
+What I could not find easily, was how to store the result of a request and be sure that even in case of no network, a cached content was available for the user, while still handling everything in a reactive fashion.</p>
+
+<h3>Caching vs non caching</h3>
+
+<p>Going straight from rest result to the UI is appropriate in many cases, for example when displaying the result of a search whose arguments are not predictable (think about Ebay, or Amazon where the user is looking for something different every time).</p>
+
+<p><em>However</em>, there are cases when the results fetched earlier are still significant and displaying them can improve the user experience significantly, compared to a spinning wheel or a white page. Those cases include your twitter feed, a local weather forecast that was fetched just 5 minutes before, or the list of the github repos of a given user.</p>
+
+<p>Here you can see the difference between a non cached version and a cached version of the same activity:</p>
+
+<p><img src="http://fedepaol.github.io/images/uncached.gif" width="300">      <img src="http://fedepaol.github.io/images/cached.gif" width="300"></p>
+
+<p>For this reason I tried to figure out what could have been a clean way to cache the results of a request while keeping the flow in a reactive fashion.</p>
+
+<h3>The storage as the unique source of the truth</h3>
+
+<h4>All reactive</h4>
+
+<p>If we want to cache the data while keeping everything inside the same subscription, things get a bit messy. The result of the request is thrown at the UI and the response is also stored in the storage. The UI subscribes from the storage too but checks which result came first and if the data is too old.</p>
+
+<p><img src="http://fedepaol.github.io/images/messy.jpg" width="500"></p>
+
+<h4>Cached</h4>
+
+<p>In this <em>hybrid</em> variant, the UI subscribes only to the storage, and a facade class wraps the storage and the subscription to the retrofit client that feeds the storage. Once the storage is filled with new data, the UI thread is automatically notified of every change.
+<img src="http://fedepaol.github.io/images/clean.jpg" width="500"></p>
+
+<p>In this scenario the observable acts as a <em>hot</em> observable, the first time it gets subscribed it emits the content of the storage, and any other change it might happen to it.</p>
+
+<h3>Talk is cheap, show me the code</h3>
+
+<p>A working example of the following code can be found <a href="https://github.com/fedepaol/RxRestSample">in my github repo here</a>
+To write this sample, I started from the abused Github apis which seems to power the 99% of the rest related examples. Sorry about that.</p>
+
+<p>First there is the storage. I wrapped a SQLite helper (which I happily generated with <a href="https://github.com/fedepaol/Android-sql-lite-helper">my handy script</a>) with a class that contains a <a href="http://reactivex.io/RxJava/javadoc/rx/subjects/PublishSubject.html">PublishSubject</a> which can be subscribed to and which we will notify when the insertion methods are called:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+</pre></td><td class='code'><pre><code class='Java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">ObservableRepoDb</span> <span class="o">{</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">PublishSubject</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">Repo</span><span class="o">&gt;&gt;</span> <span class="n">mSubject</span> <span class="o">=</span> <span class="n">PublishSubject</span><span class="o">.</span><span class="na">create</span><span class="o">();</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">RepoDbHelper</span> <span class="n">mDbHelper</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">Repo</span><span class="o">&gt;</span> <span class="nf">getAllReposFromDb</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">List</span><span class="o">&lt;</span><span class="n">Repo</span><span class="o">&gt;</span> <span class="n">repos</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ArrayList</span><span class="o">&lt;&gt;();</span>
+</span><span class='line'>        <span class="c1">// .. performs the query and fills the result</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">repos</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="n">Observable</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">Repo</span><span class="o">&gt;&gt;</span> <span class="nf">getObservable</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">Observable</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">Repo</span><span class="o">&gt;&gt;</span> <span class="n">firstTimeObservable</span> <span class="o">=</span>
+</span><span class='line'>                <span class="n">Observable</span><span class="o">.</span><span class="na">fromCallable</span><span class="o">(</span><span class="k">this</span><span class="o">::</span><span class="n">getAllReposFromDb</span><span class="o">);</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">return</span> <span class="n">firstTimeObservable</span><span class="o">.</span><span class="na">concatWith</span><span class="o">(</span><span class="n">mSubject</span><span class="o">);</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">insertRepo</span><span class="o">(</span><span class="n">Repo</span> <span class="n">r</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="c1">// ...</span>
+</span><span class='line'>        <span class="c1">// performs the insertion on the SQLite helper</span>
+</span><span class='line'>        <span class="c1">// ...</span>
+</span><span class='line'>        <span class="n">List</span><span class="o">&lt;</span><span class="n">Repo</span><span class="o">&gt;</span> <span class="n">result</span> <span class="o">=</span> <span class="n">getAllReposFromDb</span><span class="o">();</span>
+</span><span class='line'>        <span class="n">mSubject</span><span class="o">.</span><span class="na">onNext</span><span class="o">(</span><span class="n">result</span><span class="o">);</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>What we have here is the first piece of the puzzle: a storage that can be subscribed to. The concatenation is needed because we want it to emit the content of the storage as soon as it gets subscribed.</p>
+
+<p>Then there is the facade class, where we get the observable from and to which we start a new update:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='Java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">ObservableGithubRepos</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">ObservableRepoDb</span> <span class="n">mDatabase</span><span class="o">;</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">BehaviorSubject</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span> <span class="n">mRestSubject</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// ...</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="n">Observable</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">Repo</span><span class="o">&gt;&gt;</span> <span class="nf">getDbObservable</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">mDatabase</span><span class="o">.</span><span class="na">getObservable</span><span class="o">();</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">updateRepo</span><span class="o">(</span><span class="n">String</span> <span class="n">userName</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">Observable</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">Repo</span><span class="o">&gt;&gt;</span> <span class="n">observable</span> <span class="o">=</span> <span class="n">mClient</span><span class="o">.</span><span class="na">getRepos</span><span class="o">(</span><span class="n">userName</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">observable</span><span class="o">.</span><span class="na">subscribeOn</span><span class="o">(</span><span class="n">Schedulers</span><span class="o">.</span><span class="na">io</span><span class="o">())</span>
+</span><span class='line'>                  <span class="o">.</span><span class="na">observeOn</span><span class="o">(</span><span class="n">Schedulers</span><span class="o">.</span><span class="na">io</span><span class="o">())</span>
+</span><span class='line'>                  <span class="o">.</span><span class="na">subscribe</span><span class="o">(</span><span class="n">l</span> <span class="o">-&gt;</span> <span class="n">mDatabase</span><span class="o">.</span><span class="na">insertRepoList</span><span class="o">(</span><span class="n">l</span><span class="o">));</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Note that everything happens far from the UI thread. This is because we are going to subscribe to the database observable as the unique source of truth.</p>
+
+<p>Now, given that the observable is now <em>hot</em>, we can&rsquo;t listen for its <em>onComplete</em> in order to stop any progress indicators we might put in place.
+What we need is another subject that can be bound to the update request, so here it is the new facade class:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+</pre></td><td class='code'><pre><code class='Java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">ObservableGithubRepos</span> <span class="o">{</span>
+</span><span class='line'>    <span class="c1">// ...</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="n">Observable</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">Repo</span><span class="o">&gt;&gt;</span> <span class="nf">getDbObservable</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">mDatabase</span><span class="o">.</span><span class="na">getObservable</span><span class="o">();</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="n">Observable</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span> <span class="nf">updateRepo</span><span class="o">(</span><span class="n">String</span> <span class="n">userName</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">BehaviorSubject</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span> <span class="n">requestSubject</span> <span class="o">=</span> <span class="n">BehaviorSubject</span><span class="o">.</span><span class="na">create</span><span class="o">();</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">Observable</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">Repo</span><span class="o">&gt;&gt;</span> <span class="n">observable</span> <span class="o">=</span> <span class="n">mClient</span><span class="o">.</span><span class="na">getRepos</span><span class="o">(</span><span class="n">userName</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">observable</span><span class="o">.</span><span class="na">subscribeOn</span><span class="o">(</span><span class="n">Schedulers</span><span class="o">.</span><span class="na">io</span><span class="o">())</span>
+</span><span class='line'>                  <span class="o">.</span><span class="na">observeOn</span><span class="o">(</span><span class="n">Schedulers</span><span class="o">.</span><span class="na">io</span><span class="o">())</span>
+</span><span class='line'>                  <span class="o">.</span><span class="na">subscribe</span><span class="o">(</span><span class="n">l</span> <span class="o">-&gt;</span> <span class="o">{</span>
+</span><span class='line'>                                    <span class="n">mDatabase</span><span class="o">.</span><span class="na">insertRepoList</span><span class="o">(</span><span class="n">l</span><span class="o">);</span>
+</span><span class='line'>                                    <span class="n">requestSubject</span><span class="o">.</span><span class="na">onNext</span><span class="o">(</span><span class="n">userName</span><span class="o">);},</span>
+</span><span class='line'>                             <span class="n">e</span> <span class="o">-&gt;</span> <span class="n">requestSubject</span><span class="o">.</span><span class="na">onError</span><span class="o">(</span><span class="n">e</span><span class="o">),</span>
+</span><span class='line'>                             <span class="o">()</span> <span class="o">-&gt;</span> <span class="n">requestSubject</span><span class="o">.</span><span class="na">onCompleted</span><span class="o">());</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">requestSubject</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>In the UI client (activity or fragment) we&rsquo;ll need to subscribe to the storage in order to get the data and to the request observable in order to stop the progress indicators. An observable that emits the state of the pending request is returned every time an update is being requested.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='Java'><span class='line'><span class="n">mObservable</span> <span class="o">=</span> <span class="n">mRepo</span><span class="o">.</span><span class="na">getDbObservable</span><span class="o">();</span>
+</span><span class='line'><span class="n">mProgressObservable</span> <span class="o">=</span> <span class="n">mRepo</span><span class="o">.</span><span class="na">getProgressObservable</span><span class="o">()</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">mObservable</span><span class="o">.</span><span class="na">subscribeOn</span><span class="o">(</span><span class="n">Schedulers</span><span class="o">.</span><span class="na">io</span><span class="o">())</span>
+</span><span class='line'>               <span class="o">.</span><span class="na">observeOn</span><span class="o">(</span><span class="n">AndroidSchedulers</span><span class="o">.</span><span class="na">mainThread</span><span class="o">()).</span><span class="na">subscribe</span><span class="o">(</span><span class="n">l</span> <span class="o">-&gt;</span> <span class="o">{</span>
+</span><span class='line'>                <span class="n">mAdapter</span><span class="o">.</span><span class="na">updateData</span><span class="o">(</span><span class="n">l</span><span class="o">);</span>
+</span><span class='line'>            <span class="o">});</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">Observable</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">Repo</span><span class="o">&gt;&gt;</span> <span class="n">progressObservable</span> <span class="o">=</span> <span class="n">mRepo</span><span class="o">.</span><span class="na">updateRepo</span><span class="o">(</span><span class="s">&quot;fedepaol&quot;</span><span class="o">);</span>
+</span><span class='line'><span class="n">progressObservable</span><span class="o">.</span><span class="na">subscribeOn</span><span class="o">(</span><span class="n">Schedulers</span><span class="o">.</span><span class="na">io</span><span class="o">())</span>
+</span><span class='line'>                       <span class="o">.</span><span class="na">observeOn</span><span class="o">(</span><span class="n">AndroidSchedulers</span><span class="o">.</span><span class="na">mainThread</span><span class="o">())</span>
+</span><span class='line'>                       <span class="o">.</span><span class="na">subscribe</span><span class="o">(</span><span class="n">s</span> <span class="o">-&gt;</span> <span class="o">{},</span>
+</span><span class='line'>                                  <span class="n">e</span> <span class="o">-&gt;</span> <span class="o">{</span> <span class="n">Log</span><span class="o">.</span><span class="na">d</span><span class="o">(</span><span class="s">&quot;RX&quot;</span><span class="o">,</span> <span class="s">&quot;There has been an error&quot;</span><span class="o">);</span>
+</span><span class='line'>                                        <span class="n">mSwipeLayout</span><span class="o">.</span><span class="na">setRefreshing</span><span class="o">(</span><span class="kc">false</span><span class="o">);</span>
+</span><span class='line'>                                  <span class="o">},</span>
+</span><span class='line'>                                  <span class="o">()</span> <span class="o">-&gt;</span> <span class="n">mSwipeLayout</span><span class="o">.</span><span class="na">setRefreshing</span><span class="o">(</span><span class="kc">false</span><span class="o">));</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Please remember that the DbObservable is a hot one, so every time a call to updateRepo happens, the db will be fed with the result of the query and the ui will get subsequently notified.</p>
+
+<h3>SqlBrite</h3>
+
+<p>If all this wrapping seems too laboruous, the prolific guys from Square wrote <a href="https://github.com/square/sqlbrite">SqlBrite</a> which is a super generic database wrapper that was written for this same purpouse. I am sure it&rsquo;s better and more battle field tested than the poor man&rsquo;s version we can write by ourselves.</p>
+
+<h2>Conclusion</h2>
+
+<p>I don&rsquo;t know if this is an healthy way to use RxJava. Maybe I ended up with this scenario only because I am not 100% confident with RxJava and I am putting some non rx-ness in the middle to better control it.
+Here we need to choose where to place the operators, since we can modify the flow that feeds the storage from the http client, or the flow that comes out of the storage itself.</p>
+
+<p>In any case, having an unique source of truth seems more clear, and I feel that in this way it would be a lot easier to do stuff like prefetching, scheduling updates so the user is presented with fresh data (remember having your <a href="https://www.youtube.com/watch?v=GcNNx2zdXN4">app work like magic?</a>), checking if an update is worth to be done at all (such as displaying a 5 minutes old weather forecast) and stuff like that.</p>
+
+<p>Thanks to Fabio Collini for spotting a lot of mistakes in the first draft of this posts, and to Riccardo Ciovati for proof reading it.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Unit Testing RxJava Observables and Subscriptions]]></title>
@@ -1340,16 +1584,6 @@ This time, while PastTimer has not been released yet, I started an experiment wi
     <id>http://fedepaol.github.io/blog/2011/10/18/new-app-android-kitchen-timer</id>
     <content type="html"><![CDATA[<div class='post'>
 Pastimer is my 4th app. It&#8217;s a simple (but nice) Android Kitchen Timer based on barcode scanning.<br /><br />I learned some things during my journey of android development, but this time I wanted to focus on user interface and ease of use.<br /><br />As always, it starts as a simple idea, the you start putting some code in it, it&#8217;s &#8220;almost&#8221; working, and the difference between almost working and finished, is something like two months or more. I let it alone for more than two months.<br /><br />However, now it almost ready to be released, and it will very soon.<br /><br />The idea behind it is very simple.<br /><br />You point the barcode, the app looks in its internal database, and if it does know the time associated, starts a timer. If it does not recognize the barcode, it prompts the user asking to put the data.<br /><br />Sounds easy, doesn&#8217;t it? You can give a look at a couple of screenshots here&nbsp;<a href="https://sites.google.com/site/pastimerand/">Android Kitchen Timer</a></div>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[What I Have Been Working on.. Android Kitchen Timer]]></title>
-    <link href="http://fedepaol.github.io/blog/2011/06/24/what-i-have-been-working-on/"/>
-    <updated>2011-06-24T00:00:00+02:00</updated>
-    <id>http://fedepaol.github.io/blog/2011/06/24/what-i-have-been-working-on</id>
-    <content type="html"><![CDATA[<div class='post'>
-Apart from some rest, and reading some good books (like excellent Kent Beck&#8217;s Test Driven development by example, and &#8220;growing object-oriented software guided by tests&#8221;), I have been working on a new app in the last month or so.<br /><br />A week end locked at home because my gf was ill, was a good excuse to start a deep programming session. The app I am about to release (well, to be honest it still lacks all the nice ui parts, it just look like a bunch of grey buttons thrown on the screen) solves (or at least tries to simplify) a problem I have every time I need to cook pasta.<br /><br />Basically, if you need to cook some pasta (but this applies to every other boxed product), you need to put it in the boiling water and then look for the boiling time on the box, and set the timer with minutes and seconds on your phone.<br /><br />With my app you simply point the camera to the barcode of the box, and it automatically start a countdown for the right amount of time. Of course some data entry is needed, and if the barcode is not in the internal storage, the user will be asked to fill the name of the pasta and the correct boiling time.<br /><br />So, it&#8217;s a simplified timer for android, which should make easier and faster the countdown setting process.<br /><br />I really hope to release it soon, if you are interested and you want to be notified when I will release it, just throw me an email at fedepaol <at> gmail.com</at></div>
 ]]></content>
   </entry>
   
