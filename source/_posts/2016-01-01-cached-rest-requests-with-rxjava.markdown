@@ -52,6 +52,12 @@ public class ObservableRepoDb {
     private PublishSubject<List<Repo>> mSubject = PublishSubject.create();
     private RepoDbHelper mDbHelper;
 
+    private List<Repo> getAllReposFromDb() {
+        List<Repo> repos = new ArrayList<>();
+        // .. performs the query and fills the result
+        return repos;
+    }
+
     public Observable<List<Repo>> getObservable() {
         Observable<List<Repo>> firstTimeObservable =
                 Observable.fromCallable(this::getAllReposFromDb);
