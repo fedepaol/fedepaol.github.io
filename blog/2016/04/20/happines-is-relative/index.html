@@ -1,0 +1,387 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Happines Is (a) Relative (Layout) - My little Android warehouse</title>
+  <meta name="author" content="Federico Paolinelli">
+
+  
+  <meta name="description" content="Using relative layout is bad .. or at least they say so.
+The truth is, it is relatively easy to build complex layouts using RelativeLayouts, but this &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://fedepaol.github.io/blog/2016/04/20/happines-is-relative">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="My little Android warehouse" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-16514009-2']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">My little Android warehouse</a></h1>
+  
+    <h2>Random thoughts about my experience as moonlight android developer.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:fedepaol.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Happines Is (a) Relative (Layout)</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2016-04-20T06:34:46+02:00'><span class='date'><span class='date-month'>Apr</span> <span class='date-day'>20</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>6:34 am</span></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><h4>Using relative layout is bad</h4>
+
+<p>.. or at least they say so.
+The truth is, it is <em>relatively</em> easy to build complex layouts using RelativeLayouts, but this ease of use comes with a cost: in order to provide that kind of flexibility, RelativeLayout does two measurement passes.</p>
+
+<p>There are a lot of talks and <a href="https://medium.com/google-developers/developing-for-android-iii-2efc140167fd#.wpqgdu3xs">posts</a> explaining that if you have nested relative layouts, you&rsquo;ll end up with many measurement passes that will consume your cpu and will contribute to miss the dreaded 16 ms threshold. The higher the RelativeLayouts are placed in your view hierarchy, the more will be the number of measurements.</p>
+
+<p><strong>It&rsquo;s easier than you think</strong>: let&rsquo;s pretend you have a RelativeLayout as the root of your activity view (because hey, it&rsquo;s what Android Studio sets as default from the BlankActivity template).</p>
+
+<p>Then you have a fragment, and for some reason you have a list you want to place aside a button and you need a RelativeLayout over there.</p>
+
+<p>Finally, you&rsquo;ll have to place an image and a text inside the list elements, isn&rsquo;t there an easier way than RelativeLayout? (Actually, <a href="http://antonioleiva.com/textview_power_drawables/">there is and it&rsquo;s much more efficient</a>)</p>
+
+<p><img class="center" src="/images/relative_hierarchy.png" width="300"></p>
+
+<p>What will happen here is that with this unharmful scenario the <code>onMeasure()</code> method of each children of the list <strong>will be called 8 times</strong> each frame.</p>
+
+<h3>But why does RelativeLayout need two passes?</h3>
+
+<p>Given that Android is an open source framework, I could satisfy my curiosity by digging into the source code. Here I will try to provide a high level explanation of my understanding on how it works, without going too much into the details.</p>
+
+<p>Let&rsquo;s pretend you want four children (A, B, C, D) for your layout, and the rules are the following:</p>
+
+<ul>
+<li>A is above C</li>
+<li>B is to right of A</li>
+<li>D is below B and its right margin is aligned to B</li>
+<li>C is to left of D and its top is aligned to D</li>
+</ul>
+
+
+<p><img class="center" src="/images/relative_sample.png" width="200"></p>
+
+<p>The concept behind RelativeLayout is fairly simple. <strong>In order to measure (and place) a certain child, you need to measure (and place) all the views that child depends on</strong> in term of relationship. For this reason, the first thing RelativeLayout does is to build a graph of dependencies between the children. Those dependencies determine the order in which the children are measured (i.e. first the views with no dependencies, then the views that depend only from the root, etc).</p>
+
+<p>This explains the need for two measurement passes: <strong>the order the views need to be measured horizontally can be different from the order the views need to be measured vertically</strong>. In my example, A does not have any <em>horizontal</em> dependency but <em>vertically</em> it depends on the size and the position of C.</p>
+
+<p>In the example, the sequence of measurement are:</p>
+
+<p>Horizontal dimension:
+A -> B -> D -> C</p>
+
+<p><img src="/images/relative_horizontal.png" width="800"></p>
+
+<p>Note that given the vertical size is not calculated yet, the views are temporarly assigned with the height of the parent view while measuring the horizontal sizes.</p>
+
+<p>Vertical dimension:
+B -> D -> C -> A</p>
+
+<p><img src="/images/relative_vertical.png" width="800"></p>
+
+<p>Other than these two passes, RelativeLayout can also loop its children up to three other times to finalize their placement (for example for those that are aligned to the bottom of the parent in case of wrap content).</p>
+
+<p>The position of the views is calculated during the measurement double pass. For this reason the <code>onLayout()</code> implementation is pretty trivial.</p>
+
+<p>Finally, the dependency lists are cached, but those cached elements are invalidated whenever a <code>requestLayout()</code> happens. This, together with the fact that <code>requestLayout()</code> goes up to the root and is called on all the children is another reason for not having deep view hierarchy especially with RelativeLayouts.</p>
+
+<h3>Optimizing RelativeLayout</h3>
+
+<p>First of all, remember that you don&rsquo;t always need to. If you are in the early stage of the development or under strict time constraints and you prefer the simplicity of use of <code>RelativeLayout</code> against performance then use it, <strong>just be aware of the implications</strong>. This small piece of technical debt might come back in the future to claim its price.</p>
+
+<p><strong>Measure twice and cut once</strong> (but remember to do that from time to time). Hierarchy Viewer is a convenient way to understand if your hierarchy is too complex and to see at glance what&rsquo;s costing too much:</p>
+
+<p><img class="center" src="/images/hierarchy.png" width="700"></p>
+
+<p><a href="https://github.com/lucasr/probe">Probe</a> by Lucas Rocha is also an effective tool to check if your views are getting measured too many times.</p>
+
+<p>After that, if you realize that your view groups suffer from performance issues, the most efficient way to optimize is to write a custom viewgroup. It might look scary at first, but it&rsquo;s just a matter of measuring and placing boxes <strong>knowing exactly where you want to place them and how their container looks like</strong>. This will flat your hierarchy and make it a lot more efficient.</p>
+
+<p>I don&rsquo;t want to write (yet another) tutorial on building custom viewgroups here since it will double the lenght of this post, but some good starting points are:</p>
+
+<ul>
+<li><a href="https://newcircle.com/s/post/1663/tutorial_enhancing_android_ui_with_custom_views_dave_smith_video">Dave Smith&rsquo;s post on custom views</a></li>
+<li><a href="https://sriramramani.wordpress.com/2015/05/06/custom-viewgroups/">Sriram Ramani&rsquo;s post on custom viewgroups</a></li>
+<li><a href="https://www.youtube.com/watch?v=NYtB6mlu7vA">This talk from google io 2013</a></li>
+<li><a href="https://www.youtube.com/watch?v=-xAdDqwaWJk">Loving lean layouts from Droidcon SF</a></li>
+</ul>
+
+
+<h3>What&rsquo;s the take home lesson</h3>
+
+<p>RelativeLayout is an awesome piece of software. It makes it super easy to describe complex scenarios without needing to do nasty nested linear layouts.</p>
+
+<p><strong>However</strong> from today, before placing it inside a view I will start thinking not only about the two passes, but also to all the hard work this complex piece of software needs to do behind the scene in order to offer me the flexibility I am used to.</p>
+
+<p>The two measurement passes can be the biggest source of problems because of the risk of exponential explosion, but <strong>other than that there are a lot of computation and additional data structures involved</strong> in building (and maintain) those dependency lists, and a good amount of extra loops through the children needed to place them correctly.</p>
+
+<p>Thanks to Riccardo Ciovati and Fabio Collini for proofreading this post.</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Federico Paolinelli</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2016-04-20T06:34:46+02:00'><span class='date'><span class='date-month'>Apr</span> <span class='date-day'>20</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>6:34 am</span></time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/android/'>android</a>, <a class='category' href='/blog/categories/custom-views/'>custom views</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://fedepaol.github.io/blog/2016/04/20/happines-is-relative/" data-via="fedepaol" data-counturl="http://fedepaol.github.io/blog/2016/04/20/happines-is-relative/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2016/01/01/cached-rest-requests-with-rxjava/" title="Previous Post: Subscribe it while it's hot: cached rest requests with RxJava">&laquo; Subscribe it while it's hot: cached rest requests with RxJava</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>About Me</h1>
+  <p>Lead developer with electronic trading software by day, passionate about mobile. I spend a lot of my spare time writing software for android. Table Tennis player, snowboarder, dad. I also contribute to Firefox for Android.</p>
+  <a href="mailto:fedepaol@gmail.com" target="_top">fedepaol@gmail.com</a>
+</section>
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2016/04/20/happines-is-relative/">Happines Is (a) Relative (Layout)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/01/01/cached-rest-requests-with-rxjava/">Subscribe It While It's Hot: Cached Rest Requests With RxJava</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/09/13/testing-rxjava-observables-subscriptions/">Unit Testing RxJava Observables and Subscriptions</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/09/05/mocking-with-robolectric-and-dagger-2/">Mocking With Robolectric and Dagger 2</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/09/04/its-been-a-while/">It's Been a While</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/fedepaol">@fedepaol</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'fedepaol',
+            count: 0,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+<section class="googleplus">
+  <h1>
+    <a href="https://plus.google.com/+FedericoPaolinelli?rel=author">
+      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
+      Google+
+    </a>
+  </h1>
+</section>
+
+
+
+<section>
+	<h1>On Twitter:</h1>
+	<div>
+		<p><br /><a href="http://twitter.com/fedepaol" target="_blank">My Tweets, on Twitter.</a></p>
+		<a href="http://twitter.com/fedepaol" class="twitter-follow-button" data-show-count="">Follow @fedepaol</a>
+	</div>
+</section>
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2016 - Federico Paolinelli -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'fedepaolgithubio';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://fedepaol.github.io/blog/2016/04/20/happines-is-relative/';
+        var disqus_url = 'http://fedepaol.github.io/blog/2016/04/20/happines-is-relative/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

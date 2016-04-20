@@ -9,7 +9,8 @@
   <meta name="author" content="Federico Paolinelli">
 
   
-  <meta name="description" content="Disclaimer: In this post I am trying to cover a proper approach to a common problem. I am still in the process of wrapping my head around RxJava so &hellip;">
+  <meta name="description" content="Using relative layout is bad .. or at least they say so.
+The truth is, it is relatively easy to build complex layouts using RelativeLayouts, but this &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -77,6 +78,122 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2016/04/20/happines-is-relative/">Happines Is (a) Relative (Layout)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2016-04-20T06:34:46+02:00'><span class='date'><span class='date-month'>Apr</span> <span class='date-day'>20</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>6:34 am</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h4>Using relative layout is bad</h4>
+
+<p>.. or at least they say so.
+The truth is, it is <em>relatively</em> easy to build complex layouts using RelativeLayouts, but this ease of use comes with a cost: in order to provide that kind of flexibility, RelativeLayout does two measurement passes.</p>
+
+<p>There are a lot of talks and <a href="https://medium.com/google-developers/developing-for-android-iii-2efc140167fd#.wpqgdu3xs">posts</a> explaining that if you have nested relative layouts, you&rsquo;ll end up with many measurement passes that will consume your cpu and will contribute to miss the dreaded 16 ms threshold. The higher the RelativeLayouts are placed in your view hierarchy, the more will be the number of measurements.</p>
+
+<p><strong>It&rsquo;s easier than you think</strong>: let&rsquo;s pretend you have a RelativeLayout as the root of your activity view (because hey, it&rsquo;s what Android Studio sets as default from the BlankActivity template).</p>
+
+<p>Then you have a fragment, and for some reason you have a list you want to place aside a button and you need a RelativeLayout over there.</p>
+
+<p>Finally, you&rsquo;ll have to place an image and a text inside the list elements, isn&rsquo;t there an easier way than RelativeLayout? (Actually, <a href="http://antonioleiva.com/textview_power_drawables/">there is and it&rsquo;s much more efficient</a>)</p>
+
+<p><img class="center" src="/images/relative_hierarchy.png" width="300"></p>
+
+<p>What will happen here is that with this unharmful scenario the <code>onMeasure()</code> method of each children of the list <strong>will be called 8 times</strong> each frame.</p>
+
+<h3>But why does RelativeLayout need two passes?</h3>
+
+<p>Given that Android is an open source framework, I could satisfy my curiosity by digging into the source code. Here I will try to provide a high level explanation of my understanding on how it works, without going too much into the details.</p>
+
+<p>Let&rsquo;s pretend you want four children (A, B, C, D) for your layout, and the rules are the following:</p>
+
+<ul>
+<li>A is above C</li>
+<li>B is to right of A</li>
+<li>D is below B and its right margin is aligned to B</li>
+<li>C is to left of D and its top is aligned to D</li>
+</ul>
+
+
+<p><img class="center" src="/images/relative_sample.png" width="200"></p>
+
+<p>The concept behind RelativeLayout is fairly simple. <strong>In order to measure (and place) a certain child, you need to measure (and place) all the views that child depends on</strong> in term of relationship. For this reason, the first thing RelativeLayout does is to build a graph of dependencies between the children. Those dependencies determine the order in which the children are measured (i.e. first the views with no dependencies, then the views that depend only from the root, etc).</p>
+
+<p>This explains the need for two measurement passes: <strong>the order the views need to be measured horizontally can be different from the order the views need to be measured vertically</strong>. In my example, A does not have any <em>horizontal</em> dependency but <em>vertically</em> it depends on the size and the position of C.</p>
+
+<p>In the example, the sequence of measurement are:</p>
+
+<p>Horizontal dimension:
+A -> B -> D -> C</p>
+
+<p><img src="/images/relative_horizontal.png" width="800"></p>
+
+<p>Note that given the vertical size is not calculated yet, the views are temporarly assigned with the height of the parent view while measuring the horizontal sizes.</p>
+
+<p>Vertical dimension:
+B -> D -> C -> A</p>
+
+<p><img src="/images/relative_vertical.png" width="800"></p>
+
+<p>Other than these two passes, RelativeLayout can also loop its children up to three other times to finalize their placement (for example for those that are aligned to the bottom of the parent in case of wrap content).</p>
+
+<p>The position of the views is calculated during the measurement double pass. For this reason the <code>onLayout()</code> implementation is pretty trivial.</p>
+
+<p>Finally, the dependency lists are cached, but those cached elements are invalidated whenever a <code>requestLayout()</code> happens. This, together with the fact that <code>requestLayout()</code> goes up to the root and is called on all the children is another reason for not having deep view hierarchy especially with RelativeLayouts.</p>
+
+<h3>Optimizing RelativeLayout</h3>
+
+<p>First of all, remember that you don&rsquo;t always need to. If you are in the early stage of the development or under strict time constraints and you prefer the simplicity of use of <code>RelativeLayout</code> against performance then use it, <strong>just be aware of the implications</strong>. This small piece of technical debt might come back in the future to claim its price.</p>
+
+<p><strong>Measure twice and cut once</strong> (but remember to do that from time to time). Hierarchy Viewer is a convenient way to understand if your hierarchy is too complex and to see at glance what&rsquo;s costing too much:</p>
+
+<p><img class="center" src="/images/hierarchy.png" width="700"></p>
+
+<p><a href="https://github.com/lucasr/probe">Probe</a> by Lucas Rocha is also an effective tool to check if your views are getting measured too many times.</p>
+
+<p>After that, if you realize that your view groups suffer from performance issues, the most efficient way to optimize is to write a custom viewgroup. It might look scary at first, but it&rsquo;s just a matter of measuring and placing boxes <strong>knowing exactly where you want to place them and how their container looks like</strong>. This will flat your hierarchy and make it a lot more efficient.</p>
+
+<p>I don&rsquo;t want to write (yet another) tutorial on building custom viewgroups here since it will double the lenght of this post, but some good starting points are:</p>
+
+<ul>
+<li><a href="https://newcircle.com/s/post/1663/tutorial_enhancing_android_ui_with_custom_views_dave_smith_video">Dave Smith&rsquo;s post on custom views</a></li>
+<li><a href="https://sriramramani.wordpress.com/2015/05/06/custom-viewgroups/">Sriram Ramani&rsquo;s post on custom viewgroups</a></li>
+<li><a href="https://www.youtube.com/watch?v=NYtB6mlu7vA">This talk from google io 2013</a></li>
+<li><a href="https://www.youtube.com/watch?v=-xAdDqwaWJk">Loving lean layouts from Droidcon SF</a></li>
+</ul>
+
+
+<h3>What&rsquo;s the take home lesson</h3>
+
+<p>RelativeLayout is an awesome piece of software. It makes it super easy to describe complex scenarios without needing to do nasty nested linear layouts.</p>
+
+<p><strong>However</strong> from today, before placing it inside a view I will start thinking not only about the two passes, but also to all the hard work this complex piece of software needs to do behind the scene in order to offer me the flexibility I am used to.</p>
+
+<p>The two measurement passes can be the biggest source of problems because of the risk of exponential explosion, but <strong>other than that there are a lot of computation and additional data structures involved</strong> in building (and maintain) those dependency lists, and a good amount of extra loops through the children needed to place them correctly.</p>
+
+<p>Thanks to Riccardo Ciovati and Fabio Collini for proofreading this post.</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1683,49 +1800,6 @@ It&#39;s FF 23 release day, and I saw your name in the list on https://blog.mozi
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2013/03/06/postman-ringstwice-reloaded-android/">PostMan (RingsTwice) Reloaded - Android Rest and Oauth Make Easy(er)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2013-03-06'><span class='date'><span class='date-month'>Mar</span> <span class='date-day'>6</span><span class='date-suffix'>th</span>, <span class='date-year'>2013</span></span> <span class='time'>12:00 am</span></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><div class='post'>
-<h3><span style="font-size: large;"><br /></span></h3><h3><span style="font-size: large;">Android and Rest</span></h3><div><span style="font-size: large;"><br /></span></div><div><span style="font-size: large;"><br /></span></div>My <a href="https://github.com/fedepaol/PostmanLib--Rings-Twice--Android">PostManLib android library</a> had a quite troubled genesis. Some infos can be found in this <a href="/blog/2012/01/30/postmanlib-android-and-rest-web">old post</a>&nbsp;, but bear in mind that I only kept the skeleton of what I wrote at that time (which, by the way, was inspired by&nbsp;<a href="http://www.youtube.com/watch?v=xHXn3Kg2IQE">this</a>&nbsp;talk).<br /><br />The api was (to be kind) a bit clunky, and I recently chose to rewrite / finish it. Apart from its clunkyness, one thing was missing:<br /><br /><h3>OAuth Authentication</h3><div>OAuth authentication is quite common for android apps, since it is a widely supported authentication system. Looking for &#8220;inspiration&#8221; I came across&nbsp;<a href="https://github.com/fernandezpablo85/scribe-java">https://github.com/fernandezpablo85/scribe-java</a>&nbsp;which not only provides oauth out of the box, but already provides a good and well tested abstraction for http rest interactions. I then chose not to reinvent the wheel and to delegate oauth and http interaction entirely to scribe.</div><div><br /></div><h3>Why asynchronous rest calls in android are important:</h3><div><br /></div><div>In android, performing time consuming work in the ui thread may result in ANR errors, and obviously rest calls belong to this category. What postmanlib does is to decouple the requests and execute them inside intent services, providing a way to get notified of calls results.</div><h3></h3><h3>What postmanlib offers:</h3><div><br /></div><div><ul><li>OAuth login using a webview hosted inside a fragment dialog. Every interaction is performed asynchronously. Just call registerOAuthService<span style="color: #333333; font-family: Consolas, 'Liberation Mono', Courier, monospace; font-size: 12px; line-height: 19px;">&nbsp;</span>and the registration will happen</li><li>Asynchronous rest calls (oauth-ed or not) performed inside an intent service</li><li>Multiple api handling - token storage</li></ul><div><br /></div></div><div>Given that the interaction is performed inside an intent service, all the well known problems related to asynctasks are avoided.&nbsp;</div><div><br /></div><h3></h3><h3>What postmanlib does not offer:</h3><div><br /></div><div><ul><li>Storage: the data received in background can be stored in the user&#8217;s favorite storage. I strongly suggest to use a content provider, using my automatic <a href="blog/2012/11/11/android-content-providers-generator.html">content provider generator</a></li><li>Parsing: the plain text received must be interpreted. There is plenty of json / xml parsing library, just pick one</li></ul></div><div><br /></div><h2><span style="font-weight: normal;"><span style="font-size: x-large;"><br /></span></span></h2><h2><span style="font-weight: normal;"><span style="font-size: x-large;"><br /></span></span></h2><h2><span style="font-weight: normal;"><span style="font-size: x-large;">Library Architecture</span></span></h2><div><span style="font-weight: normal;"><br /></span></div><div><br /></div><div class="separator" style="clear: both; text-align: center;"><a href="https://raw.github.com/fedepaol/PostmanLib--Rings-Twice--Android/master/images/postman.png" imageanchor="1" style="margin-left: 1em; margin-right: 1em;"><img border="0" height="400" src="https://raw.github.com/fedepaol/PostmanLib--Rings-Twice--Android/master/images/postman.png" width="352" /></a></div><div class="separator" style="clear: both; text-align: center;"><br /></div><div class="separator" style="clear: both; text-align: center;"><br /></div><div class="separator" style="clear: both; text-align: left;">A singleton object collects the requests to perform the rest calls in background.&nbsp;</div><div class="separator" style="clear: both; text-align: left;">The requests are parcelable objects that are passed inside an intent to the intent services. Using the command pattern along with the strategy pattern to implement the interaction resulted in a much cleaner api (more details about the structure can be found in the <a href="https://github.com/fedepaol/PostmanLib--Rings-Twice--Android">git repository</a>).</div><div class="separator" style="clear: both; text-align: left;"><br /></div><div class="separator" style="clear: both; text-align: left;"><br /></div><div class="separator" style="clear: both; text-align: left;">All the client application has to do is to perform oauth requests is to create and register a oauthservice builder.&nbsp;</div><div class="separator" style="clear: both; text-align: left;">I had to wrap the original scribe oauth service builder because I had to store all the tokens in order to restore them whenever the singleton is garbage collected.</div><div class="separator" style="clear: both; text-align: left;"><br /></div><div class="separator" style="clear: both; text-align: left;">After performing the registration (which is done using a OAuthHelper class), a registered api can be used to sign any request sent. The only difference between oauth-ed and plain requests is that in the first case we specify a signer.</div><div class="separator" style="clear: both; text-align: left;"><br /></div><div class="separator" style="clear: both; text-align: left;"><br /></div><div class="separator" style="clear: both; text-align: left;"><br /></div><h2></h2><h2 id="yui_3_7_3_1_1362605099013_692" style="background-color: #dedede; color: #222222; font-family: 'Bree Serif'; font-size: 26px; font-weight: 400; line-height: 28px; margin: 1.5em 0px; text-transform: capitalize;">TL;DR</h2><div><br /></div><div class="p4" style="background-color: #dedede; color: #2b2b2b; font-family: 'Source Sans Pro'; font-size: 22px; font-weight: normal; line-height: 33px; margin-bottom: 1.5em;"><strong style="margin-bottom: 0px; margin-top: 0px;"></strong></div><div class="separator" style="clear: both; text-align: left;">I really like the way the library grew up (not just because I wrote it :-) ). Scribe performs an excellent job in abstracting oauth registration and http interaction, so I could focus on asynchronous interaction with it.</div><div class="separator" style="clear: both; text-align: left;">The registration process is more than trivial, and rest requests are strongly decoupled from the activities.</div><div class="separator" style="clear: both; text-align: left;">As told earlier, it can be found here:&nbsp;<a href="https://github.com/fedepaol/PostmanLib--Rings-Twice--Android">https://github.com/fedepaol/PostmanLib&#8211;Rings-Twice&#8211;Android</a></div><div class="separator" style="clear: both; text-align: left;"><br /></div><div class="separator" style="clear: both; text-align: left;">I think this library might be of some help to anybody who wants to interact with webservices and want to go beyond the too often badly used async tasks.</div><div class="separator" style="clear: both; text-align: left;">A real world sample (with no oauth, sorry) can be found in my <a href="https://github.com/fedepaol/AndAppennino">AndAppennino application</a>.&nbsp;</div><div class="separator" style="clear: both; text-align: left;"><br /></div><div class="separator" style="clear: both; text-align: left;"><br /></div><div class="separator" style="clear: both; text-align: left;"><br /></div><div><br /></div></div>
-<h2>Comments</h2>
-<div class='comments'>
-<div class='comment'>
-<div class='author'>Federico Paolinelli</div>
-<div class='content'>
-Grazie mille :-), cerco di darmi da fare come riesco, troppo buono a mettermi sullo stesso piano di Gabriele.. <br />Ho visto la pull request, appena ho un attimo ci faccio un giro e la mergio, adesso sono un po&#39; preso dall&#39;arrivo di una figlia :-)<br /><br />Grazie ancora per le (troppo) buone parole.</div>
-</div>
-<div class='comment'>
-<div class='author'>Alessandro Bellesia</div>
-<div class='content'>
-Ciao Federico! Innanzitutto ti faccio i miei complimenti per l&#39;ottimo progetto. Si tratta di una soluzione davvero molto completa e comoda perché già pronta out-of-the-box. <br /><br />Grazie a te ed a Gabriele Mariotti praticamente l&#39;Android Weekly è tutta italiana! Sono davvero molto contento. <br /><br />Giocando un po con la libreria mi sono accorto che la funzione isServiceEnabled nel ServerInteractionHelper non funziona nel modo corretto. I numero di Services infatti risulta sempre 4 a prescindere dai servizi effettivamente impostati nel manifest dell&#39;app.<br /><br />Mi sono permesso di fare una piccola pull request su GitHub con la mia proposta di correzione!<br /><br />Grazie mille ed ancora complimenti!<br /><br />Saluti,<br />Alessandro.<br /><br /><br /><br /></div>
-</div>
-</div>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/2">&larr; Older</a>
@@ -1746,6 +1820,10 @@ Ciao Federico! Innanzitutto ti faccio i miei complimenti per l&#39;ottimo proget
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2016/04/20/happines-is-relative/">Happines Is (a) Relative (Layout)</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2016/01/01/cached-rest-requests-with-rxjava/">Subscribe It While It's Hot: Cached Rest Requests With RxJava</a>
       </li>
     
@@ -1759,10 +1837,6 @@ Ciao Federico! Innanzitutto ti faccio i miei complimenti per l&#39;ottimo proget
     
       <li class="post">
         <a href="/blog/2015/09/04/its-been-a-while/">It's Been a While</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/09/01/dragging-with-viewdraghelper/">Dragging With ViewDragHelper</a>
       </li>
     
   </ul>

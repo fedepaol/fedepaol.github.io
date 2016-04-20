@@ -9,7 +9,7 @@
   <meta name="author" content="Federico Paolinelli">
 
   
-  <meta name="description" content="Apart from some rest, and reading some good books (like excellent Kent Beck&#8217;s Test Driven development by example, and &#8220;growing object- &hellip;">
+  <meta name="description" content="Pastimer is my 4th app. It&#8217;s a simple (but nice) Android Kitchen Timer based on barcode scanning.I learned some things during my journey of &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -77,6 +77,36 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2011/10/18/new-app-android-kitchen-timer/">A New App - Android Kitchen Timer</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2011-10-18'><span class='date'><span class='date-month'>Oct</span> <span class='date-day'>18</span><span class='date-suffix'>th</span>, <span class='date-year'>2011</span></span> <span class='time'>12:00 am</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><div class='post'>
+Pastimer is my 4th app. It&#8217;s a simple (but nice) Android Kitchen Timer based on barcode scanning.<br /><br />I learned some things during my journey of android development, but this time I wanted to focus on user interface and ease of use.<br /><br />As always, it starts as a simple idea, the you start putting some code in it, it&#8217;s &#8220;almost&#8221; working, and the difference between almost working and finished, is something like two months or more. I let it alone for more than two months.<br /><br />However, now it almost ready to be released, and it will very soon.<br /><br />The idea behind it is very simple.<br /><br />You point the barcode, the app looks in its internal database, and if it does know the time associated, starts a timer. If it does not recognize the barcode, it prompts the user asking to put the data.<br /><br />Sounds easy, doesn&#8217;t it? You can give a look at a couple of screenshots here&nbsp;<a href="https://sites.google.com/site/pastimerand/">Android Kitchen Timer</a></div>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -364,36 +394,6 @@ its hard to follow your code. why declare an interface. is that of type interfac
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2010/11/18/my-sqllite-helper-builder/">My Sqllite Helper Builder</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2010-11-18'><span class='date'><span class='date-month'>Nov</span> <span class='date-day'>18</span><span class='date-suffix'>th</span>, <span class='date-year'>2010</span></span> <span class='time'>12:00 am</span></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><div class='post'>
-EDIT 11/11/2012: as described in <a href="/blog/2012/11/11/android-content-providers-generator">this new blog post</a>, I modified the script to generate a content provider as well<br /><br />This is my first post about something related to android.<br />Just to break the ice, I would like to introduce a simple helper script I developed this summer.<br /><br />Android ships with a very nice local storage, which is sqllite. It&#8217;s said almost everywhere that, in order to make your life easier, you should develop an helper class.<br />It will take care of open / close the sqllite db, of the version control and of any other kind of interaction you may have with it.<br /><br />A nice example can be found in the official android documentation <a href="http://developer.android.com/guide/topics/data/data-storage.html#db">here</a><br />or <a href="http://developer.android.com/resources/samples/NotePad/index.html">here</a>.<br />Reto Meier in his excellent &#8220;Professional Android Development&#8221; explains the same, and I am pretty sure its the same for other manuals.<br /><br />Well, building a sqllite helper is BOOORING. You always have to do the same things, write the same functions of every table you want to store in it.<br />And here is where my script comes in your help.<br />You just provide it a configuration file with the description of the tables you want to store in it, and it will give you the dbhelper java file.<br /><br /><br />A configuration file looks like this:<br /><br /><pre style="background-color: #eeeeee; border: 1px dashed rgb(153, 153, 153); color: black; font-family: Andale Mono,Lucida Console,Monaco,fixed,monospace; font-size: 12px; line-height: 14px; overflow: auto; padding: 5px; width: 100%;"><code><br />CLASS Employee<br />String Name<br />Date Birthday<br />Double weigth<br />ENDCLASS<br /><br />CLASS Call<br />String Number<br />Date Time<br />ENDCLASS</code></pre><br /><br />The available types are<br />String, Double, Long, Integer and Date<br /><br />The available script commands are:<br /><br /><pre style="background-color: #eeeeee; border: 1px dashed rgb(153, 153, 153); color: black; font-family: Andale Mono,Lucida Console,Monaco,fixed,monospace; font-size: 12px; line-height: 14px; overflow: auto; padding: 5px; width: 100%;"><code> -h, --help            show this help message and exit<br />-i INFILE, --infile=INFILE<br />                     file that contains classes definition<br />-n NAME, --name=NAME  name of the dbhelper class<br />-p PACKAGE, --package=PACKAGE<br />                     name of the package</code></pre><br /><br /><br /><br />So, instead of spending an entire afternoon writing the same add / remove / getAll methods, all you have to do is to compile the configuration file, launch something like<br /><br /><pre style="background-color: #eeeeee; border: 1px dashed rgb(153, 153, 153); color: black; font-family: Andale Mono,Lucida Console,Monaco,fixed,monospace; font-size: 12px; line-height: 14px; overflow: auto; padding: 5px; width: 100%;"><code>python sql_lite_helper.py -i sample.txt -n MyDbAdapter -p com.my.package</code></pre><br /><br />and you&#8217;ll have your brand new sqllite helper class. Of course you can extend it, for example if you want to have some insert / get methods that accept and return java classes instead of fields, but in any case it will save you a lot of time.<br /><br />An example of the output file can be found <a href="http://dl.dropbox.com/u/3092639/Archive.zip">here</a>.<br /><br />The script is available on github <a href="https://github.com/fedepaol/Android-sql-lite-helper">here</a>.<br /><br />I really hope it can help somebody. If you have any issues / requests, feel free to contact me at fedepaol[AT]gmail[DOT]com .</div>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/4">&larr; Older</a>
@@ -416,6 +416,10 @@ EDIT 11/11/2012: as described in <a href="/blog/2012/11/11/android-content-provi
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2016/04/20/happines-is-relative/">Happines Is (a) Relative (Layout)</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2016/01/01/cached-rest-requests-with-rxjava/">Subscribe It While It's Hot: Cached Rest Requests With RxJava</a>
       </li>
     
@@ -429,10 +433,6 @@ EDIT 11/11/2012: as described in <a href="/blog/2012/11/11/android-content-provi
     
       <li class="post">
         <a href="/blog/2015/09/04/its-been-a-while/">It's Been a While</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/09/01/dragging-with-viewdraghelper/">Dragging With ViewDragHelper</a>
       </li>
     
   </ul>
