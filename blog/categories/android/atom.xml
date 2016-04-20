@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Android | My little Android warehouse]]></title>
   <link href="http://fedepaol.github.io/blog/categories/android/atom.xml" rel="self"/>
   <link href="http://fedepaol.github.io/"/>
-  <updated>2014-09-01T23:13:00+02:00</updated>
+  <updated>2016-01-07T12:10:41+01:00</updated>
   <id>http://fedepaol.github.io/</id>
   <author>
     <name><![CDATA[Federico Paolinelli]]></name>
@@ -14,13 +14,490 @@
 
   
   <entry>
+    <title type="html"><![CDATA[Subscribe It While It's Hot: Cached Rest Requests With RxJava]]></title>
+    <link href="http://fedepaol.github.io/blog/2016/01/01/cached-rest-requests-with-rxjava/"/>
+    <updated>2016-01-01T17:54:21+01:00</updated>
+    <id>http://fedepaol.github.io/blog/2016/01/01/cached-rest-requests-with-rxjava</id>
+    <content type="html"><![CDATA[<h4>Disclaimer:</h4>
+
+<p>In this post I am trying to cover a proper approach to a common problem. I am still in the process of wrapping my head around RxJava so what I write here might not be the best way to solve the problem.</p>
+
+<h1>Cached requests with RxJava</h1>
+
+<p>Lately I&rsquo;ve been trying to develop a rest backed app using RxJava. I must admit that once you get in the proper mental mood, RxJava almost feels like cheating. Everything looks cleaner, multiple requests can be composed and manipulated easily, the StrictMode gets satisfied by observing on the ui thread and subscribing on a different thread, and all the nice things that can be read about how cool is RxJava with Android.
+What I could not find easily, was how to store the result of a request and be sure that even in case of no network, a cached content was available for the user, while still handling everything in a reactive fashion.</p>
+
+<h3>Caching vs non caching</h3>
+
+<p>Going straight from rest result to the UI is appropriate in many cases, for example when displaying the result of a search whose arguments are not predictable (think about Ebay, or Amazon where the user is looking for something different every time).</p>
+
+<p><em>However</em>, there are cases when the results fetched earlier are still significant and displaying them can improve the user experience significantly, compared to a spinning wheel or a white page. Those cases include your twitter feed, a local weather forecast that was fetched just 5 minutes before, or the list of the github repos of a given user.</p>
+
+<p>Here you can see the difference between a non cached version and a cached version of the same activity:</p>
+
+<p><img src="/images/uncached.gif" width="300">      <img src="/images/cached.gif" width="300"></p>
+
+<p>For this reason I tried to figure out what could have been a clean way to cache the results of a request while keeping the flow in a reactive fashion.</p>
+
+<h3>The storage as the unique source of the truth</h3>
+
+<h4>All reactive</h4>
+
+<p>If we want to cache the data while keeping everything inside the same subscription, things get a bit messy. The result of the request is thrown at the UI and the response is also stored in the storage. The UI subscribes from the storage too but checks which result came first and if the data is too old.</p>
+
+<p><img src="/images/messy.jpg" width="500"></p>
+
+<h4>Cached</h4>
+
+<p>In this <em>hybrid</em> variant, the UI subscribes only to the storage, and a facade class wraps the storage and the subscription to the retrofit client that feeds the storage. Once the storage is filled with new data, the UI thread is automatically notified of every change.
+<img src="/images/clean.jpg" width="500"></p>
+
+<p>In this scenario the observable acts as a <em>hot</em> observable, the first time it gets subscribed it emits the content of the storage, and any other change it might happen to it.</p>
+
+<h3>Talk is cheap, show me the code</h3>
+
+<p>A working example of the following code can be found <a href="https://github.com/fedepaol/RxRestSample">in my github repo here</a>
+To write this sample, I started from the abused Github apis which seems to power the 99% of the rest related examples. Sorry about that.</p>
+
+<p>First there is the storage. I wrapped a SQLite helper (which I happily generated with <a href="https://github.com/fedepaol/Android-sql-lite-helper">my handy script</a>) with a class that contains a <a href="http://reactivex.io/RxJava/javadoc/rx/subjects/PublishSubject.html">PublishSubject</a> which can be subscribed to and which we will notify when the insertion methods are called:</p>
+
+<pre><code class="Java">public class ObservableRepoDb {
+    private PublishSubject&lt;List&lt;Repo&gt;&gt; mSubject = PublishSubject.create();
+    private RepoDbHelper mDbHelper;
+
+    private List&lt;Repo&gt; getAllReposFromDb() {
+        List&lt;Repo&gt; repos = new ArrayList&lt;&gt;();
+        // .. performs the query and fills the result
+        return repos;
+    }
+
+    public Observable&lt;List&lt;Repo&gt;&gt; getObservable() {
+        Observable&lt;List&lt;Repo&gt;&gt; firstTimeObservable =
+                Observable.fromCallable(this::getAllReposFromDb);
+
+        return firstTimeObservable.concatWith(mSubject);
+    }
+
+    public void insertRepo(Repo r) {
+        // ...
+        // performs the insertion on the SQLite helper
+        // ...
+        List&lt;Repo&gt; result = getAllReposFromDb();
+        mSubject.onNext(result);
+    }
+}
+</code></pre>
+
+<p>What we have here is the first piece of the puzzle: a storage that can be subscribed to. The concatenation is needed because we want it to emit the content of the storage as soon as it gets subscribed.</p>
+
+<p>Then there is the facade class, where we get the observable from and to which we start a new update:</p>
+
+<pre><code class="Java">public class ObservableGithubRepos {
+    ObservableRepoDb mDatabase;
+    private BehaviorSubject&lt;String&gt; mRestSubject;
+
+    // ...
+    public Observable&lt;List&lt;Repo&gt;&gt; getDbObservable() {
+        return mDatabase.getObservable();
+    }
+
+    public void updateRepo(String userName) {
+        Observable&lt;List&lt;Repo&gt;&gt; observable = mClient.getRepos(userName);
+        observable.subscribeOn(Schedulers.io())
+                  .observeOn(Schedulers.io())
+                  .subscribe(l -&gt; mDatabase.insertRepoList(l));
+    }
+} 
+</code></pre>
+
+<p>Note that everything happens far from the UI thread. This is because we are going to subscribe to the database observable as the unique source of truth.</p>
+
+<p>Now, given that the observable is now <em>hot</em>, we can&rsquo;t listen for its <em>onComplete</em> in order to stop any progress indicators we might put in place.
+What we need is another subject that can be bound to the update request, so here it is the new facade class:</p>
+
+<pre><code class="Java ">public class ObservableGithubRepos {
+    // ...
+
+    public Observable&lt;List&lt;Repo&gt;&gt; getDbObservable() {
+        return mDatabase.getObservable();
+    }
+
+    public Observable&lt;String&gt; updateRepo(String userName) {
+        BehaviorSubject&lt;String&gt; requestSubject = BehaviorSubject.create();
+
+        Observable&lt;List&lt;Repo&gt;&gt; observable = mClient.getRepos(userName);
+        observable.subscribeOn(Schedulers.io())
+                  .observeOn(Schedulers.io())
+                  .subscribe(l -&gt; {
+                                    mDatabase.insertRepoList(l);
+                                    requestSubject.onNext(userName);},
+                             e -&gt; requestSubject.onError(e),
+                             () -&gt; requestSubject.onCompleted());
+        return requestSubject;
+    }
+}
+</code></pre>
+
+<p>In the UI client (activity or fragment) we&rsquo;ll need to subscribe to the storage in order to get the data and to the request observable in order to stop the progress indicators. An observable that emits the state of the pending request is returned every time an update is being requested.</p>
+
+<pre><code class="Java">    mObservable = mRepo.getDbObservable();
+    mProgressObservable = mRepo.getProgressObservable()
+
+    mObservable.subscribeOn(Schedulers.io())
+                   .observeOn(AndroidSchedulers.mainThread()).subscribe(l -&gt; {
+                    mAdapter.updateData(l);
+                });
+
+    Observable&lt;List&lt;Repo&gt;&gt; progressObservable = mRepo.updateRepo("fedepaol");
+    progressObservable.subscribeOn(Schedulers.io())
+                           .observeOn(AndroidSchedulers.mainThread())
+                           .subscribe(s -&gt; {},
+                                      e -&gt; { Log.d("RX", "There has been an error");
+                                            mSwipeLayout.setRefreshing(false);
+                                      },
+                                      () -&gt; mSwipeLayout.setRefreshing(false));
+</code></pre>
+
+<p>Please remember that the DbObservable is a hot one, so every time a call to updateRepo happens, the db will be fed with the result of the query and the ui will get subsequently notified.</p>
+
+<h3>SqlBrite</h3>
+
+<p>If all this wrapping seems too laboruous, the prolific guys from Square wrote <a href="https://github.com/square/sqlbrite">SqlBrite</a> which is a super generic database wrapper that was written for this same purpouse. I am sure it&rsquo;s better and more battle field tested than the poor man&rsquo;s version we can write by ourselves.</p>
+
+<h2>Conclusion</h2>
+
+<p>I don&rsquo;t know if this is an healthy way to use RxJava. Maybe I ended up with this scenario only because I am not 100% confident with RxJava and I am putting some non rx-ness in the middle to better control it.
+Here we need to choose where to place the operators, since we can modify the flow that feeds the storage from the http client, or the flow that comes out of the storage itself.</p>
+
+<p>In any case, having an unique source of truth seems more clear, and I feel that in this way it would be a lot easier to do stuff like prefetching, scheduling updates so the user is presented with fresh data (remember having your <a href="https://www.youtube.com/watch?v=GcNNx2zdXN4">app work like magic?</a>), checking if an update is worth to be done at all (such as displaying a 5 minutes old weather forecast) and stuff like that.</p>
+
+<p>Thanks to Fabio Collini for spotting a lot of mistakes in the first draft of this posts, and to Riccardo Ciovati for proof reading it.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Unit Testing RxJava Observables and Subscriptions]]></title>
+    <link href="http://fedepaol.github.io/blog/2015/09/13/testing-rxjava-observables-subscriptions/"/>
+    <updated>2015-09-13T21:26:15+02:00</updated>
+    <id>http://fedepaol.github.io/blog/2015/09/13/testing-rxjava-observables-subscriptions</id>
+    <content type="html"><![CDATA[<h2>Testing RxJava</h2>
+
+<p>While catching up with the latest Android novelties I could not ignore RxJava, which seems to grow in popularity between android developers.</p>
+
+<p>If you just heard about it, and you want to get your feet wet, I really recommend Dan Lew&rsquo;s <a href="http://blog.danlew.net/2014/09/15/grokking-rxjava-part-1/">Grokking with RxJava</a> series as a starting point.</p>
+
+<p><strong>RxJava is asynchronous by nature</strong>, so unit testing it might seem a daunting at first, especially if you use that asynchronous interaction to test stuff. Luckily, RxJava (and RxAndroid) come with a couple of tools that will make our life a lot easier.</p>
+
+<h2>What to (unit) test</h2>
+
+<p>There are at least a couple of things you&rsquo;ll want to test:</p>
+
+<ol>
+<li>You will want to test the <strong>observables</strong>, meaning not only the observables you built, but also the resulting composition of the various operators you may want to apply to them.</li>
+<li>Given a certain observable (or its mock), you will want to test <strong>how the rest of your application behaves while triggered by the subscription</strong>.</li>
+</ol>
+
+
+<h2>Testing the observables</h2>
+
+<p>Despite the fact that a subscription is asynchronous, there are (at least) a couple of ways to make the stream of your observable synchronous.</p>
+
+<p>The first way is by using
+<code>Java
+ResultToCheck res = myObservable.toBlocking().first();
+</code></p>
+
+<p>This works because <a href="http://reactivex.io/RxJava/javadoc/rx/Observable.html#toBlocking%28%29">toBlocking</a> converts the observable to a blocking one, while <a href="http://reactivex.io/documentation/operators/first.html">first</a> returns the first emitted element.
+The calling code will wait synchronously until the observer calls onCompleted().</p>
+
+<p><strong>The official way to test an observable</strong> is by using a <a href="http://reactivex.io/RxJava/javadoc/rx/observers/TestSubscriber.html">TestSubscriber</a>, an helper subscriber provided directly by the RxJava library.
+As with toBlocking, a test subscription is synchronous.
+Here you can find an example:</p>
+
+<pre><code class="Java">Observable&lt;RubberChicken&gt; obs = obsFactory.getObservable();
+TestSubscriber&lt;RubberChicken&gt; testSubscriber = new TestSubscriber&lt;&gt;();
+obs.subscribe(testSubscriber);
+
+testSubscriber.assertNoErrors();
+List&lt;RubberChicken&gt; chickens = testSubscriber.getOnNextEvents();
+// Assert your chickens integrity here
+</code></pre>
+
+<p><code>TestSubscriber</code> comes with a bunch of helper methods for testing, like specific assertions and other stuff. On top of that, its <code>getOnNextEvents()</code> method is blocking and  will return all the emitted items as elements of a list.
+This is a neat way to test not only your observers, but also to check if the compositions you put in place are working as expected. That makes testing observables super easy.</p>
+
+<h2>Testing the subscription</h2>
+
+<p>Once your observables are in place, you will likely to be observing them on some thread, and subscribing them on some other thread. This will make it harder for us to test how our activity (or fragment) reacts to a triggered subscription.</p>
+
+<p>RxJava (and RxAndroid) provide a way to override the schedulers exposed when <code>Schedulers.io()</code> or <code>AndroidSchedulers.mainThread()</code> are called. By replacing them with <code>Schedulers.immediate()</code>, your code will run immediately and you&rsquo;ll be able to see its results.</p>
+
+<p>The solution is a bit hacky, since we need to call <code>reset()</code> method before overriding RxJava&rsquo;s schedulers, which is package protected. I <em>took inspiration</em> from Alexis Mas&#8217; <a href="http://alexismas.com/blog/2015/05/20/unit-testing-rxjava/">blogpost</a> extending RxJavaPlugins class (there no need for that with RxAndroid):
+&#8220;`Java
+package rx.plugins;</p>
+
+<p>public class RxJavaTestPlugins extends RxJavaPlugins {
+    RxJavaTestPlugins() {
+        super();
+    }</p>
+
+<pre><code>public static void resetPlugins(){
+    getInstance().reset();
+}
+</code></pre>
+
+<p>}</p>
+
+<pre><code>
+Registering a scheduler hook that provides a custom implemetation (Schedulers.immediate()) will end up in overriding the schedulers we are using.
+
+As pointed out by [Patrik Åkerfeldt](https://twitter.com/pakerfeldt) in the comments, since the hooks are asked to provide a scheduler implementation during the initialization of the Schedulers class, we have only one chance to override the default schedulers. For this reason, there is no point in setting them up in the `setup` phases of all our tests.
+
+The best place to override them once seems to be the `TestRunner`'s constructor. 
+
+The custom `TestRunner` will look like this:
+</code></pre>
+
+<p>public class RxJavaTestRunner extends RobolectricGradleTestRunner {
+    public RxJavaTestRunner(Class&lt;?> testClass) throws InitializationError {
+        super(testClass);</p>
+
+<pre><code>    RxJavaTestPlugins.resetPlugins();
+    RxJavaPlugins.getInstance().registerSchedulersHook(new RxJavaSchedulersHook() {
+        @Override
+        public Scheduler getIOScheduler() {
+            return Schedulers.immediate();
+        }
+    });
+}
+</code></pre>
+
+<p>}
+&#8220;`</p>
+
+<p>And this is how the <code>setup()</code> and <code>teardown()</code> methods will look like (here I am using robolectric but it makes no difference with AndroidTests):</p>
+
+<pre><code class="Java">@RunWith(RxJavaTestRunner.class)
+@Config(constants = BuildConfig.class,
+application = TestRobolectricApplication.class)
+public class SubscriberTest {
+    @Before
+    public void setup() {
+        RxAndroidPlugins.getInstance().registerSchedulersHook(new RxAndroidSchedulersHook() {
+            @Override
+            public Scheduler getMainThreadScheduler() {
+                return Schedulers.immediate();
+            }
+        });
+    }
+
+    @After
+    public void tearDown() {
+        RxAndroidPlugins.getInstance().reset();
+    }}
+
+    /* Your tests here */
+}
+</code></pre>
+
+<p>As I already mentioned, you can inject the custom schedulers only once per test session. On the other hand, RxAndroidPlugins come with a reset method that will allow us to hook in different schedulers in different threads.</p>
+
+<p>This, together with a non blocking observable (for instance by replacing your long taking observable with a mocked <code>Observable.just()</code>) will make our test synchronous.</p>
+
+<p>In order to inject a mocked observable, we can override the Application object used by Robolectric,  as described in my <a href="http://fedepaol.github.io/blog/2015/09/05/mocking-with-robolectric-and-dagger-2/">previous post here</a> .</p>
+
+<h2>Bonus point: debugging</h2>
+
+<p>If the unit tests are not enough, and you want to check what is happening inside the chaining / transformation of the stream, you can set an <code>ObservableExecutionHook</code> that will be triggered when observables are being called:</p>
+
+<pre><code class="Java">   private void enableRxTrack() {
+        RxJavaPlugins.getInstance().registerObservableExecutionHook(new DebugHook(new DebugNotificationListener() {
+            final String TAG = "RXDEBUG";
+            public Object onNext(DebugNotification n) {
+                Log.v(TAG, "onNext on " + n);
+                return super.onNext(n);
+            }
+
+
+            public Object start(DebugNotification n) {
+                Log.v(TAG,"start on "+n);
+                return super.start(n);
+            }
+
+
+            public void complete(Object context) {
+                super.complete(context);
+                Log.v(TAG,"oncomplete n "+context);
+            }
+
+            public void error(Object context, Throwable e) {
+                super.error(context, e);
+                Log.e(TAG,"error on "+context);
+            }
+        }));
+    }
+</code></pre>
+
+<h1>TL;DR:</h1>
+
+<ul>
+<li>Use TestSubscriber when testing how an observable (or a composition of observables) behaves</li>
+<li>Mock your observable and override the default schedulers to test how the subscribing class works</li>
+<li>Enable the tracking of your observables by registering an observable execution hook</li>
+</ul>
+
+
+<p>A working example (rubber chickens included) can be found on my <a href="https://github.com/fedepaol/TestingRxJava">github repo</a>.</p>
+
+<h3>References</h3>
+
+<ul>
+<li><a href="https://medium.com/ribot-labs/unit-testing-rxjava-6e9540d4a329">Unit testing rxjava (observables)</a> by Iván Carballo</li>
+<li><a href="http://alexismas.com/blog/2015/05/20/unit-testing-rxjava/">Unit testing rxjava (subscription)</a> by Alexis Mas</li>
+<li><a href="http://fragmentedpodcast.com/episodes/3/">This</a> and <a href="http://fragmentedpodcast.com/episodes/4/">this</a> episodes of <a href="http://fragmentedpodcast.com">Fragmented Podcast</a> where Dan Lew gave some insights about RxJava, where I heard about the scheduler overriding trick</li>
+<li>Patrik Åkerfeldt&rsquo;s example that demonstrates how the scheduler injection works only before Scheduler class initialization</li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Mocking With Robolectric and Dagger 2]]></title>
+    <link href="http://fedepaol.github.io/blog/2015/09/05/mocking-with-robolectric-and-dagger-2/"/>
+    <updated>2015-09-05T08:22:47+02:00</updated>
+    <id>http://fedepaol.github.io/blog/2015/09/05/mocking-with-robolectric-and-dagger-2</id>
+    <content type="html"><![CDATA[<h2>Why robolectric</h2>
+
+<p>I&rsquo;ve been a fan of robolectric since the old days, since <a href="http://fedepaol.github.io/blog/2012/07/23/intellij-robolectric-and-android/">when Android Studio was not an option and few developers embraced IntelliJ</a>. I left it a bit behind after the introduction of Android Studio, since its support was far from optimal.</p>
+
+<p>Things have changed, and after listening Corey Latislaw advocating its usage during <a href="http://fragmentedpodcast.com/episodes/13/">this fragmented podcast episode</a> I wanted to give it a spin. Even if there is a bit of debate over its usage, mainly because tests are performed against mocked objects instead of the real framework code, it is the fastest lane to your tdd cycle because tests are run on the local jvm instead of being packed in an apk, deployed on a device and run over there.</p>
+
+<h2>Dependency Injection</h2>
+
+<p>One really cool thing about robolectric 3.0 is the fact that you can override the Application object declared in your manifest with a custom one (which can inherit from your application&rsquo;s one).</p>
+
+<p>If you are using dagger (or dagger 2) and you are using the application as the source of dependency injection for your classes, this allow to easily replace your injected objects with mocks. You can even choose which mocks inject in the setup phase of your tests.</p>
+
+<h2>Let&rsquo;s see an example:</h2>
+
+<p>Let&rsquo;s say you have your application class that exposes all the injected objects in a Dagger 2 fashion, and that you are using it to inject classes in your activities:</p>
+
+<pre><code class="java">    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        // stuff 
+        ((MyApplication) getApplication()).getComponent().inject(this);
+    }
+</code></pre>
+
+<p>Now, if we can drive the component injected within our tests, the rest of the app would use them and (hopefully) behave in a way we expect, depending on our mocks instead of the real objects.</p>
+
+<p>The dependencies are provided by a module:</p>
+
+<pre><code class="java">@Module
+public class ApplicationModule {
+    // stuff
+
+    @Provides
+    @Singleton
+    GitHubClient provideClient() {
+        return new GitHubClient(mApp.getApplicationContext());
+    }
+    // .. Provides other stuff
+}
+</code></pre>
+
+<p><code>GitHubClient</code> is a Retrofit (2) powered client that helps to retrieve all the repos for a given user.</p>
+
+<p>By using a test only application, we can provide a module from our tests.</p>
+
+<p>Let&rsquo;s see ApplicationModule&rsquo;s mocked alter ego. Note that we can override only the dependencies that we want to mock:</p>
+
+<pre><code class="java">public class MockApplicationModule extends ApplicationModule {
+    List&lt;Repo&gt; result;
+    // stuff
+
+    @Override
+    GitHubClient provideClient() {
+        GitHubClient client = mock(GitHubClient.class);
+        // mock behaviour
+        return client;
+    }
+
+    public void setResult(List&lt;Repo&gt; result) {
+        this.result = result;
+    }
+}
+</code></pre>
+
+<p>Now that everything is in place, we can use the mocked objects in our tests:</p>
+
+<pre><code class="java">@RunWith(RobolectricGradleTestRunner.class)
+@Config(constants = BuildConfig.class,
+        application = TestApplication.class)
+public class SampleTest {
+    @Before
+    public void setup() {
+        TestApplication app = (TestApplication) RuntimeEnvironment.application;
+        // Setting up the mock module
+        MockApplicationModule module = new MockApplicationModule(app);
+        module.setResult(mockedResult);
+        app.setApplicationModule(module);
+    }
+}
+</code></pre>
+
+<p>From now on, the our tested activities will be injected with our mocked github client and we will be able to test their behaviour.</p>
+
+<h2>Quirks</h2>
+
+<p>Since the Test Application object is created before running the tests, a default application module must be provided, otherwise you&rsquo;ll get a dreaded NPE while running your tests.</p>
+
+<pre><code class="java">public class TestApplication extends MyApplication {
+    @Override
+    ApplicationModule getApplicationModule() {
+        if (mApplicationModule == null) {
+            return super.getApplicationModule();
+        }
+        return mApplicationModule;
+    }}
+</code></pre>
+
+<p>moreover, the dependency graph is generally built inside the Application&rsquo;s onCreate method. Given that we want to recreate it with our mocked module, I had to add a method for that:</p>
+
+<pre><code class="java">public class MyApplication extends Application {
+    // Stuff 
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        initComponent();
+    }
+
+    void initComponent() {
+        mComponent = DaggerRoboSampleComponent.builder()
+                .applicationModule(getApplicationModule())
+                .build();
+    }
+}
+</code></pre>
+
+<h2>Conclusion</h2>
+
+<p>The fact that robolectric allows you to use a custom test application object (even a different one for different tests) together with dagger is an easy way to inject mock object without having to rely on ugly setters.</p>
+
+<p>Robolectric is a fast and effective way to speed up your tdd process. All the time spent to set the tests and the mocks app is well repaid in code coverage and writing and debugging speed afterwards.</p>
+
+<h2>See it in action (and have something to copy from)</h2>
+
+<p><a href="https://github.com/fedepaol/RobolectricDependenyInjection">Here on github</a> I put a working example that demonstrates how to inject a mocked module using robolectring.</p>
+]]></content>
+  </entry>
+  
+  <entry>
     <title type="html"><![CDATA[Dragging With ViewDragHelper]]></title>
     <link href="http://fedepaol.github.io/blog/2014/09/01/dragging-with-viewdraghelper/"/>
     <updated>2014-09-01T20:48:20+02:00</updated>
     <id>http://fedepaol.github.io/blog/2014/09/01/dragging-with-viewdraghelper</id>
-    <content type="html"><![CDATA[<p><a href="https://developer.android.com/reference/android/support/v4/widget/ViewDragHelper.html">ViewDragHelper</a> is an helper class available on Support Library v4, that makes it easier to drag child views of a ViewGroup. It is used in the <a href="https://developer.android.com/design/patterns/navigation-drawer.html">NavigationDrawer</a> too.</p>
-
-<p>While working on my <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=909434">last side gig</a>, a patch to Firefox for Android to allow the urlbar to be dragged in order to show content hidden behind the main view, I had to deal with ViewDragHelper and understand how it works.</p>
+    <content type="html"><![CDATA[<p>While working on my <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=909434">last side gig</a>, a patch to Firefox for Android to allow the urlbar to be dragged in order to show content hidden behind the main view, I had to deal with ViewDragHelper and understand how it works.</p>
 
 <p>The final result (please note that the patch is still under review) is something like this:</p>
 
@@ -402,56 +879,6 @@ Thank you for the very useful info.<br /><br />What could you tell in regards to
 Hello, Federico. Could you explain how can we handle a case with endless list of content? As i understand we should download all content and find changes to persist. In general the main question is: How to maintain consistency beetween remote and local database? Thank you.</div>
 </div>
 </div>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Contributing to Firefox for Android]]></title>
-    <link href="http://fedepaol.github.io/blog/2013/07/29/contributing-to-firefox-for-android/"/>
-    <updated>2013-07-29T00:00:00+02:00</updated>
-    <id>http://fedepaol.github.io/blog/2013/07/29/contributing-to-firefox-for-android</id>
-    <content type="html"><![CDATA[<div class='post'>
-<br />In the past two / three years I have been (mostly) developing Android code, <a href="http://fedepaol.github.io/blog/2010/11/10/something-more-about-me">even before it was cool</a>(tm), as a way to do something different from what I do during my day time job.<br /><br />I wrote some <a href="https://play.google.com/store/search?q=federico+paolinelli&amp;c=apps">apps</a>, a couple of <a href="https://github.com/fedepaol">libraries</a>, and some 80% finished projects I really hope I will finish some day.<br /><br />Recently I thought that joining some big android related open source project could have been interesting, and I went for them.<br /><br /><br />That&#8217;s <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=731491">when</a> I found <a href="https://play.google.com/store/apps/details?id=org.mozilla.firefox">Firefox for Android</a> (code name fennec). There are several reasons why I choose it. It&#8217;s one of the most complex / active open source projects, I <a href="http://www.joshmatthews.net/fosdem/">spotted these slides</a> on my g+ stream and I decided to give it a spin.<br /><br /><a href="http://www.flickr.com/photos/tambako/5964400251/"><img src="http://farm7.staticflickr.com/6126/5964400251_8dd37a206a.jpg" /></a><br /><br /><span style="font-size: xx-small;">(Some rights reserved, cc licenze by &#8220;Tambako the Jaguar&#8221;)</span><br /><br /><br /> I must admit that I was not using fennec as my primary browser on android.<br /><br />This is my first experience in a (quite) big open source software project, and now I spend on fennec all of the free time I devote to developing (and I really like it).<br /><br /> <br /><h3> What was *totally* a surprise,</h3>&nbsp; is the fact that fennec is very far from a &#8220;plain android&#8221; project. When I first started, I (wrongly) expected to find an android project where I could reuse the stuff I knew from before, and I ended up working on a lot of javascript (which I never used before).  The project is various and I like the mixture of js, c++ and regular android, and I find this challenging, even if the code read / written ratio has become really huge. Hope this will get better with time.<br /><br /><br /><br /><h3> Working on it is harder than a regular android project.</h3>&nbsp; Forget intellij, eclipse or android studio. Forget debugging, or at least expect attaching a command line debugger to your code to be tricky. Slow build time (a full build takes something like 2 hour and half on my laptop).<br />Incremental builds time and upload to the device may take up to 2-3 minutes. I got back to the really old times when I wrote most of my code using vim and figuring out what was happening through logs.<br /><br /><br /><h3> You can get a lot of help from the mobile team,</h3>&nbsp; but you need to ask. A lot. Think of your average day. A lot of work to be done. Bugs coming, code to be written. Now think about some guy, who never wrote a line of code on the project you are working on, coming and asking some dumb or obvious questions. You are that guy.<br />That&#8217;s what must be their point of view (hope I am making less dumb questions). But they are helpful, even on monday mornings. You just have to ping <a href="https://wiki.mozilla.org/IRC">them on irc.</a><br /><br /><br /><h3> Did I say it is hard at first?</h3>&nbsp; The <a href="http://www.joshmatthews.net/bugsahoy/?mobile=1">bugs ahoy page</a> makes it quite easy to find a bug to start with, and the <a href="https://wiki.mozilla.org/Mobile/Fennec/Android">build instructions</a> are dumb proof. But then, it feels like being thrown in the middle of the jungle with a pocket knife. A huge codebase, xul interfaces, javascript, C++ code, Xpcom interfaces, no idea of which function is calling what. <br />The documentation is there, but it&#8217;s hard to figure out where to start from.<br />But if you are not worried about pinging and pinging people on irc, you will be given all the answers you need in order to get better and go ahead, and you will learn about all the tools at your disposal that help a distributed team to work better, such as <a href="http://mxr.mozilla.org/">mxr</a>, <a href="http://pastebin.mozilla.org/">pastebin</a> and <a href="https://etherpad.mozilla.org/">mopad</a>, or <a href="https://developer.mozilla.org/en-US/docs/Developer_Guide/How_to_Submit_a_Patch">how to submit a patch</a>&nbsp;using <a href="https://developer.mozilla.org/en-US/docs/Mercurial_Queues">hg queues</a>.<br /><br /><br /><h3> Is it worth it?</h3><b>&nbsp; Definetely</b>. As I wrote before, I am currently spending all the spare time I devote to side projects writing code for Fennec. Or I should say, reading a lot of code and writing some code. The &#8220;aha&#8221; moment when you realize that you understand how things work after grepping and digging into interfaces and callbacks has no price and it&#8217;s something I haven&#8217;t experienced for a long time.<br />Moreover, it&#8217;s exciting to interact with the mobile team, they all are passionate about what they are doing and very capable, not to mention that you will be forced to produce high quality code in order to pass the reviews.<br /><b>&nbsp; Finally</b>, the fact that you are contributing something bigger than that <a href="https://play.google.com/store/apps/details?id=com.whiterabbit.pastimer.lite">pasta cooking timer app</a> , and that your code will run in the hands of a lot of users is huge. I am not an opensource software integralist, despite having written a decent amount of it, but the <b>freedom message shared by the mozilla foundation is something it feels nice to be part of.</b><br /><br /><br /> <br /> Not to mention the tshirt I received and the &#8221;<a href="https://badges.mozilla.org/en-US/badges/badge/Friends-of-the-Mobile-Team/awards/1002">friend of mobile team</a>&#8221; badge I was awarded :-)<br /><br /><a href="http://1.bp.blogspot.com/-Qrsy0iSfC-w/UfbaCd153iI/AAAAAAAAMCA/iW7Pa0xXMFI/s1600/IMG_20130729_224220.jpg"><img border="0" src="http://1.bp.blogspot.com/-Qrsy0iSfC-w/UfbaCd153iI/AAAAAAAAMCA/iW7Pa0xXMFI/s320/IMG_20130729_224220.jpg" /></a><br /><br /><br /><br /><br /></div>
-
-
-<h2>Comments</h2>
-
-
-<div class='comments'>
-<div class='comment'>
-<div class='author'>Federico Paolinelli</div>
-<div class='content'>
-Thanks mrlachatte. Did not realize that my first contribution was getting live until now!</div>
-</div>
-<div class='comment'>
-<div class='author'>mrlachatte</div>
-<div class='content'>
-It&#39;s FF 23 release day, and I saw your name in the list on https://blog.mozilla.org/community/2013/08/05/firefox-23-new-contributors/. Congratulations on having your first contribution be released to our many users!</div>
-</div>
-</div>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[DroidAlone - Reloaded]]></title>
-    <link href="http://fedepaol.github.io/blog/2012/11/25/droidalone-reloaded/"/>
-    <updated>2012-11-25T00:00:00+01:00</updated>
-    <id>http://fedepaol.github.io/blog/2012/11/25/droidalone-reloaded</id>
-    <content type="html"><![CDATA[<div class='post'>
-Whenever I speak with another android developer, the occasional chat goes to &#8220;what did you develop?&#8221; question.<br />Last time it happened at droidcon uk, and for the first time I felt something wasn&#8217;t completely right when I showed my DroidAlone app.<br /><br />DroidAlone is a useful app (so they say) that comes into play whenever you forget your phone at home. With a simple sms protected by a password choosen by the user, it can be activated. From that moment, it will start notifying you of any missed calls and sms. It also ships a lot of other nice features, such as phone location retrieval and auto reply via sms (if you want to inform the caller that he can reach you to another number).<br />The full description of DroidAlone can be found at&nbsp;<a href="http://www.fedepaolapps.com/app/droidalone/">Missed Calls for Android</a>&nbsp;.<br /><br />Everything seems to work well, it has a lot of good reviews and the few users are happy.<br />Except one thing. It looks (looked) like this:<br /><br /><div class="separator" style="clear: both; text-align: center;"><a href="http://www.fedepaolapps.com/wp-content/uploads/2012/09/main_screen1.jpg" imageanchor="1" style="margin-left: 1em; margin-right: 1em;"><img border="0" height="320" src="http://www.fedepaolapps.com/wp-content/uploads/2012/09/main_screen1.jpg" width="213" /></a></div><a href="http://www.blogger.com/"></a><span id="goog_1451563458"></span><span id="goog_1451563459"></span><br />It also had another view with the list of events. The other developer&#8217;s reaction was &#8220;ugh&#8221;. And then I realized that I can&#8217;t keep producing new stuff ignoring what I have around, especially if this is the case of the only app I manage to sell a bit.<br /><br />So, when I got home I decided to change the ui &#8220;just to make it more pleasant&#8221;. &nbsp;Then I opened the code, and I realized that my two year&#8217;s old code needed a bit more than a refresh.<br /><br />Here what was wrong:<br /><br /><ul><li>it used tabactivity, which is very old fashioned. I decided to add the actionbar.</li><li>from the event list view, you had to click on the item to see the details of the event. The details where shown into a dialog. Ugh (again). In the new version I wanted all the details to be visible since they are not so long.</li><li>All the properties of the views in the layouts where explicit. No styles anywhere. The color resources where &#8220;background_color&#8221;, or &#8220;title_color&#8221; instead of some name that remind you the color. I had to put a heavy hand on that.</li><li>I tried to use gridlayout a lot since it seem to be the more efficient way to dispose a layout.</li><li>There was no empty list information.</li><li>A lot of calls where deprecated. I switched to the most modern versions.</li><li>All the data was contained in a sqllite storage without using a content provider. I switched to using a content provider and a cursorloader, which ended up in a more compact code. I didn&#8217;t need anymore to use a broadcast to notify the ui that the data was changed.</li><li>DroidAlone uses broadcast receivers to be notified of incoming calls / sms. Even tough the sms receiver must be enabled because an activation sms can be received at anytime, the call receiver is needed only when the app is active. I then used the package manager to disable it when not needed.</li><li>I wanted to refactor a lot of code. A lot of brackets where on the new line instead of the same line of the method (a la C), and it bothered me a lot. I also trusted lint and changed a lot here and there.&nbsp;</li></ul><div><br /></div><div>Other than these things, I redraw (by my self) a lot of the assets using inkscape. Because I soon got bored to export the resources in 4 different resolutions folders, I wrote a simple python script to do that for me. You can find it <a href="https://gist.github.com/4127778">here</a>&nbsp;.</div><div><br /></div><div>More than that, I got REALLY REALLY bored while writing the content provider, so I ended up writing another python script to automatically generate the content provider for me, as described in my previous <a href="http://fedepaol.github.io/blog/2012/11/11/android-content-providers-generator">post</a>. You can find the <a href="https://github.com/fedepaol/Android-sql-lite-helper">android content provider generator here</a>.&nbsp;</div><div><br /></div><div>Finally, I switched the project to maven because I am getting used to that solution, especially in case I want to add robolectric tests and keep working with intellij.</div><div><br /></div><div>The new version of the app hasn&#8217;t been released yet (I want to have it running for a while on my phone before releasing it, just to be sure that I didn&#8217;t break anything).</div><div><br /></div><div>This is how the new version will look like&nbsp;</div><div><br /></div><div class="separator" style="clear: both; text-align: center;"><a href="http://1.bp.blogspot.com/-KFbMTLsxs5w/ULKCXaGOnLI/AAAAAAAAJS4/CVeElRWX6wA/s1600/screen3.tiff" imageanchor="1" style="margin-left: 1em; margin-right: 1em;"><img border="0" height="320" src="http://1.bp.blogspot.com/-KFbMTLsxs5w/ULKCXaGOnLI/AAAAAAAAJS4/CVeElRWX6wA/s320/screen3.tiff" width="194" /></a></div><div class="separator" style="clear: both; text-align: center;"><br /></div><div class="separator" style="clear: both; text-align: left;">So, this is how a &#8220;little ui polishing&#8221; ended lasting more than two weeks (of my spare time). I am also glad that I think my old code is not that good. I like to think that I am better than two years ago.</div><div><br /></div><br /><div class="separator" style="clear: both; text-align: center;"><br /></div><br /></div>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Android Content Providers Generator]]></title>
-    <link href="http://fedepaol.github.io/blog/2012/11/11/android-content-providers-generator/"/>
-    <updated>2012-11-11T00:00:00+01:00</updated>
-    <id>http://fedepaol.github.io/blog/2012/11/11/android-content-providers-generator</id>
-    <content type="html"><![CDATA[<div class='post'>
-During the refactoring of my two years old app DroidAlone, I decided to try to access to the storage through a ContentProvider.<br /><br />Even if the official documentation warns that there is no need to use content providers if your app does not want to export it&#8217;s data against other apps, there are a bunch of advantages in using a content provider in your app.<br /><br />The main and more obvious advantage is that you can use a Loader with your data. Using loaders relieve you from managing the cursor, forgetting open cursors here and there and most of all, makes a lot easier for your ui to react to changes in your model. Well, more than easier, you don&#8217;t have to do anything.<br /><br />However, I am not writing this post to describe how to interact with an android content provider, nor how to implement a content provider. There are a lot of content provider tutorials out there that probably can explain how them work better than I could possibly ever do (and in a better English).<br /><br />I am writing this post because while writing the content provider, I got bored.<br />It&#8217;s a lot of code, always the same, that cannot be avoided, and you don&#8217;t have to add any value to it. The best thing you can do is not getting distracted and write it with no errors. And it&#8217;s loong (ok, not that long).<br /><br />Given the &#8220;boilerplateness&#8221; of this problem, I thought I could take off some dust from my old <a href="http://fedepaol.github.io/blog/2010/11/18/my-sqllite-helper-builder">SqliteHelper builder script</a>&nbsp;and maybe make it able to generate the content provider class for me. And that&#8217;s what I did.<br /><br /><h3>Android Content Provider Generator</h3><br /><a href="https://github.com/fedepaol/Android-sql-lite-helper">https://github.com/fedepaol/Android-sql-lite-helper</a><br /><br />I added a couple of options to it, and now it can generate automatically for you (no more cut/paste, no more forgotten columns) the content provider class AND a client class with a bunch of methods you can use to add / update / delete / query your data.<br />A sample of the generated code is already included in the beta of my app and it seems to work properly.<br /><br />I won&#8217;t write any instructions or examples here, they are already in the github repo.<br /><b>All you need to know is that with a 10 rows text file that describes your data, you can generate the whole content provider</b>.<br /><br />As <a href="https://plus.google.com/105096943850026101634/posts/RTbp2zVPZQq">I wrote on G+</a>, it&#8217;s certainly not the most elegant piece of python I wrote, but it makes it&#8217;s job.<br /><br /><br /><br />If you liked this post (or my script), consider following me on twitter @fedepaol<br /><br /></div>
 
 ]]></content>
   </entry>

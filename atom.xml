@@ -4,7 +4,7 @@
   <title><![CDATA[My little Android warehouse]]></title>
   <link href="http://fedepaol.github.io/atom.xml" rel="self"/>
   <link href="http://fedepaol.github.io/"/>
-  <updated>2014-09-01T23:13:00+02:00</updated>
+  <updated>2016-01-07T12:10:41+01:00</updated>
   <id>http://fedepaol.github.io/</id>
   <author>
     <name><![CDATA[Federico Paolinelli]]></name>
@@ -14,13 +14,743 @@
 
   
   <entry>
+    <title type="html"><![CDATA[Subscribe It While It's Hot: Cached Rest Requests With RxJava]]></title>
+    <link href="http://fedepaol.github.io/blog/2016/01/01/cached-rest-requests-with-rxjava/"/>
+    <updated>2016-01-01T17:54:21+01:00</updated>
+    <id>http://fedepaol.github.io/blog/2016/01/01/cached-rest-requests-with-rxjava</id>
+    <content type="html"><![CDATA[<h4>Disclaimer:</h4>
+
+<p>In this post I am trying to cover a proper approach to a common problem. I am still in the process of wrapping my head around RxJava so what I write here might not be the best way to solve the problem.</p>
+
+<h1>Cached requests with RxJava</h1>
+
+<p>Lately I&rsquo;ve been trying to develop a rest backed app using RxJava. I must admit that once you get in the proper mental mood, RxJava almost feels like cheating. Everything looks cleaner, multiple requests can be composed and manipulated easily, the StrictMode gets satisfied by observing on the ui thread and subscribing on a different thread, and all the nice things that can be read about how cool is RxJava with Android.
+What I could not find easily, was how to store the result of a request and be sure that even in case of no network, a cached content was available for the user, while still handling everything in a reactive fashion.</p>
+
+<h3>Caching vs non caching</h3>
+
+<p>Going straight from rest result to the UI is appropriate in many cases, for example when displaying the result of a search whose arguments are not predictable (think about Ebay, or Amazon where the user is looking for something different every time).</p>
+
+<p><em>However</em>, there are cases when the results fetched earlier are still significant and displaying them can improve the user experience significantly, compared to a spinning wheel or a white page. Those cases include your twitter feed, a local weather forecast that was fetched just 5 minutes before, or the list of the github repos of a given user.</p>
+
+<p>Here you can see the difference between a non cached version and a cached version of the same activity:</p>
+
+<p><img src="http://fedepaol.github.io/images/uncached.gif" width="300">      <img src="http://fedepaol.github.io/images/cached.gif" width="300"></p>
+
+<p>For this reason I tried to figure out what could have been a clean way to cache the results of a request while keeping the flow in a reactive fashion.</p>
+
+<h3>The storage as the unique source of the truth</h3>
+
+<h4>All reactive</h4>
+
+<p>If we want to cache the data while keeping everything inside the same subscription, things get a bit messy. The result of the request is thrown at the UI and the response is also stored in the storage. The UI subscribes from the storage too but checks which result came first and if the data is too old.</p>
+
+<p><img src="http://fedepaol.github.io/images/messy.jpg" width="500"></p>
+
+<h4>Cached</h4>
+
+<p>In this <em>hybrid</em> variant, the UI subscribes only to the storage, and a facade class wraps the storage and the subscription to the retrofit client that feeds the storage. Once the storage is filled with new data, the UI thread is automatically notified of every change.
+<img src="http://fedepaol.github.io/images/clean.jpg" width="500"></p>
+
+<p>In this scenario the observable acts as a <em>hot</em> observable, the first time it gets subscribed it emits the content of the storage, and any other change it might happen to it.</p>
+
+<h3>Talk is cheap, show me the code</h3>
+
+<p>A working example of the following code can be found <a href="https://github.com/fedepaol/RxRestSample">in my github repo here</a>
+To write this sample, I started from the abused Github apis which seems to power the 99% of the rest related examples. Sorry about that.</p>
+
+<p>First there is the storage. I wrapped a SQLite helper (which I happily generated with <a href="https://github.com/fedepaol/Android-sql-lite-helper">my handy script</a>) with a class that contains a <a href="http://reactivex.io/RxJava/javadoc/rx/subjects/PublishSubject.html">PublishSubject</a> which can be subscribed to and which we will notify when the insertion methods are called:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+</pre></td><td class='code'><pre><code class='Java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">ObservableRepoDb</span> <span class="o">{</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">PublishSubject</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">Repo</span><span class="o">&gt;&gt;</span> <span class="n">mSubject</span> <span class="o">=</span> <span class="n">PublishSubject</span><span class="o">.</span><span class="na">create</span><span class="o">();</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">RepoDbHelper</span> <span class="n">mDbHelper</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">Repo</span><span class="o">&gt;</span> <span class="nf">getAllReposFromDb</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">List</span><span class="o">&lt;</span><span class="n">Repo</span><span class="o">&gt;</span> <span class="n">repos</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ArrayList</span><span class="o">&lt;&gt;();</span>
+</span><span class='line'>        <span class="c1">// .. performs the query and fills the result</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">repos</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="n">Observable</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">Repo</span><span class="o">&gt;&gt;</span> <span class="nf">getObservable</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">Observable</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">Repo</span><span class="o">&gt;&gt;</span> <span class="n">firstTimeObservable</span> <span class="o">=</span>
+</span><span class='line'>                <span class="n">Observable</span><span class="o">.</span><span class="na">fromCallable</span><span class="o">(</span><span class="k">this</span><span class="o">::</span><span class="n">getAllReposFromDb</span><span class="o">);</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">return</span> <span class="n">firstTimeObservable</span><span class="o">.</span><span class="na">concatWith</span><span class="o">(</span><span class="n">mSubject</span><span class="o">);</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">insertRepo</span><span class="o">(</span><span class="n">Repo</span> <span class="n">r</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="c1">// ...</span>
+</span><span class='line'>        <span class="c1">// performs the insertion on the SQLite helper</span>
+</span><span class='line'>        <span class="c1">// ...</span>
+</span><span class='line'>        <span class="n">List</span><span class="o">&lt;</span><span class="n">Repo</span><span class="o">&gt;</span> <span class="n">result</span> <span class="o">=</span> <span class="n">getAllReposFromDb</span><span class="o">();</span>
+</span><span class='line'>        <span class="n">mSubject</span><span class="o">.</span><span class="na">onNext</span><span class="o">(</span><span class="n">result</span><span class="o">);</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>What we have here is the first piece of the puzzle: a storage that can be subscribed to. The concatenation is needed because we want it to emit the content of the storage as soon as it gets subscribed.</p>
+
+<p>Then there is the facade class, where we get the observable from and to which we start a new update:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='Java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">ObservableGithubRepos</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">ObservableRepoDb</span> <span class="n">mDatabase</span><span class="o">;</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">BehaviorSubject</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span> <span class="n">mRestSubject</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// ...</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="n">Observable</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">Repo</span><span class="o">&gt;&gt;</span> <span class="nf">getDbObservable</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">mDatabase</span><span class="o">.</span><span class="na">getObservable</span><span class="o">();</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">updateRepo</span><span class="o">(</span><span class="n">String</span> <span class="n">userName</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">Observable</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">Repo</span><span class="o">&gt;&gt;</span> <span class="n">observable</span> <span class="o">=</span> <span class="n">mClient</span><span class="o">.</span><span class="na">getRepos</span><span class="o">(</span><span class="n">userName</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">observable</span><span class="o">.</span><span class="na">subscribeOn</span><span class="o">(</span><span class="n">Schedulers</span><span class="o">.</span><span class="na">io</span><span class="o">())</span>
+</span><span class='line'>                  <span class="o">.</span><span class="na">observeOn</span><span class="o">(</span><span class="n">Schedulers</span><span class="o">.</span><span class="na">io</span><span class="o">())</span>
+</span><span class='line'>                  <span class="o">.</span><span class="na">subscribe</span><span class="o">(</span><span class="n">l</span> <span class="o">-&gt;</span> <span class="n">mDatabase</span><span class="o">.</span><span class="na">insertRepoList</span><span class="o">(</span><span class="n">l</span><span class="o">));</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Note that everything happens far from the UI thread. This is because we are going to subscribe to the database observable as the unique source of truth.</p>
+
+<p>Now, given that the observable is now <em>hot</em>, we can&rsquo;t listen for its <em>onComplete</em> in order to stop any progress indicators we might put in place.
+What we need is another subject that can be bound to the update request, so here it is the new facade class:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+</pre></td><td class='code'><pre><code class='Java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">ObservableGithubRepos</span> <span class="o">{</span>
+</span><span class='line'>    <span class="c1">// ...</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="n">Observable</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">Repo</span><span class="o">&gt;&gt;</span> <span class="nf">getDbObservable</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">mDatabase</span><span class="o">.</span><span class="na">getObservable</span><span class="o">();</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="n">Observable</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span> <span class="nf">updateRepo</span><span class="o">(</span><span class="n">String</span> <span class="n">userName</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">BehaviorSubject</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span> <span class="n">requestSubject</span> <span class="o">=</span> <span class="n">BehaviorSubject</span><span class="o">.</span><span class="na">create</span><span class="o">();</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">Observable</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">Repo</span><span class="o">&gt;&gt;</span> <span class="n">observable</span> <span class="o">=</span> <span class="n">mClient</span><span class="o">.</span><span class="na">getRepos</span><span class="o">(</span><span class="n">userName</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">observable</span><span class="o">.</span><span class="na">subscribeOn</span><span class="o">(</span><span class="n">Schedulers</span><span class="o">.</span><span class="na">io</span><span class="o">())</span>
+</span><span class='line'>                  <span class="o">.</span><span class="na">observeOn</span><span class="o">(</span><span class="n">Schedulers</span><span class="o">.</span><span class="na">io</span><span class="o">())</span>
+</span><span class='line'>                  <span class="o">.</span><span class="na">subscribe</span><span class="o">(</span><span class="n">l</span> <span class="o">-&gt;</span> <span class="o">{</span>
+</span><span class='line'>                                    <span class="n">mDatabase</span><span class="o">.</span><span class="na">insertRepoList</span><span class="o">(</span><span class="n">l</span><span class="o">);</span>
+</span><span class='line'>                                    <span class="n">requestSubject</span><span class="o">.</span><span class="na">onNext</span><span class="o">(</span><span class="n">userName</span><span class="o">);},</span>
+</span><span class='line'>                             <span class="n">e</span> <span class="o">-&gt;</span> <span class="n">requestSubject</span><span class="o">.</span><span class="na">onError</span><span class="o">(</span><span class="n">e</span><span class="o">),</span>
+</span><span class='line'>                             <span class="o">()</span> <span class="o">-&gt;</span> <span class="n">requestSubject</span><span class="o">.</span><span class="na">onCompleted</span><span class="o">());</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">requestSubject</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>In the UI client (activity or fragment) we&rsquo;ll need to subscribe to the storage in order to get the data and to the request observable in order to stop the progress indicators. An observable that emits the state of the pending request is returned every time an update is being requested.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='Java'><span class='line'><span class="n">mObservable</span> <span class="o">=</span> <span class="n">mRepo</span><span class="o">.</span><span class="na">getDbObservable</span><span class="o">();</span>
+</span><span class='line'><span class="n">mProgressObservable</span> <span class="o">=</span> <span class="n">mRepo</span><span class="o">.</span><span class="na">getProgressObservable</span><span class="o">()</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">mObservable</span><span class="o">.</span><span class="na">subscribeOn</span><span class="o">(</span><span class="n">Schedulers</span><span class="o">.</span><span class="na">io</span><span class="o">())</span>
+</span><span class='line'>               <span class="o">.</span><span class="na">observeOn</span><span class="o">(</span><span class="n">AndroidSchedulers</span><span class="o">.</span><span class="na">mainThread</span><span class="o">()).</span><span class="na">subscribe</span><span class="o">(</span><span class="n">l</span> <span class="o">-&gt;</span> <span class="o">{</span>
+</span><span class='line'>                <span class="n">mAdapter</span><span class="o">.</span><span class="na">updateData</span><span class="o">(</span><span class="n">l</span><span class="o">);</span>
+</span><span class='line'>            <span class="o">});</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">Observable</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">Repo</span><span class="o">&gt;&gt;</span> <span class="n">progressObservable</span> <span class="o">=</span> <span class="n">mRepo</span><span class="o">.</span><span class="na">updateRepo</span><span class="o">(</span><span class="s">&quot;fedepaol&quot;</span><span class="o">);</span>
+</span><span class='line'><span class="n">progressObservable</span><span class="o">.</span><span class="na">subscribeOn</span><span class="o">(</span><span class="n">Schedulers</span><span class="o">.</span><span class="na">io</span><span class="o">())</span>
+</span><span class='line'>                       <span class="o">.</span><span class="na">observeOn</span><span class="o">(</span><span class="n">AndroidSchedulers</span><span class="o">.</span><span class="na">mainThread</span><span class="o">())</span>
+</span><span class='line'>                       <span class="o">.</span><span class="na">subscribe</span><span class="o">(</span><span class="n">s</span> <span class="o">-&gt;</span> <span class="o">{},</span>
+</span><span class='line'>                                  <span class="n">e</span> <span class="o">-&gt;</span> <span class="o">{</span> <span class="n">Log</span><span class="o">.</span><span class="na">d</span><span class="o">(</span><span class="s">&quot;RX&quot;</span><span class="o">,</span> <span class="s">&quot;There has been an error&quot;</span><span class="o">);</span>
+</span><span class='line'>                                        <span class="n">mSwipeLayout</span><span class="o">.</span><span class="na">setRefreshing</span><span class="o">(</span><span class="kc">false</span><span class="o">);</span>
+</span><span class='line'>                                  <span class="o">},</span>
+</span><span class='line'>                                  <span class="o">()</span> <span class="o">-&gt;</span> <span class="n">mSwipeLayout</span><span class="o">.</span><span class="na">setRefreshing</span><span class="o">(</span><span class="kc">false</span><span class="o">));</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Please remember that the DbObservable is a hot one, so every time a call to updateRepo happens, the db will be fed with the result of the query and the ui will get subsequently notified.</p>
+
+<h3>SqlBrite</h3>
+
+<p>If all this wrapping seems too laboruous, the prolific guys from Square wrote <a href="https://github.com/square/sqlbrite">SqlBrite</a> which is a super generic database wrapper that was written for this same purpouse. I am sure it&rsquo;s better and more battle field tested than the poor man&rsquo;s version we can write by ourselves.</p>
+
+<h2>Conclusion</h2>
+
+<p>I don&rsquo;t know if this is an healthy way to use RxJava. Maybe I ended up with this scenario only because I am not 100% confident with RxJava and I am putting some non rx-ness in the middle to better control it.
+Here we need to choose where to place the operators, since we can modify the flow that feeds the storage from the http client, or the flow that comes out of the storage itself.</p>
+
+<p>In any case, having an unique source of truth seems more clear, and I feel that in this way it would be a lot easier to do stuff like prefetching, scheduling updates so the user is presented with fresh data (remember having your <a href="https://www.youtube.com/watch?v=GcNNx2zdXN4">app work like magic?</a>), checking if an update is worth to be done at all (such as displaying a 5 minutes old weather forecast) and stuff like that.</p>
+
+<p>Thanks to Fabio Collini for spotting a lot of mistakes in the first draft of this posts, and to Riccardo Ciovati for proof reading it.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Unit Testing RxJava Observables and Subscriptions]]></title>
+    <link href="http://fedepaol.github.io/blog/2015/09/13/testing-rxjava-observables-subscriptions/"/>
+    <updated>2015-09-13T21:26:15+02:00</updated>
+    <id>http://fedepaol.github.io/blog/2015/09/13/testing-rxjava-observables-subscriptions</id>
+    <content type="html"><![CDATA[<h2>Testing RxJava</h2>
+
+<p>While catching up with the latest Android novelties I could not ignore RxJava, which seems to grow in popularity between android developers.</p>
+
+<p>If you just heard about it, and you want to get your feet wet, I really recommend Dan Lew&rsquo;s <a href="http://blog.danlew.net/2014/09/15/grokking-rxjava-part-1/">Grokking with RxJava</a> series as a starting point.</p>
+
+<p><strong>RxJava is asynchronous by nature</strong>, so unit testing it might seem a daunting at first, especially if you use that asynchronous interaction to test stuff. Luckily, RxJava (and RxAndroid) come with a couple of tools that will make our life a lot easier.</p>
+
+<h2>What to (unit) test</h2>
+
+<p>There are at least a couple of things you&rsquo;ll want to test:</p>
+
+<ol>
+<li>You will want to test the <strong>observables</strong>, meaning not only the observables you built, but also the resulting composition of the various operators you may want to apply to them.</li>
+<li>Given a certain observable (or its mock), you will want to test <strong>how the rest of your application behaves while triggered by the subscription</strong>.</li>
+</ol>
+
+
+<h2>Testing the observables</h2>
+
+<p>Despite the fact that a subscription is asynchronous, there are (at least) a couple of ways to make the stream of your observable synchronous.</p>
+
+<p>The first way is by using</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='Java'><span class='line'><span class="n">ResultToCheck</span> <span class="n">res</span> <span class="o">=</span> <span class="n">myObservable</span><span class="o">.</span><span class="na">toBlocking</span><span class="o">().</span><span class="na">first</span><span class="o">();</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This works because <a href="http://reactivex.io/RxJava/javadoc/rx/Observable.html#toBlocking%28%29">toBlocking</a> converts the observable to a blocking one, while <a href="http://reactivex.io/documentation/operators/first.html">first</a> returns the first emitted element.
+The calling code will wait synchronously until the observer calls onCompleted().</p>
+
+<p><strong>The official way to test an observable</strong> is by using a <a href="http://reactivex.io/RxJava/javadoc/rx/observers/TestSubscriber.html">TestSubscriber</a>, an helper subscriber provided directly by the RxJava library.
+As with toBlocking, a test subscription is synchronous.
+Here you can find an example:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='Java'><span class='line'><span class="n">Observable</span><span class="o">&lt;</span><span class="n">RubberChicken</span><span class="o">&gt;</span> <span class="n">obs</span> <span class="o">=</span> <span class="n">obsFactory</span><span class="o">.</span><span class="na">getObservable</span><span class="o">();</span>
+</span><span class='line'><span class="n">TestSubscriber</span><span class="o">&lt;</span><span class="n">RubberChicken</span><span class="o">&gt;</span> <span class="n">testSubscriber</span> <span class="o">=</span> <span class="k">new</span> <span class="n">TestSubscriber</span><span class="o">&lt;&gt;();</span>
+</span><span class='line'><span class="n">obs</span><span class="o">.</span><span class="na">subscribe</span><span class="o">(</span><span class="n">testSubscriber</span><span class="o">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">testSubscriber</span><span class="o">.</span><span class="na">assertNoErrors</span><span class="o">();</span>
+</span><span class='line'><span class="n">List</span><span class="o">&lt;</span><span class="n">RubberChicken</span><span class="o">&gt;</span> <span class="n">chickens</span> <span class="o">=</span> <span class="n">testSubscriber</span><span class="o">.</span><span class="na">getOnNextEvents</span><span class="o">();</span>
+</span><span class='line'><span class="c1">// Assert your chickens integrity here</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>TestSubscriber</code> comes with a bunch of helper methods for testing, like specific assertions and other stuff. On top of that, its <code>getOnNextEvents()</code> method is blocking and  will return all the emitted items as elements of a list.
+This is a neat way to test not only your observers, but also to check if the compositions you put in place are working as expected. That makes testing observables super easy.</p>
+
+<h2>Testing the subscription</h2>
+
+<p>Once your observables are in place, you will likely to be observing them on some thread, and subscribing them on some other thread. This will make it harder for us to test how our activity (or fragment) reacts to a triggered subscription.</p>
+
+<p>RxJava (and RxAndroid) provide a way to override the schedulers exposed when <code>Schedulers.io()</code> or <code>AndroidSchedulers.mainThread()</code> are called. By replacing them with <code>Schedulers.immediate()</code>, your code will run immediately and you&rsquo;ll be able to see its results.</p>
+
+<p>The solution is a bit hacky, since we need to call <code>reset()</code> method before overriding RxJava&rsquo;s schedulers, which is package protected. I <em>took inspiration</em> from Alexis Mas&#8217; <a href="http://alexismas.com/blog/2015/05/20/unit-testing-rxjava/">blogpost</a> extending RxJavaPlugins class (there no need for that with RxAndroid):</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='Java'><span class='line'><span class="kn">package</span> <span class="n">rx</span><span class="o">.</span><span class="na">plugins</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">RxJavaTestPlugins</span> <span class="kd">extends</span> <span class="n">RxJavaPlugins</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">RxJavaTestPlugins</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="kd">super</span><span class="o">();</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">resetPlugins</span><span class="o">(){</span>
+</span><span class='line'>        <span class="n">getInstance</span><span class="o">().</span><span class="na">reset</span><span class="o">();</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Registering a scheduler hook that provides a custom implemetation (Schedulers.immediate()) will end up in overriding the schedulers we are using.</p>
+
+<p>As pointed out by <a href="https://twitter.com/pakerfeldt">Patrik Åkerfeldt</a> in the comments, since the hooks are asked to provide a scheduler implementation during the initialization of the Schedulers class, we have only one chance to override the default schedulers. For this reason, there is no point in setting them up in the <code>setup</code> phases of all our tests.</p>
+
+<p>The best place to override them once seems to be the <code>TestRunner</code>&rsquo;s constructor.</p>
+
+<p>The custom <code>TestRunner</code> will look like this:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='Java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">RxJavaTestRunner</span> <span class="kd">extends</span> <span class="n">RobolectricGradleTestRunner</span> <span class="o">{</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="nf">RxJavaTestRunner</span><span class="o">(</span><span class="n">Class</span><span class="o">&lt;?&gt;</span> <span class="n">testClass</span><span class="o">)</span> <span class="kd">throws</span> <span class="n">InitializationError</span> <span class="o">{</span>
+</span><span class='line'>        <span class="kd">super</span><span class="o">(</span><span class="n">testClass</span><span class="o">);</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">RxJavaTestPlugins</span><span class="o">.</span><span class="na">resetPlugins</span><span class="o">();</span>
+</span><span class='line'>        <span class="n">RxJavaPlugins</span><span class="o">.</span><span class="na">getInstance</span><span class="o">().</span><span class="na">registerSchedulersHook</span><span class="o">(</span><span class="k">new</span> <span class="nf">RxJavaSchedulersHook</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>            <span class="nd">@Override</span>
+</span><span class='line'>            <span class="kd">public</span> <span class="n">Scheduler</span> <span class="nf">getIOScheduler</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>                <span class="k">return</span> <span class="n">Schedulers</span><span class="o">.</span><span class="na">immediate</span><span class="o">();</span>
+</span><span class='line'>            <span class="o">}</span>
+</span><span class='line'>        <span class="o">});</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>And this is how the <code>setup()</code> and <code>teardown()</code> methods will look like (here I am using robolectric but it makes no difference with AndroidTests):</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+</pre></td><td class='code'><pre><code class='Java'><span class='line'><span class="nd">@RunWith</span><span class="o">(</span><span class="n">RxJavaTestRunner</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
+</span><span class='line'><span class="nd">@Config</span><span class="o">(</span><span class="n">constants</span> <span class="o">=</span> <span class="n">BuildConfig</span><span class="o">.</span><span class="na">class</span><span class="o">,</span>
+</span><span class='line'><span class="n">application</span> <span class="o">=</span> <span class="n">TestRobolectricApplication</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
+</span><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">SubscriberTest</span> <span class="o">{</span>
+</span><span class='line'>    <span class="nd">@Before</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setup</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">RxAndroidPlugins</span><span class="o">.</span><span class="na">getInstance</span><span class="o">().</span><span class="na">registerSchedulersHook</span><span class="o">(</span><span class="k">new</span> <span class="nf">RxAndroidSchedulersHook</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>            <span class="nd">@Override</span>
+</span><span class='line'>            <span class="kd">public</span> <span class="n">Scheduler</span> <span class="nf">getMainThreadScheduler</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>                <span class="k">return</span> <span class="n">Schedulers</span><span class="o">.</span><span class="na">immediate</span><span class="o">();</span>
+</span><span class='line'>            <span class="o">}</span>
+</span><span class='line'>        <span class="o">});</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nd">@After</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">tearDown</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">RxAndroidPlugins</span><span class="o">.</span><span class="na">getInstance</span><span class="o">().</span><span class="na">reset</span><span class="o">();</span>
+</span><span class='line'>    <span class="o">}}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="cm">/* Your tests here */</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>As I already mentioned, you can inject the custom schedulers only once per test session. On the other hand, RxAndroidPlugins come with a reset method that will allow us to hook in different schedulers in different threads.</p>
+
+<p>This, together with a non blocking observable (for instance by replacing your long taking observable with a mocked <code>Observable.just()</code>) will make our test synchronous.</p>
+
+<p>In order to inject a mocked observable, we can override the Application object used by Robolectric,  as described in my <a href="http://fedepaol.github.io/blog/2015/09/05/mocking-with-robolectric-and-dagger-2/">previous post here</a> .</p>
+
+<h2>Bonus point: debugging</h2>
+
+<p>If the unit tests are not enough, and you want to check what is happening inside the chaining / transformation of the stream, you can set an <code>ObservableExecutionHook</code> that will be triggered when observables are being called:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+</pre></td><td class='code'><pre><code class='Java'><span class='line'>   <span class="kd">private</span> <span class="kt">void</span> <span class="nf">enableRxTrack</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">RxJavaPlugins</span><span class="o">.</span><span class="na">getInstance</span><span class="o">().</span><span class="na">registerObservableExecutionHook</span><span class="o">(</span><span class="k">new</span> <span class="nf">DebugHook</span><span class="o">(</span><span class="k">new</span> <span class="nf">DebugNotificationListener</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>            <span class="kd">final</span> <span class="n">String</span> <span class="n">TAG</span> <span class="o">=</span> <span class="s">&quot;RXDEBUG&quot;</span><span class="o">;</span>
+</span><span class='line'>            <span class="kd">public</span> <span class="n">Object</span> <span class="nf">onNext</span><span class="o">(</span><span class="n">DebugNotification</span> <span class="n">n</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>                <span class="n">Log</span><span class="o">.</span><span class="na">v</span><span class="o">(</span><span class="n">TAG</span><span class="o">,</span> <span class="s">&quot;onNext on &quot;</span> <span class="o">+</span> <span class="n">n</span><span class="o">);</span>
+</span><span class='line'>                <span class="k">return</span> <span class="kd">super</span><span class="o">.</span><span class="na">onNext</span><span class="o">(</span><span class="n">n</span><span class="o">);</span>
+</span><span class='line'>            <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>            <span class="kd">public</span> <span class="n">Object</span> <span class="nf">start</span><span class="o">(</span><span class="n">DebugNotification</span> <span class="n">n</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>                <span class="n">Log</span><span class="o">.</span><span class="na">v</span><span class="o">(</span><span class="n">TAG</span><span class="o">,</span><span class="s">&quot;start on &quot;</span><span class="o">+</span><span class="n">n</span><span class="o">);</span>
+</span><span class='line'>                <span class="k">return</span> <span class="kd">super</span><span class="o">.</span><span class="na">start</span><span class="o">(</span><span class="n">n</span><span class="o">);</span>
+</span><span class='line'>            <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>            <span class="kd">public</span> <span class="kt">void</span> <span class="nf">complete</span><span class="o">(</span><span class="n">Object</span> <span class="n">context</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>                <span class="kd">super</span><span class="o">.</span><span class="na">complete</span><span class="o">(</span><span class="n">context</span><span class="o">);</span>
+</span><span class='line'>                <span class="n">Log</span><span class="o">.</span><span class="na">v</span><span class="o">(</span><span class="n">TAG</span><span class="o">,</span><span class="s">&quot;oncomplete n &quot;</span><span class="o">+</span><span class="n">context</span><span class="o">);</span>
+</span><span class='line'>            <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="kd">public</span> <span class="kt">void</span> <span class="nf">error</span><span class="o">(</span><span class="n">Object</span> <span class="n">context</span><span class="o">,</span> <span class="n">Throwable</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>                <span class="kd">super</span><span class="o">.</span><span class="na">error</span><span class="o">(</span><span class="n">context</span><span class="o">,</span> <span class="n">e</span><span class="o">);</span>
+</span><span class='line'>                <span class="n">Log</span><span class="o">.</span><span class="na">e</span><span class="o">(</span><span class="n">TAG</span><span class="o">,</span><span class="s">&quot;error on &quot;</span><span class="o">+</span><span class="n">context</span><span class="o">);</span>
+</span><span class='line'>            <span class="o">}</span>
+</span><span class='line'>        <span class="o">}));</span>
+</span><span class='line'>    <span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>TL;DR:</h1>
+
+<ul>
+<li>Use TestSubscriber when testing how an observable (or a composition of observables) behaves</li>
+<li>Mock your observable and override the default schedulers to test how the subscribing class works</li>
+<li>Enable the tracking of your observables by registering an observable execution hook</li>
+</ul>
+
+
+<p>A working example (rubber chickens included) can be found on my <a href="https://github.com/fedepaol/TestingRxJava">github repo</a>.</p>
+
+<h3>References</h3>
+
+<ul>
+<li><a href="https://medium.com/ribot-labs/unit-testing-rxjava-6e9540d4a329">Unit testing rxjava (observables)</a> by Iván Carballo</li>
+<li><a href="http://alexismas.com/blog/2015/05/20/unit-testing-rxjava/">Unit testing rxjava (subscription)</a> by Alexis Mas</li>
+<li><a href="http://fragmentedpodcast.com/episodes/3/">This</a> and <a href="http://fragmentedpodcast.com/episodes/4/">this</a> episodes of <a href="http://fragmentedpodcast.com">Fragmented Podcast</a> where Dan Lew gave some insights about RxJava, where I heard about the scheduler overriding trick</li>
+<li>Patrik Åkerfeldt&rsquo;s example that demonstrates how the scheduler injection works only before Scheduler class initialization</li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Mocking With Robolectric and Dagger 2]]></title>
+    <link href="http://fedepaol.github.io/blog/2015/09/05/mocking-with-robolectric-and-dagger-2/"/>
+    <updated>2015-09-05T08:22:47+02:00</updated>
+    <id>http://fedepaol.github.io/blog/2015/09/05/mocking-with-robolectric-and-dagger-2</id>
+    <content type="html"><![CDATA[<h2>Why robolectric</h2>
+
+<p>I&rsquo;ve been a fan of robolectric since the old days, since <a href="http://fedepaol.github.io/blog/2012/07/23/intellij-robolectric-and-android/">when Android Studio was not an option and few developers embraced IntelliJ</a>. I left it a bit behind after the introduction of Android Studio, since its support was far from optimal.</p>
+
+<p>Things have changed, and after listening Corey Latislaw advocating its usage during <a href="http://fragmentedpodcast.com/episodes/13/">this fragmented podcast episode</a> I wanted to give it a spin. Even if there is a bit of debate over its usage, mainly because tests are performed against mocked objects instead of the real framework code, it is the fastest lane to your tdd cycle because tests are run on the local jvm instead of being packed in an apk, deployed on a device and run over there.</p>
+
+<h2>Dependency Injection</h2>
+
+<p>One really cool thing about robolectric 3.0 is the fact that you can override the Application object declared in your manifest with a custom one (which can inherit from your application&rsquo;s one).</p>
+
+<p>If you are using dagger (or dagger 2) and you are using the application as the source of dependency injection for your classes, this allow to easily replace your injected objects with mocks. You can even choose which mocks inject in the setup phase of your tests.</p>
+
+<h2>Let&rsquo;s see an example:</h2>
+
+<p>Let&rsquo;s say you have your application class that exposes all the injected objects in a Dagger 2 fashion, and that you are using it to inject classes in your activities:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="nd">@Override</span>
+</span><span class='line'><span class="kd">protected</span> <span class="kt">void</span> <span class="nf">onCreate</span><span class="o">(</span><span class="n">Bundle</span> <span class="n">savedInstanceState</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>    <span class="c1">// stuff </span>
+</span><span class='line'>    <span class="o">((</span><span class="n">MyApplication</span><span class="o">)</span> <span class="n">getApplication</span><span class="o">()).</span><span class="na">getComponent</span><span class="o">().</span><span class="na">inject</span><span class="o">(</span><span class="k">this</span><span class="o">);</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now, if we can drive the component injected within our tests, the rest of the app would use them and (hopefully) behave in a way we expect, depending on our mocks instead of the real objects.</p>
+
+<p>The dependencies are provided by a module:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="nd">@Module</span>
+</span><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">ApplicationModule</span> <span class="o">{</span>
+</span><span class='line'>    <span class="c1">// stuff</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nd">@Provides</span>
+</span><span class='line'>    <span class="nd">@Singleton</span>
+</span><span class='line'>    <span class="n">GitHubClient</span> <span class="nf">provideClient</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="k">new</span> <span class="nf">GitHubClient</span><span class="o">(</span><span class="n">mApp</span><span class="o">.</span><span class="na">getApplicationContext</span><span class="o">());</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>    <span class="c1">// .. Provides other stuff</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>GitHubClient</code> is a Retrofit (2) powered client that helps to retrieve all the repos for a given user.</p>
+
+<p>By using a test only application, we can provide a module from our tests.</p>
+
+<p>Let&rsquo;s see ApplicationModule&rsquo;s mocked alter ego. Note that we can override only the dependencies that we want to mock:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">MockApplicationModule</span> <span class="kd">extends</span> <span class="n">ApplicationModule</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">List</span><span class="o">&lt;</span><span class="n">Repo</span><span class="o">&gt;</span> <span class="n">result</span><span class="o">;</span>
+</span><span class='line'>    <span class="c1">// stuff</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="n">GitHubClient</span> <span class="nf">provideClient</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">GitHubClient</span> <span class="n">client</span> <span class="o">=</span> <span class="n">mock</span><span class="o">(</span><span class="n">GitHubClient</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+</span><span class='line'>        <span class="c1">// mock behaviour</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">client</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setResult</span><span class="o">(</span><span class="n">List</span><span class="o">&lt;</span><span class="n">Repo</span><span class="o">&gt;</span> <span class="n">result</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">this</span><span class="o">.</span><span class="na">result</span> <span class="o">=</span> <span class="n">result</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now that everything is in place, we can use the mocked objects in our tests:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="nd">@RunWith</span><span class="o">(</span><span class="n">RobolectricGradleTestRunner</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
+</span><span class='line'><span class="nd">@Config</span><span class="o">(</span><span class="n">constants</span> <span class="o">=</span> <span class="n">BuildConfig</span><span class="o">.</span><span class="na">class</span><span class="o">,</span>
+</span><span class='line'>        <span class="n">application</span> <span class="o">=</span> <span class="n">TestApplication</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
+</span><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">SampleTest</span> <span class="o">{</span>
+</span><span class='line'>    <span class="nd">@Before</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setup</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">TestApplication</span> <span class="n">app</span> <span class="o">=</span> <span class="o">(</span><span class="n">TestApplication</span><span class="o">)</span> <span class="n">RuntimeEnvironment</span><span class="o">.</span><span class="na">application</span><span class="o">;</span>
+</span><span class='line'>        <span class="c1">// Setting up the mock module</span>
+</span><span class='line'>        <span class="n">MockApplicationModule</span> <span class="n">module</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">MockApplicationModule</span><span class="o">(</span><span class="n">app</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">module</span><span class="o">.</span><span class="na">setResult</span><span class="o">(</span><span class="n">mockedResult</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">app</span><span class="o">.</span><span class="na">setApplicationModule</span><span class="o">(</span><span class="n">module</span><span class="o">);</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>From now on, the our tested activities will be injected with our mocked github client and we will be able to test their behaviour.</p>
+
+<h2>Quirks</h2>
+
+<p>Since the Test Application object is created before running the tests, a default application module must be provided, otherwise you&rsquo;ll get a dreaded NPE while running your tests.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestApplication</span> <span class="kd">extends</span> <span class="n">MyApplication</span> <span class="o">{</span>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="n">ApplicationModule</span> <span class="nf">getApplicationModule</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">if</span> <span class="o">(</span><span class="n">mApplicationModule</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="k">return</span> <span class="kd">super</span><span class="o">.</span><span class="na">getApplicationModule</span><span class="o">();</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">mApplicationModule</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p></p>
+
+<p>moreover, the dependency graph is generally built inside the Application&rsquo;s onCreate method. Given that we want to recreate it with our mocked module, I had to add a method for that:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">MyApplication</span> <span class="kd">extends</span> <span class="n">Application</span> <span class="o">{</span>
+</span><span class='line'>    <span class="c1">// Stuff </span>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onCreate</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="kd">super</span><span class="o">.</span><span class="na">onCreate</span><span class="o">();</span>
+</span><span class='line'>        <span class="n">initComponent</span><span class="o">();</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kt">void</span> <span class="nf">initComponent</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">mComponent</span> <span class="o">=</span> <span class="n">DaggerRoboSampleComponent</span><span class="o">.</span><span class="na">builder</span><span class="o">()</span>
+</span><span class='line'>                <span class="o">.</span><span class="na">applicationModule</span><span class="o">(</span><span class="n">getApplicationModule</span><span class="o">())</span>
+</span><span class='line'>                <span class="o">.</span><span class="na">build</span><span class="o">();</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Conclusion</h2>
+
+<p>The fact that robolectric allows you to use a custom test application object (even a different one for different tests) together with dagger is an easy way to inject mock object without having to rely on ugly setters.</p>
+
+<p>Robolectric is a fast and effective way to speed up your tdd process. All the time spent to set the tests and the mocks app is well repaid in code coverage and writing and debugging speed afterwards.</p>
+
+<h2>See it in action (and have something to copy from)</h2>
+
+<p><a href="https://github.com/fedepaol/RobolectricDependenyInjection">Here on github</a> I put a working example that demonstrates how to inject a mocked module using robolectring.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[It's Been a While]]></title>
+    <link href="http://fedepaol.github.io/blog/2015/09/04/its-been-a-while/"/>
+    <updated>2015-09-04T23:13:14+02:00</updated>
+    <id>http://fedepaol.github.io/blog/2015/09/04/its-been-a-while</id>
+    <content type="html"><![CDATA[<h3>.. since my last blogpost.</h3>
+
+<p>I&rsquo;ve done a few things in the meanwhile, I wrote a game with LibGdx, I tinkered with various frameworks, but on top of all these things I&rsquo;ve been taking care of my one (and a half) year old daughter.</p>
+
+<p>I do certainly have less time to devote to side projects, but I still like to learn new things and Android is exciting from that point of view.</p>
+
+<p>While trying to catch up with all the new things that keep happening in the Android World, I hope I&rsquo;ll be able to post more often here.</p>
+
+<p>PS: I used this post to reacquatain myself with octopress</p>
+]]></content>
+  </entry>
+  
+  <entry>
     <title type="html"><![CDATA[Dragging With ViewDragHelper]]></title>
     <link href="http://fedepaol.github.io/blog/2014/09/01/dragging-with-viewdraghelper/"/>
     <updated>2014-09-01T20:48:20+02:00</updated>
     <id>http://fedepaol.github.io/blog/2014/09/01/dragging-with-viewdraghelper</id>
-    <content type="html"><![CDATA[<p><a href="https://developer.android.com/reference/android/support/v4/widget/ViewDragHelper.html">ViewDragHelper</a> is an helper class available on Support Library v4, that makes it easier to drag child views of a ViewGroup. It is used in the <a href="https://developer.android.com/design/patterns/navigation-drawer.html">NavigationDrawer</a> too.</p>
-
-<p>While working on my <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=909434">last side gig</a>, a patch to Firefox for Android to allow the urlbar to be dragged in order to show content hidden behind the main view, I had to deal with ViewDragHelper and understand how it works.</p>
+    <content type="html"><![CDATA[<p>While working on my <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=909434">last side gig</a>, a patch to Firefox for Android to allow the urlbar to be dragged in order to show content hidden behind the main view, I had to deal with ViewDragHelper and understand how it works.</p>
 
 <p>The final result (please note that the patch is still under review) is something like this:</p>
 
@@ -494,7 +1224,7 @@ I really hope this post does not contain too many errors and that you enjoyed re
 
 <p>but when I had to write a new blogpost and had to embed some code snippets into my blogger hosted blog, I got so pissed of that I chose to migrate my existing blog to a github hosted instance of octopress.</p>
 
-<p>Jason Jarrett made a pretty nice tutorial about the whole process <a href="http://staxmanade.com/2014/04/migrating-blogspot-to-octopress-part-1-introduction/i">here</a>.
+<p>Jason Jarrett made a pretty nice tutorial about the whole process <a href="http://staxmanade.com/2014/04/migrating-blogspot-to-octopress-part-1-introduction/">here</a>.
 However, I had to change a couple of things and I thought those might be helpful to anybody who faces the same problems.</p>
 
 <p>The overall process is something like:</p>
@@ -547,55 +1277,55 @@ import os
 
 
 def is_post(node):
-    t = node.find('{http://www.w3.org/2005/Atom}category').get('term')
-    d = node.find('{http://purl.org/atom/app#}control')
-    return (not d) and (t == 'http://schemas.google.com/blogger/2008/kind#post')
+    t = node.find(&#39;{http://www.w3.org/2005/Atom}category&#39;).get(&#39;term&#39;)
+    d = node.find(&#39;{http://purl.org/atom/app#}control&#39;)
+    return (not d) and (t == &#39;http://schemas.google.com/blogger/2008/kind#post&#39;)
 
 def get_posts_id(blogger_dump):
     title_map = {}
     tree = ET.parse(blogger_dump)
     elem = tree.getroot()
-    feed = elem.findall('{http://www.w3.org/2005/Atom}entry')
+    feed = elem.findall(&#39;{http://www.w3.org/2005/Atom}entry&#39;)
     for f in filter(is_post, feed):
-        post_id = f.find('{http://www.w3.org/2005/Atom}id')
-        id_number = post_id.text.split('-')[2]
-        post_title = f.find('{http://www.w3.org/2005/Atom}title').text
+        post_id = f.find(&#39;{http://www.w3.org/2005/Atom}id&#39;)
+        id_number = post_id.text.split(&#39;-&#39;)[2]
+        post_title = f.find(&#39;{http://www.w3.org/2005/Atom}title&#39;).text
         title_map[post_title] = id_number
     return title_map
 
 def inject_redirect(file_name, title_map):
     yaml_separator = 0
-    old_file = file_name + 'old'
+    old_file = file_name + &#39;old&#39;
     print file_name
     print old_file
     os.rename(file_name, old_file)
-    f = open(old_file, 'r')
-    n = open(file_name, 'w+')
+    f = open(old_file, &#39;r&#39;)
+    n = open(file_name, &#39;w+&#39;)
     for line in f:
-        if line == '---':
+        if line == &#39;---&#39;:
             yaml_separator = yaml_separator + 1
         if yaml_separator == 2:
             n.write(line)
             continue
-        if line.startswith('title'):
-            title = line.split('&quot;')[1]
+        if line.startswith(&#39;title&#39;):
+            title = line.split(&#39;&quot;&#39;)[1]
             try:
                 post_id = title_map[title]
-                n.write('redirect_from:\n')
-                n.write('  - /blog/%s/\n'%post_id)
+                n.write(&#39;redirect_from:\n&#39;)
+                n.write(&#39;  - /blog/%s/\n&#39;%post_id)
             except KeyError:
-                print 'id not found for ' + title
+                print &#39;id not found for &#39; + title
         n.write(line)
 
 def set_redirect(posts_path, titles_map):
     for file_name in os.listdir(posts_path):
-        if (file_name.endswith('html')):
+        if (file_name.endswith(&#39;html&#39;)):
             inject_redirect(os.path.join(posts_path, file_name), titles_map)
 
-if __name__ == '__main__':
+if __name__ == &#39;__main__&#39;:
     parser = argparse.ArgumentParser()
-    parser.add_argument('-p', '--posts', dest='posts_path', help='path of the converted _posts')
-    parser.add_argument('-b', '--blogger', dest='blogger_dump', help='blogger dump file')
+    parser.add_argument(&#39;-p&#39;, &#39;--posts&#39;, dest=&#39;posts_path&#39;, help=&#39;path of the converted _posts&#39;)
+    parser.add_argument(&#39;-b&#39;, &#39;--blogger&#39;, dest=&#39;blogger_dump&#39;, help=&#39;blogger dump file&#39;)
     args = parser.parse_args()
 
     titles_map = get_posts_id(args.blogger_dump)
@@ -854,54 +1584,6 @@ This time, while PastTimer has not been released yet, I started an experiment wi
     <id>http://fedepaol.github.io/blog/2011/10/18/new-app-android-kitchen-timer</id>
     <content type="html"><![CDATA[<div class='post'>
 Pastimer is my 4th app. It&#8217;s a simple (but nice) Android Kitchen Timer based on barcode scanning.<br /><br />I learned some things during my journey of android development, but this time I wanted to focus on user interface and ease of use.<br /><br />As always, it starts as a simple idea, the you start putting some code in it, it&#8217;s &#8220;almost&#8221; working, and the difference between almost working and finished, is something like two months or more. I let it alone for more than two months.<br /><br />However, now it almost ready to be released, and it will very soon.<br /><br />The idea behind it is very simple.<br /><br />You point the barcode, the app looks in its internal database, and if it does know the time associated, starts a timer. If it does not recognize the barcode, it prompts the user asking to put the data.<br /><br />Sounds easy, doesn&#8217;t it? You can give a look at a couple of screenshots here&nbsp;<a href="https://sites.google.com/site/pastimerand/">Android Kitchen Timer</a></div>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[What I Have Been Working on.. Android Kitchen Timer]]></title>
-    <link href="http://fedepaol.github.io/blog/2011/06/24/what-i-have-been-working-on/"/>
-    <updated>2011-06-24T00:00:00+02:00</updated>
-    <id>http://fedepaol.github.io/blog/2011/06/24/what-i-have-been-working-on</id>
-    <content type="html"><![CDATA[<div class='post'>
-Apart from some rest, and reading some good books (like excellent Kent Beck&#8217;s Test Driven development by example, and &#8220;growing object-oriented software guided by tests&#8221;), I have been working on a new app in the last month or so.<br /><br />A week end locked at home because my gf was ill, was a good excuse to start a deep programming session. The app I am about to release (well, to be honest it still lacks all the nice ui parts, it just look like a bunch of grey buttons thrown on the screen) solves (or at least tries to simplify) a problem I have every time I need to cook pasta.<br /><br />Basically, if you need to cook some pasta (but this applies to every other boxed product), you need to put it in the boiling water and then look for the boiling time on the box, and set the timer with minutes and seconds on your phone.<br /><br />With my app you simply point the camera to the barcode of the box, and it automatically start a countdown for the right amount of time. Of course some data entry is needed, and if the barcode is not in the internal storage, the user will be asked to fill the name of the pasta and the correct boiling time.<br /><br />So, it&#8217;s a simplified timer for android, which should make easier and faster the countdown setting process.<br /><br />I really hope to release it soon, if you are interested and you want to be notified when I will release it, just throw me an email at fedepaol <at> gmail.com</at></div>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Behind Activities: Android, Services, Background Operations and Threads]]></title>
-    <link href="http://fedepaol.github.io/blog/2011/04/25/behind-activities-android-services/"/>
-    <updated>2011-04-25T00:00:00+02:00</updated>
-    <id>http://fedepaol.github.io/blog/2011/04/25/behind-activities-android-services</id>
-    <content type="html"><![CDATA[<div class='post'>
-This time I want to share something I learned about working in background on android.<br /><br />One of the biggest advantages of android over ios (or, at least, some ios version ago) is that your app is not sandboxed and can continue to live in background.<br /><br />To perform background (not visible) work, all you need to know is how to use android services.<br /><br />A service is a piece of an application that is allowed to be active even if the application is not in foreground anymore. The most commonly used example for describing a service is the music player, which need to continue to play music when your app is hidden by something else.<br /><br />First of all, I want to remark a concept I had some problems with: a service does not have any relationship with threads! The service shares the main (ui) thread with the rest of the components of the app. This means that, if your app is in foreground AND you have a service active AND your service performs some time consuming operations, it will affect the responsivness of the gui (and you don&#8217;t want to disappoint your user).<br />So, even if you are now able to perform some background work, if you expect it to be heavy, please move it inside a thread (or an asynctask) hosted by the service.<br /><br />Another advantage of bringing a service on board is that your application will gain priority over the other apps. Android prefers to kill processes that do not have active services. On the other hand, this means that you should use services carefully if you don&#8217;t want to drain your user&#8217;s battery. If you don&#8217;t need a service anymore, please kill it and restart it later (as pointed out from mark murphy in this old but interesting article: <a href="http://www.androidguys.com/2009/09/09/diamonds-are-forever-services-are-not/">http://www.androidguys.com/2009/09/09/diamonds-are-forever-services-are-not/</a>)<br /><br />Said that, I am now going to list some typical service usage patterns<br /><br /><ul><li><span class="Apple-style-span" style="color: red;">Listen and react to events from outside </span>which need to be handled even if the application is not active (and maybe when the device is idle), such as location variation, accelerometer, incoming calls and so on</li><li><span class="Apple-style-span" style="color: red;">Tasks that need to be performed periodically</span>, like polling a mail server every 15 minutes</li><li><span class="Apple-style-span" style="color: red;">Continuous tasks</span> (like playing a song, or sampling the location with a very narrow interval) that need to be performed in background</li></ul><br /><br />I would say the first two are similar, and the third needs to be handled in a different way.<br /><br /><br /><span class="Apple-style-span" style="font-size: large;"><b>One shot tasks</b></span><br />If you need one shot tasks (like downloading your email), you could:<br /><br /><ol><li>start a service with an <i>intent</i></li><li>return <i>START_NOT_STICKY</i> in its <i>onCommand</i> callback</li><li><div style="margin-bottom: 0px; margin-left: 0px; margin-right: 0px; margin-top: 0px;">start an <i>AsyncTask</i> to perform the heavy operations</div><div style="margin-bottom: 0px; margin-left: 0px; margin-right: 0px; margin-top: 0px;"><br /></div><div style="margin-bottom: 0px; margin-left: 0px; margin-right: 0px; margin-top: 0px;">OR</div></li></ol><br /><div style="text-align: center;"><b><span class="Apple-style-span" style="color: red;"><u>you can use an IntentService.&nbsp;</u></span></b></div><div style="text-align: center;"><br /></div>IntentServices are useful as much as they are little advertised.<br />If your service is an intentservice, it will be automatically hosted in its own thread. You can send it as many actions to be performed you want bundled in intents. They will be queued and handled one at a time.<br />You don&#8217;t even have to bother if you need to shut the service down. It will automatically shut down when you return from the <i>onHandleIntent</i> call.&nbsp;Much simple, isn&#8217;t it?<br /><br />Here are some simple scenarios for using intent services:<br /><br /><ul><li><span class="Apple-style-span" style="color: red;">Background operation triggered from user</span> (such as a button):&nbsp;Just pack the command in an intent, and launch the service with the intent.</li><li><span class="Apple-style-span" style="color: red;">React to some broadcast event</span> (such as some system broadcast event):&nbsp;Register a broadcast receiver in your manifest and then launch the intent service from its onReceive. You can&#8217;t handle long running operations in the broadcast receiver, there is a strict time limit in broadcast handling.</li><li><span class="Apple-style-span" style="color: red;">Perform periodic tasks</span>: Use an alarm manager and make it launch your intent service. I also remind you that using setInexactRepeating in this case will help your&nbsp;app to save more resources.</li></ul><br /><br /><b><span class="Apple-style-span" style="font-size: large;">Long running tasks</span></b><br /><br />If you need to need to perform long, continuous background operations, you have no options, and you need a classic service, returning <i>START_STICKY</i> in its <i>onCommand()</i> method.<br />Again, remember that in this case you need to perform time consuming operations inside a thread or an asynctask, because the service shares the same thread with the gui.<br /><br /><br /><br /><a name='more'></a><br /><br /><br />The next time I will try to write down some more practical stuff on how to implement activities and services communication.<br /><br /><br />If I wasn&#8217;t clear enough, if you broke your phone trying to implement this advices, or if you think I&#8217;d better shoot in my foot than writing this ugly stuff in a very poor engRish, drop me an email fedepaol <at> gmail.com .</at><br />If you liked this post, you can consider following me on twitter @fedepaol .<br /><br /><br />UPDATE: I am currently (23/01/2012) working on a library to be used to interact with a service using an intent service. In case you may be interested, you can find it here&nbsp;<a href="https://github.com/fedepaol/PostmanLib--Rings-Twice--Android">PostmanLib - Android webservice interaction</a><br /><br /><div><br /></div></div>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[First 18 Days of Pegdroid]]></title>
-    <link href="http://fedepaol.github.io/blog/2011/03/21/first-18-days-of-pegdroid/"/>
-    <updated>2011-03-21T00:00:00+01:00</updated>
-    <id>http://fedepaol.github.io/blog/2011/03/21/first-18-days-of-pegdroid</id>
-    <content type="html"><![CDATA[<div class='post'>
-It&#8217;s already been 18 days, and it&#8217;s time to make some considerations.<br /><br />For those who don&#8217;t know what pegdroid is, it&#8217;s a simple peg solitaire for android. I released it 18 days ago, it&#8217;s free and it&#8217;s basically ad-supported (but I don&#8217;t get much from that).<br /><br /><div>I integrated google analytics in my app, so I can get some help from the statistics I get every day. In the meanwhile, the market dashboard got updated and I also can see which kind of device are the most popular.</div><div><br /></div><div>At the moment, it was downloaded 1022 times (android developer console), and something like 7000 boards were played. Don&#8217;t know why, but it looks like it&#8217;s quite popular in minneapolis :-) .</div><div><br /></div><div>First, there was a huge (or so) number of accesses and downloads the first day (like 350 downloads), and then the number of downloads dropped considerably, as well as the number of accesses, that went from a considerable 1800, to an average of 300 accesses per day. I tried to tweet some news about the game, but I didn&#8217;t experience any noticeable effect.</div><div><br /></div><div>I then released the first update, because some users said it would have been better to have the score expressed in terms of remaing pegs, than in terms of pegs already eaten.</div><div><br /></div><div>With the second update I implemented the undo of the last move, which was a widely requested feature, and I fixed a sporadic crash some anonymous guy reported me.&nbsp;With this update (and not with the previous update) I had a spike in the download and access number, as you can see in the picture.<br /><br /><div class="separator" style="clear: both; text-align: center;"><a href="https://lh5.googleusercontent.com/-spugJcGq3ls/TYejCvV_CrI/AAAAAAAAE-A/fydCT3O9gBE/s1600/analytics.jpg" imageanchor="1" style="margin-left: 1em; margin-right: 1em;"><img border="0" height="90" src="https://lh5.googleusercontent.com/-spugJcGq3ls/TYejCvV_CrI/AAAAAAAAE-A/fydCT3O9gBE/s400/analytics.jpg" width="400" /></a></div><br /></div><div><br /></div><div>I am really curious on what drives the download number, at the moment I can only say that updates have a positive effect. The next move is to integrate some kind of social gaming platform (I am still evaluating)..<br /></div><div><br /></div><div>In any case, if you haven&#8217;t downloaded pegdroid yet, here you can find the link to the market:</div><div><br /></div><div><a href="https://market.android.com/details?id=com.whiterabbit.checkers">Pegdroid</a></div></div>
-<h2>Comments</h2>
-<div class='comments'>
-<div class='comment'>
-<div class='author'>Pharaviel</div>
-<div class='content'>
-Ti lascio un piccolo commento per ringraziarti del fantastico lavoro che hai fatto con GeoTagger per android, sono un fotoamatore e apprezzo molto di poter usare le funzioni di iphoto senza dover comprare un costosissimo gps per la mia fotocamera!<br />Darò volentieri uno sguardo a pegdroid visto che ogni tanto giochicchio con il telefono.<br /><br />Ok basta sproloqui, grazie ancora!</div>
-</div>
-</div>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[PegDroid - Android Simple Game]]></title>
-    <link href="http://fedepaol.github.io/blog/2011/03/03/pegdroid/"/>
-    <updated>2011-03-03T00:00:00+01:00</updated>
-    <id>http://fedepaol.github.io/blog/2011/03/03/pegdroid</id>
-    <content type="html"><![CDATA[<div class='post'>
-I just released a new game. It&#8217;s (yet another) version of the popular solitaire game. I thought its name was &#8220;Chinese checkers&#8221;, but it looks like it&#8217;s most common name is &#8220;Peg&#8221;. Anyway, it didn&#8217;t take (too) much to develop it, I really enjoyed learning something about the powerful andengine framework, but I am still proceeding at a slow pace since I can work on android only after my daytime job.<br /><div><br /></div><div>I am releasing it with ads, but in any case I think I will update the sources on github very soon. Now it&#8217;s quite late and I&#8217;m afraid to make some mistake. </div><div><br /></div><div>Good points: the framework and the assets. I think my favourite designer (yes, still my gf) has done a good job in drawing all the assets. Very far from what I would have been done alone.</div><div><br /></div><div>Another thing I tried to include in this app is google analytics. I can see which are the most played boards, and who downloads my app. I must say I am pretty curious.</div><div><br /></div><div>Next time I promise to post some technical stuff, for example how I handled andengine stuff in a more structured way in my new app. </div><div><br /></div><div>I will end including the demo video of PegDroid down here:</div><div><br /></div><div><br /><iframe allowfullscreen="" frameborder="0" height="390" src="http://www.youtube.com/embed/HOXvHJUKfb4" title="YouTube video player" width="480"></iframe></div></div>
 ]]></content>
   </entry>
   

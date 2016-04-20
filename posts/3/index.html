@@ -9,7 +9,7 @@
   <meta name="author" content="Federico Paolinelli">
 
   
-  <meta name="description" content="Another thing I always wanted to do was game programming. Moving objects and interacting with the game, as well as having fun with them, gives great &hellip;">
+  <meta name="description" content="Apart from some rest, and reading some good books (like excellent Kent Beck&#8217;s Test Driven development by example, and &#8220;growing object- &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -77,6 +77,134 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2011/06/24/what-i-have-been-working-on/">What I Have Been Working on.. Android Kitchen Timer</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2011-06-24'><span class='date'><span class='date-month'>Jun</span> <span class='date-day'>24</span><span class='date-suffix'>th</span>, <span class='date-year'>2011</span></span> <span class='time'>12:00 am</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><div class='post'>
+Apart from some rest, and reading some good books (like excellent Kent Beck&#8217;s Test Driven development by example, and &#8220;growing object-oriented software guided by tests&#8221;), I have been working on a new app in the last month or so.<br /><br />A week end locked at home because my gf was ill, was a good excuse to start a deep programming session. The app I am about to release (well, to be honest it still lacks all the nice ui parts, it just look like a bunch of grey buttons thrown on the screen) solves (or at least tries to simplify) a problem I have every time I need to cook pasta.<br /><br />Basically, if you need to cook some pasta (but this applies to every other boxed product), you need to put it in the boiling water and then look for the boiling time on the box, and set the timer with minutes and seconds on your phone.<br /><br />With my app you simply point the camera to the barcode of the box, and it automatically start a countdown for the right amount of time. Of course some data entry is needed, and if the barcode is not in the internal storage, the user will be asked to fill the name of the pasta and the correct boiling time.<br /><br />So, it&#8217;s a simplified timer for android, which should make easier and faster the countdown setting process.<br /><br />I really hope to release it soon, if you are interested and you want to be notified when I will release it, just throw me an email at fedepaol <at> gmail.com</at></div>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2011/04/25/behind-activities-android-services/">Behind Activities: Android, Services, Background Operations and Threads</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2011-04-25'><span class='date'><span class='date-month'>Apr</span> <span class='date-day'>25</span><span class='date-suffix'>th</span>, <span class='date-year'>2011</span></span> <span class='time'>12:00 am</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><div class='post'>
+This time I want to share something I learned about working in background on android.<br /><br />One of the biggest advantages of android over ios (or, at least, some ios version ago) is that your app is not sandboxed and can continue to live in background.<br /><br />To perform background (not visible) work, all you need to know is how to use android services.<br /><br />A service is a piece of an application that is allowed to be active even if the application is not in foreground anymore. The most commonly used example for describing a service is the music player, which need to continue to play music when your app is hidden by something else.<br /><br />First of all, I want to remark a concept I had some problems with: a service does not have any relationship with threads! The service shares the main (ui) thread with the rest of the components of the app. This means that, if your app is in foreground AND you have a service active AND your service performs some time consuming operations, it will affect the responsivness of the gui (and you don&#8217;t want to disappoint your user).<br />So, even if you are now able to perform some background work, if you expect it to be heavy, please move it inside a thread (or an asynctask) hosted by the service.<br /><br />Another advantage of bringing a service on board is that your application will gain priority over the other apps. Android prefers to kill processes that do not have active services. On the other hand, this means that you should use services carefully if you don&#8217;t want to drain your user&#8217;s battery. If you don&#8217;t need a service anymore, please kill it and restart it later (as pointed out from mark murphy in this old but interesting article: <a href="http://www.androidguys.com/2009/09/09/diamonds-are-forever-services-are-not/">http://www.androidguys.com/2009/09/09/diamonds-are-forever-services-are-not/</a>)<br /><br />Said that, I am now going to list some typical service usage patterns<br /><br /><ul><li><span class="Apple-style-span" style="color: red;">Listen and react to events from outside </span>which need to be handled even if the application is not active (and maybe when the device is idle), such as location variation, accelerometer, incoming calls and so on</li><li><span class="Apple-style-span" style="color: red;">Tasks that need to be performed periodically</span>, like polling a mail server every 15 minutes</li><li><span class="Apple-style-span" style="color: red;">Continuous tasks</span> (like playing a song, or sampling the location with a very narrow interval) that need to be performed in background</li></ul><br /><br />I would say the first two are similar, and the third needs to be handled in a different way.<br /><br /><br /><span class="Apple-style-span" style="font-size: large;"><b>One shot tasks</b></span><br />If you need one shot tasks (like downloading your email), you could:<br /><br /><ol><li>start a service with an <i>intent</i></li><li>return <i>START_NOT_STICKY</i> in its <i>onCommand</i> callback</li><li><div style="margin-bottom: 0px; margin-left: 0px; margin-right: 0px; margin-top: 0px;">start an <i>AsyncTask</i> to perform the heavy operations</div><div style="margin-bottom: 0px; margin-left: 0px; margin-right: 0px; margin-top: 0px;"><br /></div><div style="margin-bottom: 0px; margin-left: 0px; margin-right: 0px; margin-top: 0px;">OR</div></li></ol><br /><div style="text-align: center;"><b><span class="Apple-style-span" style="color: red;"><u>you can use an IntentService.&nbsp;</u></span></b></div><div style="text-align: center;"><br /></div>IntentServices are useful as much as they are little advertised.<br />If your service is an intentservice, it will be automatically hosted in its own thread. You can send it as many actions to be performed you want bundled in intents. They will be queued and handled one at a time.<br />You don&#8217;t even have to bother if you need to shut the service down. It will automatically shut down when you return from the <i>onHandleIntent</i> call.&nbsp;Much simple, isn&#8217;t it?<br /><br />Here are some simple scenarios for using intent services:<br /><br /><ul><li><span class="Apple-style-span" style="color: red;">Background operation triggered from user</span> (such as a button):&nbsp;Just pack the command in an intent, and launch the service with the intent.</li><li><span class="Apple-style-span" style="color: red;">React to some broadcast event</span> (such as some system broadcast event):&nbsp;Register a broadcast receiver in your manifest and then launch the intent service from its onReceive. You can&#8217;t handle long running operations in the broadcast receiver, there is a strict time limit in broadcast handling.</li><li><span class="Apple-style-span" style="color: red;">Perform periodic tasks</span>: Use an alarm manager and make it launch your intent service. I also remind you that using setInexactRepeating in this case will help your&nbsp;app to save more resources.</li></ul><br /><br /><b><span class="Apple-style-span" style="font-size: large;">Long running tasks</span></b><br /><br />If you need to need to perform long, continuous background operations, you have no options, and you need a classic service, returning <i>START_STICKY</i> in its <i>onCommand()</i> method.<br />Again, remember that in this case you need to perform time consuming operations inside a thread or an asynctask, because the service shares the same thread with the gui.<br /><br /><br /><br /><a name='more'></a><br /><br /><br />The next time I will try to write down some more practical stuff on how to implement activities and services communication.<br /><br /><br />If I wasn&#8217;t clear enough, if you broke your phone trying to implement this advices, or if you think I&#8217;d better shoot in my foot than writing this ugly stuff in a very poor engRish, drop me an email fedepaol <at> gmail.com .</at><br />If you liked this post, you can consider following me on twitter @fedepaol .<br /><br /><br />UPDATE: I am currently (23/01/2012) working on a library to be used to interact with a service using an intent service. In case you may be interested, you can find it here&nbsp;<a href="https://github.com/fedepaol/PostmanLib--Rings-Twice--Android">PostmanLib - Android webservice interaction</a><br /><br /><div><br /></div></div>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2011/03/21/first-18-days-of-pegdroid/">First 18 Days of Pegdroid</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2011-03-21'><span class='date'><span class='date-month'>Mar</span> <span class='date-day'>21</span><span class='date-suffix'>st</span>, <span class='date-year'>2011</span></span> <span class='time'>12:00 am</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><div class='post'>
+It&#8217;s already been 18 days, and it&#8217;s time to make some considerations.<br /><br />For those who don&#8217;t know what pegdroid is, it&#8217;s a simple peg solitaire for android. I released it 18 days ago, it&#8217;s free and it&#8217;s basically ad-supported (but I don&#8217;t get much from that).<br /><br /><div>I integrated google analytics in my app, so I can get some help from the statistics I get every day. In the meanwhile, the market dashboard got updated and I also can see which kind of device are the most popular.</div><div><br /></div><div>At the moment, it was downloaded 1022 times (android developer console), and something like 7000 boards were played. Don&#8217;t know why, but it looks like it&#8217;s quite popular in minneapolis :-) .</div><div><br /></div><div>First, there was a huge (or so) number of accesses and downloads the first day (like 350 downloads), and then the number of downloads dropped considerably, as well as the number of accesses, that went from a considerable 1800, to an average of 300 accesses per day. I tried to tweet some news about the game, but I didn&#8217;t experience any noticeable effect.</div><div><br /></div><div>I then released the first update, because some users said it would have been better to have the score expressed in terms of remaing pegs, than in terms of pegs already eaten.</div><div><br /></div><div>With the second update I implemented the undo of the last move, which was a widely requested feature, and I fixed a sporadic crash some anonymous guy reported me.&nbsp;With this update (and not with the previous update) I had a spike in the download and access number, as you can see in the picture.<br /><br /><div class="separator" style="clear: both; text-align: center;"><a href="https://lh5.googleusercontent.com/-spugJcGq3ls/TYejCvV_CrI/AAAAAAAAE-A/fydCT3O9gBE/s1600/analytics.jpg" imageanchor="1" style="margin-left: 1em; margin-right: 1em;"><img border="0" height="90" src="https://lh5.googleusercontent.com/-spugJcGq3ls/TYejCvV_CrI/AAAAAAAAE-A/fydCT3O9gBE/s400/analytics.jpg" width="400" /></a></div><br /></div><div><br /></div><div>I am really curious on what drives the download number, at the moment I can only say that updates have a positive effect. The next move is to integrate some kind of social gaming platform (I am still evaluating)..<br /></div><div><br /></div><div>In any case, if you haven&#8217;t downloaded pegdroid yet, here you can find the link to the market:</div><div><br /></div><div><a href="https://market.android.com/details?id=com.whiterabbit.checkers">Pegdroid</a></div></div>
+<h2>Comments</h2>
+<div class='comments'>
+<div class='comment'>
+<div class='author'>Pharaviel</div>
+<div class='content'>
+Ti lascio un piccolo commento per ringraziarti del fantastico lavoro che hai fatto con GeoTagger per android, sono un fotoamatore e apprezzo molto di poter usare le funzioni di iphoto senza dover comprare un costosissimo gps per la mia fotocamera!<br />Darò volentieri uno sguardo a pegdroid visto che ogni tanto giochicchio con il telefono.<br /><br />Ok basta sproloqui, grazie ancora!</div>
+</div>
+</div>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2011/03/03/pegdroid/">PegDroid - Android Simple Game</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2011-03-03'><span class='date'><span class='date-month'>Mar</span> <span class='date-day'>3</span><span class='date-suffix'>rd</span>, <span class='date-year'>2011</span></span> <span class='time'>12:00 am</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><div class='post'>
+I just released a new game. It&#8217;s (yet another) version of the popular solitaire game. I thought its name was &#8220;Chinese checkers&#8221;, but it looks like it&#8217;s most common name is &#8220;Peg&#8221;. Anyway, it didn&#8217;t take (too) much to develop it, I really enjoyed learning something about the powerful andengine framework, but I am still proceeding at a slow pace since I can work on android only after my daytime job.<br /><div><br /></div><div>I am releasing it with ads, but in any case I think I will update the sources on github very soon. Now it&#8217;s quite late and I&#8217;m afraid to make some mistake. </div><div><br /></div><div>Good points: the framework and the assets. I think my favourite designer (yes, still my gf) has done a good job in drawing all the assets. Very far from what I would have been done alone.</div><div><br /></div><div>Another thing I tried to include in this app is google analytics. I can see which are the most played boards, and who downloads my app. I must say I am pretty curious.</div><div><br /></div><div>Next time I promise to post some technical stuff, for example how I handled andengine stuff in a more structured way in my new app. </div><div><br /></div><div>I will end including the demo video of PegDroid down here:</div><div><br /></div><div><br /><iframe allowfullscreen="" frameborder="0" height="390" src="http://www.youtube.com/embed/HOXvHJUKfb4" title="YouTube video player" width="480"></iframe></div></div>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -266,140 +394,9 @@ EDIT 11/11/2012: as described in <a href="/blog/2012/11/11/android-content-provi
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2010/11/10/something-more-about-me/">Something More About Me...</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2010-11-10'><span class='date'><span class='date-month'>Nov</span> <span class='date-day'>10</span><span class='date-suffix'>th</span>, <span class='date-year'>2010</span></span> <span class='time'>12:00 am</span></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><div class='post'>
-Well, maintaining a blog looks harder than I thought, but this is another attempt to keep it alive.<br /><br />I&#8217;ll say something more about me, just to break the ice: I live in Italy, I am a software engineer, and my current employer is a company whose main products are related to finance.<br />I&#8217;m currently working to maintain and to evolve the brokerage platform of one major italian bank. After developing it&#8217;s main core components, I had the honor (?!?) of being promoted (!?) as responsible of any technical aspect of that platform. This is what I do during the day. It includes a lot of things other than coding, and I am not alone.<br /><br />However, this is not what this blog is about. This blog is about what I do in my spare time. And in my spare time, I like to learn new things.<br />It may sound weird to the most of you, but after working like 10 hours per day, I like to sit in front of my laptop and try new things (or read technical books).<br /><br />I has always been interested in mobile (as you may notice in one of the previous posts), and in the last year I started learning android development, I bought Reto Meier&#8217;s &#8220;Professional Android Development&#8221; in January and I published my first app in June. It&#8217;s quite a slow process, I know, but it was all done in my spare time (and I do sport, and I have a girlfriend as well).<br /><br />The next posts will be more technical, and will mostly involve android development.<br />Hope somebody will take advantage (or correct) and enjoy them.</div>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2010/07/06/its-been-long-time/">It's Been a Long Time...</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2010-07-06'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>6</span><span class='date-suffix'>th</span>, <span class='date-year'>2010</span></span> <span class='time'>12:00 am</span></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><div class='post'>
-A lot of things have changed since my last post, but some are still the same.<br />One of them is my curiosity and my passion for technologies.<br /><br />Why I am back here? Because I am trying to understand and develop some applications with Android framework, and I think it would be useful for me to have a place where collect the new things I learn. At the same time I hope these things will be useful for somebody out there.<br /><br />I am pretty new to Java, so please cut me some slack if you find some coding horror, but at the please time tell me what I could change to write a better and more correct code.<br /><br />    Federico<br /><br /><a id="publishButton" class="cssButton" href="javascript:void(0)" target="" onclick="if (this.className.indexOf(&quot;ubtn-disabled&quot;) == -1) {var e = document['stuffform'].publish;(e.length) ? e[0].click() : e.click(); if (window.event) window.event.cancelBubble = true; return false;}"><div class="cssButtonOuter"><div class="cssButtonMiddle"><div class="cssButtonInner"><br /></div></div></div></a></div>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2008/06/10/why-this-blog/">Why This Blog</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2008-06-10'><span class='date'><span class='date-month'>Jun</span> <span class='date-day'>10</span><span class='date-suffix'>th</span>, <span class='date-year'>2008</span></span> <span class='time'>12:00 am</span></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><div class='post'>
-I often try to do something with various tech stuff. I thought that this could be a nice place to share my experiences with others, and also a good place to write everything I will need in the future.<br /><br />At the moment I am trying to work on a little project using python interpreter for symbian applications&#8230;..</div>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2008/06/10/developing-python-on-symbian-from-linux/">Developing Python on Symbian From a Linux Box</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2008-06-10'><span class='date'><span class='date-month'>Jun</span> <span class='date-day'>10</span><span class='date-suffix'>th</span>, <span class='date-year'>2008</span></span> <span class='time'>12:00 am</span></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><div class='post'>
-Since my mobile device is a s60v3 one (Nokia E61), I found particulary difficult to develop any simple python script on the phone. The hardest thing to do was the write - test cycle.<br /><br />On linux you can&#8217;t simply send the file to the phone with obex, since it will be stored in your incoming messages.<br /><br />From the excellent<a href="http://www.mobilenin.com/"> Jürgen Scheible</a>&#8217;s tutorial website I discovered the existance of the nice putools for making easier the development cycle <a href="http://people.csail.mit.edu/kapu/symbian/python.html">here</a><br /><br />It allows you to sync and reload the scripts on the phone directly from the pc.<br /><br />Unfortunately, the instructions in the website are for a windows machine, but the whole tool is python based, so it is supposed do be (and it is) multiplatform.<br /><br />In the sync.config file you are asked to choose the right serial port over bluetooth file, which can be one of /dev/rfcommxx<br />ie: COM_PORT = &#8216;/dev/rfcomm2&#8217; instead of windows COMxx port<br /><br />The first problem I had then was related to a bug of my ubuntu distribution (8.04) described <a href="https://bugs.launchpad.net/ubuntu/+source/bluez-utils/+bug/227429">here</a>  which can be easly fixed installing the bluez-utils package from Debian Sid<br /><br />At this point, you can follow the instruction on the putools website by opening a serial port<br /><span style="font-family:trebuchet ms;"> $ sdptool add &#8211;channel=2 SP</span><br /><br /><span style="font-family:trebuchet ms;"> $ rfcomm listen rfcomm2 2 </span><br /><br />and launching the script on the phone and finally launching from another shell the push command from the pcfiles folder.</div>
-<h2>Comments</h2>
-<div class='comments'>
-<div class='comment'>
-<div class='author'>Deuce868</div>
-<div class='content'>
-nvm, got it working by changing the com port in the config from just 3 to the entire /dev&#8230; path<BR/><BR/>Thanks for the excellent post.</div>
-</div>
-<div class='comment'>
-<div class='author'>Deuce868</div>
-<div class='content'>
-Other than the bug in the ubuntu package, any idea why I&#8217;d get the &#8220;port not open&#8221; exception? <BR/><BR/>I&#8217;m running intrepid which has the updated bluez-utils package, but wheneven I try push I get:<BR/>python push<BR/>file /home/rharding/.push/config<BR/>Connecting to serial port /dev/ttyS2<BR/>Traceback (most recent call last):<BR/>  File &#8220;push&#8221;, line 75, in module<BR/>    main()<BR/>  File &#8220;push&#8221;, line 55, in main<BR/>    app = App(0)<BR/>  File &#8220;/usr/lib/python2.5/site-packages/wx-2.8-gtk2-unicode/wx/_core.py&#8221;, line 7912, in __init__<BR/>    self._BootstrapApp()<BR/>  File &#8220;/usr/lib/python2.5/site-packages/wx-2.8-gtk2-unicode/wx/_core.py&#8221;, line 7487, in _BootstrapApp<BR/>    return _core_.PyApp__BootstrapApp(*args, **kwargs)<BR/>  File &#8220;push&#8221;, line 38, in OnInit<BR/>    title=&#8217;push&#8217; )<BR/>  File &#8220;/home/rharding/Desktop/putools/pcfiles/phoneshell.py&#8221;, line 56, in __init__<BR/>    *args, **kwds)<BR/>  File &#8220;/home/rharding/Desktop/putools/pcfiles/phoneshell.py&#8221;, line 243, in __init__<BR/>    *args, **kwds)<BR/>  File &#8220;/home/rharding/Desktop/putools/pcfiles/btinterpreter.py&#8221;, line 105, in __init__<BR/>    self.bt.send( &#8216;reset&#8217; )<BR/>  File &#8220;/home/rharding/Desktop/putools/pcfiles/../libs/phcomm.py&#8221;, line 339, in send<BR/>    self.write( cmd )<BR/>  File &#8220;/home/rharding/Desktop/putools/pcfiles/../libs/phcomm.py&#8221;, line 367, in write<BR/>    self.sock.send(msg)<BR/>  File &#8220;/home/rharding/Desktop/putools/pcfiles/../libs/phcomm.py&#8221;, line 147, in send<BR/>    self.file.write( msg )<BR/>  File &#8220;/usr/lib/python2.5/site-packages/serial/serialposix.py&#8221;, line 328, in write<BR/>    if self.fd is None: raise portNotOpenError<BR/>serial.serialutil.SerialException: Port not open</div>
-</div>
-</div>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
+    
+      <a class="prev" href="/posts/4">&larr; Older</a>
     
     <a href="/blog/archives">Blog Archives</a>
     
@@ -419,23 +416,23 @@ Other than the bug in the ubuntu package, any idea why I&#8217;d get the &#8220;
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2016/01/01/cached-rest-requests-with-rxjava/">Subscribe It While It's Hot: Cached Rest Requests With RxJava</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/09/13/testing-rxjava-observables-subscriptions/">Unit Testing RxJava Observables and Subscriptions</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/09/05/mocking-with-robolectric-and-dagger-2/">Mocking With Robolectric and Dagger 2</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/09/04/its-been-a-while/">It's Been a While</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/09/01/dragging-with-viewdraghelper/">Dragging With ViewDragHelper</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/08/24/migrating-from-blogger-to-octopress-done/">Migrating From Blogger to Octopress (Done!)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/04/08/preloading-localized-data-in-sqllte/">Generating Preloaded Sqlite Data</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/02/20/rest-interaction-in-android/">Rest Interaction in Android</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/07/29/contributing-to-firefox-for-android/">Contributing to Firefox for Android</a>
       </li>
     
   </ul>
@@ -498,7 +495,7 @@ Other than the bug in the ubuntu package, any idea why I&#8217;d get the &#8220;
     </div>
   </div>
   <footer role="contentinfo"><p>
-  Copyright &copy; 2014 - Federico Paolinelli -
+  Copyright &copy; 2016 - Federico Paolinelli -
   <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
 </p>
 

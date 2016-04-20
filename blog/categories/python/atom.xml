@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Python | My little Android warehouse]]></title>
   <link href="http://fedepaol.github.io/blog/categories/python/atom.xml" rel="self"/>
   <link href="http://fedepaol.github.io/"/>
-  <updated>2014-09-01T23:13:00+02:00</updated>
+  <updated>2016-01-07T12:10:41+01:00</updated>
   <id>http://fedepaol.github.io/</id>
   <author>
     <name><![CDATA[Federico Paolinelli]]></name>
@@ -22,7 +22,7 @@
 
 <p>but when I had to write a new blogpost and had to embed some code snippets into my blogger hosted blog, I got so pissed of that I chose to migrate my existing blog to a github hosted instance of octopress.</p>
 
-<p>Jason Jarrett made a pretty nice tutorial about the whole process <a href="http://staxmanade.com/2014/04/migrating-blogspot-to-octopress-part-1-introduction/i">here</a>.
+<p>Jason Jarrett made a pretty nice tutorial about the whole process <a href="http://staxmanade.com/2014/04/migrating-blogspot-to-octopress-part-1-introduction/">here</a>.
 However, I had to change a couple of things and I thought those might be helpful to anybody who faces the same problems.</p>
 
 <p>The overall process is something like:</p>
@@ -73,55 +73,55 @@ import os
 
 
 def is_post(node):
-    t = node.find('{http://www.w3.org/2005/Atom}category').get('term')
-    d = node.find('{http://purl.org/atom/app#}control')
-    return (not d) and (t == 'http://schemas.google.com/blogger/2008/kind#post')
+    t = node.find(&#39;{http://www.w3.org/2005/Atom}category&#39;).get(&#39;term&#39;)
+    d = node.find(&#39;{http://purl.org/atom/app#}control&#39;)
+    return (not d) and (t == &#39;http://schemas.google.com/blogger/2008/kind#post&#39;)
 
 def get_posts_id(blogger_dump):
     title_map = {}
     tree = ET.parse(blogger_dump)
     elem = tree.getroot()
-    feed = elem.findall('{http://www.w3.org/2005/Atom}entry')
+    feed = elem.findall(&#39;{http://www.w3.org/2005/Atom}entry&#39;)
     for f in filter(is_post, feed):
-        post_id = f.find('{http://www.w3.org/2005/Atom}id')
-        id_number = post_id.text.split('-')[2]
-        post_title = f.find('{http://www.w3.org/2005/Atom}title').text
+        post_id = f.find(&#39;{http://www.w3.org/2005/Atom}id&#39;)
+        id_number = post_id.text.split(&#39;-&#39;)[2]
+        post_title = f.find(&#39;{http://www.w3.org/2005/Atom}title&#39;).text
         title_map[post_title] = id_number
     return title_map
 
 def inject_redirect(file_name, title_map):
     yaml_separator = 0
-    old_file = file_name + 'old'
+    old_file = file_name + &#39;old&#39;
     print file_name
     print old_file
     os.rename(file_name, old_file)
-    f = open(old_file, 'r')
-    n = open(file_name, 'w+')
+    f = open(old_file, &#39;r&#39;)
+    n = open(file_name, &#39;w+&#39;)
     for line in f:
-        if line == '---':
+        if line == &#39;---&#39;:
             yaml_separator = yaml_separator + 1
         if yaml_separator == 2:
             n.write(line)
             continue
-        if line.startswith('title'):
-            title = line.split('&quot;')[1]
+        if line.startswith(&#39;title&#39;):
+            title = line.split(&#39;&quot;&#39;)[1]
             try:
                 post_id = title_map[title]
-                n.write('redirect_from:\n')
-                n.write('  - /blog/%s/\n'%post_id)
+                n.write(&#39;redirect_from:\n&#39;)
+                n.write(&#39;  - /blog/%s/\n&#39;%post_id)
             except KeyError:
-                print 'id not found for ' + title
+                print &#39;id not found for &#39; + title
         n.write(line)
 
 def set_redirect(posts_path, titles_map):
     for file_name in os.listdir(posts_path):
-        if (file_name.endswith('html')):
+        if (file_name.endswith(&#39;html&#39;)):
             inject_redirect(os.path.join(posts_path, file_name), titles_map)
 
-if __name__ == '__main__':
+if __name__ == &#39;__main__&#39;:
     parser = argparse.ArgumentParser()
-    parser.add_argument('-p', '--posts', dest='posts_path', help='path of the converted _posts')
-    parser.add_argument('-b', '--blogger', dest='blogger_dump', help='blogger dump file')
+    parser.add_argument(&#39;-p&#39;, &#39;--posts&#39;, dest=&#39;posts_path&#39;, help=&#39;path of the converted _posts&#39;)
+    parser.add_argument(&#39;-b&#39;, &#39;--blogger&#39;, dest=&#39;blogger_dump&#39;, help=&#39;blogger dump file&#39;)
     args = parser.parse_args()
 
     titles_map = get_posts_id(args.blogger_dump)

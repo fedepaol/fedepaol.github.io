@@ -9,7 +9,7 @@
   <meta name="author" content="Federico Paolinelli">
 
   
-  <meta name="description" content="I have been curious about intellij since droicon uk 2011, where I noticed that some of the speakers were using IntelliJ instead of eclipse.A post &hellip;">
+  <meta name="description" content="Whenever I speak with another android developer, the occasional chat goes to &#8220;what did you develop?&#8221; question.Last time it happened at &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -77,6 +77,134 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/11/25/droidalone-reloaded/">DroidAlone - Reloaded</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2012-11-25'><span class='date'><span class='date-month'>Nov</span> <span class='date-day'>25</span><span class='date-suffix'>th</span>, <span class='date-year'>2012</span></span> <span class='time'>12:00 am</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><div class='post'>
+Whenever I speak with another android developer, the occasional chat goes to &#8220;what did you develop?&#8221; question.<br />Last time it happened at droidcon uk, and for the first time I felt something wasn&#8217;t completely right when I showed my DroidAlone app.<br /><br />DroidAlone is a useful app (so they say) that comes into play whenever you forget your phone at home. With a simple sms protected by a password choosen by the user, it can be activated. From that moment, it will start notifying you of any missed calls and sms. It also ships a lot of other nice features, such as phone location retrieval and auto reply via sms (if you want to inform the caller that he can reach you to another number).<br />The full description of DroidAlone can be found at&nbsp;<a href="http://www.fedepaolapps.com/app/droidalone/">Missed Calls for Android</a>&nbsp;.<br /><br />Everything seems to work well, it has a lot of good reviews and the few users are happy.<br />Except one thing. It looks (looked) like this:<br /><br /><div class="separator" style="clear: both; text-align: center;"><a href="http://www.fedepaolapps.com/wp-content/uploads/2012/09/main_screen1.jpg" imageanchor="1" style="margin-left: 1em; margin-right: 1em;"><img border="0" height="320" src="http://www.fedepaolapps.com/wp-content/uploads/2012/09/main_screen1.jpg" width="213" /></a></div><a href="http://www.blogger.com/"></a><span id="goog_1451563458"></span><span id="goog_1451563459"></span><br />It also had another view with the list of events. The other developer&#8217;s reaction was &#8220;ugh&#8221;. And then I realized that I can&#8217;t keep producing new stuff ignoring what I have around, especially if this is the case of the only app I manage to sell a bit.<br /><br />So, when I got home I decided to change the ui &#8220;just to make it more pleasant&#8221;. &nbsp;Then I opened the code, and I realized that my two year&#8217;s old code needed a bit more than a refresh.<br /><br />Here what was wrong:<br /><br /><ul><li>it used tabactivity, which is very old fashioned. I decided to add the actionbar.</li><li>from the event list view, you had to click on the item to see the details of the event. The details where shown into a dialog. Ugh (again). In the new version I wanted all the details to be visible since they are not so long.</li><li>All the properties of the views in the layouts where explicit. No styles anywhere. The color resources where &#8220;background_color&#8221;, or &#8220;title_color&#8221; instead of some name that remind you the color. I had to put a heavy hand on that.</li><li>I tried to use gridlayout a lot since it seem to be the more efficient way to dispose a layout.</li><li>There was no empty list information.</li><li>A lot of calls where deprecated. I switched to the most modern versions.</li><li>All the data was contained in a sqllite storage without using a content provider. I switched to using a content provider and a cursorloader, which ended up in a more compact code. I didn&#8217;t need anymore to use a broadcast to notify the ui that the data was changed.</li><li>DroidAlone uses broadcast receivers to be notified of incoming calls / sms. Even tough the sms receiver must be enabled because an activation sms can be received at anytime, the call receiver is needed only when the app is active. I then used the package manager to disable it when not needed.</li><li>I wanted to refactor a lot of code. A lot of brackets where on the new line instead of the same line of the method (a la C), and it bothered me a lot. I also trusted lint and changed a lot here and there.&nbsp;</li></ul><div><br /></div><div>Other than these things, I redraw (by my self) a lot of the assets using inkscape. Because I soon got bored to export the resources in 4 different resolutions folders, I wrote a simple python script to do that for me. You can find it <a href="https://gist.github.com/4127778">here</a>&nbsp;.</div><div><br /></div><div>More than that, I got REALLY REALLY bored while writing the content provider, so I ended up writing another python script to automatically generate the content provider for me, as described in my previous <a href="/blog/2012/11/11/android-content-providers-generator">post</a>. You can find the <a href="https://github.com/fedepaol/Android-sql-lite-helper">android content provider generator here</a>.&nbsp;</div><div><br /></div><div>Finally, I switched the project to maven because I am getting used to that solution, especially in case I want to add robolectric tests and keep working with intellij.</div><div><br /></div><div>The new version of the app hasn&#8217;t been released yet (I want to have it running for a while on my phone before releasing it, just to be sure that I didn&#8217;t break anything).</div><div><br /></div><div>This is how the new version will look like&nbsp;</div><div><br /></div><div class="separator" style="clear: both; text-align: center;"><a href="http://1.bp.blogspot.com/-KFbMTLsxs5w/ULKCXaGOnLI/AAAAAAAAJS4/CVeElRWX6wA/s1600/screen3.tiff" imageanchor="1" style="margin-left: 1em; margin-right: 1em;"><img border="0" height="320" src="http://1.bp.blogspot.com/-KFbMTLsxs5w/ULKCXaGOnLI/AAAAAAAAJS4/CVeElRWX6wA/s320/screen3.tiff" width="194" /></a></div><div class="separator" style="clear: both; text-align: center;"><br /></div><div class="separator" style="clear: both; text-align: left;">So, this is how a &#8220;little ui polishing&#8221; ended lasting more than two weeks (of my spare time). I am also glad that I think my old code is not that good. I like to think that I am better than two years ago.</div><div><br /></div><br /><div class="separator" style="clear: both; text-align: center;"><br /></div><br /></div>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/11/11/android-content-providers-generator/">Android Content Providers Generator</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2012-11-11'><span class='date'><span class='date-month'>Nov</span> <span class='date-day'>11</span><span class='date-suffix'>th</span>, <span class='date-year'>2012</span></span> <span class='time'>12:00 am</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><div class='post'>
+During the refactoring of my two years old app DroidAlone, I decided to try to access to the storage through a ContentProvider.<br /><br />Even if the official documentation warns that there is no need to use content providers if your app does not want to export it&#8217;s data against other apps, there are a bunch of advantages in using a content provider in your app.<br /><br />The main and more obvious advantage is that you can use a Loader with your data. Using loaders relieve you from managing the cursor, forgetting open cursors here and there and most of all, makes a lot easier for your ui to react to changes in your model. Well, more than easier, you don&#8217;t have to do anything.<br /><br />However, I am not writing this post to describe how to interact with an android content provider, nor how to implement a content provider. There are a lot of content provider tutorials out there that probably can explain how them work better than I could possibly ever do (and in a better English).<br /><br />I am writing this post because while writing the content provider, I got bored.<br />It&#8217;s a lot of code, always the same, that cannot be avoided, and you don&#8217;t have to add any value to it. The best thing you can do is not getting distracted and write it with no errors. And it&#8217;s loong (ok, not that long).<br /><br />Given the &#8220;boilerplateness&#8221; of this problem, I thought I could take off some dust from my old <a href="/blog/2010/11/18/my-sqllite-helper-builder">SqliteHelper builder script</a>&nbsp;and maybe make it able to generate the content provider class for me. And that&#8217;s what I did.<br /><br /><h3>Android Content Provider Generator</h3><br /><a href="https://github.com/fedepaol/Android-sql-lite-helper">https://github.com/fedepaol/Android-sql-lite-helper</a><br /><br />I added a couple of options to it, and now it can generate automatically for you (no more cut/paste, no more forgotten columns) the content provider class AND a client class with a bunch of methods you can use to add / update / delete / query your data.<br />A sample of the generated code is already included in the beta of my app and it seems to work properly.<br /><br />I won&#8217;t write any instructions or examples here, they are already in the github repo.<br /><b>All you need to know is that with a 10 rows text file that describes your data, you can generate the whole content provider</b>.<br /><br />As <a href="https://plus.google.com/105096943850026101634/posts/RTbp2zVPZQq">I wrote on G+</a>, it&#8217;s certainly not the most elegant piece of python I wrote, but it makes it&#8217;s job.<br /><br /><br /><br />If you liked this post (or my script), consider following me on twitter @fedepaol<br /><br /></div>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/10/29/droidconuk-2012/">DroidconUk 2012</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2012-10-29'><span class='date'><span class='date-month'>Oct</span> <span class='date-day'>29</span><span class='date-suffix'>th</span>, <span class='date-year'>2012</span></span> <span class='time'>12:00 am</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><div class='post'>
+Here I am, back again from my third DroidconUk experience.<br /><br /><div class="separator" style="clear: both; text-align: center;"><a href="http://1.bp.blogspot.com/-dfNEw8CwymY/UI7dRBZVlzI/AAAAAAAAJBw/JqUhyGTyHZE/s1600/IMG_20121029_204517.jpg" imageanchor="1" style="margin-left: 1em; margin-right: 1em;"><img border="0" height="240" src="http://1.bp.blogspot.com/-dfNEw8CwymY/UI7dRBZVlzI/AAAAAAAAJBw/JqUhyGTyHZE/s320/IMG_20121029_204517.jpg" width="320" /></a></div><br /><br />I can still remember explaining to my non tech friends what Android was the evening of the 1st droidcon, and since then it became a sort of ritual, a couple of days when I can take some rest from my day time job and take part to the community of some of the best android developers coming from all over the Europe.<br /><br /><div class="separator" style="clear: both; text-align: center;"><a href="http://1.bp.blogspot.com/-YsYHqWhHMHk/UI7eDIWeCqI/AAAAAAAAJCA/b3Dv80SwVLk/s1600/IMG_20121026_190855.jpg" imageanchor="1" style="margin-left: 1em; margin-right: 1em;"><img border="0" height="240" src="http://1.bp.blogspot.com/-YsYHqWhHMHk/UI7eDIWeCqI/AAAAAAAAJCA/b3Dv80SwVLk/s320/IMG_20121026_190855.jpg" width="320" /></a></div><br /><br /><br />It&#8217;s an (almost) cheap to flight from Pisa (IT) where I live to London, and I can always count on my architect friends from <a href="http://www.marcelmauer.eu/">Marcel Mauer</a> for accommodation.<br /><br /><br />My overall impression is that droidcon is getting better and better. It&#8217;s growing as much as the Android &nbsp;platform itself, and despite all the interesting talks the better part is still the people you can meet there BETWEEN the talks. Even if you are as shy and sociopath as I am.<br /><br /><br />Most of the talks where very instructive and I heard about a lot of new stuff I can reuse on my side projects.<br /><br /><br /><br />Here I will put a short list of what are the things I liked most (as a kind reminder for me but also for any occasional reader that lands on this page by chance).<br /><br /><br /><br /><h2>The talks:</h2><div class="separator" style="clear: both; text-align: center;"><a href="http://1.bp.blogspot.com/-cJwI92KmcAA/UI7hSI-I9wI/AAAAAAAAJDY/PcojASjug88/s1600/IMG_20121025_142744.jpg" imageanchor="1" style="margin-left: 1em; margin-right: 1em;"><img border="0" height="240" src="http://1.bp.blogspot.com/-cJwI92KmcAA/UI7hSI-I9wI/AAAAAAAAJDY/PcojASjug88/s320/IMG_20121025_142744.jpg" width="320" /></a></div><div><br /></div><div class="separator" style="clear: both; text-align: center;"></div><div><br /></div><div>I am not following a proper order if not the chronological one. I really enjoyed all the talks.</div><h3>The keynotes:</h3>It&#8217;s official. They are putting Android everywhere. Three keynotes for three Android related product which where not phones nor tablets.<br />- Ouya, the famous kickstarter funded android gaming console<br />- Vendscreen, an android based vending machine (!)<br />- Parrot android based car stereos.<br /><br /><h3>Building songkick for Android&nbsp;(<a href="https://speakerdeck.com/jdamcd/building-songkick-on-android">slides</a>):</h3>Askay and Jamie from Novoda show their professional approach to build the songkick app. A lot of interesting tips and best practices from them. Really liked the &#8220;writing good code is always faster than writing bad code&#8221; approach.<br /><br /><h3>Overcoming device fragmentation:</h3>Jan and Jon from SoundCloud had a bad time dealing with sound infrastructure in Android, especially from a multi device perspective.<br />It&#8217;s not an aspect of the platform I have never addressed that much, but I really enjoyed their story about going from the simple system call up to get the hands dirty with bringing on board ogg library through ndk. I also liked the fact that at first they tried to deal with java version, because it&#8217;s something I would do as well.<br /><br /><h3>The fly in app menu for designers and developers (<a href="https://speakerdeck.com/cyrilmottier/the-fly-in-app-menu-for-designers-and-developers">slides</a>):</h3>Cyril Mottier (&nbsp;we may remember him for Greendroid) made a gorgeous presentation on this navigation pattern which is getting more and more popular (but don&#8217;t use it just because it&#8217;s à la mode).<br />The presentation was a proper walkthrough on why and when one should use the new pattern (and when one shouldn&#8217;t). During the talk he gave a lot of tips on how the correct user experience should be. Very inspiring.<br />If you want to bring this pattern in your app and you can&#8217;t affort to develop it &#8220;in house&#8221; as Cyril did, there are a couple of libraries that implement it for us:<br /><a href="https://github.com/eddieringle/android-undergarment">https://github.com/eddieringle/android-undergarment</a><br /><a href="https://github.com/jfeinstein10/SlidingMenu">https://github.com/jfeinstein10/SlidingMenu</a><br /><a href="https://github.com/SimonVT/android-menudrawer">https://github.com/SimonVT/android-menudrawer</a><br /><br /><br /><h3>Beaming data to devices with nfc (<a href="http://www.slideshare.net/commonsguy/beaming-data-to-devices-with-nfc">slides</a>):</h3>Mark Murphy from CommonsWare introduced what (and how) can be done with an nfc enabled phone through a royalty free spy story. Interesting and funny as always, the talk of Mark is worth the ticket by itself (well, his talk and the free beers I had).<br />It&#8217;s a good starting point when I will look into nfc, which might be very soon.<br /><br /><br /><h3>Fast, user friendly and power efficient network communication with android (<a href="http://developer.sonymobile.com/downloads/documentation/fast-user-friendly-and-power-efficient-network-communication-on-android/">slides</a>):&nbsp;</h3>Another series of super tips from Erik Hellman on how you should perform networking in a proper manner.<br />Still, stuff I read here and there but still useful.<br />He also mentioned <a href="http://netty.io/">netty.io</a> library, which is something I should definitely check, since my current project involves plain socket operation and I implemented it my self (the android way).<br /><br /><br /><h3>Introduction to Google Tv (<a href="http://www.slideshare.net/OpenWorldForum/owf12paug-conf-days-google-tv-part-1-introduction-matt-gaunt-advocate-at-google">slides</a>):</h3><div>Google Tv looks to be the next big thing. I have never dig into the docs but it really looks like a new whole world. Apart from the different challenges that we can have developing a tv ui, I really like the idea of having it interact with our personal devices.</div><br /><br /><br /><h2>The libraries:</h2><br /><h3>Polaris (<a href="https://github.com/cyrilmottier/Polaris">link</a>):</h3><a href="http://android.cyrilmottier.com/">Cyril Mottier</a>&nbsp;(yes, still him) delighted us with Polaris, his map library to enhance the poor experience available from standard map apis.<br /><br /><h3>RoboSpice (<a href="https://github.com/octo-online/robospice">link</a>):</h3><div>The french guys from Octo (sorry I can&#8217;t remember the name of the speaker) presented their awesome RoboSpice library, a library to perform asynchronous jobs (and a lot more) on steroids.&nbsp;</div><div>I was really interested in this talk because of my previous attempt to build something (barely) similar with&nbsp;<a href="/blog/2012/01/postmanlib-android-and-rest-web.html">Postman Lib</a>&nbsp;. Unfortunately I never had time to polish it and it&#8217;s still an unfinished product. Moreover, the guys from Octo made a better job under every aspect of object reusing and performance, dealing with issues I would have never fix even if I took the library to a decent state. I am quite curious to dig into their code just for the fun of it :-)</div><div><br /></div><h3>OpenCv:</h3><div>Erik Hellman from Sony introduced how opencv library for computer vision can be (almost) easily integrated into an android app. Still, something I would always loved to play with, maybe I will if I get some extra spare time.</div><br /><br /><h3>NetMera (<a href="http://www.netmera.com/pages/web/home">link</a>):</h3>Well, this is not a real library, but it&#8217;s a brand new concept (at least, new to me) for a platform as an sdk. &nbsp;It was introduced by Friedger Muffke during his talk&nbsp;<a href="https://docs.google.com/presentation/d/1GjAWqrB-OrEtsoudPLMq1KUEwjSuPygHmNBjv1FEq0A/edit">&#8220;Serverless Android Applications&#8221;</a>. They provide a full remote backend without having you bother at all for it. Sounds like the holy grail for&nbsp;<i>developers with no time(tm)&nbsp;</i>but I don&#8217;t like the idea of having my code bound to a specific service.<br /><br /><br /><h2>Talks I missed:</h2><div>I was told that this talks were excellent:</div><div>- <a href="http://prezi.com/fh2uslbr1xs3/the-fragment-transition/">The fragment transition</a>&nbsp;by Corey Latislaw</div><div>- <a href="https://docs.google.com/presentation/d/1OcGVS5bci9jaYiI7uvXFf9asj5TS4xZa72LX-i8lEcs/present#slide=id.p25">Writing games for an Android video game console</a>&nbsp;by Al Sutton</div><div>- Proguard by Eric Lafortune</div><div>-&nbsp;Dynamic animations with custom views by Anders Ericsson</div><br /><br /><h2>Epilogue:</h2>I had a great time at droidcon, I really enjoyed it under every aspect (even though I suspect I still have to digest an hotdog of two from the dinner of Thursday). It really boosted my hunger for learning new things. As an immediate effect I decided to polish my old apps, those I developed three years ago which now look ugly and old (the code as well).<br /><br />See you next year, DroidConUk!<br /><br /><div class="separator" style="clear: both; text-align: center;"><a href="http://2.bp.blogspot.com/-yzyd64vYHrA/UI7eL43qhqI/AAAAAAAAJCI/Ua-AJTnGAu8/s1600/IMG_20121027_072842.jpg" imageanchor="1" style="margin-left: 1em; margin-right: 1em;"><img border="0" height="320" src="http://2.bp.blogspot.com/-yzyd64vYHrA/UI7eL43qhqI/AAAAAAAAJCI/Ua-AJTnGAu8/s320/IMG_20121027_072842.jpg" width="240" /></a></div><span style="font-size: x-small;">(This picture was taken at Liverpool Street while waiting for the bus to Stanstead Airport). Way too early for a Saturday morning.</span><br /><br /><br /></div>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/09/15/gridlayout-support-library-with-maven/">Gridlayout Support Library With Maven</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2012-09-15'><span class='date'><span class='date-month'>Sep</span> <span class='date-day'>15</span><span class='date-suffix'>th</span>, <span class='date-year'>2012</span></span> <span class='time'>12:00 am</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><div class='post'>
+<br /><span style="font-size: x-large;">EDIT 17/10/2012:</span><br />Gridlayout support is now working natively with maven android deployer. I strongly suggest to use it instead of my method.<br /><span style="font-size: x-large;"><br /></span><span style="font-size: x-large;">&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;</span><br /><span style="font-size: x-large;"><br /></span><br /><a href="http://developer.android.com/reference/android/widget/GridLayout.html">Gridlayout</a> has been introduced since api level 14, and is being suggested layout as a more efficient alternative over nested linear layouts and relative layout.<br /><br />It has also been recently added as part of the android support library, in order to have it available on older devices.<br /><br />Trying to use it in a maven setup is a bit tricky.<br />At the time of writing, the version added by <a href="https://github.com/mosabua/maven-android-sdk-deployer">maven android deployer</a> won&#8217;t work because of this <a href="https://github.com/mosabua/maven-android-sdk-deployer/issues/50">issue</a>&nbsp;.<br />The problem is, you can&#8217;t just add the jar because the library is intended to be an android project library, which means that brings with itself a couple of resources.<br /><br /><br />The error you might get is<br /><br /><b><span style="font-size: large;">java.lang.NoClassDefFoundError: android/support/v7/gridlayout/R$dimen</span></b><br /><br />I don&#8217;t know if the following is the best &#8220;mavenic&#8221; way to solve the problem, however it worked for me and I am sharing it here.<br /><br />What you need to do is to build your own apk lib to add to your maven repo to link against.<br /><br /><h3>Step 1: building an apk lib</h3><div>The information you can find on android maven plugin <a href="http://code.google.com/p/maven-android-plugin/wiki/ApkLib">website</a>&nbsp;wasn&#8217;t very clear to me. However they ship a couple of <a href="https://github.com/jayway/maven-android-plugin-samples/archives/stable">examples</a> you can take inspiration from.</div><div><br /></div><div><br /></div><div>Assuming that you have a proper ANDROID_HOME variable set up, and you already used maven android deployer to have a working setup, the first thing you have to do is to download the support library.&nbsp;</div><div>You will find it under $ANDROID_HOME/extras/android/support/v7/gridlayout</div><div><br /></div><div>Make your own copy somewhere else in your hard disk.</div><div><br /></div><div><br /></div><div>Now copy my pom.xml file:</div><!-- HTML generated using hilite.me --><br /><div style="background: #ffffff; background: white; border-width: .1em .1em .1em .8em; border: solid gray; color: black; overflow: auto; padding: .2em .6em; width: auto;"><pre style="line-height: 125%; margin: 0;"><span style="color: #507090;">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span><br /><span style="color: #007000;">&lt;project</span> <span style="color: #0000c0;">xmlns=</span><span style="background-color: #fff0f0;">"http://maven.apache.org/POM/4.0.0"</span> <span style="color: #0000c0;">xmlns:xsi=</span><span style="background-color: #fff0f0;">"http://www.w3.org/2001/XMLSchema-instance"</span><br />         <span style="color: #0000c0;">xsi:schemaLocation=</span><span style="background-color: #fff0f0;">"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd"</span><span style="color: #007000;">&gt;</span><br />    <span style="color: #007000;">&lt;modelVersion&gt;</span>4.0.0<span style="color: #007000;">&lt;/modelVersion&gt;</span><br /><br /><br />    <span style="color: #007000;">&lt;version&gt;</span>1.0.0-SNAPSHOT<span style="color: #007000;">&lt;/version&gt;</span><br />    <span style="color: #007000;">&lt;groupId&gt;</span>com.support.gridlayout<span style="color: #007000;">&lt;/groupId&gt;</span><br />    <span style="color: #007000;">&lt;artifactId&gt;</span>gridlayout_compat<span style="color: #007000;">&lt;/artifactId&gt;</span><br />    <span style="color: #007000;">&lt;packaging&gt;</span>apklib<span style="color: #007000;">&lt;/packaging&gt;</span><br />    <span style="color: #007000;">&lt;name&gt;</span>Gridlayout compatibility library<span style="color: #007000;">&lt;/name&gt;</span><br /><br />    <span style="color: #007000;">&lt;dependencies&gt;</span><br />        <span style="color: #007000;">&lt;dependency&gt;</span><br />            <span style="color: #007000;">&lt;groupId&gt;</span>android<span style="color: #007000;">&lt;/groupId&gt;</span><br />            <span style="color: #007000;">&lt;artifactId&gt;</span>android<span style="color: #007000;">&lt;/artifactId&gt;</span><br />            <span style="color: #007000;">&lt;scope&gt;</span>provided<span style="color: #007000;">&lt;/scope&gt;</span><br />            <span style="color: #007000;">&lt;version&gt;</span>4.0.3_r3<span style="color: #007000;">&lt;/version&gt;</span><br />        <span style="color: #007000;">&lt;/dependency&gt;</span><br /><br />        <span style="color: #007000;">&lt;dependency&gt;</span><br />            <span style="color: #007000;">&lt;groupId&gt;</span>com.grid<span style="color: #007000;">&lt;/groupId&gt;</span><br />            <span style="color: #007000;">&lt;artifactId&gt;</span>gridlayout<span style="color: #007000;">&lt;/artifactId&gt;</span><br />            <span style="color: #007000;">&lt;version&gt;</span>1.0<span style="color: #007000;">&lt;/version&gt;</span><br />        <span style="color: #007000;">&lt;/dependency&gt;</span><br />    <span style="color: #007000;">&lt;/dependencies&gt;</span><br /><br />    <span style="color: #007000;">&lt;build&gt;</span><br />        <span style="color: #007000;">&lt;plugins&gt;</span><br />            <span style="color: #007000;">&lt;plugin&gt;</span><br />                <span style="color: #007000;">&lt;groupId&gt;</span>com.jayway.maven.plugins.android.generation2<span style="color: #007000;">&lt;/groupId&gt;</span><br />                <span style="color: #007000;">&lt;version&gt;</span>3.1.1<span style="color: #007000;">&lt;/version&gt;</span><br />                <span style="color: #007000;">&lt;artifactId&gt;</span>android-maven-plugin<span style="color: #007000;">&lt;/artifactId&gt;</span><br />                <span style="color: #007000;">&lt;extensions&gt;</span>true<span style="color: #007000;">&lt;/extensions&gt;</span><br />            <span style="color: #007000;">&lt;/plugin&gt;</span><br />        <span style="color: #007000;">&lt;/plugins&gt;</span><br />    <span style="color: #007000;">&lt;/build&gt;</span><br />    <span style="color: #007000;">&lt;repositories&gt;</span><br />        <span style="color: #007000;">&lt;repository&gt;</span><br />            <span style="color: #007000;">&lt;id&gt;</span>repo<span style="color: #007000;">&lt;/id&gt;</span><br />            <span style="color: #007000;">&lt;releases&gt;</span><br />                <span style="color: #007000;">&lt;enabled&gt;</span>true<span style="color: #007000;">&lt;/enabled&gt;</span><br />                <span style="color: #007000;">&lt;checksumPolicy&gt;</span>ignore<span style="color: #007000;">&lt;/checksumPolicy&gt;</span><br />            <span style="color: #007000;">&lt;/releases&gt;</span><br />            <span style="color: #007000;">&lt;snapshots&gt;</span><br />                <span style="color: #007000;">&lt;enabled&gt;</span>false<span style="color: #007000;">&lt;/enabled&gt;</span><br />            <span style="color: #007000;">&lt;/snapshots&gt;</span><br />            <span style="color: #007000;">&lt;url&gt;</span>file://${project.basedir}/repo<span style="color: #007000;">&lt;/url&gt;</span><br />        <span style="color: #007000;">&lt;/repository&gt;</span><br />    <span style="color: #007000;">&lt;/repositories&gt;</span><br /><br /><span style="color: #007000;">&lt;/project&gt;</span><br /></pre></div><div><br /></div><div><br /></div><div>You will have another thing to do. Since you cannot include jar files directly but you have to specify them as depedencies, you can:</div><div><ul><li>refer to the jar provided by maven android deployer</li><li>have a dependency pointing a local repo, as described <a href="http://stackoverflow.com/questions/364114/can-i-add-jars-to-maven-2-build-classpath-without-installing-them">here</a></li></ul><div><br /></div></div><div>I chose the second approach.<br /><br />As you can see in the lower part of the pom file, I add a local repository.<br />You need to put the jar file in that repository. As suggested by the stackoverflow answer, you can let maven build it for you with<br /><!-- HTML generated using hilite.me --><br /><div style="background: #ffffff; background: white; border-width: .1em .1em .1em .8em; border: solid gray; color: black; overflow: auto; padding: .2em .6em; width: auto;"><pre style="line-height: 125%; margin: 0;">mvn install:install-file -DlocalRepositoryPath=repo -DcreateChecksum=true -Dpackaging=jar -Dfile=libs/android-support-v7-gridlayout.jar -DgroupId=com.grid -DartifactId=gridlayout -Dversion=1.0<br /></pre></div><br /><h3>Step 2: Including the apklib to your project</h3><br />Now you have your apklib ready to use. You can add it as a dependency in the pom.xml of your app<br /><br /><!-- HTML generated using hilite.me --><br /><div style="background: #ffffff; background: white; border-width: .1em .1em .1em .8em; border: solid gray; color: black; overflow: auto; padding: .2em .6em; width: auto;"><pre style="line-height: 125%; margin: 0;">       <span style="color: #007000;">&lt;dependency&gt;</span><br />          <span style="color: #007000;">&lt;groupId&gt;</span>com.support.gridlayout<span style="color: #007000;">&lt;/groupId&gt;</span><br />          <span style="color: #007000;">&lt;artifactId&gt;</span>gridlayout_compat<span style="color: #007000;">&lt;/artifactId&gt;</span><br />          <span style="color: #007000;">&lt;version&gt;</span>1.0.0-SNAPSHOT<span style="color: #007000;">&lt;/version&gt;</span><br />          <span style="color: #007000;">&lt;type&gt;</span>apklib<span style="color: #007000;">&lt;/type&gt;</span><br />        <span style="color: #007000;">&lt;/dependency&gt;</span><br /></pre></div><br /><br /><br />This costed me a couple of sleepless nights figuring out why it was not working&#8230;<br /><br /><h3>Edit:</h3><div>As markus pointed out in his comment, I forgot the last trivial step which is to run</div><div><i>mvn install&nbsp;</i><br /><i><br /></i><i><br /></i><i><br /></i><i><br /></i></div><h4>Epilogue:</h4><div>Please read the README file included in the gridlayout support library BEFORE trying to use it. It will save you a bit of extra headache.</div><div><br /></div><br />If you liked this post, you might be interested in following me on twitter <a href="https://twitter.com/fedepaol">@fedepaol</a><br /><br /><br /><br /></div><div><br /></div></div>
+<h2>Comments</h2>
+<div class='comments'>
+<div class='comment'>
+<div class='author'>Markus</div>
+<div class='content'>
+Last Step is mvn install.</div>
+</div>
+</div>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -276,134 +404,6 @@ Pastimer is my 4th app. It&#8217;s a simple (but nice) Android Kitchen Timer bas
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2011/06/24/what-i-have-been-working-on/">What I Have Been Working on.. Android Kitchen Timer</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2011-06-24'><span class='date'><span class='date-month'>Jun</span> <span class='date-day'>24</span><span class='date-suffix'>th</span>, <span class='date-year'>2011</span></span> <span class='time'>12:00 am</span></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><div class='post'>
-Apart from some rest, and reading some good books (like excellent Kent Beck&#8217;s Test Driven development by example, and &#8220;growing object-oriented software guided by tests&#8221;), I have been working on a new app in the last month or so.<br /><br />A week end locked at home because my gf was ill, was a good excuse to start a deep programming session. The app I am about to release (well, to be honest it still lacks all the nice ui parts, it just look like a bunch of grey buttons thrown on the screen) solves (or at least tries to simplify) a problem I have every time I need to cook pasta.<br /><br />Basically, if you need to cook some pasta (but this applies to every other boxed product), you need to put it in the boiling water and then look for the boiling time on the box, and set the timer with minutes and seconds on your phone.<br /><br />With my app you simply point the camera to the barcode of the box, and it automatically start a countdown for the right amount of time. Of course some data entry is needed, and if the barcode is not in the internal storage, the user will be asked to fill the name of the pasta and the correct boiling time.<br /><br />So, it&#8217;s a simplified timer for android, which should make easier and faster the countdown setting process.<br /><br />I really hope to release it soon, if you are interested and you want to be notified when I will release it, just throw me an email at fedepaol <at> gmail.com</at></div>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2011/04/25/behind-activities-android-services/">Behind Activities: Android, Services, Background Operations and Threads</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2011-04-25'><span class='date'><span class='date-month'>Apr</span> <span class='date-day'>25</span><span class='date-suffix'>th</span>, <span class='date-year'>2011</span></span> <span class='time'>12:00 am</span></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><div class='post'>
-This time I want to share something I learned about working in background on android.<br /><br />One of the biggest advantages of android over ios (or, at least, some ios version ago) is that your app is not sandboxed and can continue to live in background.<br /><br />To perform background (not visible) work, all you need to know is how to use android services.<br /><br />A service is a piece of an application that is allowed to be active even if the application is not in foreground anymore. The most commonly used example for describing a service is the music player, which need to continue to play music when your app is hidden by something else.<br /><br />First of all, I want to remark a concept I had some problems with: a service does not have any relationship with threads! The service shares the main (ui) thread with the rest of the components of the app. This means that, if your app is in foreground AND you have a service active AND your service performs some time consuming operations, it will affect the responsivness of the gui (and you don&#8217;t want to disappoint your user).<br />So, even if you are now able to perform some background work, if you expect it to be heavy, please move it inside a thread (or an asynctask) hosted by the service.<br /><br />Another advantage of bringing a service on board is that your application will gain priority over the other apps. Android prefers to kill processes that do not have active services. On the other hand, this means that you should use services carefully if you don&#8217;t want to drain your user&#8217;s battery. If you don&#8217;t need a service anymore, please kill it and restart it later (as pointed out from mark murphy in this old but interesting article: <a href="http://www.androidguys.com/2009/09/09/diamonds-are-forever-services-are-not/">http://www.androidguys.com/2009/09/09/diamonds-are-forever-services-are-not/</a>)<br /><br />Said that, I am now going to list some typical service usage patterns<br /><br /><ul><li><span class="Apple-style-span" style="color: red;">Listen and react to events from outside </span>which need to be handled even if the application is not active (and maybe when the device is idle), such as location variation, accelerometer, incoming calls and so on</li><li><span class="Apple-style-span" style="color: red;">Tasks that need to be performed periodically</span>, like polling a mail server every 15 minutes</li><li><span class="Apple-style-span" style="color: red;">Continuous tasks</span> (like playing a song, or sampling the location with a very narrow interval) that need to be performed in background</li></ul><br /><br />I would say the first two are similar, and the third needs to be handled in a different way.<br /><br /><br /><span class="Apple-style-span" style="font-size: large;"><b>One shot tasks</b></span><br />If you need one shot tasks (like downloading your email), you could:<br /><br /><ol><li>start a service with an <i>intent</i></li><li>return <i>START_NOT_STICKY</i> in its <i>onCommand</i> callback</li><li><div style="margin-bottom: 0px; margin-left: 0px; margin-right: 0px; margin-top: 0px;">start an <i>AsyncTask</i> to perform the heavy operations</div><div style="margin-bottom: 0px; margin-left: 0px; margin-right: 0px; margin-top: 0px;"><br /></div><div style="margin-bottom: 0px; margin-left: 0px; margin-right: 0px; margin-top: 0px;">OR</div></li></ol><br /><div style="text-align: center;"><b><span class="Apple-style-span" style="color: red;"><u>you can use an IntentService.&nbsp;</u></span></b></div><div style="text-align: center;"><br /></div>IntentServices are useful as much as they are little advertised.<br />If your service is an intentservice, it will be automatically hosted in its own thread. You can send it as many actions to be performed you want bundled in intents. They will be queued and handled one at a time.<br />You don&#8217;t even have to bother if you need to shut the service down. It will automatically shut down when you return from the <i>onHandleIntent</i> call.&nbsp;Much simple, isn&#8217;t it?<br /><br />Here are some simple scenarios for using intent services:<br /><br /><ul><li><span class="Apple-style-span" style="color: red;">Background operation triggered from user</span> (such as a button):&nbsp;Just pack the command in an intent, and launch the service with the intent.</li><li><span class="Apple-style-span" style="color: red;">React to some broadcast event</span> (such as some system broadcast event):&nbsp;Register a broadcast receiver in your manifest and then launch the intent service from its onReceive. You can&#8217;t handle long running operations in the broadcast receiver, there is a strict time limit in broadcast handling.</li><li><span class="Apple-style-span" style="color: red;">Perform periodic tasks</span>: Use an alarm manager and make it launch your intent service. I also remind you that using setInexactRepeating in this case will help your&nbsp;app to save more resources.</li></ul><br /><br /><b><span class="Apple-style-span" style="font-size: large;">Long running tasks</span></b><br /><br />If you need to need to perform long, continuous background operations, you have no options, and you need a classic service, returning <i>START_STICKY</i> in its <i>onCommand()</i> method.<br />Again, remember that in this case you need to perform time consuming operations inside a thread or an asynctask, because the service shares the same thread with the gui.<br /><br /><br /><br /><a name='more'></a><br /><br /><br />The next time I will try to write down some more practical stuff on how to implement activities and services communication.<br /><br /><br />If I wasn&#8217;t clear enough, if you broke your phone trying to implement this advices, or if you think I&#8217;d better shoot in my foot than writing this ugly stuff in a very poor engRish, drop me an email fedepaol <at> gmail.com .</at><br />If you liked this post, you can consider following me on twitter @fedepaol .<br /><br /><br />UPDATE: I am currently (23/01/2012) working on a library to be used to interact with a service using an intent service. In case you may be interested, you can find it here&nbsp;<a href="https://github.com/fedepaol/PostmanLib--Rings-Twice--Android">PostmanLib - Android webservice interaction</a><br /><br /><div><br /></div></div>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2011/03/21/first-18-days-of-pegdroid/">First 18 Days of Pegdroid</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2011-03-21'><span class='date'><span class='date-month'>Mar</span> <span class='date-day'>21</span><span class='date-suffix'>st</span>, <span class='date-year'>2011</span></span> <span class='time'>12:00 am</span></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><div class='post'>
-It&#8217;s already been 18 days, and it&#8217;s time to make some considerations.<br /><br />For those who don&#8217;t know what pegdroid is, it&#8217;s a simple peg solitaire for android. I released it 18 days ago, it&#8217;s free and it&#8217;s basically ad-supported (but I don&#8217;t get much from that).<br /><br /><div>I integrated google analytics in my app, so I can get some help from the statistics I get every day. In the meanwhile, the market dashboard got updated and I also can see which kind of device are the most popular.</div><div><br /></div><div>At the moment, it was downloaded 1022 times (android developer console), and something like 7000 boards were played. Don&#8217;t know why, but it looks like it&#8217;s quite popular in minneapolis :-) .</div><div><br /></div><div>First, there was a huge (or so) number of accesses and downloads the first day (like 350 downloads), and then the number of downloads dropped considerably, as well as the number of accesses, that went from a considerable 1800, to an average of 300 accesses per day. I tried to tweet some news about the game, but I didn&#8217;t experience any noticeable effect.</div><div><br /></div><div>I then released the first update, because some users said it would have been better to have the score expressed in terms of remaing pegs, than in terms of pegs already eaten.</div><div><br /></div><div>With the second update I implemented the undo of the last move, which was a widely requested feature, and I fixed a sporadic crash some anonymous guy reported me.&nbsp;With this update (and not with the previous update) I had a spike in the download and access number, as you can see in the picture.<br /><br /><div class="separator" style="clear: both; text-align: center;"><a href="https://lh5.googleusercontent.com/-spugJcGq3ls/TYejCvV_CrI/AAAAAAAAE-A/fydCT3O9gBE/s1600/analytics.jpg" imageanchor="1" style="margin-left: 1em; margin-right: 1em;"><img border="0" height="90" src="https://lh5.googleusercontent.com/-spugJcGq3ls/TYejCvV_CrI/AAAAAAAAE-A/fydCT3O9gBE/s400/analytics.jpg" width="400" /></a></div><br /></div><div><br /></div><div>I am really curious on what drives the download number, at the moment I can only say that updates have a positive effect. The next move is to integrate some kind of social gaming platform (I am still evaluating)..<br /></div><div><br /></div><div>In any case, if you haven&#8217;t downloaded pegdroid yet, here you can find the link to the market:</div><div><br /></div><div><a href="https://market.android.com/details?id=com.whiterabbit.checkers">Pegdroid</a></div></div>
-<h2>Comments</h2>
-<div class='comments'>
-<div class='comment'>
-<div class='author'>Pharaviel</div>
-<div class='content'>
-Ti lascio un piccolo commento per ringraziarti del fantastico lavoro che hai fatto con GeoTagger per android, sono un fotoamatore e apprezzo molto di poter usare le funzioni di iphoto senza dover comprare un costosissimo gps per la mia fotocamera!<br />Darò volentieri uno sguardo a pegdroid visto che ogni tanto giochicchio con il telefono.<br /><br />Ok basta sproloqui, grazie ancora!</div>
-</div>
-</div>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2011/03/03/pegdroid/">PegDroid - Android Simple Game</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2011-03-03'><span class='date'><span class='date-month'>Mar</span> <span class='date-day'>3</span><span class='date-suffix'>rd</span>, <span class='date-year'>2011</span></span> <span class='time'>12:00 am</span></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><div class='post'>
-I just released a new game. It&#8217;s (yet another) version of the popular solitaire game. I thought its name was &#8220;Chinese checkers&#8221;, but it looks like it&#8217;s most common name is &#8220;Peg&#8221;. Anyway, it didn&#8217;t take (too) much to develop it, I really enjoyed learning something about the powerful andengine framework, but I am still proceeding at a slow pace since I can work on android only after my daytime job.<br /><div><br /></div><div>I am releasing it with ads, but in any case I think I will update the sources on github very soon. Now it&#8217;s quite late and I&#8217;m afraid to make some mistake. </div><div><br /></div><div>Good points: the framework and the assets. I think my favourite designer (yes, still my gf) has done a good job in drawing all the assets. Very far from what I would have been done alone.</div><div><br /></div><div>Another thing I tried to include in this app is google analytics. I can see which are the most played boards, and who downloads my app. I must say I am pretty curious.</div><div><br /></div><div>Next time I promise to post some technical stuff, for example how I handled andengine stuff in a more structured way in my new app. </div><div><br /></div><div>I will end including the demo video of PegDroid down here:</div><div><br /></div><div><br /><iframe allowfullscreen="" frameborder="0" height="390" src="http://www.youtube.com/embed/HOXvHJUKfb4" title="YouTube video player" width="480"></iframe></div></div>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/3">&larr; Older</a>
@@ -426,23 +426,23 @@ I just released a new game. It&#8217;s (yet another) version of the popular soli
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2016/01/01/cached-rest-requests-with-rxjava/">Subscribe It While It's Hot: Cached Rest Requests With RxJava</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/09/13/testing-rxjava-observables-subscriptions/">Unit Testing RxJava Observables and Subscriptions</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/09/05/mocking-with-robolectric-and-dagger-2/">Mocking With Robolectric and Dagger 2</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/09/04/its-been-a-while/">It's Been a While</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/09/01/dragging-with-viewdraghelper/">Dragging With ViewDragHelper</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/08/24/migrating-from-blogger-to-octopress-done/">Migrating From Blogger to Octopress (Done!)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/04/08/preloading-localized-data-in-sqllte/">Generating Preloaded Sqlite Data</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/02/20/rest-interaction-in-android/">Rest Interaction in Android</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/07/29/contributing-to-firefox-for-android/">Contributing to Firefox for Android</a>
       </li>
     
   </ul>
@@ -505,7 +505,7 @@ I just released a new game. It&#8217;s (yet another) version of the popular soli
     </div>
   </div>
   <footer role="contentinfo"><p>
-  Copyright &copy; 2014 - Federico Paolinelli -
+  Copyright &copy; 2016 - Federico Paolinelli -
   <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
 </p>
 
