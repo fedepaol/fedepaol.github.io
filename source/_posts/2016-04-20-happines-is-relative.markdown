@@ -1,7 +1,7 @@
 ---
 layout: post
-title: "Everything is relative"
-date: 2016-04-05 06:34:46 +0200
+title: "Happines is (a) relative (layout)"
+date: 2016-04-20 06:34:46 +0200
 comments: true
 categories: 
  - android
@@ -27,6 +27,8 @@ What will happen here is that with this unharmful scenario the `onMeasure()` met
 Given that Android is an open source framework, I could satisfy my curiosity by digging into the source code. Here I will try to provide a high level explanation of my understanding on how it works, without going too much into the details.
 
 Let's pretend you want four children (A, B, C, D) for your layout, and the rules are the following:
+
+
 * A is above C
 * B is to right of A
 * D is below B and its right margin is aligned to B
@@ -35,7 +37,7 @@ Let's pretend you want four children (A, B, C, D) for your layout, and the rules
 {% img center /images/relative_sample.png 200 %}
 
 
-The concept behind RelativeLayout is fairly simple. **In order to measure (and place) a certain child, you need to measure (and place) all the views that child depends** on in term of relationship. For this reason, the first thing RelativeLayout does is to build a graph of dependencies between the views. Those dependencies determine the order in which the children are measured (i.e. first the views with no dependencies, then the views that depend only from the root, etc).
+The concept behind RelativeLayout is fairly simple. **In order to measure (and place) a certain child, you need to measure (and place) all the views that child depends on** in term of relationship. For this reason, the first thing RelativeLayout does is to build a graph of dependencies between the children. Those dependencies determine the order in which the children are measured (i.e. first the views with no dependencies, then the views that depend only from the root, etc).
 
 This explains the need for two measurement passes: **the order the views need to be measured horizontally can be different from the order the views need to be measured vertically**. In my example, A does not have any _horizontal_ dependency but _vertically_ it depends on the size and the position of C.
 
@@ -59,9 +61,9 @@ The position of the views is calculated during the measurement double pass. For 
 
 Finally, the dependency lists are cached, but those cached elements are invalidated whenever a `requestLayout()` happens. This, together with the fact that `requestLayout()` goes up to the root and is called on all the children is another reason for not having deep view hierarchy especially with RelativeLayouts.
 
-### Alternatives
+### Optimizing RelativeLayout
 
-First of all, remember that you don't always need one. If you are in the early stage of the deployement or under time constraints and you prefer the simplicity of use of `RelativeLayout` against performance then use it, **just be aware of the implications**. This small piece of technical debt might come back in the future to claim its price.
+First of all, remember that you don't always need to. If you are in the early stage of the development or under strict time constraints and you prefer the simplicity of use of `RelativeLayout` against performance then use it, **just be aware of the implications**. This small piece of technical debt might come back in the future to claim its price.
 
 **Measure twice and cut once** (but remember to do that from time to time). Hierarchy Viewer is a convenient way to understand if your hierarchy is too complex and to see at glance what's costing too much:
 
@@ -76,7 +78,7 @@ I don't want to write (yet another) tutorial on building custom viewgroups here 
 * [Dave Smith's post on custom views](https://newcircle.com/s/post/1663/tutorial_enhancing_android_ui_with_custom_views_dave_smith_video)
 * [Sriram Ramani's post on custom viewgroups](https://sriramramani.wordpress.com/2015/05/06/custom-viewgroups/)
 * [This talk from google io 2013](https://www.youtube.com/watch?v=NYtB6mlu7vA)
-* [Loving lean layouts from Droidcon SF](https://www.youtube.com/watch?v=-xAdDqwaWJk) which was published while I was writing this post
+* [Loving lean layouts from Droidcon SF](https://www.youtube.com/watch?v=-xAdDqwaWJk) 
 
 
 ### What's the take home lesson
@@ -88,5 +90,5 @@ RelativeLayout is an awesome piece of software. It makes it super easy to descri
 The two measurement passes can be the biggest source of problems because of the risk of exponential explosion, but other than that there are a lot of computation and additional data structures involved in order to build (and maintain) those dependency lists, and a good amount of loops through its children in order to place them correctly. 
 
 
-
+Thanks to Riccardo Ciovati and Fabio Collini for proofreading this post.
 
