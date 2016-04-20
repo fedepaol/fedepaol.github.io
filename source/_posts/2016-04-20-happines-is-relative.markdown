@@ -87,7 +87,7 @@ RelativeLayout is an awesome piece of software. It makes it super easy to descri
 
 **However** from today, before placing it inside a view I will start thinking not only about the two passes, but also to all the hard work this complex piece of software needs to do behind the scene in order to offer me the flexibility I am used to.
 
-The two measurement passes can be the biggest source of problems because of the risk of exponential explosion, but other than that there are a lot of computation and additional data structures involved in order to build (and maintain) those dependency lists, and a good amount of loops through its children in order to place them correctly. 
+The two measurement passes can be the biggest source of problems because of the risk of exponential explosion, but **other than that there are a lot of computation and additional data structures involved** in building (and maintain) those dependency lists, and a good amount of extra loops through the children needed to place them correctly. 
 
 
 Thanks to Riccardo Ciovati and Fabio Collini for proofreading this post.
