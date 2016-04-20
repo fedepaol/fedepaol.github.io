@@ -59,6 +59,26 @@ The position of the views is calculated during the measurement double pass. For 
 
 Finally, the dependency lists are cached, but those cached elements are invalidated whenever a `requestLayout()` happens. This, together with the fact that `requestLayout()` goes up to the root and is called on all the children is another reason for not having deep view hierarchy especially with RelativeLayouts.
 
+### Alternatives
+
+First of all, remember that you don't always need one. If you are in the early stage of the deployement or under time constraints and you prefer the simplicity of use of `RelativeLayout` against performance then use it, **just be aware of the implications**. This small piece of technical debt might come back in the future to claim its price.
+
+**Measure twice and cut once** (but remember to do that from time to time). Hierarchy Viewer is a convenient way to understand if your hierarchy is too complex and to see at glance what's costing too much:
+
+{% img center /images/hierarchy.png 700 %}
+
+[Probe](https://github.com/lucasr/probe) by Lucas Rocha is also an effective tool to check if your views are getting measured too many times.
+
+After that, if you realize that your view groups suffer from performance issues, the most efficient way to optimize is to write a custom viewgroup. It might look scary at first, but it's just a matter of measuring and placing boxes **knowing exactly where you want to place them and how their container looks like**. This will flat your hierarchy and make it a lot more efficient.
+
+I don't want to write (yet another) tutorial on building custom viewgroups here since it will double the lenght of this post, but some good starting points are:
+
+* [Dave Smith's post on custom views](https://newcircle.com/s/post/1663/tutorial_enhancing_android_ui_with_custom_views_dave_smith_video)
+* [Sriram Ramani's post on custom viewgroups](https://sriramramani.wordpress.com/2015/05/06/custom-viewgroups/)
+* [This talk from google io 2013](https://www.youtube.com/watch?v=NYtB6mlu7vA)
+* [Loving lean layouts from Droidcon SF](https://www.youtube.com/watch?v=-xAdDqwaWJk) which was published while I was writing this post
+
+
 ### What's the take home lesson
 
 RelativeLayout is an awesome piece of software. It makes it super easy to describe complex scenarios without needing to do nasty nested linear layouts.
@@ -68,8 +88,5 @@ RelativeLayout is an awesome piece of software. It makes it super easy to descri
 The two measurement passes can be the biggest source of problems because of the risk of exponential explosion, but other than that there are a lot of computation and additional data structures involved in order to build (and maintain) those dependency lists, and a good amount of loops through its children in order to place them correctly. 
 
 
-### Alternatives
 
-### GridLayout
 
-### Custom Layouts
