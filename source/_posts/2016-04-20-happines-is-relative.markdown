@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Happines is (a) relative (layout)"
+title: "Happiness is (a) relative (layout)"
 date: 2016-04-20 06:34:46 +0200
 comments: true
 categories: 
