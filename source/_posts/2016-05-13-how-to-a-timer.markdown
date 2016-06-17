@@ -11,7 +11,7 @@ categories:
 #### Why do we need a whole post about timers?
 Recently, I had to implement a countdown timer in Android.
 
-If you google for _inspiration_, you'll get a lot of results like:
+If you google for looking for --code to cut and paste--_inspiration_, you'll get a lot of results like:
 - use a [countdown timer](https://developer.android.com/reference/android/os/CountDownTimer.html)
 - use a dyi implementation using handlers
 - be _a la mode_ and use [RxJava's timer](http://reactivex.io/documentation/operators/timer.html)
@@ -21,16 +21,27 @@ There is even a [cookbook recipe](https://androidcookbook.com/Recipe.seam;jsessi
 That might work if you had to measure the cooking time of a [portion of capellini](http://www.bettycrocker.com/how-to/tipslibrary/charts-timetables-measuring/timetable-cooking-pasta) (a very thin kind of pasta that takes no more than 6 minutes to cook).
 
 ### But wait, what if I had to bake a plum cake?
-The baking time of a plum cake is longer than an hour. All the solutions I just mentioned rely on the fact that your application is running **for the whole lenght of the timer**. That could be acceptable in the desktop / server world, but it's far from acceptable in the Android context: if the app goes in background because the user wants to check his email, answer to a phone call, or play a game, your app is likely to be killed, and the timer with it.
+The baking time of a plum cake is longer than an hour. All the solutions I just mentioned rely on the fact that your application is running **for the whole lenght of the timer**. That could be acceptable in the desktop / server world, but it's far from acceptable in the Android context: if the app goes in background because the user wants to check his email, answer to a phone call or play a game, the operating system is likely to reclaim the resources and shutdown the app itself. 
 
 ### I can use a foreground service!
-A more viable option would be to install one of the mentioned implementation inside a service that requests to run on foreground. That would extend the chance of your app to live for the whole lenght of the timer. 
+So one can start looking for a way to keep the app running in background. A [Service](https://developer.android.com/guide/components/services.html) is an Android component made specifically for this purpose. By using a Service with the [startForeground](https://developer.android.com/guide/components/services.html#Foreground) option, the chance of having it running for the whole length of the timer. 
 
-A lot of results on google. you have the activity, launch a handler, or a countdown timer, or a thread
+{% img center /images/soareyoutelling_timer.jpg 300 %}
 
-A service.
+###The right way
+The right way is to cheat. The idea here is to run the countdown timer as long as the app is foregrounded, showing the progress to the user _one second at the time_, but install a system alarm whenever the app goes in background. Whenever the user gets back to the app, you'll uninstall the system alarm and restart the timer from where it is supposed to start.
 
-The right way
+In this way, you'll be consuming the cpu _only when the app is in foreground_ and has all the right to consume cpu. The app won't consume a cycle when in background, apart from the effort needed to waking it up when the timer is due.
+
+###Some code
+
+There are three things you have to take into account:
+
+##Running the timer in the app
+
+##Remembering when the timer was started / how long it was supposed to run
+
+##Handling the alarm
 
 Conclusion: you can cheat. Always remember that the user can leave your app (but hates to burn his stufato)
 Mention alarm manager / alarmclock from api 21
