@@ -53,7 +53,7 @@ Inside the app however, the timer will run *only when the app is in foreground* 
 
 ###Some code
 
-A simplified version of what I am describing can be found in my [github repo](##).
+A simplified version of what I am describing can be found in my [github repo](https://github.com/fedepaol/AndroidTimerSample)
 
 There are three things you have to take into account:
 
@@ -102,7 +102,7 @@ That value is used when resuming the app in order to check how long the timer ha
 
 The app tries to retrieve the start time value. If there still is  some time to run, the countdown restarts for the remaining length of time. Otherwise the timer is reset and the user is notified of the timer expiration.
 
-Please note that this is a ultra simplified version that assumes that _the timer is running_. The github sample checks also if the timer was started or not.
+Please note that this is a ultra simplified version that assumes that _the timer is running_. The [github sample](https://github.com/fedepaol/AndroidTimerSample) checks also if the timer was started or not.
 
 ##Handling the alarm
 
@@ -137,7 +137,7 @@ and uninstall it in onResume:
    }
 ```
 
-Launching a system notification that brings the user back to the app when clicked is trivial. You can check the sample on github.
+Launching a system notification that brings the user back to the app when clicked is trivial. You can check the [sample on github](https://github.com/fedepaol/AndroidTimerSample).
 
 
 ##Conclusion
