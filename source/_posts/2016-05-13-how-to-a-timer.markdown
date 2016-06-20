@@ -9,7 +9,7 @@ categories:
 ---
 
 #### Ok, I must confess
-the title is built to draw people's attention, because you know, nowdays everything is done in a reactive fashion. RxJava is superhelpful, but *if we forget the ecosystem our apps are running into*, we risk to forget the _proper_ way to implement certain tasks in Android. 
+the title is built to draw people's attention, because you know, nowdays everything is done in a reactive fashion. RxJava is superhelpful, but **if we forget the ecosystem our apps are running into**, we risk to forget the _proper_ way to implement certain tasks in Android. 
 
 
 #### Why do we need a whole post about timers?
@@ -28,7 +28,7 @@ That might work if you had to measure the cooking time of a [portion of capellin
 ### But wait, what if I had to bake a plum cake?
 Baking a plum cake takes longer than an hour. All the solutions I just mentioned rely on the fact that your application is running **for the whole lenght of the timer**. 
 
-This could be acceptable in the desktop / server world, but it's far from acceptable in the Android context: if the app goes in background because the user wants to check his email, answer to a phone call or play a game, *the operating system is likely to reclaim the resources and shutdown the app itself*. In any case, the device will turn off after a short time. If you think that using a [wakelock](https://developer.android.com/training/scheduling/wakelock.html) will solve the problem... it will, but the user won't be happy of all the battery wasted by the screen.
+This could be acceptable in the desktop / server world, but it's far from acceptable in the Android context: if the app goes in background because the user wants to check his email, answer to a phone call or play a game, **the operating system is likely to reclaim the resources and shutdown the app itself**. In any case, the device will turn off after a short time. If you think that using a [wakelock](https://developer.android.com/training/scheduling/wakelock.html) will solve the problem... it will, but the user won't be happy of all the battery wasted by the screen.
 
 ### I can use a foreground service!
 So one can start looking for a way to keep the app running in background. A [Service](https://developer.android.com/guide/components/services.html) is an Android component made specifically for this purpose. 
@@ -48,7 +48,7 @@ Here what it would look like when the user gets back to the app before the timer
 
 From the user's perspective, the timer is running even if the app is in background, because whenever he returns to the app he sees what he is expecting to see (the time passed). On the other hand, if the timer expires when the app is in background, a friendly notification will remind him that he has to take the plum cake out of the oven.
 
-Inside the app however, the timer will run *only when the app is in foreground* and has all the rights to consume cpu because the user is using the app.
+Inside the app however, the timer will run **only when the app is in foreground** and has all the rights to consume cpu because the user is using the app.
 
 
 ###Some code
@@ -144,5 +144,5 @@ Launching a system notification that brings the user back to the app when clicke
 What I wrote today may sound obvious to a lot of experienced developers.
 
 However, I thought it was a post worth writing since it's a good example of how you should always remember the ecosystem your app is being run into.
-If you forget this and think that *your app is the most important app the user has in his phone*, you'll face some unexpected behaviours (the app gets killed) or you will piss the user off (the app needs to be active for the whole length of the timer).
+If you forget this and think that **your app is the most important app the user has in his phone**, you'll face some unexpected behaviours (the app gets killed) or you will piss the user off (the app needs to be active for the whole length of the timer).
 
