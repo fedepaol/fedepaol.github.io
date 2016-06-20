@@ -26,7 +26,7 @@ There is even a [cookbook recipe](https://androidcookbook.com/Recipe.seam;jsessi
 That might work if you had to measure the cooking time of a [portion of capellini](http://www.bettycrocker.com/how-to/tipslibrary/charts-timetables-measuring/timetable-cooking-pasta) (the fastest cooking pasta I could think of).
 
 ### But wait, what if I had to bake a plum cake?
-The baking time of a plum cake is longer than an hour. All the solutions I just mentioned rely on the fact that your application is running **for the whole lenght of the timer**. 
+Baking a plum cake takes longer than an hour. All the solutions I just mentioned rely on the fact that your application is running **for the whole lenght of the timer**. 
 
 This could be acceptable in the desktop / server world, but it's far from acceptable in the Android context: if the app goes in background because the user wants to check his email, answer to a phone call or play a game, *the operating system is likely to reclaim the resources and shutdown the app itself*. In any case, the device will turn off after a short time. If you think that using a [wakelock](https://developer.android.com/training/scheduling/wakelock.html) will solve the problem... it will, but the user won't be happy of all the battery wasted by the screen.
 
