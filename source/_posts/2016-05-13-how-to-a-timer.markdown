@@ -1,12 +1,16 @@
 ---
 layout: post
-title: "Android timers, countdowns and lifecycle"
+title: "Of reactive Android timers, countdowns and lifecycle"
 date: 2016-05-13 23:06:59 +0200
 comments: true
 categories: 
  - android
  - lifecycle 
 ---
+
+#### Ok, I must confess
+the title is built to draw people's attention, because you know, nowdays everything is done in a reactive fashion. RxJava is superhelpful, but *if we forget the ecosystem our apps are running into*, we are risking to forget the _proper_ way to implement some kind of tasks in Android. 
+
 
 #### Why do we need a whole post about timers?
 Recently, I had to implement a countdown timer in Android.
