@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Of reactive Android timers, countdowns and lifecycle"
-date: 2016-05-13 23:06:59 +0200
+date: 2016-06-20 23:06:59 +0200
 comments: true
 categories: 
  - android
@@ -9,13 +9,13 @@ categories:
 ---
 
 #### Ok, I must confess
-the title is built to draw people's attention, because you know, nowdays everything is done in a reactive fashion. RxJava is superhelpful, but *if we forget the ecosystem our apps are running into*, we are risking to forget the _proper_ way to implement some kind of tasks in Android. 
+the title is built to draw people's attention, because you know, nowdays everything is done in a reactive fashion. RxJava is superhelpful, but *if we forget the ecosystem our apps are running into*, we risk to forget the _proper_ way to implement certain tasks in Android. 
 
 
 #### Why do we need a whole post about timers?
 Recently, I had to implement a countdown timer in Android.
 
-If you google for looking for ~~code to cut and paste~~ _inspiration_, you'll get a lot of results like:
+If you google for ~~code to cut and paste~~ _inspiration_, you'll get a lot of results like:
 
  - use a [countdown timer](https://developer.android.com/reference/android/os/CountDownTimer.html)
  - use a dyi implementation using handlers
@@ -40,7 +40,7 @@ By using a Service with the [startForeground](https://developer.android.com/guid
 This approach will work, but it has a drawback. Your app (or let's say at least the service) needs to be running for the whole length of the timer. This is a waste of memory and cpu.
 
 ###The right way
-The right way is to take advantage of what the OS offers. The idea here is to run the countdown timer as long as the app is foregrounded, showing the progress to the user _one second at the time_, but install a system alarm whenever the app goes in background. Whenever the user gets back to the app, you'll uninstall the system alarm and restart the timer from where it is supposed to start.
+The right way is to take advantage of what the OS offers. The idea here is to run the countdown timer as long as the app is foregrounded, showing the progress to the user _one second at the time_, but set a system alarm whenever the app goes in background. Whenever the user gets back to the app, you'll cancel the system alarm and restart the timer from where it is supposed to start.
 
 Here what it would look like when the user gets back to the app before the timer is expired (on the left) and when the timer expires while the app is in background (on the right):
 
@@ -106,7 +106,7 @@ Please note that this is a ultra simplified version that assumes that _the timer
 
 ##Handling the alarm
 
-This is simple. You should install the alarm that triggers a broadcast receiver through the alarm manager:
+This is simple. You should set the alarm that triggers a broadcast receiver through the alarm manager:
 
 ```java
     @Override
@@ -124,7 +124,7 @@ This is simple. You should install the alarm that triggers a broadcast receiver 
     }
 ```
 
-and uninstall it in onResume:
+and canel it in onResume:
 
 ```java
     @Override
