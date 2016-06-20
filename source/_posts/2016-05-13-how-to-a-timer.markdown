@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Of reactive Android timers, countdowns and lifecycle"
+title: "Reactive Android timers, countdowns and lifecycle"
 date: 2016-06-20 23:06:59 +0200
 comments: true
 categories: 
