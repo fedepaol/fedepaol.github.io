@@ -59,7 +59,7 @@ There are three things you have to take into account:
 
 ##Running the timer in the app
 This is the easiest part: you can use a countdown timer, a handler, rxjava or whatever you want to ~~copy and paste~~ take inspiration from.
-In my example I'll use a countdown timer since it's simple to use and servers the purpouse.
+In my example I'll use a countdown timer since it's simple to use and serves the purpouse.
 
 ```java
 private void startTimer() {
@@ -124,7 +124,7 @@ This is simple. You should set the alarm that triggers a broadcast receiver thro
     }
 ```
 
-and canel it in onResume:
+and cancel it in onResume:
 
 ```java
     @Override
