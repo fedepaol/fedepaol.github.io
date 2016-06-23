@@ -4,7 +4,7 @@
   <title><![CDATA[My little Android warehouse]]></title>
   <link href="http://fedepaol.github.io/atom.xml" rel="self"/>
   <link href="http://fedepaol.github.io/"/>
-  <updated>2016-04-21T23:48:19+02:00</updated>
+  <updated>2016-06-23T22:33:46+02:00</updated>
   <id>http://fedepaol.github.io/</id>
   <author>
     <name><![CDATA[Federico Paolinelli]]></name>
@@ -12,6 +12,206 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Reactive Android Timers, Countdowns and Lifecycle]]></title>
+    <link href="http://fedepaol.github.io/blog/2016/06/20/how-to-a-timer/"/>
+    <updated>2016-06-20T23:06:59+02:00</updated>
+    <id>http://fedepaol.github.io/blog/2016/06/20/how-to-a-timer</id>
+    <content type="html"><![CDATA[<h4>Ok, I must confess</h4>
+
+<p>the title is built to draw people&rsquo;s attention, because you know, nowdays everything is done in a reactive fashion. RxJava is superhelpful, but <strong>if we forget the ecosystem our apps are running into</strong>, we risk to forget the <em>proper</em> way to implement certain tasks in Android.</p>
+
+<h4>Why do we need a whole post about timers?</h4>
+
+<p>Recently, I had to implement a countdown timer in Android.</p>
+
+<p>If you google for <del>code to cut and paste</del> <em>inspiration</em>, you&rsquo;ll get a lot of results like:</p>
+
+<ul>
+<li>use a <a href="https://developer.android.com/reference/android/os/CountDownTimer.html">countdown timer</a></li>
+<li>use a dyi implementation using handlers</li>
+<li>be <em>a la mode</em> and use <a href="http://reactivex.io/documentation/operators/timer.html">RxJava&rsquo;s timer</a></li>
+</ul>
+
+
+<p>There is even a <a href="https://androidcookbook.com/Recipe.seam;jsessionid=DF53064E03C7505C4EBF727E56E0728E?recipeId=1205">cookbook recipe</a> that shows how to implement it.</p>
+
+<p>That might work if you had to measure the cooking time of a <a href="http://www.bettycrocker.com/how-to/tipslibrary/charts-timetables-measuring/timetable-cooking-pasta">portion of capellini</a> (the fastest cooking pasta I could think of).</p>
+
+<h3>But wait, what if I had to bake a plum cake?</h3>
+
+<p>Baking a plum cake takes longer than an hour. All the solutions I just mentioned rely on the fact that your application is running <strong>for the whole lenght of the timer</strong>.</p>
+
+<p>This could be acceptable in the desktop / server world, but it&rsquo;s far from acceptable in the Android context: if the app goes in background because the user wants to check his email, answer to a phone call or play a game, <strong>the operating system is likely to reclaim the resources and shutdown the app itself</strong>. In any case, the device will turn off after a short time. If you think that using a <a href="https://developer.android.com/training/scheduling/wakelock.html">wakelock</a> will solve the problem&hellip; it will, but the user won&rsquo;t be happy of all the battery wasted by the screen.</p>
+
+<h3>I can use a foreground service!</h3>
+
+<p>So one can start looking for a way to keep the app running in background. A <a href="https://developer.android.com/guide/components/services.html">Service</a> is an Android component made specifically for this purpose.</p>
+
+<p>By using a Service with the <a href="https://developer.android.com/guide/components/services.html#Foreground">startForeground</a> option, your app will stay alive through the whole lenght of the timer. When the timer is finished, it just has to throw a notification and a broadcast so the user will know that the timer expired.</p>
+
+<p><img class="center" src="http://fedepaol.github.io/images/soareyoutelling_timer.jpg" width="300"></p>
+
+<p>This approach will work, but it has a drawback. Your app (or let&rsquo;s say at least the service) needs to be running for the whole length of the timer. This is a waste of memory and cpu.</p>
+
+<h3>The right way</h3>
+
+<p>The right way is to take advantage of what the OS offers. The idea here is to run the countdown timer as long as the app is foregrounded, showing the progress to the user <em>one second at the time</em>, but set a system alarm whenever the app goes in background. Whenever the user gets back to the app, you&rsquo;ll cancel the system alarm and restart the timer from where it is supposed to start.</p>
+
+<p>Here what it would look like when the user gets back to the app before the timer is expired (on the left) and when the timer expires while the app is in background (on the right):</p>
+
+<p><img src="http://fedepaol.github.io/images/timer_resume.png" width="300"> <img src="http://fedepaol.github.io/images/timer_pause.png" width="300"></p>
+
+<p>From the user&rsquo;s perspective, the timer is running even if the app is in background, because whenever he returns to the app he sees what he is expecting to see (the time passed). On the other hand, if the timer expires when the app is in background, a friendly notification will remind him that he has to take the plum cake out of the oven.</p>
+
+<p>Inside the app however, the timer will run <strong>only when the app is in foreground</strong> and has all the rights to consume cpu because the user is using the app.</p>
+
+<h3>Some code</h3>
+
+<p>A simplified version of what I am describing can be found in my <a href="https://github.com/fedepaol/AndroidTimerSample">github repo</a></p>
+
+<p>There are three things you have to take into account:</p>
+
+<h2>Running the timer in the app</h2>
+
+<p>This is the easiest part: you can use a countdown timer, a handler, rxjava or whatever you want to <del>copy and paste</del> take inspiration from.
+In my example I&rsquo;ll use a countdown timer since it&rsquo;s simple to use and serves the purpouse.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">private</span> <span class="kt">void</span> <span class="nf">startTimer</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">mCountDownTimer</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">CountDownTimer</span><span class="o">(</span><span class="n">mTimeToGo</span> <span class="o">*</span> <span class="mi">1000</span><span class="o">,</span> <span class="mi">1000</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onTick</span><span class="o">(</span><span class="kt">long</span> <span class="n">millisUntilFinished</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>  <span class="n">mTimeToGo</span> <span class="o">-=</span> <span class="mi">1000</span><span class="o">;</span>
+</span><span class='line'>  <span class="n">updateTimeUi</span><span class="o">();</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onFinish</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>  <span class="n">mState</span> <span class="o">=</span> <span class="n">TimerState</span><span class="o">.</span><span class="na">STOPPED</span><span class="o">;</span>
+</span><span class='line'>  <span class="n">onTimerFinish</span><span class="o">();</span>
+</span><span class='line'>  <span class="n">updateTimeUi</span><span class="o">();</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>    <span class="o">}.</span><span class="na">start</span><span class="o">();</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Remembering when the timer was started / how long it was supposed to run</h2>
+
+<p>This is the trickiest part.
+In the example I store the starting time inside the shared preferences storage. It will persist even if the app is killed.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">mPreferences</span><span class="o">.</span><span class="na">setStartedTime</span><span class="o">(</span><span class="n">getNow</span><span class="o">());</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>That value is used when resuming the app in order to check how long the timer has to run (or if the time did expire):</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">private</span> <span class="kt">void</span> <span class="nf">initTimer</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>    <span class="kt">long</span> <span class="n">startTime</span> <span class="o">=</span> <span class="n">mPreferences</span><span class="o">.</span><span class="na">getStartedTime</span><span class="o">();</span>
+</span><span class='line'>    <span class="n">mTimeToGo</span> <span class="o">=</span> <span class="o">(</span><span class="n">TIMER_LENGHT</span> <span class="o">-</span> <span class="o">(</span><span class="n">getNow</span><span class="o">()</span> <span class="o">-</span> <span class="n">startTime</span><span class="o">));</span>
+</span><span class='line'>    <span class="k">if</span> <span class="o">(</span><span class="n">mTimeToGo</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span> <span class="c1">// TIMER EXPIRED</span>
+</span><span class='line'>        <span class="n">mTimeToGo</span> <span class="o">=</span> <span class="n">TIMER_LENGHT</span><span class="o">;</span>
+</span><span class='line'>        <span class="n">onTimerFinish</span><span class="o">();</span>
+</span><span class='line'>    <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">startTimer</span><span class="o">();</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The app tries to retrieve the start time value. If there still is  some time to run, the countdown restarts for the remaining length of time. Otherwise the timer is reset and the user is notified of the timer expiration.</p>
+
+<p>Please note that this is a ultra simplified version that assumes that <em>the timer is running</em>. The <a href="https://github.com/fedepaol/AndroidTimerSample">github sample</a> checks also if the timer was started or not.</p>
+
+<h2>Handling the alarm</h2>
+
+<p>This is simple. You should set the alarm that triggers a broadcast receiver through the alarm manager:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="nd">@Override</span>
+</span><span class='line'><span class="kd">protected</span> <span class="kt">void</span> <span class="nf">onPause</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>    <span class="kd">super</span><span class="o">.</span><span class="na">onPause</span><span class="o">();</span>
+</span><span class='line'>    <span class="kt">long</span> <span class="n">wakeUpTime</span> <span class="o">=</span> <span class="o">(</span><span class="n">mPreferences</span><span class="o">.</span><span class="na">getStartedTime</span><span class="o">()</span> <span class="o">+</span> <span class="n">TIMER_LENGHT</span><span class="o">)</span> <span class="o">*</span> <span class="mi">1000</span><span class="o">;</span>
+</span><span class='line'>    <span class="n">AlarmManager</span> <span class="n">am</span> <span class="o">=</span> <span class="o">(</span><span class="n">AlarmManager</span><span class="o">)</span> <span class="n">getSystemService</span><span class="o">(</span><span class="n">Context</span><span class="o">.</span><span class="na">ALARM_SERVICE</span><span class="o">);</span>
+</span><span class='line'>    <span class="n">Intent</span> <span class="n">intent</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">Intent</span><span class="o">(</span><span class="k">this</span><span class="o">,</span> <span class="n">TimerExpiredReceiver</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+</span><span class='line'>    <span class="n">PendingIntent</span> <span class="n">sender</span> <span class="o">=</span> <span class="n">PendingIntent</span><span class="o">.</span><span class="na">getBroadcast</span><span class="o">(</span><span class="k">this</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="n">intent</span><span class="o">,</span> <span class="n">PendingIntent</span><span class="o">.</span><span class="na">FLAG_CANCEL_CURRENT</span><span class="o">);</span>
+</span><span class='line'>    <span class="k">if</span> <span class="o">(</span><span class="n">Build</span><span class="o">.</span><span class="na">VERSION</span><span class="o">.</span><span class="na">SDK_INT</span> <span class="o">&gt;=</span> <span class="n">Build</span><span class="o">.</span><span class="na">VERSION_CODES</span><span class="o">.</span><span class="na">LOLLIPOP</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">am</span><span class="o">.</span><span class="na">setAlarmClock</span><span class="o">(</span><span class="k">new</span> <span class="n">AlarmManager</span><span class="o">.</span><span class="na">AlarmClockInfo</span><span class="o">(</span><span class="n">wakeUpTime</span><span class="o">,</span> <span class="n">sender</span><span class="o">),</span> <span class="n">sender</span><span class="o">);</span>
+</span><span class='line'>    <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">am</span><span class="o">.</span><span class="na">set</span><span class="o">(</span><span class="n">AlarmManager</span><span class="o">.</span><span class="na">RTC_WAKEUP</span><span class="o">,</span> <span class="n">wakeUpTime</span><span class="o">,</span> <span class="n">sender</span><span class="o">);</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>and cancel it in onResume:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="nd">@Override</span>
+</span><span class='line'><span class="kd">protected</span> <span class="kt">void</span> <span class="nf">onResume</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>    <span class="kd">super</span><span class="o">.</span><span class="na">onResume</span><span class="o">();</span>
+</span><span class='line'>    <span class="n">Intent</span> <span class="n">intent</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">Intent</span><span class="o">(</span><span class="k">this</span><span class="o">,</span> <span class="n">TimerExpiredReceiver</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+</span><span class='line'>    <span class="n">PendingIntent</span> <span class="n">sender</span> <span class="o">=</span> <span class="n">PendingIntent</span><span class="o">.</span><span class="na">getBroadcast</span><span class="o">(</span><span class="k">this</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="n">intent</span><span class="o">,</span> <span class="n">PendingIntent</span><span class="o">.</span><span class="na">FLAG_CANCEL_CURRENT</span><span class="o">);</span>
+</span><span class='line'>    <span class="n">AlarmManager</span> <span class="n">am</span> <span class="o">=</span> <span class="o">(</span><span class="n">AlarmManager</span><span class="o">)</span> <span class="n">getSystemService</span><span class="o">(</span><span class="n">Context</span><span class="o">.</span><span class="na">ALARM_SERVICE</span><span class="o">);</span>
+</span><span class='line'>    <span class="n">am</span><span class="o">.</span><span class="na">cancel</span><span class="o">(</span><span class="n">sender</span><span class="o">);</span>
+</span><span class='line'>   <span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Launching a system notification that brings the user back to the app when clicked is trivial. You can check the <a href="https://github.com/fedepaol/AndroidTimerSample">sample on github</a>.</p>
+
+<h2>Conclusion</h2>
+
+<p>What I wrote today may sound obvious to a lot of experienced developers.</p>
+
+<p>However, I thought it was a post worth writing since it&rsquo;s a good example of how you should always remember the ecosystem your app is being run into.
+If you forget this and think that <strong>your app is the most important app the user has in his phone</strong>, you&rsquo;ll face some unexpected behaviours (the app gets killed) or you will piss the user off (the app needs to be active for the whole length of the timer).</p>
+
+<p>Thanks as always to Fabio Collini and Riccardo Ciovati for proofreading.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Happiness Is (a) Relative (Layout)]]></title>
@@ -1660,16 +1860,6 @@ This comment has been removed by the author.</div>
     <id>http://fedepaol.github.io/blog/2012/01/22/pastimer-android-kitchen-timer-released</id>
     <content type="html"><![CDATA[<div class='post'>
 Pastimer, my barcode based kitchen timer is now on the market.<br /><br />The basic idea is to scan the barcode on the box to set the time.<br /><br /><br /><div class="separator" style="clear: both; text-align: center;"><object width="320" height="266" class="BLOGGER-youtube-video" classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=6,0,40,0" data-thumbnail-src="http://i.ytimg.com/vi/k-cG6rnXieQ/0.jpg"><param name="movie" value="http://www.youtube.com/v/k-cG6rnXieQ?version=3&f=user_uploads&c=google-webdrive-0&app=youtube_gdata" /><param name="bgcolor" value="#FFFFFF" /><embed width="320" height="266"  src="http://www.youtube.com/v/k-cG6rnXieQ?version=3&f=user_uploads&c=google-webdrive-0&app=youtube_gdata" type="application/x-shockwave-flash"></embed></object></div><br /><br />The url to download it from the market is<br /><a href="https://market.android.com/details?id=com.whiterabbit.pastimer">https://market.android.com/details?id=com.whiterabbit.pastimer</a><br /><br />or this for the lite version<br /><br /><a href="https://market.android.com/details?id=com.whiterabbit.pastimer.lite">https://market.android.com/details?id=com.whiterabbit.pastimer.lite</a><br /><br /><br />The description of the product can be found here&nbsp;<a href="https://sites.google.com/site/pastimerand/">Android Kitchen Timer</a></div>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[MyDearSanta]]></title>
-    <link href="http://fedepaol.github.io/blog/2011/12/05/mydearsanta/"/>
-    <updated>2011-12-05T00:00:00+01:00</updated>
-    <id>http://fedepaol.github.io/blog/2011/12/05/mydearsanta</id>
-    <content type="html"><![CDATA[<div class='post'>
-This time, while PastTimer has not been released yet, I started an experiment with an old friend. We wanted not just to release another standalone app, but interact in some way with a backend.<br /><br />The result is&nbsp;<a href="http://www.mydearsanta.info/">www.mydearsanta.info</a>&nbsp;, a web based Christmas list, which comes together with and Android app&nbsp;<a href="https://market.android.com/details?id=com.smokingbytes.santas">https://market.android.com/details?id=com.smokingbytes.santas</a>&nbsp;and an Iphone app (currently under the approval process) .<br /><br />The backend was written using the Django framework, and the apps interact with it using a json based rest api.</div>
 ]]></content>
   </entry>
   
