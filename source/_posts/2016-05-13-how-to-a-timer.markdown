@@ -62,8 +62,8 @@ This is the easiest part: you can use a countdown timer, a handler, rxjava or wh
 In my example I'll use a countdown timer since it's simple to use and serves the purpouse.
 
 ```java
-private void startTimer() {
-    mCountDownTimer = new CountDownTimer(mTimeToGo * 1000, 1000) {
+    private void startTimer() {
+        mCountDownTimer = new CountDownTimer(mTimeToGo * 1000, 1000) {
 	    public void onTick(long millisUntilFinished) {
 		mTimeToGo -= 1000;
 		updateTimeUi();
@@ -72,9 +72,9 @@ private void startTimer() {
 		mState = TimerState.STOPPED;
 		onTimerFinish();
 		updateTimeUi();
-	    }
-    }.start();
-}
+	}
+        }.start();
+    }
 ```
 
 ##Remembering when the timer was started / how long it was supposed to run
@@ -82,7 +82,7 @@ This is the trickiest part.
 In the example I store the starting time inside the shared preferences storage. It will persist even if the app is killed.
 
 ```java
-            mPreferences.setStartedTime(getNow());
+    mPreferences.setStartedTime(getNow());
 ```
 
 That value is used when resuming the app in order to check how long the timer has to run (or if the time did expire):
@@ -146,3 +146,5 @@ What I wrote today may sound obvious to a lot of experienced developers.
 However, I thought it was a post worth writing since it's a good example of how you should always remember the ecosystem your app is being run into.
 If you forget this and think that **your app is the most important app the user has in his phone**, you'll face some unexpected behaviours (the app gets killed) or you will piss the user off (the app needs to be active for the whole length of the timer).
 
+
+Thanks as always to Fabio Collini and Riccardo Ciovati for proofreading.
