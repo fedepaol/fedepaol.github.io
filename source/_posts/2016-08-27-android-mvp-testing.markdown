@@ -45,9 +45,12 @@ Is (unit) testing the presenter. The dependencies here are resolved by passing w
 
 Since no injection magic is involved here, we can just mock the view and all the other stuff the presenter needs and easily write unit tests for a Presenter instance.
 
-This is when I started to think that it was easy.
+Moreover, all the dependencies with external models / sources of data like retrofit can be tested by testing the behaviour of the presenter.
 
 ### Testing the view
+
+A common approach I heard around is to test the view not against a mock presenter, but against a presenter injected with mocked "external components", such as api client and storage.
+What I wanted to achieve here, is to test the view driving the behaviour of the presenter it interacts with.
 
 With this strong separation of roles, I expected it to be easy to mock the presenter and test the view with Espresso.
 
@@ -63,4 +66,129 @@ By using the suggested way to inject the view
                 .build().inject(this);
 ```
 
-the only way to provide a mocked presenter was to take advantage of the build variants, but I wanted to take advantage of dagger 2.
+the only way to provide a mocked presenter is to take advantage of the build variants. This is the approach followed by [Android testing codelab](https://codelabs.developers.google.com/codelabs/android-testing/#0).
+
+However, I wanted to take advantage of dagger 2 injecting a mock presenter.
+
+### The key of replacing a dependency is by overriding the Application object
+
+This can be done by using a custom test runner that provides a subclass of the application object declared in the Manifest.
+
+```java
+public class EspressoTestRunner extends AndroidJUnitRunner {
+    @Override
+    public Application newApplication(ClassLoader cl, String className, Context context) throws
+            IllegalAccessException, ClassNotFoundException, InstantiationException {
+        return super.newApplication(cl, TestMvpApplication.class.getName(), context);
+    }
+}
+```
+
+and by declaring it in our gradle file
+
+```groovy
+
+android {
+    ... 
+    defaultConfig {
+	...
+        testInstrumentationRunner 'com.whiterabbit.windlocator.EspressoTestRunner'
+	...
+    }
+}
+```
+
+
+The Application object (and its test variant) is the one responsible of providing all the modules, so by subclassing it we can drive what is provided to be injected:
+
+```java
+
+public class TestMvpApplication extends MvpApplication {
+    private MainModule mMainModule;
+
+    // By usint this two method we can drive whatever module we want during the tests
+    // (and with that, drive what classes inject)
+    @Override
+    public MainModule getMainModule(MainView view) {
+        return mMainModule;
+    }
+
+    public void setMainModule(MainModule m) {
+        mMainModule = m;
+    }
+}
+```
+
+This is what the setup method would look like:
+
+```java
+@Before
+public void setUp() throws Exception {
+    // a mock module with the mock presenter to be injected..
+    MainModule m = mock(MainModule.class);
+    mMockPresenter = mock(MainPresenter.class);
+    
+    when(m.provideMainView()).thenReturn(mock(MainView.class)); // this is needed to fool dagger
+    when(m.provideMainPresenter(any(MainView.class), any(KeyValueStorage.class)))
+    	.thenReturn(mMockPresenter);
+    
+    Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
+    TestMvpApplication app
+    	= (TestMvpApplication) instrumentation.getTargetContext().getApplicationContext();
+    
+    // forced to the application object
+    app.setMainModule(m);
+}
+```
+
+A mock module is needed to provide a mock presenter. Then the mock module is passed to the fake application object.
+Please note that in order to have dagger 2 working, the mock module needs to provide a fake view (that it will be different from the real one that we are testing).
+
+Now we can finally write a test method:
+
+```java
+    @Test
+    public void testButtonClick() {
+        activity.launchActivity(new Intent());
+        onView(withId(R.id.main_button)).perform(click());
+        verify(mMockPresenter).onButtonClicked();
+    }
+```
+
+After all this struggle, we can "just test the view", meaning that we do not need to test if the mocked rest end point was called, nor if the storage was asked to write something.
+**We just test the view against the presenter interface**
+
+One piece is still missing: what if we want to test the behaviour of the view when one of its methods gets called by the presenter? In the example, the view interface offers a method to set the text displayed.
+
+Again, one could naively think that it would be sufficient to call the method with something like 
+
+```java
+activity.getActivity().showValue("23");
+```
+
+The truth is, espresso tests run in a thread different from the UI thread. By doing that, it would result in 
+
+    Only the original thread that created a view hierarchy can touch its views
+
+One way to overcome this, is to call the methods in the ui thread
+
+```java
+activity.getActivity().runOnUiThread(new Runnable() { // fancy using a lambda here?
+                                                 @Override
+                                                 public void run() {
+                                                     activity.getActivity().showValue("23");
+                                                 }
+                                             });
+```
+
+
+### Conclusion
+
+The Mvp pattern isolates the view (which needs to be as dumb as it can) from the presenter.
+By instrumenting the view with a mocked presenter, you will drain those tests from any kind of logic we expect to be in the presenter. You just test that the interface between the presenter and the view is working as expected.
+
+By doing this, you can focus on testing the business logic inside the presenter with vanilla unit tests. Your tdd loop will definetely be faster.
+
+Finally, I did not add anything new with this post. However, I expected it to be a lot easier than it was in reality, so I hope it can help whoever is looking to setup his tests in this way.
+
+
