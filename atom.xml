@@ -4,7 +4,7 @@
   <title><![CDATA[My little Android warehouse]]></title>
   <link href="http://fedepaol.github.io/atom.xml" rel="self"/>
   <link href="http://fedepaol.github.io/"/>
-  <updated>2016-06-23T22:33:46+02:00</updated>
+  <updated>2016-09-12T22:13:01+02:00</updated>
   <id>http://fedepaol.github.io/</id>
   <author>
     <name><![CDATA[Federico Paolinelli]]></name>
@@ -12,6 +12,312 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Android, MVP, Dagger and Testing]]></title>
+    <link href="http://fedepaol.github.io/blog/2016/08/27/android-mvp-testing/"/>
+    <updated>2016-08-27T22:52:07+02:00</updated>
+    <id>http://fedepaol.github.io/blog/2016/08/27/android-mvp-testing</id>
+    <content type="html"><![CDATA[<h3>MVP is Model View Presenter</h3>
+
+<p>.. which is a pattern that is very popular among Android developers nowdays.</p>
+
+<p>I don&rsquo;t intend to write (yet) another guide about MVP in Android, because others have done a better job, for example:</p>
+
+<ul>
+<li><a href="http://antonioleiva.com/MVP-android/">Antonio Leiva&rsquo;s introduction to MVP</a></li>
+<li><a href="http://hannesdorfmann.com/mosby/MVP/">Hannes Dorfmann&rsquo;s introduction to Mosby</a></li>
+<li><a href="http://fernandocejas.com/2014/09/03/architecting-android-the-clean-way/">Fernando Cejas&#8217; post on clean architecture</a></li>
+</ul>
+
+
+<p>A lot have been said about MVP (and other similar patterns), like:</p>
+
+<ul>
+<li>it isolates the business logic from the UI</li>
+<li>it makes faster and easier to unit test the business logic</li>
+<li>it avoids having a god Fragment or Activity class that manages everything</li>
+<li>it makes it easier to maintain the app</li>
+</ul>
+
+
+<p>However, the first thing you notice while switching into &ldquo;MVP mode&rdquo;, <em>is a great sense of order</em>.</p>
+
+<p>In all the (few) apps I wrote before, I ended up with the well known hodgepodgey fragment or activity that contained both the UI logic and the business logic.</p>
+
+<p>By defining the responsabilities of the view and of the presenter with MVP, you implicitly define the interfaces between those two components (and the model), <strong>and everything fits its place</strong>.</p>
+
+<p>Every touch, drag, and eventyally lifecycle events are just events that are reported back to the presenter, which then chooses what to do with them. This is powerful.</p>
+
+<h2>This post is about my experience with the MVP pattern, Dagger (2) and testing.</h2>
+
+<p>Given the definition of the interface between the view and the presenter, <strong>I ingenuosly expected that testing of both (using unit tests and Espresso tests) would have been super smooth</strong>. As it often happens, the reality is quite different from what one expects and reads from blogs. In this post I will try to sum up all the issues I had during that process and the solutions I tried to put in place.</p>
+
+<p>In order to better illustrate the concepts, I wrote a little example that can be found on my <a href="https://github.com/fedepaol/MVPtesting">github repo</a></p>
+
+<p>The structure of the app is the same one the can be found googling for Dagger / MVP , for example <a href="https://github.com/antoniolg/androidMVP">here</a>.</p>
+
+<p>The only thing I added is a local component / module that I use in order to inject the stuff needed only by that particular set of classes.</p>
+
+<p>This means that in addition to the global Component / Module classes, used to inject stuff like the storage, there will be a <em>local</em> Component / Module used, for example, to inject the presenter into the View.</p>
+
+<h3>The easy part: testing the presenter</h3>
+
+<p>The dependencies are resolved by passing what it needs as constructor parameters:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="nd">@Before</span>
+</span><span class='line'><span class="kd">public</span> <span class="kt">void</span> <span class="nf">setup</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">mMockView</span> <span class="o">=</span> <span class="n">mock</span><span class="o">(</span><span class="n">MainView</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+</span><span class='line'>    <span class="n">mMockStorage</span> <span class="o">=</span> <span class="n">mock</span><span class="o">(</span><span class="n">KeyValueStorage</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+</span><span class='line'>    <span class="n">mToTest</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">MainPresenterImpl</span><span class="o">(</span><span class="n">mMockView</span><span class="o">,</span> <span class="n">mMockStorage</span><span class="o">);</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Since no injection magic is involved here, we can just mock the view and all the other stuff the presenter needs and easily write unit tests for a Presenter instance.</p>
+
+<p>Moreover, all the dependencies with external models / sources of data like retrofit can be tested by testing the behaviour of the presenter.</p>
+
+<h3>The &ldquo;I expected it to be easier part&rdquo;: testing the view</h3>
+
+<p>A common approach I heard around is to test the view not against a mock presenter, but against a presenter injected with mocked &ldquo;external components&rdquo;, such as api client and storage.</p>
+
+<p>What I wanted to achieve here on the other hand, is to test the view driving the behaviour of the presenter it interacts with.</p>
+
+<p>With this strong separation of roles, I expected it to be easy to mock the presenter and test the view with Espresso.</p>
+
+<h4>Injecting a mock presenter</h4>
+
+<p>Since the presenter is provided by the local module and injected into the view by Dagger, I had to find a way to override the Module in order to provide the mock presenter that could drive the tests.</p>
+
+<p>By using the common method to inject the view</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">DaggerMainComponent</span><span class="o">.</span><span class="na">builder</span><span class="o">()</span>
+</span><span class='line'>            <span class="o">.</span><span class="na">applicationComponent</span><span class="o">(</span><span class="n">app</span><span class="o">.</span><span class="na">getComponent</span><span class="o">())</span>
+</span><span class='line'>            <span class="o">.</span><span class="na">mainModule</span><span class="o">(</span><span class="k">new</span> <span class="nf">MainModule</span><span class="o">(</span><span class="k">this</span><span class="o">))</span>
+</span><span class='line'>            <span class="o">.</span><span class="na">build</span><span class="o">().</span><span class="na">inject</span><span class="o">(</span><span class="k">this</span><span class="o">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>the only way to override the presenter since it is provided by the &ldquo;real&rdquo; MainModule is to use build flavours, as shown in <a href="https://codelabs.developers.google.com/codelabs/android-testing/#0">Android testing codelab</a>.</p>
+
+<p><strong>However, I wanted to take advantage of Dagger 2 injecting a mock presenter.</strong></p>
+
+<h3>The key of replacing a dependency is by overriding the Application object</h3>
+
+<p>By adding a factory method that returns an istance of the module in the Application class</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">DaggerMainComponent</span><span class="o">.</span><span class="na">builder</span><span class="o">()</span>
+</span><span class='line'>                <span class="o">.</span><span class="na">applicationComponent</span><span class="o">(</span><span class="n">app</span><span class="o">.</span><span class="na">getComponent</span><span class="o">())</span>
+</span><span class='line'>                <span class="o">.</span><span class="na">mainModule</span><span class="o">(</span><span class="n">app</span><span class="o">.</span><span class="na">getMainModule</span><span class="o">(</span><span class="k">this</span><span class="o">))</span>
+</span><span class='line'>                <span class="o">.</span><span class="na">build</span><span class="o">().</span><span class="na">inject</span><span class="o">(</span><span class="k">this</span><span class="o">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Then we can be use a custom test runner that provides a subclass of that application object declared in the Manifest.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">EspressoTestRunner</span> <span class="kd">extends</span> <span class="n">AndroidJUnitRunner</span> <span class="o">{</span>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="n">Application</span> <span class="nf">newApplication</span><span class="o">(</span><span class="n">ClassLoader</span> <span class="n">cl</span><span class="o">,</span> <span class="n">String</span> <span class="n">className</span><span class="o">,</span> <span class="n">Context</span> <span class="n">context</span><span class="o">)</span> <span class="kd">throws</span>
+</span><span class='line'>            <span class="n">IllegalAccessException</span><span class="o">,</span> <span class="n">ClassNotFoundException</span><span class="o">,</span> <span class="n">InstantiationException</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="kd">super</span><span class="o">.</span><span class="na">newApplication</span><span class="o">(</span><span class="n">cl</span><span class="o">,</span> <span class="n">TestMvpApplication</span><span class="o">.</span><span class="na">class</span><span class="o">.</span><span class="na">getName</span><span class="o">(),</span> <span class="n">context</span><span class="o">);</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>and declare it in our gradle file</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="n">android</span> <span class="o">{</span>
+</span><span class='line'>    <span class="o">...</span>
+</span><span class='line'>    <span class="n">defaultConfig</span> <span class="o">{</span>
+</span><span class='line'>  <span class="o">...</span>
+</span><span class='line'>        <span class="n">testInstrumentationRunner</span> <span class="s1">&#39;com.whiterabbit.windlocator.EspressoTestRunner&#39;</span>
+</span><span class='line'>  <span class="o">...</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The Application object (and its test variant) is the one responsible of providing all the modules, so by subclassing it we can drive what is provided to be injected:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestMvpApplication</span> <span class="kd">extends</span> <span class="n">MvpApplication</span> <span class="o">{</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">MainModule</span> <span class="n">mMainModule</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// By usint this two method we can drive whatever module we want during the tests</span>
+</span><span class='line'>    <span class="c1">// (and with that, drive what classes inject)</span>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="n">MainModule</span> <span class="nf">getMainModule</span><span class="o">(</span><span class="n">MainView</span> <span class="n">view</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">mMainModule</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setMainModule</span><span class="o">(</span><span class="n">MainModule</span> <span class="n">m</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">mMainModule</span> <span class="o">=</span> <span class="n">m</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This is what the setup method would look like:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="nd">@Before</span>
+</span><span class='line'><span class="kd">public</span> <span class="kt">void</span> <span class="nf">setUp</span><span class="o">()</span> <span class="kd">throws</span> <span class="n">Exception</span> <span class="o">{</span>
+</span><span class='line'>    <span class="c1">// a mock module with the mock presenter to be injected..</span>
+</span><span class='line'>    <span class="n">MainModule</span> <span class="n">m</span> <span class="o">=</span> <span class="n">mock</span><span class="o">(</span><span class="n">MainModule</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+</span><span class='line'>    <span class="n">mMockPresenter</span> <span class="o">=</span> <span class="n">mock</span><span class="o">(</span><span class="n">MainPresenter</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">when</span><span class="o">(</span><span class="n">m</span><span class="o">.</span><span class="na">provideMainView</span><span class="o">()).</span><span class="na">thenReturn</span><span class="o">(</span><span class="n">mock</span><span class="o">(</span><span class="n">MainView</span><span class="o">.</span><span class="na">class</span><span class="o">));</span> <span class="c1">// this is needed to fool dagger</span>
+</span><span class='line'>    <span class="n">when</span><span class="o">(</span><span class="n">m</span><span class="o">.</span><span class="na">provideMainPresenter</span><span class="o">(</span><span class="n">any</span><span class="o">(</span><span class="n">MainView</span><span class="o">.</span><span class="na">class</span><span class="o">),</span> <span class="n">any</span><span class="o">(</span><span class="n">KeyValueStorage</span><span class="o">.</span><span class="na">class</span><span class="o">)))</span>
+</span><span class='line'>      <span class="o">.</span><span class="na">thenReturn</span><span class="o">(</span><span class="n">mMockPresenter</span><span class="o">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">Instrumentation</span> <span class="n">instrumentation</span> <span class="o">=</span> <span class="n">InstrumentationRegistry</span><span class="o">.</span><span class="na">getInstrumentation</span><span class="o">();</span>
+</span><span class='line'>    <span class="n">TestMvpApplication</span> <span class="n">app</span>
+</span><span class='line'>      <span class="o">=</span> <span class="o">(</span><span class="n">TestMvpApplication</span><span class="o">)</span> <span class="n">instrumentation</span><span class="o">.</span><span class="na">getTargetContext</span><span class="o">().</span><span class="na">getApplicationContext</span><span class="o">();</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// forced to the application object</span>
+</span><span class='line'>    <span class="n">app</span><span class="o">.</span><span class="na">setMainModule</span><span class="o">(</span><span class="n">m</span><span class="o">);</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>A mock module is needed to provide a mock presenter. Then the mock module is passed to the application object.
+Please note that in order to have Dagger 2 working, the mock module needs to provide a view instance (even a mock one) that will never be used.</p>
+
+<p>Now we can finally write a test method:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="nd">@Test</span>
+</span><span class='line'><span class="kd">public</span> <span class="kt">void</span> <span class="nf">testButtonClick</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">activity</span><span class="o">.</span><span class="na">launchActivity</span><span class="o">(</span><span class="k">new</span> <span class="nf">Intent</span><span class="o">());</span>
+</span><span class='line'>    <span class="n">onView</span><span class="o">(</span><span class="n">withId</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">id</span><span class="o">.</span><span class="na">main_button</span><span class="o">)).</span><span class="na">perform</span><span class="o">(</span><span class="n">click</span><span class="o">());</span>
+</span><span class='line'>    <span class="n">verify</span><span class="o">(</span><span class="n">mMockPresenter</span><span class="o">).</span><span class="na">onButtonClicked</span><span class="o">();</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>After all this struggling, we can &ldquo;just test the view&rdquo;, meaning that we do not need to test if the mocked rest end point was called, nor if the storage was asked to write something.
+<strong>We just test the view against the presenter interface</strong></p>
+
+<p>One piece is still missing: what if we want to test the behaviour of the view when one of its methods gets called by the presenter? In the example, the view interface offers a method to set the text displayed.</p>
+
+<p>Again, one could naively think that it would be sufficient to call the method with something like</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">activity</span><span class="o">.</span><span class="na">getActivity</span><span class="o">().</span><span class="na">showValue</span><span class="o">(</span><span class="s">&quot;23&quot;</span><span class="o">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The truth is, espresso tests run in a thread different from the UI thread. By doing that, it would result in</p>
+
+<pre><code>Only the original thread that created a view hierarchy can touch its views
+</code></pre>
+
+<p>One way to overcome this, is to call the methods in the ui thread</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">activity</span><span class="o">.</span><span class="na">getActivity</span><span class="o">().</span><span class="na">runOnUiThread</span><span class="o">(</span><span class="k">new</span> <span class="nf">Runnable</span><span class="o">()</span> <span class="o">{</span> <span class="c1">// fancy using a lambda here?</span>
+</span><span class='line'>                                                 <span class="nd">@Override</span>
+</span><span class='line'>                                                 <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>                                                     <span class="n">activity</span><span class="o">.</span><span class="na">getActivity</span><span class="o">().</span><span class="na">showValue</span><span class="o">(</span><span class="s">&quot;23&quot;</span><span class="o">);</span>
+</span><span class='line'>                                                 <span class="o">}</span>
+</span><span class='line'>                                             <span class="o">});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h4>Why I did not use the <code>@UiThreadTest</code> annotation?</h4>
+
+<p>Simply because it would have ended with another exception since startactivity cannot be called directly from the ui thread.</p>
+
+<h3>To sum up</h3>
+
+<ul>
+<li>Make the application provide the Module that provides the presenter(s)</li>
+<li>Change the testrunner in order to provide a different application</li>
+<li>Let the &ldquo;test&rdquo; application provide a mock module that provides a mock presenter</li>
+<li>Test!</li>
+</ul>
+
+
+<h2>Conclusion</h2>
+
+<p>The Mvp pattern isolates the view (which needs to be as dumb as it can) from the presenter.
+By instrumenting the view with a mocked presenter, you will drain those tests from any kind of logic we expect to be in the presenter. You just test that the interface between the presenter and the view is working as expected.</p>
+
+<p>By doing this, you can focus on testing the business logic inside the presenter with vanilla unit tests. Your tdd loop will definetely be faster.</p>
+
+<p><em>A big thank as always to my proofreaders Fabio Collini &amp; Riccardo Ciovati</em></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Reactive Android Timers, Countdowns and Lifecycle]]></title>
@@ -1850,16 +2156,6 @@ This comment has been removed by the author.</div>
     <id>http://fedepaol.github.io/blog/2012/01/30/postmanlib-android-and-rest-web</id>
     <content type="html"><![CDATA[<div class='post'>
 <span style="font-size: large;">Edit 2013-03-10: I&#8217;ve performed a substancial refactoring of postmanlib, and the details can be found in <a href="http://fedepaol.github.io/blog/2013/03/06/postman-ringstwice-reloaded-android">this new post</a></span><br /><br />With the development of <a href="https://market.android.com/details?id=com.smokingbytes.santas">MyDearSanta</a> app, I needed to fetch and put some data to a rest service developed using django python framework with a simple set of json based rest apis.<br /><br />The development of the interaction between <b>android and the rest web service</b> was a bit messy because I was in hurry to release the app before Christmas (giving it&#8217;s xmas related nature), but while developing it I thought it could have been a good start for my first android library. And so it was.<br /><br />Yesterday I finally managed to write a first use case of my PostmanLib (rings twice) android library. I must confess it tooks nearly a couple of hours just to get a nice name, but I really like this one.<br /><br /><span style="font-size: large;">You can check the library <a href="https://github.com/fedepaol/PostmanLib--Rings-Twice--Android">HERE</a></span><br /><br />It&#8217;s barely inspired by Virgil Dobjanschi talk at google io 2010, and its relies on the common pattern is to make the one-shot background work inside intent services, let them update the model with the results of their work and then notify the interface when the model it&#8217;s changed, so that it can refresh itself.<br /><br />It does not provide a way to serialize your data into <b>json</b> nor how to store it into a content provider. There are a plenty of examples out there if you look for <u>json, android, rest</u> and other keyword like those and what&#8217;s more, they really depends on the interface your server is offering.<br /><br />What was missing was a common and clean way to interact with the service without using the &#8220;asynctask inside an activity&#8221; approach, which I don&#8217;t really like because of the well known issues of&nbsp;configuration changes.<br /><br />All you need to do with my lib is to implement the abstract methods of a Command class, such as the execute method that will be called inside the intentservice which is the method that performs the real work, and some method to serialize / deserialize the command inside an intent.<br />The library comes along with a singleton helper class that can be used in activities to fire the commands and get notified with their results.<br /><br />The steps are:<br /><br /><ul><li>the activity gets a reference to the helper</li><li>a command is sent to the intent service (serialized in an intent)</li><li>the intent service executes the command and updates the model (sqlite, shared prefs, content provider, whatever)</li><li>if the activity was registered as event listener, gets notified of the result and can check again the model (or notify the user about an error)</li><li>the activity can ask the helper about any in progress services (it can be useful in onresume stage to notify the user)</li></ul><div><br /></div><div>You will still have to implement the real <b>interaction between Android and the web service</b></div><br /><br />&nbsp;It&#8217;s far from be completed, but I am really enjoying how it is growing, and I hope it might be of some help for somebody.<br /><br />If you are curious about that, just checkout it from github here&nbsp;<a href="https://github.com/fedepaol/PostmanLib--Rings-Twice--Android">Android rest service interaction</a></div>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Pastimer - Android Kitchen Timer (Released)]]></title>
-    <link href="http://fedepaol.github.io/blog/2012/01/22/pastimer-android-kitchen-timer-released/"/>
-    <updated>2012-01-22T00:00:00+01:00</updated>
-    <id>http://fedepaol.github.io/blog/2012/01/22/pastimer-android-kitchen-timer-released</id>
-    <content type="html"><![CDATA[<div class='post'>
-Pastimer, my barcode based kitchen timer is now on the market.<br /><br />The basic idea is to scan the barcode on the box to set the time.<br /><br /><br /><div class="separator" style="clear: both; text-align: center;"><object width="320" height="266" class="BLOGGER-youtube-video" classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=6,0,40,0" data-thumbnail-src="http://i.ytimg.com/vi/k-cG6rnXieQ/0.jpg"><param name="movie" value="http://www.youtube.com/v/k-cG6rnXieQ?version=3&f=user_uploads&c=google-webdrive-0&app=youtube_gdata" /><param name="bgcolor" value="#FFFFFF" /><embed width="320" height="266"  src="http://www.youtube.com/v/k-cG6rnXieQ?version=3&f=user_uploads&c=google-webdrive-0&app=youtube_gdata" type="application/x-shockwave-flash"></embed></object></div><br /><br />The url to download it from the market is<br /><a href="https://market.android.com/details?id=com.whiterabbit.pastimer">https://market.android.com/details?id=com.whiterabbit.pastimer</a><br /><br />or this for the lite version<br /><br /><a href="https://market.android.com/details?id=com.whiterabbit.pastimer.lite">https://market.android.com/details?id=com.whiterabbit.pastimer.lite</a><br /><br /><br />The description of the product can be found here&nbsp;<a href="https://sites.google.com/site/pastimerand/">Android Kitchen Timer</a></div>
 ]]></content>
   </entry>
   
