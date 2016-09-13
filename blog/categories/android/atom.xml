@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Android | My little Android warehouse]]></title>
   <link href="http://fedepaol.github.io/blog/categories/android/atom.xml" rel="self"/>
   <link href="http://fedepaol.github.io/"/>
-  <updated>2016-09-12T22:14:12+02:00</updated>
+  <updated>2016-09-13T08:55:38+02:00</updated>
   <id>http://fedepaol.github.io/</id>
   <author>
     <name><![CDATA[Federico Paolinelli]]></name>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Android, MVP, Dagger and Testing]]></title>
-    <link href="http://fedepaol.github.io/blog/2016/08/27/android-mvp-testing/"/>
-    <updated>2016-08-27T22:52:07+02:00</updated>
-    <id>http://fedepaol.github.io/blog/2016/08/27/android-mvp-testing</id>
+    <link href="http://fedepaol.github.io/blog/2016/09/12/android-mvp-testing/"/>
+    <updated>2016-09-12T22:52:07+02:00</updated>
+    <id>http://fedepaol.github.io/blog/2016/09/12/android-mvp-testing</id>
     <content type="html"><![CDATA[<h3>MVP is Model View Presenter</h3>
 
 <p>.. which is a pattern that is very popular among Android developers nowdays.</p>
