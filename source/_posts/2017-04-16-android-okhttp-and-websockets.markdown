@@ -19,7 +19,7 @@ Given the quality of the libraries offered by Square, OkHttp was the first libra
 
 
 ### Establishing the connection
-Establishing the connection is pretty straightforward. You declare the OkHttp client:
+Establishing the connection is pretty straightforward. You declare the OkHttp client as always:
 
 ```java
 
@@ -91,7 +91,7 @@ Since some interaction is involved, the socket might not be immediately closed. 
 Cancel is more brutal: it just discards all the queued messages and brutally closes the socket. This has the advantage of not having to wait for the housekeeping and the trasmission of enqueued messages. However, choosing ```cancel``` over ```close``` really depends on the use case. 
 
 # Talk is cheap, show me the code
-[Here](https://github.com/fedepaol/websocket-sample) I pushed a simple example that allows an app to open the websocket when the app goes in foreground and shuts the websocket down when the app goes on background. 
+[Here](https://github.com/fedepaol/websocket-sample) I pushed a simple example that allows an app to open the websocket when the app goes in foreground and shuts the websocket down when the app goes on background. This is the suggested approach for persistent connections. Using a service to hold the persisten connection is considered a misbehaviour and doze mode will make your app's life really hard.
 
 The example has some weak point that could be improved:
 
