@@ -9,7 +9,7 @@
   <meta name="author" content="Federico Paolinelli">
 
   
-  <meta name="description" content="MVP is Model View Presenter .. which is a pattern that is very popular among Android developers nowdays. I don&rsquo;t intend to write (yet) another &hellip;">
+  <meta name="description" content="Websockets Rest http calls are the most common interaction between Android apps and remote servers. However, there are some scenarios where the &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -77,6 +77,141 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2017/04/16/android-okhttp-and-websockets/">Android, Okhttp and Websockets</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2017-04-16T23:04:19+02:00'><span class='date'><span class='date-month'>Apr</span> <span class='date-day'>16</span><span class='date-suffix'>th</span>, <span class='date-year'>2017</span></span> <span class='time'>11:04 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>Websockets</h2>
+
+<p>Rest http calls are the most common interaction between Android apps and remote servers. However, there are some scenarios where the interaction is better handled via a persistent connection: think about a chat, or a multiplayer game where data flows in both directions and the server needs to push data to the clients and to be aware of which client are connected.</p>
+
+<p>This kind of scenario can be implemented through Websockets.</p>
+
+<h3>OkHttp and Websockets</h3>
+
+<p>Given the quality of the libraries offered by Square, OkHttp was the first library I checked when I recently had to deal with websockets. Luckily, <a href="https://medium.com/square-corner-blog/web-sockets-now-shipping-in-okhttp-3-5-463a9eec82d1">WebSocket support was introduced in December, 2016</a>. In this post I will try to describe how to use it, and to show how it is different from using it with regular http calls.</p>
+
+<h3>Establishing the connection</h3>
+
+<p>Establishing the connection is pretty straightforward. You declare the OkHttp client as always:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'> <span class="n">client</span> <span class="o">=</span> <span class="k">new</span> <span class="n">OkHttpClient</span><span class="o">.</span><span class="na">Builder</span><span class="o">()</span>
+</span><span class='line'>                <span class="o">.</span><span class="na">readTimeout</span><span class="o">(</span><span class="mi">3</span><span class="o">,</span>  <span class="n">TimeUnit</span><span class="o">.</span><span class="na">SECONDS</span><span class="o">)</span>
+</span><span class='line'>                <span class="o">.</span><span class="na">build</span><span class="o">();</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>and then take a websocket object out of it:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">Request</span> <span class="n">request</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Request</span><span class="o">.</span><span class="na">Builder</span><span class="o">()</span>
+</span><span class='line'>            <span class="o">.</span><span class="na">url</span><span class="o">(</span><span class="n">serverUrl</span><span class="o">)</span>
+</span><span class='line'>            <span class="o">.</span><span class="na">build</span><span class="o">();</span>
+</span><span class='line'>    <span class="n">webSocket</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="na">newWebSocket</span><span class="o">(</span><span class="n">request</span><span class="o">,</span> <span class="k">new</span> <span class="nf">WebSocketListener</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>                      <span class="o">...</span>
+</span><span class='line'>                  <span class="o">});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Please note that by creating the websocket, OkHttp will try to establish the connection with the server. The second parameter of the <code>newWebSocket</code> factory method needs to implement the <code>WebSocketListener</code> interface, in order to get asynchronously notified of the various events occurred to the socket (such as an incoming message, or the disconnection of the socket, or a failure).</p>
+
+<h3>Sending a message</h3>
+
+<p>Sending a message is easy. Just call <code>send</code> with a <em>String</em> or a <em>ByteString</em> as an argument. Since OkHttp will send the data using its own background thread, <code>send</code> can be called from any thread without worrying of blocking the current thread (and risking to get a NetworkOnMainThreadException).</p>
+
+<p>The only caveat here is that a positive result only indicates that the message was enqueued, but it does not reflect the result of the trasmission. From my understanding, the user of the library is notified only in case of failure via the <code>onFailure</code> callback, so an optimistic approach must be taken in place.</p>
+
+<h3>The callbacks</h3>
+
+<p>The <a href="https://github.com/square/okhttp/blob/master/okhttp/src/main/java/okhttp3/WebSocketListener.java">WebSocketListener</a> interface provides callbacks to handle the asynchronous events related to the socket. Those includes the fact that the socket was opened (or closed), or that a new message was received.</p>
+
+<p>Unlike the trasmission of the data, the interaction between the callbacks and the main Android thread needs to be implemented carefully, since <code>WebSocketListener</code>&rsquo;s method will be executed inside a background thread. Using a <code>handler</code> is the &ldquo;vanilla Android&rdquo; approach to let a background thread interact with a thread associated to a looper (such as Android&rsquo;s main thread).</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="nd">@Override</span>
+</span><span class='line'><span class="kd">public</span> <span class="kt">void</span> <span class="nf">onMessage</span><span class="o">(</span><span class="n">WebSocket</span> <span class="n">webSocket</span><span class="o">,</span> <span class="n">String</span> <span class="n">text</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'><span class="o">...</span>
+</span><span class='line'>    <span class="n">handler</span><span class="o">.</span><span class="na">sendMessage</span><span class="o">(..);</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Another way to achieve the same result would be to go reactive and expose observables to publish this events.</p>
+
+<h3>Closing the connection</h3>
+
+<p>OkHttp provides two methods to close the connection:</p>
+
+<h2>Close</h2>
+
+<p><code>webSocket.close(0, "Bye");</code> asks the server to gracefully close the connection and waits for confirmation.
+All the queued messages are trasmitted <strong>before</strong> closing the connection.</p>
+
+<p>Since some interaction is involved, the socket might not be immediately closed. If the initialization and the closure of the connection are bound to the lifecycle of the activity (i.e. in onPause / onResume), what could happen is that some messages are received <strong>after</strong> close was invoked, so this needs to be handled carefully.</p>
+
+<h2>Cancel</h2>
+
+<p>Cancel is more brutal: it just discards all the queued messages and brutally closes the socket. This has the advantage of not having to wait for the housekeeping and the trasmission of enqueued messages. However, choosing <code>cancel</code> over <code>close</code> really depends on the use case.</p>
+
+<h1>Talk is cheap, show me the code</h1>
+
+<p><a href="https://github.com/fedepaol/websocket-sample">Here</a> I pushed a simple example that allows an app to open the websocket when the app goes in foreground and shuts the websocket down when the app goes on background. This is the suggested approach for persistent connections. Using a service to hold the persisten connection is considered a misbehaviour and doze mode will make your app&rsquo;s life really hard.</p>
+
+<p>The example has some weak point that could be improved:</p>
+
+<h4>Cancel is invoked when the app goes in background.</h4>
+
+<p>This means that some messages could eventually get discarded. A better approach would be to invoke close and wait the connection to be gracefully closed and all the messages sent. Since in <code>onPause</code> the activity disposes the subscriptions, no leaking is happening. We can just hope that the application process will live long enough to let OkHttp thread to do what it needs to do in order to gracefully close the connection. A more complex approach could involve a Service or using the JobScheduler.</p>
+
+<h4>No failure of trasmission is taken into account</h4>
+
+<p>onFailure should listen for failures and notify the user of the failure (or even retry to send failed messages) while in the sample it just forces the disconnection.</p>
+
+<h4>No RxJava!</h4>
+
+<p>Handlers are so 2013. A better solution would have used RxJava (and probably there are many cool libraries that support that out of the box). Using RxJava would make super easy to use and transform the incoming messages and / or implement smart reconnection policies such as exponential backoff.</p>
+
+<h1>Conclusion</h1>
+
+<p>Using websockets is a completely different beast from getting / posting to http endpoints where you fetch (or post) and forget about the call, however the OkHttp implementation is really easy to use.</p>
+
+<p>On your side, you&rsquo;ll have not only to handle the trasmission / reception of the messages, but you will also need to monitor the state of the connection and behave accordingly.</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -2194,36 +2329,6 @@ if __name__ == &#39;__main__&#39;:
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/04/08/preloading-localized-data-in-sqllte/">Generating Preloaded Sqlite Data</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2014-04-08'><span class='date'><span class='date-month'>Apr</span> <span class='date-day'>8</span><span class='date-suffix'>th</span>, <span class='date-year'>2014</span></span> <span class='time'>12:00 am</span></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><div class='post'>
-Preloading data in Sqlite is a common problem during android development.<br />The most common solutions are:<br /><ul><li>hardcode the insert statements and execute them (possibly inside a transaction) the first time the db is opened</li><li>place the data inside a csv file, load it the first time the db gets opened, parse the rows and populate the db</li><li>prepare a pre-built sqlite file, ship it along with your app and load it the first time the db is opened</li></ul><br /><div class="separator" style="clear: both; text-align: center;"><a href="http://i.imgur.com/CmGdiFU.jpg" imageanchor="1" style="margin-left: 1em; margin-right: 1em;"><img border="0" src="http://i.imgur.com/CmGdiFU.jpg" height="320" width="320" /></a></div><br /><ul></ul>I&#8217;ll focus on the third approach, because it allows us to check our db outside the app without extracting it from our device, and because it allows us to prepare the data in a more &#8220;human friendly way&#8221;.<br /><br />It&#8217;s worth to mention the excellent <a href="https://github.com/jgilfelt/android-sqlite-asset-helper">sqlite asset helper</a> library by Jeff Gifelt, that allows us to embed a prebuilt (compressed) sqlite file without having to reinvent the wheel. For this reason, this post will be about how to handle data entry process (and something more), and you won&#8217;t find a (yet another) way to preload a sqlite file.<br /><br />Let&#8217;s start with a problem: you want to build a pretty simple <a href="https://play.google.com/store/apps/details?id=com.whiterabbit.freshfruitveg">Seasonal Fruit and Vegetables</a> app, and the amount of data you have to deal with is big enough to discourage you to prepare the inserts manually.<br />You&#8217;ll have:<br /><ul><li>the list of products</li><li>the description of each product (possibly localized in different languages)</li><li>the data related to the seasonality of each product</li></ul>So, here&#8217;s the approach:<br /><h3>Step 1: data entry </h3>Use a spreadsheet to fill the data in a human friendly way, export it as csv (or tsv, so you won&#8217;t have to deal with any random comma inside the descriptions), parse it and produce the sqlite file together with localized string res files to be embedded inside the application.<br />In my case I had a file&nbsp; having the genre (fruit or veg), the calories count, the name and the description in italian and in english:<br /><br /><pre style="background-image: URL(http://2.bp.blogspot.com/_z5ltvMQPaa8/SjJXr_U2YBI/AAAAAAAAAAM/46OqEP32CJ8/s320/codebg.gif); background: #f0f0f0; border: 1px dashed #CCCCCC; color: black; font-family: arial; font-size: 12px; height: auto; line-height: 20px; overflow: auto; padding: 0px; text-align: left; width: 99%;"><code style="color: black; word-wrap: normal;"> asparagus     0     25     Asparagi     Descrizione asparagi in italiano.      Asparagus     English asparagus description  <br /> chard          0     12     Bietola          Descrizione bietola in italiano.      Chard          English chard description  <br /></code></pre><br /><br />I also have files that describe the seasonality of each products in different areas, but I will not describe them since they are not relevant to the approach I am describing here.<br /><br /><h3>Step 2: Parse!</h3>Choose your favorite scripting language. I went for python since it&#8217;s super slick and it comes with batteries included, such as xml writing and sqllite support.<br /><br />Creating the db is straightforward:<br /><pre style="background-image: URL(http://2.bp.blogspot.com/_z5ltvMQPaa8/SjJXr_U2YBI/AAAAAAAAAAM/46OqEP32CJ8/s320/codebg.gif); background: #f0f0f0; border: 1px dashed #CCCCCC; color: black; font-family: arial; font-size: 12px; height: auto; line-height: 20px; overflow: auto; padding: 0px; text-align: left; width: 99%;"><code style="color: black; word-wrap: normal;"> CREATE_ITEMS = 'create table Item (_id integer primary key, Name text, kind integer, calories integer);'  <br /> CREATE_ITEM_PER_MONTHS = 'create table ItemPerMonth (ItemId integer, Month integer, Freshness integer, Area integer);'  <br /> CREATE_ITEM_PREFERRED = 'create table PreferredItem (PreferredItemId integer);'  <br /> conn = sqlite3.connect('fruit')  <br /> c = conn.cursor()  <br /> c.execute(CREATE_ITEM_PER_MONTHS)  <br /> c.execute(CREATE_ITEM_PREFERRED)  <br /></code></pre><br /><br />Then we need to use the data we have to fullfill two purpouses:<br /><ul><li>fill the database</li><li>fill the localized string resources&nbsp;</li></ul>Again, filling the database consists of parsing each line of the csv file and calling the appropriate insert.<br /><br />In python is as easy as calling<br /><br /><pre style="background-image: URL(http://2.bp.blogspot.com/_z5ltvMQPaa8/SjJXr_U2YBI/AAAAAAAAAAM/46OqEP32CJ8/s320/codebg.gif); background: #f0f0f0; border: 1px dashed #CCCCCC; color: black; font-family: arial; font-size: 12px; height: auto; line-height: 20px; overflow: auto; padding: 0px; text-align: left; width: 99%;"><code style="color: black; word-wrap: normal;">   cursor.execute(statement)  <br /></code></pre><br />on a cursor object, where statement is the insert statement.<br /><br />Together with that, we do have a lot of data that needs to be rendered in the proper language.<br />In order to take advantage of the resource framework, I chose to generate the resource files instead of relying on a &#8220;locale&#8221; field in the db to filter in my queries.<br />Again, filling an xml node is pretty straightforward in python:<br /><br /><pre style="background-image: URL(http://2.bp.blogspot.com/_z5ltvMQPaa8/SjJXr_U2YBI/AAAAAAAAAAM/46OqEP32CJ8/s320/codebg.gif); background: #f0f0f0; border: 1px dashed #CCCCCC; color: black; font-family: arial; font-size: 12px; height: auto; line-height: 20px; overflow: auto; padding: 0px; text-align: left; width: 99%;"><code style="color: black; word-wrap: normal;">   name = ET.SubElement(root, "string")  <br />   name.set("name", item_name)  <br />   if lang_name.find('%') != -1:  <br />     name.set("formatted", "false")  <br />   name.text = lang_name  <br /></code></pre><br /><br />At this point, we can generate an it_descriptions.xml file and an eng_descriptions.xml file (and even let our script place them in the proper folders).<br /><br />When we want to use our descriptions in Android (i.e. in&nbsp; our cursor adapter&#8217;s bindView), we&nbsp; need to bind the product name (i.e. &#8220;asparagus&#8221;) with the corresponding resource. That&#8217;s easy and it can be done in this way:<br /><br /><pre style="background-image: URL(http://2.bp.blogspot.com/_z5ltvMQPaa8/SjJXr_U2YBI/AAAAAAAAAAM/46OqEP32CJ8/s320/codebg.gif); background: #f0f0f0; border: 1px dashed #CCCCCC; color: black; font-family: arial; font-size: 12px; height: auto; line-height: 20px; overflow: auto; padding: 0px; text-align: left; width: 99%;"><code style="color: black; word-wrap: normal;">  int nameResID = context.getResources().getIdentifier(name,   <br />                     "string", context.getPackageName());  <br /></code></pre><br />By doing that, we can retrieve the resource id of the string related to the name that was generated by our script. If we are worried about the cost of the lookup, we can even add a lru cache to absorb that cost.<br /><br /><br />TL;DR:<br /><ul><li>Write your data in a human readable format</li><li>Parse that data with your favourite language</li><li>Write the data that does not depends on the language in sqllite</li><li>Write the language-dependent data in resource files</li><li>Use getIdentifier for retrieving the resource id of the strings automatically generated</li></ul>Bonus point: again, you can use this convention for pictures as well, so you can throw an &#8220;asparagus.png&#8221; image in your assets to be loaded afterwards.<br /><br />The biggest advantage of this approach is that you have only one master source of your data (the spreadsheet) that you can modify and rerun the generator over every time you modify it. <br /><br />If you are interested in the whole loader python script you can <a href="https://gist.github.com/fedepaol/10193052">check it here</a><br /><br /><br /><br /><br /></div>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/2">&larr; Older</a>
@@ -2244,6 +2349,10 @@ Preloading data in Sqlite is a common problem during android development.<br />T
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2017/04/16/android-okhttp-and-websockets/">Android, Okhttp and Websockets</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2016/08/27/android-mvp-testing/">Android, MVP, Dagger and Testing</a>
       </li>
     
@@ -2257,10 +2366,6 @@ Preloading data in Sqlite is a common problem during android development.<br />T
     
       <li class="post">
         <a href="/blog/2016/01/01/cached-rest-requests-with-rxjava/">Subscribe It While It's Hot: Cached Rest Requests With RxJava</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/09/13/testing-rxjava-observables-subscriptions/">Unit Testing RxJava Observables and Subscriptions</a>
       </li>
     
   </ul>
@@ -2323,7 +2428,7 @@ Preloading data in Sqlite is a common problem during android development.<br />T
     </div>
   </div>
   <footer role="contentinfo"><p>
-  Copyright &copy; 2016 - Federico Paolinelli -
+  Copyright &copy; 2017 - Federico Paolinelli -
   <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
 </p>
 
