@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Rxjava | My little Android warehouse]]></title>
   <link href="http://fedepaol.github.io/blog/categories/rxjava/atom.xml" rel="self"/>
   <link href="http://fedepaol.github.io/"/>
-  <updated>2017-04-30T23:26:52+02:00</updated>
+  <updated>2017-04-30T23:55:47+02:00</updated>
   <id>http://fedepaol.github.io/</id>
   <author>
     <name><![CDATA[Federico Paolinelli]]></name>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Android, Okhttp and Websockets]]></title>
-    <link href="http://fedepaol.github.io/blog/2017/04/16/android-okhttp-and-websockets/"/>
-    <updated>2017-04-16T23:04:19+02:00</updated>
-    <id>http://fedepaol.github.io/blog/2017/04/16/android-okhttp-and-websockets</id>
+    <link href="http://fedepaol.github.io/blog/2017/04/30/android-okhttp-and-websockets/"/>
+    <updated>2017-04-30T23:04:19+02:00</updated>
+    <id>http://fedepaol.github.io/blog/2017/04/30/android-okhttp-and-websockets</id>
     <content type="html"><![CDATA[<h2>Websockets</h2>
 
 <p>Rest http calls are the most common interaction between Android apps and remote servers. However, there are some scenarios where the interaction is better handled via a persistent connection: think about a chat, or a multiplayer game where data flows in both directions and the server needs to push data to the clients and to be aware of which client are connected.</p>
@@ -102,7 +102,7 @@ All the queued messages are trasmitted <strong>before</strong> closing the conne
 
 <h4>No RxJava!</h4>
 
-<p>Handlers are so 2013. A better solution would have used RxJava (and probably there are many cool libraries that support that out of the box). Using RxJava would make super easy to use and transform the incoming messages and / or implement smart reconnection policies such as exponential backoff.</p>
+<p>I wanted to keep the app simple and to avoid to introduce extra complexity, but handlers are so 2013. A better solution would have used RxJava (and probably there are many cool libraries that support that out of the box). Using RxJava would make super easy to use and transform the incoming messages and / or implement smart reconnection policies such as exponential backoff.</p>
 
 <h1>Conclusion</h1>
 
