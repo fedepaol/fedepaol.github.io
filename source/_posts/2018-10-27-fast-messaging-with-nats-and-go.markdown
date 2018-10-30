@@ -9,28 +9,25 @@ categories:
  - talks
 ---
 
-## This is the first post of a lot of things:
-
-- not counting the "a new chapter" post, it's the first technical post after a lot of time (namely since having my second child ~1.5 years ago)
-- it's the first *non android* post
-- it's the first (and I hope not the last) Go / distributed systems post
-- it's the first of a serie of posts, following up the talk *Fast messaging with Nats and Go* I gave at [golab 2018](golab.io). 
+This is the first of follow up serie of the talk *Fast messaging with Nats and Go* I gave at [golab 2018](golab.io). 
 
 
-### The slides of the talk:
+### The slides of the talk can be found here:
 
 <script async class="speakerdeck-embed" data-id="001030954dc6483285e47ccf4906a7d0" data-ratio="1.33333333333333" src="//speakerdeck.com/assets/embed.js"></script>
 
-### Nats
-Nats is a messaging system hosted under the [CNCF](www.cncf.io) umbrella, which is an *open source software foundation dedicated to making cloud native computing universal and sustainable*. It's my place-to-go while looking for software related to distributed systems. I am just a user of Nats reporting my experience and my understanding of how it works. What follows might be inaccurate or wrong :-)
+### What is Nats
+[Nats](nats.io) is a messaging system hosted under the [CNCF](www.cncf.io) umbrella, which is an *open source software foundation dedicated to making cloud native computing universal and sustainable*. It's my place-to-go while looking for software related to distributed systems. I am just a user of Nats reporting my experience and my understanding of how it works. What follows might be inaccurate or wrong :-)
 
 ### Why messaging
 
-The way we architect and build our applications changed in the past few years, moving from monolithic apps to distributed and interacting (micro) services. Together with that, some communication patterns emerged. The most popular one is to use rest, there are rpc libraries such as [grpc](https://grpc.io/) or [thrift](https://thrift.apache.org/), but there are some interactions where using a messaging system fits more the problem we are trying to solve.
+The way we architect and build our applications changed in the past few years, moving from monolithic apps to distributed and therefore interacting (micro) services. Together with that, some communication patterns emerged. 
+
+Even if the most popular one is to use rest and there are popular libraries for synchronous interaction such as [grpc](https://grpc.io/) or [thrift](https://thrift.apache.org/), some interactions are better represented using events and messaging.
 
 ### Good points of messaging
 
-Messaging is a natural way to decouple producers of messages from consumers of those messages. The producer does not know who (and if) is going to consume the message, the consumer does not know where that message is coming from.
+Messaging is a natural way to decouple producers of messages from consumers of those messages. The producer does not know who (if any) is going to consume the message, the consumer does not know where that message is coming from.
 
 **This makes scalability easier:** you can throw in / remove producers (or consumers) and your application will scale accordingly without having to change anything.
 
@@ -57,7 +54,8 @@ Some aspects that we need to take in consideration are:
 **Auth / Authz:** Does it support authentication / authorization? How?
 
 ### What makes a good communication system?
-There are two different extremes:
+The two extremes of the spectrum are
+
 #### The Enterprise Service Bus:
 Popular during the SOA movement, the bus held a lot of logic itself. Transformation, routing rules, manipulation and filtering of the messages. The result was that the logic was split between the endpoints and the bus itself, making really difficult to understand the big picture.
 
@@ -107,7 +105,11 @@ The nats server is a (small) single Go executable. In order to run it, you just 
 ```
 gnatsd -p 4222
 ```
-and you are done. The nats server provides also a gossip based authodiscovery mechanism. By using it, you can seamlessly add and remove new nodes to the cluster to scale up / down. A new server addition is propagated to all its peers and to all the clients.
+and you are done. 
+
+#### Autodiscovery
+The nats server provides also a gossip based autodiscovery mechanism. By using it, you can seamlessly add and remove new nodes to the cluster to scale up / down. A new server addition is propagated to all its peers and to all the clients.
+
 The auto discovery is enabled by setting one or more servers as *seed server* and by pointing them from the peers:
 
 ```
