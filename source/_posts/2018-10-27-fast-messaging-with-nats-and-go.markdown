@@ -119,7 +119,7 @@ gnatsd -p 5222 -routes nats://localhost:4248
 
 #### All the servers form a full mesh:
 
-{% img /images/nats/fullmesh.png %}
+{% img /images/nats/fullmesh.png 450 %}
 
 Each server is connected to each other, meaning that two clients will always be one hop distant **at most**. Once a client subscribes a subject, its interest will be propagated through all the servers of the mesh.
 
