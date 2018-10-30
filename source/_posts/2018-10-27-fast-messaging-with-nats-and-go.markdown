@@ -8,15 +8,21 @@ categories:
  - nats
  - talks
 ---
-This is the first post-android post, a follow-up to the talk *Fast messaging with Nats and Go* I gave at [golab 2018](golab.io). 
+
+## This is the first post of a lot of things:
+
+- not counting the "a new chapter" post, it's the first technical post after a lot of time (namely since having my second child ~1.5 years ago)
+- it's the first *non android* post
+- it's the first (and I hope not the last) Go / distributed systems post
+- it's the first of a serie of posts, following up the talk *Fast messaging with Nats and Go* I gave at [golab 2018](golab.io). 
 
 
-### The slides
+### The slides of the talk:
 
 <script async class="speakerdeck-embed" data-id="001030954dc6483285e47ccf4906a7d0" data-ratio="1.33333333333333" src="//speakerdeck.com/assets/embed.js"></script>
 
 ### Nats
-Nats is a messaging system hosted under the [CNCF](www.cncf.io) umbrella, which is an *open source software foundation dedicated to making cloud native computing universal and sustainable*. It's my place-to-go while looking for software related to distributed systems.
+Nats is a messaging system hosted under the [CNCF](www.cncf.io) umbrella, which is an *open source software foundation dedicated to making cloud native computing universal and sustainable*. It's my place-to-go while looking for software related to distributed systems. I am just a user of Nats reporting my experience and my understanding of how it works. What follows might be inaccurate or wrong :-)
 
 ### Why messaging
 
@@ -121,18 +127,20 @@ Nats provides very few guarantees:
 
 - It guarantees ordering of messages.
 
-- It's an **at most once delivery** system, which means that if the client is not connected while the message is being published, it won't receive that message. Ever.
+- It's an **at most once delivery** system, which means that if the client is not connected while the message is being published, it won't receive that message. Ever. **The message is not kept on the server**, if a client looses it for some reason and wants it, some kind of recovery mechanism must be implemented (more on this later).
 
 It's kind of like the tree falling in the forest while nobody is hearing.
 
 ## Availability
 
-The *at most once delivery guarantee* allows Nats to be **fast and reliable**. (Almost) no state is kept on the server. What's more, if the nats server detects that a client is not able to keep up with the messages it should consume, **it disconnects it**. 
+The *at most once delivery guarantee* allows Nats to be **fast and reliable**. (Almost) no state is kept on the server. 
+**A slow client** is a client that is not able to consume the messages the server is sending to it for more than 1 second (the timeout is configurable). 
 
-**The nats server behaves in a very selfish manner**, and by doing that it achieves high levels of stability and availability, not having to do the extra work of accomodate any slow client. 
+**The nats server behaves in a very selfish manner cutting the connection of the slow clients**, and not having to do the extra work of trying to help slow clients it achieves high levels of consistency and availability, 
 
+## That's it for now
 
-
+I'll publish the second part soon, where I'll continue continue analyzing Nats following the outline of the talk.
 
 
 
