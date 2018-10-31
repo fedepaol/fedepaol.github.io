@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Talks | My little software store]]></title>
+  <link href="http://fedepaol.github.io/blog/categories/talks/atom.xml" rel="self"/>
+  <link href="http://fedepaol.github.io/"/>
+  <updated>2018-10-31T07:11:21+01:00</updated>
+  <id>http://fedepaol.github.io/</id>
+  <author>
+    <name><![CDATA[Federico Paolinelli]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Fast Messaging With Nats and Go]]></title>
+    <link href="http://fedepaol.github.io/blog/2018/10/27/fast-messaging-with-nats-and-go/"/>
+    <updated>2018-10-27T21:48:29+02:00</updated>
+    <id>http://fedepaol.github.io/blog/2018/10/27/fast-messaging-with-nats-and-go</id>
+    <content type="html"><![CDATA[<p>This is the first of follow up serie of the talk <em>Fast messaging with Nats and Go</em> I gave at <a href="golab.io">golab 2018</a>.</p>
+
+<h3>The slides of the talk can be found here:</h3>
+
+<script async class="speakerdeck-embed" data-id="001030954dc6483285e47ccf4906a7d0" data-ratio="1.33333333333333" src="//speakerdeck.com/assets/embed.js"></script>
+
+
+<h3>What is Nats</h3>
+
+<p><a href="nats.io">Nats</a> is a messaging system hosted under the <a href="www.cncf.io">CNCF</a> umbrella, which is an <em>open source software foundation dedicated to making cloud native computing universal and sustainable</em>.</p>
+
+<p>The CNCF projects list it&rsquo;s the place-to-go while looking for software related to distributed systems.</p>
+
+<p>Disclaimer: I am just a user of Nats reporting my experience and my understanding of how it works. What follows might be inaccurate or wrong :-)</p>
+
+<h3>Why messaging</h3>
+
+<p>The way we architect and build our applications changed in the past few years, moving from monolithic apps to distributed and therefore interacting (micro) services. Together with that, some communication patterns emerged.</p>
+
+<p>Even if the most popular one is to use rest and there are popular libraries for synchronous interaction such as <a href="https://grpc.io/">grpc</a> or <a href="https://thrift.apache.org/">thrift</a>, some interactions are better represented using events and messaging.</p>
+
+<h3>Good points of messaging</h3>
+
+<p>Messaging is a natural way to decouple producers of messages from consumers of those messages. The producer does not know who (if any) is going to consume the message, the consumer does not know where that message is coming from.</p>
+
+<p><strong>This makes scalability easier:</strong> you can throw in / remove producers (or consumers) and your application will scale accordingly without having to change anything.</p>
+
+<p>Messaging <strong>enables different kinds of interaction</strong>, for example <a href="https://martinfowler.com/eaaDev/EventSourcing.html">event sourcing</a>, where the state of a service is emitted as a sequence of updates which are collected in order to reconstruct the current state in another service.</p>
+
+<p>Messaging makes it easier to implement all the kinds of <em>reactive</em> paradigms, where the evolution of our system is driven by the emission and the reaction to messages sent and received by our services.</p>
+
+<h3>There are a lot of messaging systems, what do I need to look for in one of them?</h3>
+
+<p>Some aspects that we need to take in consideration are:</p>
+
+<p><strong>Messaging patterns:</strong> Does the messaging system support pub/sub? Request/reply? Fan-in? Any other kind of exotic messaging pattern?</p>
+
+<p><strong>Durability of the messages:</strong> How long will the messages last? Will be there forever(ish)? Will they expire after a short timeout? Will they be thrown away if they are not consumed immediately?</p>
+
+<p><strong>Ordering guarantees:</strong> Will the messages be always received in the same order the publisher is publishing them?</p>
+
+<p><strong>Routing capabilities:</strong> How does the system route the messages? Is it topic based? Does it support wildcarding?</p>
+
+<p><strong>Dev / Ops experience:</strong> This is often underestimated: how easy it is to interact with the system? How much boilerplate code is required? And also, how easy is to configure and to maintain the system? Does it require a lot of knobs to be turned in order to configure it properly?</p>
+
+<p><strong>Performance:</strong> Is it fast? How does it behaves under load?</p>
+
+<p><strong>Auth / Authz:</strong> Does it support authentication / authorization? How?</p>
+
+<h3>What makes a good communication system?</h3>
+
+<p>The two extremes of the spectrum are</p>
+
+<h4>The Enterprise Service Bus:</h4>
+
+<p>Popular during the SOA movement, the bus held a lot of logic itself. Transformation, routing rules, manipulation and filtering of the messages. The result was that the logic was split between the endpoints and the bus itself, making really difficult to understand the big picture.</p>
+
+<h4>What Martin Fowler says:</h4>
+
+<p>In <a href="https://martinfowler.com/articles/microservices.html">his really popular article about microservices</a>: <em>&ldquo;The microservice community favours an alternative approach: smart endpoints and dumb pipes&rdquo;</em>.</p>
+
+<p><strong>Nats is on the dumb side</strong>, but it&rsquo;s just dumb enough to be useful.</p>
+
+<h2>The protocol</h2>
+
+<p>The nats protocol is text based, which means that you can even telnet them to a Nats server. The messages are delimited by CR - LF .</p>
+
+<p>The main messages are:</p>
+
+<table>
+    <tr>
+        <td>PUB    -</td>
+        <td>Publish a message to a subject, with optional reply subject</td>
+    </tr>
+    <tr>
+        <td>SUB   -</td>
+        <td>Subscribe to a subject</td>
+    </tr>
+    <tr>
+        <td>MSG   -</td>
+        <td>Delivers a message payload to a subscriber</td>
+    </tr>
+    <tr>
+        <td>UNSUB  - </td>
+        <td>Unsubscribe from a subject</td>
+    </tr>
+</table>
+
+
+<p></p>
+
+<p>There are also other messages used to establish and keep the connection up, such as <em>CONNECT</em>, <em>PING</em>, <em>INFO</em> .</p>
+
+<p>PING in particular solves the problem of sockets held up by the os even if the connection is not working anymore.</p>
+
+<h3>The protocol supports wildcards</h3>
+
+<p>Nats subjects support wildcards. The subject are tokens separated by a dot, such as <strong>foo.bar</strong> or <strong>foo.bar.baz</strong>.</p>
+
+<p>There are two types of wildcards: by using <strong>*</strong> a wildcard matches the token (foo.* matches foo.bar but not foo.bar.baz). If you want to match any foo.something you need to use <strong>></strong> (as in <strong>foo.></strong>).</p>
+
+<p>In short:</p>
+
+<ul>
+<li>foo.* matches foo.bar and foo.baz but not foo.bar.baz</li>
+<li>foo.> matches foo.bar and foo.bar.baz</li>
+<li>foo.*.baz matches foo.bar.baz</li>
+</ul>
+
+
+<h2>The server (or, the ops point of view)</h2>
+
+<p>The nats server is a (small) single Go executable. In order to run it, you just start it with</p>
+
+<pre><code>gnatsd -p 4222
+</code></pre>
+
+<p>and you are done.</p>
+
+<h3>Autodiscovery</h3>
+
+<p>The nats server provides also a gossip based autodiscovery mechanism. By using it, you can seamlessly add and remove new nodes to the cluster to scale up / down. A new server addition is propagated to all its peers and to all the clients.</p>
+
+<p>The auto discovery is enabled by setting one or more servers as <em>seed server</em> and by pointing them from the peers:</p>
+
+<pre><code>gnatsd -p 4222 -cluster nats://localhost:4248
+gnatsd -p 5222 -routes nats://localhost:4248
+</code></pre>
+
+<h4>All the servers form a full mesh:</h4>
+
+<p><img src="/images/nats/fullmesh.png" width="450"></p>
+
+<p>Each server is connected to each other, meaning that two clients will always be one hop distant <strong>at most</strong>. Once a client subscribes a subject, its interest will be propagated through all the servers of the mesh.</p>
+
+<h2>Delivery guarantees</h2>
+
+<p>Nats provides very few guarantees:</p>
+
+<ul>
+<li><p>It guarantees ordering of messages.</p></li>
+<li><p>It&rsquo;s an <strong>at most once delivery</strong> system, which means that if the client is not connected while the message is being published, it won&rsquo;t receive that message. Ever. <strong>The message is not kept on the server</strong>, if a client looses it for some reason and wants it, some kind of recovery mechanism must be implemented (more on this later).</p></li>
+</ul>
+
+
+<p>It&rsquo;s kind of like the tree falling in the forest while nobody is hearing.</p>
+
+<h2>Availability</h2>
+
+<p>The <em>at most once delivery guarantee</em> allows Nats to be <strong>fast and reliable</strong>. (Almost) no state is kept on the server.
+<strong>A slow client</strong> is a client that is not able to consume the messages the server is sending to it for more than 1 second (the timeout is configurable).</p>
+
+<p><strong>The nats server behaves in a very selfish manner cutting the connection of the slow clients</strong>, and not having to do the extra work of trying to help slow clients it achieves high levels of consistency and availability,</p>
+
+<h2>That&rsquo;s it for now</h2>
+
+<p>I&rsquo;ll publish the second part soon, where I&rsquo;ll continue continue analyzing Nats following the outline of the talk.</p>
+]]></content>
+  </entry>
+  
+</feed>

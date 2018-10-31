@@ -1,0 +1,458 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Fast Messaging With Nats and Go - My little software store</title>
+  <meta name="author" content="Federico Paolinelli">
+
+  
+  <meta name="description" content="This is the first of follow up serie of the talk Fast messaging with Nats and Go I gave at golab 2018. The slides of the talk can be found here: What &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://fedepaol.github.io/blog/2018/10/27/fast-messaging-with-nats-and-go">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="My little software store" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-16514009-2']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">My little software store</a></h1>
+  
+    <h2>Random thoughts about my experience as moonlight software developer.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:fedepaol.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Fast Messaging With Nats and Go</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2018-10-27T21:48:29+02:00'><span class='date'><span class='date-month'>Oct</span> <span class='date-day'>27</span><span class='date-suffix'>th</span>, <span class='date-year'>2018</span></span> <span class='time'>9:48 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>This is the first of follow up serie of the talk <em>Fast messaging with Nats and Go</em> I gave at <a href="golab.io">golab 2018</a>.</p>
+
+<h3>The slides of the talk can be found here:</h3>
+
+<script async class="speakerdeck-embed" data-id="001030954dc6483285e47ccf4906a7d0" data-ratio="1.33333333333333" src="//speakerdeck.com/assets/embed.js"></script>
+
+
+<h3>What is Nats</h3>
+
+<p><a href="nats.io">Nats</a> is a messaging system hosted under the <a href="www.cncf.io">CNCF</a> umbrella, which is an <em>open source software foundation dedicated to making cloud native computing universal and sustainable</em>.</p>
+
+<p>The CNCF projects list it&rsquo;s the place-to-go while looking for software related to distributed systems.</p>
+
+<p>Disclaimer: I am just a user of Nats reporting my experience and my understanding of how it works. What follows might be inaccurate or wrong :-)</p>
+
+<h3>Why messaging</h3>
+
+<p>The way we architect and build our applications changed in the past few years, moving from monolithic apps to distributed and therefore interacting (micro) services. Together with that, some communication patterns emerged.</p>
+
+<p>Even if the most popular one is to use rest and there are popular libraries for synchronous interaction such as <a href="https://grpc.io/">grpc</a> or <a href="https://thrift.apache.org/">thrift</a>, some interactions are better represented using events and messaging.</p>
+
+<h3>Good points of messaging</h3>
+
+<p>Messaging is a natural way to decouple producers of messages from consumers of those messages. The producer does not know who (if any) is going to consume the message, the consumer does not know where that message is coming from.</p>
+
+<p><strong>This makes scalability easier:</strong> you can throw in / remove producers (or consumers) and your application will scale accordingly without having to change anything.</p>
+
+<p>Messaging <strong>enables different kinds of interaction</strong>, for example <a href="https://martinfowler.com/eaaDev/EventSourcing.html">event sourcing</a>, where the state of a service is emitted as a sequence of updates which are collected in order to reconstruct the current state in another service.</p>
+
+<p>Messaging makes it easier to implement all the kinds of <em>reactive</em> paradigms, where the evolution of our system is driven by the emission and the reaction to messages sent and received by our services.</p>
+
+<h3>There are a lot of messaging systems, what do I need to look for in one of them?</h3>
+
+<p>Some aspects that we need to take in consideration are:</p>
+
+<p><strong>Messaging patterns:</strong> Does the messaging system support pub/sub? Request/reply? Fan-in? Any other kind of exotic messaging pattern?</p>
+
+<p><strong>Durability of the messages:</strong> How long will the messages last? Will be there forever(ish)? Will they expire after a short timeout? Will they be thrown away if they are not consumed immediately?</p>
+
+<p><strong>Ordering guarantees:</strong> Will the messages be always received in the same order the publisher is publishing them?</p>
+
+<p><strong>Routing capabilities:</strong> How does the system route the messages? Is it topic based? Does it support wildcarding?</p>
+
+<p><strong>Dev / Ops experience:</strong> This is often underestimated: how easy it is to interact with the system? How much boilerplate code is required? And also, how easy is to configure and to maintain the system? Does it require a lot of knobs to be turned in order to configure it properly?</p>
+
+<p><strong>Performance:</strong> Is it fast? How does it behaves under load?</p>
+
+<p><strong>Auth / Authz:</strong> Does it support authentication / authorization? How?</p>
+
+<h3>What makes a good communication system?</h3>
+
+<p>The two extremes of the spectrum are</p>
+
+<h4>The Enterprise Service Bus:</h4>
+
+<p>Popular during the SOA movement, the bus held a lot of logic itself. Transformation, routing rules, manipulation and filtering of the messages. The result was that the logic was split between the endpoints and the bus itself, making really difficult to understand the big picture.</p>
+
+<h4>What Martin Fowler says:</h4>
+
+<p>In <a href="https://martinfowler.com/articles/microservices.html">his really popular article about microservices</a>: <em>&ldquo;The microservice community favours an alternative approach: smart endpoints and dumb pipes&rdquo;</em>.</p>
+
+<p><strong>Nats is on the dumb side</strong>, but it&rsquo;s just dumb enough to be useful.</p>
+
+<h2>The protocol</h2>
+
+<p>The nats protocol is text based, which means that you can even telnet them to a Nats server. The messages are delimited by CR - LF .</p>
+
+<p>The main messages are:</p>
+
+<table>
+    <tr>
+        <td>PUB    -</td>
+        <td>Publish a message to a subject, with optional reply subject</td>
+    </tr>
+    <tr>
+        <td>SUB   -</td>
+        <td>Subscribe to a subject</td>
+    </tr>
+    <tr>
+        <td>MSG   -</td>
+        <td>Delivers a message payload to a subscriber</td>
+    </tr>
+    <tr>
+        <td>UNSUB  - </td>
+        <td>Unsubscribe from a subject</td>
+    </tr>
+</table>
+
+
+<p></p>
+
+<p>There are also other messages used to establish and keep the connection up, such as <em>CONNECT</em>, <em>PING</em>, <em>INFO</em> .</p>
+
+<p>PING in particular solves the problem of sockets held up by the os even if the connection is not working anymore.</p>
+
+<h3>The protocol supports wildcards</h3>
+
+<p>Nats subjects support wildcards. The subject are tokens separated by a dot, such as <strong>foo.bar</strong> or <strong>foo.bar.baz</strong>.</p>
+
+<p>There are two types of wildcards: by using <strong>*</strong> a wildcard matches the token (foo.* matches foo.bar but not foo.bar.baz). If you want to match any foo.something you need to use <strong>></strong> (as in <strong>foo.></strong>).</p>
+
+<p>In short:</p>
+
+<ul>
+<li>foo.* matches foo.bar and foo.baz but not foo.bar.baz</li>
+<li>foo.> matches foo.bar and foo.bar.baz</li>
+<li>foo.*.baz matches foo.bar.baz</li>
+</ul>
+
+
+<h2>The server (or, the ops point of view)</h2>
+
+<p>The nats server is a (small) single Go executable. In order to run it, you just start it with</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>gnatsd -p 4222</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>and you are done.</p>
+
+<h3>Autodiscovery</h3>
+
+<p>The nats server provides also a gossip based autodiscovery mechanism. By using it, you can seamlessly add and remove new nodes to the cluster to scale up / down. A new server addition is propagated to all its peers and to all the clients.</p>
+
+<p>The auto discovery is enabled by setting one or more servers as <em>seed server</em> and by pointing them from the peers:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>gnatsd -p 4222 -cluster nats://localhost:4248
+</span><span class='line'>gnatsd -p 5222 -routes nats://localhost:4248</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<h4>All the servers form a full mesh:</h4>
+
+<p><img src="/images/nats/fullmesh.png" width="450"></p>
+
+<p>Each server is connected to each other, meaning that two clients will always be one hop distant <strong>at most</strong>. Once a client subscribes a subject, its interest will be propagated through all the servers of the mesh.</p>
+
+<h2>Delivery guarantees</h2>
+
+<p>Nats provides very few guarantees:</p>
+
+<ul>
+<li><p>It guarantees ordering of messages.</p></li>
+<li><p>It&rsquo;s an <strong>at most once delivery</strong> system, which means that if the client is not connected while the message is being published, it won&rsquo;t receive that message. Ever. <strong>The message is not kept on the server</strong>, if a client looses it for some reason and wants it, some kind of recovery mechanism must be implemented (more on this later).</p></li>
+</ul>
+
+
+<p>It&rsquo;s kind of like the tree falling in the forest while nobody is hearing.</p>
+
+<h2>Availability</h2>
+
+<p>The <em>at most once delivery guarantee</em> allows Nats to be <strong>fast and reliable</strong>. (Almost) no state is kept on the server.
+<strong>A slow client</strong> is a client that is not able to consume the messages the server is sending to it for more than 1 second (the timeout is configurable).</p>
+
+<p><strong>The nats server behaves in a very selfish manner cutting the connection of the slow clients</strong>, and not having to do the extra work of trying to help slow clients it achieves high levels of consistency and availability,</p>
+
+<h2>That&rsquo;s it for now</h2>
+
+<p>I&rsquo;ll publish the second part soon, where I&rsquo;ll continue continue analyzing Nats following the outline of the talk.</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Federico Paolinelli</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2018-10-27T21:48:29+02:00'><span class='date'><span class='date-month'>Oct</span> <span class='date-day'>27</span><span class='date-suffix'>th</span>, <span class='date-year'>2018</span></span> <span class='time'>9:48 pm</span></time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/go/'>go</a>, <a class='category' href='/blog/categories/nats/'>nats</a>, <a class='category' href='/blog/categories/talks/'>talks</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://fedepaol.github.io/blog/2018/10/27/fast-messaging-with-nats-and-go/" data-via="fedepaol" data-counturl="http://fedepaol.github.io/blog/2018/10/27/fast-messaging-with-nats-and-go/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2018/10/26/a-new-chapter/" title="Previous Post: A new (side) chapter">&laquo; A new (side) chapter</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>About Me</h1>
+  <p>Lead developer with electronic trading software by day, passionate about opensource. I spend a lot of my spare time writing Go and Android software. Table Tennis player, snowboarder, dad. I also contributed to Firefox for Android.</p>
+  <a href="mailto:fedepaol@gmail.com" target="_top">fedepaol@gmail.com</a>
+</section>
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2018/10/27/fast-messaging-with-nats-and-go/">Fast Messaging With Nats and Go</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/10/26/a-new-chapter/">A New (Side) Chapter</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2017/04/30/android-okhttp-and-websockets/">Android, Okhttp and Websockets</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/08/27/android-mvp-testing/">Android, MVP, Dagger and Testing</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/06/20/how-to-a-timer/">Reactive Android Timers, Countdowns and Lifecycle</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/fedepaol">@fedepaol</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'fedepaol',
+            count: 0,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+<section class="googleplus">
+  <h1>
+    <a href="https://plus.google.com/+FedericoPaolinelli?rel=author">
+      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
+      Google+
+    </a>
+  </h1>
+</section>
+
+
+
+<section>
+	<h1>On Twitter:</h1>
+	<div>
+		<p><br /><a href="http://twitter.com/fedepaol" target="_blank">My Tweets, on Twitter.</a></p>
+		<a href="http://twitter.com/fedepaol" class="twitter-follow-button" data-show-count="">Follow @fedepaol</a>
+	</div>
+</section>
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2018 - Federico Paolinelli -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'fedepaolgithubio';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://fedepaol.github.io/blog/2018/10/27/fast-messaging-with-nats-and-go/';
+        var disqus_url = 'http://fedepaol.github.io/blog/2018/10/27/fast-messaging-with-nats-and-go/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>
