@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Category: Webservice | My little software warehouse]]></title>
+  <title><![CDATA[Category: Webservice | My little software store]]></title>
   <link href="http://fedepaol.github.io/blog/categories/webservice/atom.xml" rel="self"/>
   <link href="http://fedepaol.github.io/"/>
-  <updated>2018-10-31T19:43:34+01:00</updated>
+  <updated>2018-12-11T23:09:55+01:00</updated>
   <id>http://fedepaol.github.io/</id>
   <author>
     <name><![CDATA[Federico Paolinelli]]></name>

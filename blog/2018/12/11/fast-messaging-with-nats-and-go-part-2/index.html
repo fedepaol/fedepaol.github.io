@@ -1,0 +1,433 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Fast Messaging With Nats and Go Part 2 - My little software store</title>
+  <meta name="author" content="Federico Paolinelli">
+
+  
+  <meta name="description" content="This is the second of a follow up serie of the talk Fast messaging with Nats and Go I gave at golab 2018.
+The first part can be found here What can &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://fedepaol.github.io/blog/2018/12/11/fast-messaging-with-nats-and-go-part-2">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="My little software store" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-16514009-2']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">My little software store</a></h1>
+  
+    <h2>Random thoughts about my experience as moonlight software developer.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:fedepaol.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Fast Messaging With Nats and Go Part 2</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2018-12-11T22:32:15+01:00'><span class='date'><span class='date-month'>Dec</span> <span class='date-day'>11</span><span class='date-suffix'>th</span>, <span class='date-year'>2018</span></span> <span class='time'>10:32 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>This is the second of a follow up serie of the talk <em>Fast messaging with Nats and Go</em> I gave at <a href="golab.io">golab 2018</a>.
+The first part can be found <a href="http://fedepaol.github.io/blog/2018/10/27/fast-messaging-with-nats-and-go/">here</a></p>
+
+<h2>What can we do with nats?</h2>
+
+<h3>Pub sub</h3>
+
+<p>As you can probably guess, given that Nats is a pure pub / sub system, we can easily implement pub / sub.</p>
+
+<p><img src="/images/nats/pubsub.png" width="350"></p>
+
+<p>Please remember that a nats publisher does not assume the audience. The published message can reach one, 1000 or 0 subscriber. If no subscribers are connected the message is gone forever.</p>
+
+<h3>Queueing</h3>
+
+<p>Queueing is a variant of pub / sub where the subscriber announces itself to belong to a subscription group. In that case the Nats server will send randomly the subscribed message <strong>only to one subscriber</strong>.</p>
+
+<p><img src="/images/nats/queueing.png" width="450"></p>
+
+<p>This is useful in case you want to implement a load balancing policy. On top of that is really easy to scale up (or down) by adding new subscribers to the subscription group.</p>
+
+<h3>Request / Reply</h3>
+
+<p>Request / Reply is <strong>just syntactic sugar</strong> over the pub / sub mechanism provided by Nats: the publisher sends a reply subject together with the message and expects any reply to be sent to that reply subject.</p>
+
+<p>The subscribers receive the request message together with the reply subject and sends the reply to that subject.</p>
+
+<p><img src="/images/nats/reqreply.png" width="450"></p>
+
+<p>Given the nature of Nats, the request gets received to all the registered subscribers. The requestor just handles the first reply it receives and discards all the other replies.</p>
+
+<p>Apart from this (quite) not efficient way to handle req / reply, this mechanism can be used together with queueing we just discussed making only one receiver of the subscription group receive the request.</p>
+
+<h2>Using Nats with Go</h2>
+
+<p>First of all, there are clients for a lot of languages already available, from the most fancy ones (rust or elixir) to some out of fashiones (even perl!).</p>
+
+<p>The go client does a bit more than just implementing the text based protocol. In particular:</p>
+
+<h4>Handles the connection / reconnection gracefully</h4>
+
+<p>Given that a client connected to the cluster gets notified of all the nodes of the cluster via the gossiping mechanism, whenever a client detects a disconnection from a node, it tries to reconnect to one of the other nodes of the cluster.</p>
+
+<p>While the reconnection is in progress, any messages that we would like to send are buffered up to a configurable limit (the default is something like 8 Mb).</p>
+
+<h4>Tries to avoid slow client errors by emptying the socket</h4>
+
+<p>The client tries to receive all the available messages and pass them to the application. To do that, it buffers the messages received in order to avoid to be marked as a <em>slow client</em> by the server. When the receive buffer is full, it tries to notify the client of the library by raising errors.</p>
+
+<h3>Some code</h3>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">nc</span><span class="p">,</span> <span class="nx">_</span> <span class="o">:=</span> <span class="nx">nats</span><span class="p">.</span><span class="nx">Connect</span><span class="p">(</span><span class="nx">nats</span><span class="p">.</span><span class="nx">DefaultURL</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">nc</span><span class="p">.</span><span class="nx">Publish</span><span class="p">(</span><span class="s">&quot;foo&quot;</span><span class="p">,</span> <span class="p">[]</span><span class="nb">byte</span><span class="p">(</span><span class="s">&quot;Hello World&quot;</span><span class="p">))</span>
+</span><span class='line'><span class="nx">nc</span><span class="p">.</span><span class="nx">Subscribe</span><span class="p">(</span><span class="s">&quot;foo&quot;</span><span class="p">,</span> <span class="kd">func</span><span class="p">(</span><span class="nx">m</span> <span class="o">*</span><span class="nx">nats</span><span class="p">.</span><span class="nx">Msg</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="c1">// handle the message</span>
+</span><span class='line'><span class="p">})</span>
+</span><span class='line'><span class="nx">nc</span><span class="p">.</span><span class="nx">Flush</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// chan subscribe</span>
+</span><span class='line'><span class="nx">ch</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="o">*</span><span class="nx">nats</span><span class="p">.</span><span class="nx">Msg</span><span class="p">,</span> <span class="mi">64</span><span class="p">)</span>
+</span><span class='line'><span class="nx">sub</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">nc</span><span class="p">.</span><span class="nx">ChanSubscribe</span><span class="p">(</span><span class="s">&quot;foo&quot;</span><span class="p">,</span> <span class="nx">ch</span><span class="p">)</span>
+</span><span class='line'><span class="nx">msg</span> <span class="o">:=</span> <span class="o">&lt;-</span> <span class="nx">ch</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>Sending and receiving takes just a few lines of code. There is also a channel based subscription where the received messages are sent through a channel.
+Beware that sending are asynchronous operations, <code>nc.Flush()</code> is needed in order to force the client to send the messages out.</p>
+
+<p>Using request / reply is just as straightforward:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="c1">// Requests    </span>
+</span><span class='line'><span class="kd">var</span> <span class="nx">response</span> <span class="kt">string</span>
+</span><span class='line'><span class="nx">err</span> <span class="o">:=</span> <span class="nx">c</span><span class="p">.</span><span class="nx">Request</span><span class="p">(</span><span class="s">&quot;help&quot;</span><span class="p">,</span> <span class="s">&quot;help me&quot;</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">response</span><span class="p">,</span> <span class="mi">10</span><span class="o">*</span><span class="nx">time</span><span class="p">.</span><span class="nx">Millisecond</span><span class="p">)</span>
+</span><span class='line'><span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;Request failed: %v\n&quot;</span><span class="p">,</span> <span class="nx">err</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Replying</span>
+</span><span class='line'><span class="nx">c</span><span class="p">.</span><span class="nx">Subscribe</span><span class="p">(</span><span class="s">&quot;help&quot;</span><span class="p">,</span> <span class="kd">func</span><span class="p">(</span><span class="nx">subj</span><span class="p">,</span> <span class="nx">reply</span> <span class="kt">string</span><span class="p">,</span> <span class="nx">msg</span> <span class="kt">string</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">c</span><span class="p">.</span><span class="nx">Publish</span><span class="p">(</span><span class="nx">reply</span><span class="p">,</span> <span class="s">&quot;I can help!&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="p">})</span>
+</span><span class='line'><span class="c1">// Queue group reply</span>
+</span><span class='line'><span class="nx">nc</span><span class="p">.</span><span class="nx">QueueSubscribe</span><span class="p">(</span><span class="s">&quot;help&quot;</span><span class="p">,</span> <span class="s">&quot;workers&quot;</span><span class="p">,</span> <span class="kd">func</span><span class="p">(</span><span class="nx">msg</span> <span class="o">*</span><span class="nx">Msg</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">c</span><span class="p">.</span><span class="nx">Publish</span><span class="p">(</span><span class="nx">msg</span><span class="p">.</span><span class="nx">Reply</span><span class="p">,</span> <span class="s">&quot;I can help!&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="p">})</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p></p>
+
+<p>Request / reply are blocking (whereas pub / sub are asynchronous) and as we already mentioned can be used together with subscription groups.</p>
+
+<p>The request accepts a <code>timeout</code> parameter but there is also a variant that accepts a <code>context</code> in order to let the caller be able to interrupt the request.</p>
+
+<h3>The go client does a lot more</h3>
+
+<ul>
+<li>it provides connection lifecycle callbacks (if you want to override the reconnection mechanism)</li>
+<li>it provides asynchronous and synchronous versions of the apis</li>
+<li>it provides encoders (json and protobuf) in order to use type safe callbacks</li>
+</ul>
+
+
+<p>This (and a lot more) can be found on the official nats go client <a href="https://github.com/nats-io/go-nats">here</a>.</p>
+
+<p>I hope I triggered your curiosity in trying a powerful (yet simple) messaging system.</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Federico Paolinelli</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2018-12-11T22:32:15+01:00'><span class='date'><span class='date-month'>Dec</span> <span class='date-day'>11</span><span class='date-suffix'>th</span>, <span class='date-year'>2018</span></span> <span class='time'>10:32 pm</span></time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/go/'>go</a>, <a class='category' href='/blog/categories/nats/'>nats</a>, <a class='category' href='/blog/categories/talks/'>talks</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://fedepaol.github.io/blog/2018/12/11/fast-messaging-with-nats-and-go-part-2/" data-via="fedepaol" data-counturl="http://fedepaol.github.io/blog/2018/12/11/fast-messaging-with-nats-and-go-part-2/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2018/10/27/fast-messaging-with-nats-and-go/" title="Previous Post: Fast messaging with Nats and Go">&laquo; Fast messaging with Nats and Go</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>About Me</h1>
+  <p>Lead developer with electronic trading software by day, passionate about opensource. I spend a lot of my spare time writing Go and Android software. Table Tennis player, snowboarder, dad. I also contributed to Firefox for Android.</p>
+  <a href="mailto:fedepaol@gmail.com" target="_top">fedepaol@gmail.com</a>
+</section>
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2018/12/11/fast-messaging-with-nats-and-go-part-2/">Fast Messaging With Nats and Go Part 2</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/10/27/fast-messaging-with-nats-and-go/">Fast Messaging With Nats and Go</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/10/26/a-new-chapter/">A New (Side) Chapter</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2017/04/30/android-okhttp-and-websockets/">Android, Okhttp and Websockets</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/08/27/android-mvp-testing/">Android, MVP, Dagger and Testing</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/fedepaol">@fedepaol</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'fedepaol',
+            count: 0,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+<section class="googleplus">
+  <h1>
+    <a href="https://plus.google.com/+FedericoPaolinelli?rel=author">
+      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
+      Google+
+    </a>
+  </h1>
+</section>
+
+
+
+<section>
+	<h1>On Twitter:</h1>
+	<div>
+		<p><br /><a href="http://twitter.com/fedepaol" target="_blank">My Tweets, on Twitter.</a></p>
+		<a href="http://twitter.com/fedepaol" class="twitter-follow-button" data-show-count="">Follow @fedepaol</a>
+	</div>
+</section>
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2018 - Federico Paolinelli -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'fedepaolgithubio';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://fedepaol.github.io/blog/2018/12/11/fast-messaging-with-nats-and-go-part-2/';
+        var disqus_url = 'http://fedepaol.github.io/blog/2018/12/11/fast-messaging-with-nats-and-go-part-2/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

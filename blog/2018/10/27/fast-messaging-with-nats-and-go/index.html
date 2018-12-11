@@ -5,7 +5,7 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Fast Messaging With Nats and Go - My little software warehouse</title>
+  <title>Fast Messaging With Nats and Go - My little software store</title>
   <meta name="author" content="Federico Paolinelli">
 
   
@@ -21,7 +21,7 @@
   <link rel="canonical" href="http://fedepaol.github.io/blog/2018/10/27/fast-messaging-with-nats-and-go">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
-  <link href="/atom.xml" rel="alternate" title="My little software warehouse" type="application/atom+xml">
+  <link href="/atom.xml" rel="alternate" title="My little software store" type="application/atom+xml">
   <script src="/javascripts/modernizr-2.0.js"></script>
   <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
   <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
@@ -48,7 +48,7 @@
 
 <body   >
   <header role="banner"><hgroup>
-  <h1><a href="/">My little software warehouse</a></h1>
+  <h1><a href="/">My little software store</a></h1>
   
     <h2>Random thoughts about my experience as moonlight software developer.</h2>
   
@@ -105,11 +105,7 @@
 
 <h3>What is Nats</h3>
 
-<p><a href="nats.io">Nats</a> is a messaging system hosted under the <a href="www.cncf.io">CNCF</a> umbrella, which is an <em>open source software foundation dedicated to making cloud native computing universal and sustainable</em>.</p>
-
-<p>The CNCF projects list it&rsquo;s the place-to-go while looking for software related to distributed systems.</p>
-
-<p>Disclaimer: I am just a user of Nats reporting my experience and my understanding of how it works. What follows might be inaccurate or wrong :-)</p>
+<p><a href="nats.io">Nats</a> is a messaging system hosted under the <a href="www.cncf.io">CNCF</a> umbrella, which is an <em>open source software foundation dedicated to making cloud native computing universal and sustainable</em>. It&rsquo;s my place-to-go while looking for software related to distributed systems. I am just a user of Nats reporting my experience and my understanding of how it works. What follows might be inaccurate or wrong :-)</p>
 
 <h3>Why messaging</h3>
 
@@ -189,22 +185,11 @@
 
 <p>There are also other messages used to establish and keep the connection up, such as <em>CONNECT</em>, <em>PING</em>, <em>INFO</em> .</p>
 
-<p>PING in particular solves the problem of sockets held up by the os even if the connection is not working anymore.</p>
-
-<h3>The protocol supports wildcards</h3>
+<h4>The protocol supports wildcards</h4>
 
 <p>Nats subjects support wildcards. The subject are tokens separated by a dot, such as <strong>foo.bar</strong> or <strong>foo.bar.baz</strong>.</p>
 
 <p>There are two types of wildcards: by using <strong>*</strong> a wildcard matches the token (foo.* matches foo.bar but not foo.bar.baz). If you want to match any foo.something you need to use <strong>></strong> (as in <strong>foo.></strong>).</p>
-
-<p>In short:</p>
-
-<ul>
-<li>foo.* matches foo.bar and foo.baz but not foo.bar.baz</li>
-<li>foo.> matches foo.bar and foo.bar.baz</li>
-<li>foo.*.baz matches foo.bar.baz</li>
-</ul>
-
 
 <h2>The server (or, the ops point of view)</h2>
 
@@ -216,7 +201,7 @@
 
 <p>and you are done.</p>
 
-<h3>Autodiscovery</h3>
+<h4>Autodiscovery</h4>
 
 <p>The nats server provides also a gossip based autodiscovery mechanism. By using it, you can seamlessly add and remove new nodes to the cluster to scale up / down. A new server addition is propagated to all its peers and to all the clients.</p>
 
@@ -299,6 +284,8 @@
         <a class="basic-alignment left" href="/blog/2018/10/26/a-new-chapter/" title="Previous Post: A new (side) chapter">&laquo; A new (side) chapter</a>
       
       
+        <a class="basic-alignment right" href="/blog/2018/12/11/fast-messaging-with-nats-and-go-part-2/" title="Next Post: fast messaging with nats and go part 2">fast messaging with nats and go part 2 &raquo;</a>
+      
     </p>
   </footer>
 </article>
@@ -323,6 +310,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2018/12/11/fast-messaging-with-nats-and-go-part-2/">Fast Messaging With Nats and Go Part 2</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2018/10/27/fast-messaging-with-nats-and-go/">Fast Messaging With Nats and Go</a>
       </li>
     
@@ -336,10 +327,6 @@
     
       <li class="post">
         <a href="/blog/2016/08/27/android-mvp-testing/">Android, MVP, Dagger and Testing</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2016/06/20/how-to-a-timer/">Reactive Android Timers, Countdowns and Lifecycle</a>
       </li>
     
   </ul>

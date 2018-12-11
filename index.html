@@ -5,11 +5,12 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>My little software warehouse</title>
+  <title>My little software store</title>
   <meta name="author" content="Federico Paolinelli">
 
   
-  <meta name="description" content="This is the first of follow up serie of the talk Fast messaging with Nats and Go I gave at golab 2018. The slides of the talk can be found here: What &hellip;">
+  <meta name="description" content="This is the second of a follow up serie of the talk Fast messaging with Nats and Go I gave at golab 2018.
+The first part can be found here What can &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -21,7 +22,7 @@
   <link rel="canonical" href="http://fedepaol.github.io">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
-  <link href="/atom.xml" rel="alternate" title="My little software warehouse" type="application/atom+xml">
+  <link href="/atom.xml" rel="alternate" title="My little software store" type="application/atom+xml">
   <script src="/javascripts/modernizr-2.0.js"></script>
   <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
   <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
@@ -48,7 +49,7 @@
 
 <body   >
   <header role="banner"><hgroup>
-  <h1><a href="/">My little software warehouse</a></h1>
+  <h1><a href="/">My little software store</a></h1>
   
     <h2>Random thoughts about my experience as moonlight software developer.</h2>
   
@@ -83,6 +84,168 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2018/12/11/fast-messaging-with-nats-and-go-part-2/">Fast Messaging With Nats and Go Part 2</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2018-12-11T22:32:15+01:00'><span class='date'><span class='date-month'>Dec</span> <span class='date-day'>11</span><span class='date-suffix'>th</span>, <span class='date-year'>2018</span></span> <span class='time'>10:32 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>This is the second of a follow up serie of the talk <em>Fast messaging with Nats and Go</em> I gave at <a href="golab.io">golab 2018</a>.
+The first part can be found <a href="http://fedepaol.github.io/blog/2018/10/27/fast-messaging-with-nats-and-go/">here</a></p>
+
+<h2>What can we do with nats?</h2>
+
+<h3>Pub sub</h3>
+
+<p>As you can probably guess, given that Nats is a pure pub / sub system, we can easily implement pub / sub.</p>
+
+<p><img src="/images/nats/pubsub.png" width="350"></p>
+
+<p>Please remember that a nats publisher does not assume the audience. The published message can reach one, 1000 or 0 subscriber. If no subscribers are connected the message is gone forever.</p>
+
+<h3>Queueing</h3>
+
+<p>Queueing is a variant of pub / sub where the subscriber announces itself to belong to a subscription group. In that case the Nats server will send randomly the subscribed message <strong>only to one subscriber</strong>.</p>
+
+<p><img src="/images/nats/queueing.png" width="450"></p>
+
+<p>This is useful in case you want to implement a load balancing policy. On top of that is really easy to scale up (or down) by adding new subscribers to the subscription group.</p>
+
+<h3>Request / Reply</h3>
+
+<p>Request / Reply is <strong>just syntactic sugar</strong> over the pub / sub mechanism provided by Nats: the publisher sends a reply subject together with the message and expects any reply to be sent to that reply subject.</p>
+
+<p>The subscribers receive the request message together with the reply subject and sends the reply to that subject.</p>
+
+<p><img src="/images/nats/reqreply.png" width="450"></p>
+
+<p>Given the nature of Nats, the request gets received to all the registered subscribers. The requestor just handles the first reply it receives and discards all the other replies.</p>
+
+<p>Apart from this (quite) not efficient way to handle req / reply, this mechanism can be used together with queueing we just discussed making only one receiver of the subscription group receive the request.</p>
+
+<h2>Using Nats with Go</h2>
+
+<p>First of all, there are clients for a lot of languages already available, from the most fancy ones (rust or elixir) to some out of fashiones (even perl!).</p>
+
+<p>The go client does a bit more than just implementing the text based protocol. In particular:</p>
+
+<h4>Handles the connection / reconnection gracefully</h4>
+
+<p>Given that a client connected to the cluster gets notified of all the nodes of the cluster via the gossiping mechanism, whenever a client detects a disconnection from a node, it tries to reconnect to one of the other nodes of the cluster.</p>
+
+<p>While the reconnection is in progress, any messages that we would like to send are buffered up to a configurable limit (the default is something like 8 Mb).</p>
+
+<h4>Tries to avoid slow client errors by emptying the socket</h4>
+
+<p>The client tries to receive all the available messages and pass them to the application. To do that, it buffers the messages received in order to avoid to be marked as a <em>slow client</em> by the server. When the receive buffer is full, it tries to notify the client of the library by raising errors.</p>
+
+<h3>Some code</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">nc</span><span class="p">,</span> <span class="nx">_</span> <span class="o">:=</span> <span class="nx">nats</span><span class="p">.</span><span class="nx">Connect</span><span class="p">(</span><span class="nx">nats</span><span class="p">.</span><span class="nx">DefaultURL</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">nc</span><span class="p">.</span><span class="nx">Publish</span><span class="p">(</span><span class="s">&quot;foo&quot;</span><span class="p">,</span> <span class="p">[]</span><span class="nb">byte</span><span class="p">(</span><span class="s">&quot;Hello World&quot;</span><span class="p">))</span>
+</span><span class='line'><span class="nx">nc</span><span class="p">.</span><span class="nx">Subscribe</span><span class="p">(</span><span class="s">&quot;foo&quot;</span><span class="p">,</span> <span class="kd">func</span><span class="p">(</span><span class="nx">m</span> <span class="o">*</span><span class="nx">nats</span><span class="p">.</span><span class="nx">Msg</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="c1">// handle the message</span>
+</span><span class='line'><span class="p">})</span>
+</span><span class='line'><span class="nx">nc</span><span class="p">.</span><span class="nx">Flush</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// chan subscribe</span>
+</span><span class='line'><span class="nx">ch</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="o">*</span><span class="nx">nats</span><span class="p">.</span><span class="nx">Msg</span><span class="p">,</span> <span class="mi">64</span><span class="p">)</span>
+</span><span class='line'><span class="nx">sub</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">nc</span><span class="p">.</span><span class="nx">ChanSubscribe</span><span class="p">(</span><span class="s">&quot;foo&quot;</span><span class="p">,</span> <span class="nx">ch</span><span class="p">)</span>
+</span><span class='line'><span class="nx">msg</span> <span class="o">:=</span> <span class="o">&lt;-</span> <span class="nx">ch</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Sending and receiving takes just a few lines of code. There is also a channel based subscription where the received messages are sent through a channel.
+Beware that sending are asynchronous operations, <code>nc.Flush()</code> is needed in order to force the client to send the messages out.</p>
+
+<p>Using request / reply is just as straightforward:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="c1">// Requests    </span>
+</span><span class='line'><span class="kd">var</span> <span class="nx">response</span> <span class="kt">string</span>
+</span><span class='line'><span class="nx">err</span> <span class="o">:=</span> <span class="nx">c</span><span class="p">.</span><span class="nx">Request</span><span class="p">(</span><span class="s">&quot;help&quot;</span><span class="p">,</span> <span class="s">&quot;help me&quot;</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">response</span><span class="p">,</span> <span class="mi">10</span><span class="o">*</span><span class="nx">time</span><span class="p">.</span><span class="nx">Millisecond</span><span class="p">)</span>
+</span><span class='line'><span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;Request failed: %v\n&quot;</span><span class="p">,</span> <span class="nx">err</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Replying</span>
+</span><span class='line'><span class="nx">c</span><span class="p">.</span><span class="nx">Subscribe</span><span class="p">(</span><span class="s">&quot;help&quot;</span><span class="p">,</span> <span class="kd">func</span><span class="p">(</span><span class="nx">subj</span><span class="p">,</span> <span class="nx">reply</span> <span class="kt">string</span><span class="p">,</span> <span class="nx">msg</span> <span class="kt">string</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">c</span><span class="p">.</span><span class="nx">Publish</span><span class="p">(</span><span class="nx">reply</span><span class="p">,</span> <span class="s">&quot;I can help!&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="p">})</span>
+</span><span class='line'><span class="c1">// Queue group reply</span>
+</span><span class='line'><span class="nx">nc</span><span class="p">.</span><span class="nx">QueueSubscribe</span><span class="p">(</span><span class="s">&quot;help&quot;</span><span class="p">,</span> <span class="s">&quot;workers&quot;</span><span class="p">,</span> <span class="kd">func</span><span class="p">(</span><span class="nx">msg</span> <span class="o">*</span><span class="nx">Msg</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">c</span><span class="p">.</span><span class="nx">Publish</span><span class="p">(</span><span class="nx">msg</span><span class="p">.</span><span class="nx">Reply</span><span class="p">,</span> <span class="s">&quot;I can help!&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="p">})</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p></p>
+
+<p>Request / reply are blocking (whereas pub / sub are asynchronous) and as we already mentioned can be used together with subscription groups.</p>
+
+<p>The request accepts a <code>timeout</code> parameter but there is also a variant that accepts a <code>context</code> in order to let the caller be able to interrupt the request.</p>
+
+<h3>The go client does a lot more</h3>
+
+<ul>
+<li>it provides connection lifecycle callbacks (if you want to override the reconnection mechanism)</li>
+<li>it provides asynchronous and synchronous versions of the apis</li>
+<li>it provides encoders (json and protobuf) in order to use type safe callbacks</li>
+</ul>
+
+
+<p>This (and a lot more) can be found on the official nats go client <a href="https://github.com/nats-io/go-nats">here</a>.</p>
+
+<p>I hope I triggered your curiosity in trying a powerful (yet simple) messaging system.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2018/10/27/fast-messaging-with-nats-and-go/">Fast Messaging With Nats and Go</a></h1>
     
     
@@ -108,11 +271,7 @@
 
 <h3>What is Nats</h3>
 
-<p><a href="nats.io">Nats</a> is a messaging system hosted under the <a href="www.cncf.io">CNCF</a> umbrella, which is an <em>open source software foundation dedicated to making cloud native computing universal and sustainable</em>.</p>
-
-<p>The CNCF projects list it&rsquo;s the place-to-go while looking for software related to distributed systems.</p>
-
-<p>Disclaimer: I am just a user of Nats reporting my experience and my understanding of how it works. What follows might be inaccurate or wrong :-)</p>
+<p><a href="nats.io">Nats</a> is a messaging system hosted under the <a href="www.cncf.io">CNCF</a> umbrella, which is an <em>open source software foundation dedicated to making cloud native computing universal and sustainable</em>. It&rsquo;s my place-to-go while looking for software related to distributed systems. I am just a user of Nats reporting my experience and my understanding of how it works. What follows might be inaccurate or wrong :-)</p>
 
 <h3>Why messaging</h3>
 
@@ -192,22 +351,11 @@
 
 <p>There are also other messages used to establish and keep the connection up, such as <em>CONNECT</em>, <em>PING</em>, <em>INFO</em> .</p>
 
-<p>PING in particular solves the problem of sockets held up by the os even if the connection is not working anymore.</p>
-
-<h3>The protocol supports wildcards</h3>
+<h4>The protocol supports wildcards</h4>
 
 <p>Nats subjects support wildcards. The subject are tokens separated by a dot, such as <strong>foo.bar</strong> or <strong>foo.bar.baz</strong>.</p>
 
 <p>There are two types of wildcards: by using <strong>*</strong> a wildcard matches the token (foo.* matches foo.bar but not foo.bar.baz). If you want to match any foo.something you need to use <strong>></strong> (as in <strong>foo.></strong>).</p>
-
-<p>In short:</p>
-
-<ul>
-<li>foo.* matches foo.bar and foo.baz but not foo.bar.baz</li>
-<li>foo.> matches foo.bar and foo.bar.baz</li>
-<li>foo.*.baz matches foo.bar.baz</li>
-</ul>
-
 
 <h2>The server (or, the ops point of view)</h2>
 
@@ -219,7 +367,7 @@
 
 <p>and you are done.</p>
 
-<h3>Autodiscovery</h3>
+<h4>Autodiscovery</h4>
 
 <p>The nats server provides also a gossip based autodiscovery mechanism. By using it, you can seamlessly add and remove new nodes to the cluster to scale up / down. A new server addition is propagated to all its peers and to all the clients.</p>
 
@@ -1896,43 +2044,6 @@ This is a neat way to test not only your observers, but also to check if the com
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/09/04/its-been-a-while/">It's Been a While</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2015-09-04T23:13:14+02:00'><span class='date'><span class='date-month'>Sep</span> <span class='date-day'>4</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>11:13 pm</span></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>.. since my last blogpost.</h3>
-
-<p>I&rsquo;ve done a few things in the meanwhile, I wrote a game with LibGdx, I tinkered with various frameworks, but on top of all these things I&rsquo;ve been taking care of my one (and a half) year old daughter.</p>
-
-<p>I do certainly have less time to devote to side projects, but I still like to learn new things and Android is exciting from that point of view.</p>
-
-<p>While trying to catch up with all the new things that keep happening in the Android World, I hope I&rsquo;ll be able to post more often here.</p>
-
-<p>PS: I used this post to reacquatain myself with octopress</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/2">&larr; Older</a>
@@ -1953,6 +2064,10 @@ This is a neat way to test not only your observers, but also to check if the com
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2018/12/11/fast-messaging-with-nats-and-go-part-2/">Fast Messaging With Nats and Go Part 2</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2018/10/27/fast-messaging-with-nats-and-go/">Fast Messaging With Nats and Go</a>
       </li>
     
@@ -1966,10 +2081,6 @@ This is a neat way to test not only your observers, but also to check if the com
     
       <li class="post">
         <a href="/blog/2016/08/27/android-mvp-testing/">Android, MVP, Dagger and Testing</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2016/06/20/how-to-a-timer/">Reactive Android Timers, Countdowns and Lifecycle</a>
       </li>
     
   </ul>

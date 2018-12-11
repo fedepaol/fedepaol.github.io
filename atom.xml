@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[My little software warehouse]]></title>
+  <title><![CDATA[My little software store]]></title>
   <link href="http://fedepaol.github.io/atom.xml" rel="self"/>
   <link href="http://fedepaol.github.io/"/>
-  <updated>2018-10-31T19:43:34+01:00</updated>
+  <updated>2018-12-11T23:09:55+01:00</updated>
   <id>http://fedepaol.github.io/</id>
   <author>
     <name><![CDATA[Federico Paolinelli]]></name>
@@ -12,6 +12,148 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Fast Messaging With Nats and Go Part 2]]></title>
+    <link href="http://fedepaol.github.io/blog/2018/12/11/fast-messaging-with-nats-and-go-part-2/"/>
+    <updated>2018-12-11T22:32:15+01:00</updated>
+    <id>http://fedepaol.github.io/blog/2018/12/11/fast-messaging-with-nats-and-go-part-2</id>
+    <content type="html"><![CDATA[<p>This is the second of a follow up serie of the talk <em>Fast messaging with Nats and Go</em> I gave at <a href="golab.io">golab 2018</a>.
+The first part can be found <a href="http://fedepaol.github.io/blog/2018/10/27/fast-messaging-with-nats-and-go/">here</a></p>
+
+<h2>What can we do with nats?</h2>
+
+<h3>Pub sub</h3>
+
+<p>As you can probably guess, given that Nats is a pure pub / sub system, we can easily implement pub / sub.</p>
+
+<p><img src="http://fedepaol.github.io/images/nats/pubsub.png" width="350"></p>
+
+<p>Please remember that a nats publisher does not assume the audience. The published message can reach one, 1000 or 0 subscriber. If no subscribers are connected the message is gone forever.</p>
+
+<h3>Queueing</h3>
+
+<p>Queueing is a variant of pub / sub where the subscriber announces itself to belong to a subscription group. In that case the Nats server will send randomly the subscribed message <strong>only to one subscriber</strong>.</p>
+
+<p><img src="http://fedepaol.github.io/images/nats/queueing.png" width="450"></p>
+
+<p>This is useful in case you want to implement a load balancing policy. On top of that is really easy to scale up (or down) by adding new subscribers to the subscription group.</p>
+
+<h3>Request / Reply</h3>
+
+<p>Request / Reply is <strong>just syntactic sugar</strong> over the pub / sub mechanism provided by Nats: the publisher sends a reply subject together with the message and expects any reply to be sent to that reply subject.</p>
+
+<p>The subscribers receive the request message together with the reply subject and sends the reply to that subject.</p>
+
+<p><img src="http://fedepaol.github.io/images/nats/reqreply.png" width="450"></p>
+
+<p>Given the nature of Nats, the request gets received to all the registered subscribers. The requestor just handles the first reply it receives and discards all the other replies.</p>
+
+<p>Apart from this (quite) not efficient way to handle req / reply, this mechanism can be used together with queueing we just discussed making only one receiver of the subscription group receive the request.</p>
+
+<h2>Using Nats with Go</h2>
+
+<p>First of all, there are clients for a lot of languages already available, from the most fancy ones (rust or elixir) to some out of fashiones (even perl!).</p>
+
+<p>The go client does a bit more than just implementing the text based protocol. In particular:</p>
+
+<h4>Handles the connection / reconnection gracefully</h4>
+
+<p>Given that a client connected to the cluster gets notified of all the nodes of the cluster via the gossiping mechanism, whenever a client detects a disconnection from a node, it tries to reconnect to one of the other nodes of the cluster.</p>
+
+<p>While the reconnection is in progress, any messages that we would like to send are buffered up to a configurable limit (the default is something like 8 Mb).</p>
+
+<h4>Tries to avoid slow client errors by emptying the socket</h4>
+
+<p>The client tries to receive all the available messages and pass them to the application. To do that, it buffers the messages received in order to avoid to be marked as a <em>slow client</em> by the server. When the receive buffer is full, it tries to notify the client of the library by raising errors.</p>
+
+<h3>Some code</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">nc</span><span class="p">,</span> <span class="nx">_</span> <span class="o">:=</span> <span class="nx">nats</span><span class="p">.</span><span class="nx">Connect</span><span class="p">(</span><span class="nx">nats</span><span class="p">.</span><span class="nx">DefaultURL</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">nc</span><span class="p">.</span><span class="nx">Publish</span><span class="p">(</span><span class="s">&quot;foo&quot;</span><span class="p">,</span> <span class="p">[]</span><span class="nb">byte</span><span class="p">(</span><span class="s">&quot;Hello World&quot;</span><span class="p">))</span>
+</span><span class='line'><span class="nx">nc</span><span class="p">.</span><span class="nx">Subscribe</span><span class="p">(</span><span class="s">&quot;foo&quot;</span><span class="p">,</span> <span class="kd">func</span><span class="p">(</span><span class="nx">m</span> <span class="o">*</span><span class="nx">nats</span><span class="p">.</span><span class="nx">Msg</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="c1">// handle the message</span>
+</span><span class='line'><span class="p">})</span>
+</span><span class='line'><span class="nx">nc</span><span class="p">.</span><span class="nx">Flush</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// chan subscribe</span>
+</span><span class='line'><span class="nx">ch</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="o">*</span><span class="nx">nats</span><span class="p">.</span><span class="nx">Msg</span><span class="p">,</span> <span class="mi">64</span><span class="p">)</span>
+</span><span class='line'><span class="nx">sub</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">nc</span><span class="p">.</span><span class="nx">ChanSubscribe</span><span class="p">(</span><span class="s">&quot;foo&quot;</span><span class="p">,</span> <span class="nx">ch</span><span class="p">)</span>
+</span><span class='line'><span class="nx">msg</span> <span class="o">:=</span> <span class="o">&lt;-</span> <span class="nx">ch</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Sending and receiving takes just a few lines of code. There is also a channel based subscription where the received messages are sent through a channel.
+Beware that sending are asynchronous operations, <code>nc.Flush()</code> is needed in order to force the client to send the messages out.</p>
+
+<p>Using request / reply is just as straightforward:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="c1">// Requests    </span>
+</span><span class='line'><span class="kd">var</span> <span class="nx">response</span> <span class="kt">string</span>
+</span><span class='line'><span class="nx">err</span> <span class="o">:=</span> <span class="nx">c</span><span class="p">.</span><span class="nx">Request</span><span class="p">(</span><span class="s">&quot;help&quot;</span><span class="p">,</span> <span class="s">&quot;help me&quot;</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">response</span><span class="p">,</span> <span class="mi">10</span><span class="o">*</span><span class="nx">time</span><span class="p">.</span><span class="nx">Millisecond</span><span class="p">)</span>
+</span><span class='line'><span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;Request failed: %v\n&quot;</span><span class="p">,</span> <span class="nx">err</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Replying</span>
+</span><span class='line'><span class="nx">c</span><span class="p">.</span><span class="nx">Subscribe</span><span class="p">(</span><span class="s">&quot;help&quot;</span><span class="p">,</span> <span class="kd">func</span><span class="p">(</span><span class="nx">subj</span><span class="p">,</span> <span class="nx">reply</span> <span class="kt">string</span><span class="p">,</span> <span class="nx">msg</span> <span class="kt">string</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">c</span><span class="p">.</span><span class="nx">Publish</span><span class="p">(</span><span class="nx">reply</span><span class="p">,</span> <span class="s">&quot;I can help!&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="p">})</span>
+</span><span class='line'><span class="c1">// Queue group reply</span>
+</span><span class='line'><span class="nx">nc</span><span class="p">.</span><span class="nx">QueueSubscribe</span><span class="p">(</span><span class="s">&quot;help&quot;</span><span class="p">,</span> <span class="s">&quot;workers&quot;</span><span class="p">,</span> <span class="kd">func</span><span class="p">(</span><span class="nx">msg</span> <span class="o">*</span><span class="nx">Msg</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">c</span><span class="p">.</span><span class="nx">Publish</span><span class="p">(</span><span class="nx">msg</span><span class="p">.</span><span class="nx">Reply</span><span class="p">,</span> <span class="s">&quot;I can help!&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="p">})</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p></p>
+
+<p>Request / reply are blocking (whereas pub / sub are asynchronous) and as we already mentioned can be used together with subscription groups.</p>
+
+<p>The request accepts a <code>timeout</code> parameter but there is also a variant that accepts a <code>context</code> in order to let the caller be able to interrupt the request.</p>
+
+<h3>The go client does a lot more</h3>
+
+<ul>
+<li>it provides connection lifecycle callbacks (if you want to override the reconnection mechanism)</li>
+<li>it provides asynchronous and synchronous versions of the apis</li>
+<li>it provides encoders (json and protobuf) in order to use type safe callbacks</li>
+</ul>
+
+
+<p>This (and a lot more) can be found on the official nats go client <a href="https://github.com/nats-io/go-nats">here</a>.</p>
+
+<p>I hope I triggered your curiosity in trying a powerful (yet simple) messaging system.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Fast Messaging With Nats and Go]]></title>
@@ -27,11 +169,7 @@
 
 <h3>What is Nats</h3>
 
-<p><a href="nats.io">Nats</a> is a messaging system hosted under the <a href="www.cncf.io">CNCF</a> umbrella, which is an <em>open source software foundation dedicated to making cloud native computing universal and sustainable</em>.</p>
-
-<p>The CNCF projects list it&rsquo;s the place-to-go while looking for software related to distributed systems.</p>
-
-<p>Disclaimer: I am just a user of Nats reporting my experience and my understanding of how it works. What follows might be inaccurate or wrong :-)</p>
+<p><a href="nats.io">Nats</a> is a messaging system hosted under the <a href="www.cncf.io">CNCF</a> umbrella, which is an <em>open source software foundation dedicated to making cloud native computing universal and sustainable</em>. It&rsquo;s my place-to-go while looking for software related to distributed systems. I am just a user of Nats reporting my experience and my understanding of how it works. What follows might be inaccurate or wrong :-)</p>
 
 <h3>Why messaging</h3>
 
@@ -111,22 +249,11 @@
 
 <p>There are also other messages used to establish and keep the connection up, such as <em>CONNECT</em>, <em>PING</em>, <em>INFO</em> .</p>
 
-<p>PING in particular solves the problem of sockets held up by the os even if the connection is not working anymore.</p>
-
-<h3>The protocol supports wildcards</h3>
+<h4>The protocol supports wildcards</h4>
 
 <p>Nats subjects support wildcards. The subject are tokens separated by a dot, such as <strong>foo.bar</strong> or <strong>foo.bar.baz</strong>.</p>
 
 <p>There are two types of wildcards: by using <strong>*</strong> a wildcard matches the token (foo.* matches foo.bar but not foo.bar.baz). If you want to match any foo.something you need to use <strong>></strong> (as in <strong>foo.></strong>).</p>
-
-<p>In short:</p>
-
-<ul>
-<li>foo.* matches foo.bar and foo.baz but not foo.bar.baz</li>
-<li>foo.> matches foo.bar and foo.bar.baz</li>
-<li>foo.*.baz matches foo.bar.baz</li>
-</ul>
-
 
 <h2>The server (or, the ops point of view)</h2>
 
@@ -138,7 +265,7 @@
 
 <p>and you are done.</p>
 
-<h3>Autodiscovery</h3>
+<h4>Autodiscovery</h4>
 
 <p>The nats server provides also a gossip based autodiscovery mechanism. By using it, you can seamlessly add and remove new nodes to the cluster to scale up / down. A new server addition is propagated to all its peers and to all the clients.</p>
 
@@ -2411,24 +2538,6 @@ During the refactoring of my two years old app DroidAlone, I decided to try to a
     <id>http://fedepaol.github.io/blog/2012/10/29/droidconuk-2012</id>
     <content type="html"><![CDATA[<div class='post'>
 Here I am, back again from my third DroidconUk experience.<br /><br /><div class="separator" style="clear: both; text-align: center;"><a href="http://1.bp.blogspot.com/-dfNEw8CwymY/UI7dRBZVlzI/AAAAAAAAJBw/JqUhyGTyHZE/s1600/IMG_20121029_204517.jpg" imageanchor="1" style="margin-left: 1em; margin-right: 1em;"><img border="0" height="240" src="http://1.bp.blogspot.com/-dfNEw8CwymY/UI7dRBZVlzI/AAAAAAAAJBw/JqUhyGTyHZE/s320/IMG_20121029_204517.jpg" width="320" /></a></div><br /><br />I can still remember explaining to my non tech friends what Android was the evening of the 1st droidcon, and since then it became a sort of ritual, a couple of days when I can take some rest from my day time job and take part to the community of some of the best android developers coming from all over the Europe.<br /><br /><div class="separator" style="clear: both; text-align: center;"><a href="http://1.bp.blogspot.com/-YsYHqWhHMHk/UI7eDIWeCqI/AAAAAAAAJCA/b3Dv80SwVLk/s1600/IMG_20121026_190855.jpg" imageanchor="1" style="margin-left: 1em; margin-right: 1em;"><img border="0" height="240" src="http://1.bp.blogspot.com/-YsYHqWhHMHk/UI7eDIWeCqI/AAAAAAAAJCA/b3Dv80SwVLk/s320/IMG_20121026_190855.jpg" width="320" /></a></div><br /><br /><br />It&#8217;s an (almost) cheap to flight from Pisa (IT) where I live to London, and I can always count on my architect friends from <a href="http://www.marcelmauer.eu/">Marcel Mauer</a> for accommodation.<br /><br /><br />My overall impression is that droidcon is getting better and better. It&#8217;s growing as much as the Android &nbsp;platform itself, and despite all the interesting talks the better part is still the people you can meet there BETWEEN the talks. Even if you are as shy and sociopath as I am.<br /><br /><br />Most of the talks where very instructive and I heard about a lot of new stuff I can reuse on my side projects.<br /><br /><br /><br />Here I will put a short list of what are the things I liked most (as a kind reminder for me but also for any occasional reader that lands on this page by chance).<br /><br /><br /><br /><h2>The talks:</h2><div class="separator" style="clear: both; text-align: center;"><a href="http://1.bp.blogspot.com/-cJwI92KmcAA/UI7hSI-I9wI/AAAAAAAAJDY/PcojASjug88/s1600/IMG_20121025_142744.jpg" imageanchor="1" style="margin-left: 1em; margin-right: 1em;"><img border="0" height="240" src="http://1.bp.blogspot.com/-cJwI92KmcAA/UI7hSI-I9wI/AAAAAAAAJDY/PcojASjug88/s320/IMG_20121025_142744.jpg" width="320" /></a></div><div><br /></div><div class="separator" style="clear: both; text-align: center;"></div><div><br /></div><div>I am not following a proper order if not the chronological one. I really enjoyed all the talks.</div><h3>The keynotes:</h3>It&#8217;s official. They are putting Android everywhere. Three keynotes for three Android related product which where not phones nor tablets.<br />- Ouya, the famous kickstarter funded android gaming console<br />- Vendscreen, an android based vending machine (!)<br />- Parrot android based car stereos.<br /><br /><h3>Building songkick for Android&nbsp;(<a href="https://speakerdeck.com/jdamcd/building-songkick-on-android">slides</a>):</h3>Askay and Jamie from Novoda show their professional approach to build the songkick app. A lot of interesting tips and best practices from them. Really liked the &#8220;writing good code is always faster than writing bad code&#8221; approach.<br /><br /><h3>Overcoming device fragmentation:</h3>Jan and Jon from SoundCloud had a bad time dealing with sound infrastructure in Android, especially from a multi device perspective.<br />It&#8217;s not an aspect of the platform I have never addressed that much, but I really enjoyed their story about going from the simple system call up to get the hands dirty with bringing on board ogg library through ndk. I also liked the fact that at first they tried to deal with java version, because it&#8217;s something I would do as well.<br /><br /><h3>The fly in app menu for designers and developers (<a href="https://speakerdeck.com/cyrilmottier/the-fly-in-app-menu-for-designers-and-developers">slides</a>):</h3>Cyril Mottier (&nbsp;we may remember him for Greendroid) made a gorgeous presentation on this navigation pattern which is getting more and more popular (but don&#8217;t use it just because it&#8217;s à la mode).<br />The presentation was a proper walkthrough on why and when one should use the new pattern (and when one shouldn&#8217;t). During the talk he gave a lot of tips on how the correct user experience should be. Very inspiring.<br />If you want to bring this pattern in your app and you can&#8217;t affort to develop it &#8220;in house&#8221; as Cyril did, there are a couple of libraries that implement it for us:<br /><a href="https://github.com/eddieringle/android-undergarment">https://github.com/eddieringle/android-undergarment</a><br /><a href="https://github.com/jfeinstein10/SlidingMenu">https://github.com/jfeinstein10/SlidingMenu</a><br /><a href="https://github.com/SimonVT/android-menudrawer">https://github.com/SimonVT/android-menudrawer</a><br /><br /><br /><h3>Beaming data to devices with nfc (<a href="http://www.slideshare.net/commonsguy/beaming-data-to-devices-with-nfc">slides</a>):</h3>Mark Murphy from CommonsWare introduced what (and how) can be done with an nfc enabled phone through a royalty free spy story. Interesting and funny as always, the talk of Mark is worth the ticket by itself (well, his talk and the free beers I had).<br />It&#8217;s a good starting point when I will look into nfc, which might be very soon.<br /><br /><br /><h3>Fast, user friendly and power efficient network communication with android (<a href="http://developer.sonymobile.com/downloads/documentation/fast-user-friendly-and-power-efficient-network-communication-on-android/">slides</a>):&nbsp;</h3>Another series of super tips from Erik Hellman on how you should perform networking in a proper manner.<br />Still, stuff I read here and there but still useful.<br />He also mentioned <a href="http://netty.io/">netty.io</a> library, which is something I should definitely check, since my current project involves plain socket operation and I implemented it my self (the android way).<br /><br /><br /><h3>Introduction to Google Tv (<a href="http://www.slideshare.net/OpenWorldForum/owf12paug-conf-days-google-tv-part-1-introduction-matt-gaunt-advocate-at-google">slides</a>):</h3><div>Google Tv looks to be the next big thing. I have never dig into the docs but it really looks like a new whole world. Apart from the different challenges that we can have developing a tv ui, I really like the idea of having it interact with our personal devices.</div><br /><br /><br /><h2>The libraries:</h2><br /><h3>Polaris (<a href="https://github.com/cyrilmottier/Polaris">link</a>):</h3><a href="http://android.cyrilmottier.com/">Cyril Mottier</a>&nbsp;(yes, still him) delighted us with Polaris, his map library to enhance the poor experience available from standard map apis.<br /><br /><h3>RoboSpice (<a href="https://github.com/octo-online/robospice">link</a>):</h3><div>The french guys from Octo (sorry I can&#8217;t remember the name of the speaker) presented their awesome RoboSpice library, a library to perform asynchronous jobs (and a lot more) on steroids.&nbsp;</div><div>I was really interested in this talk because of my previous attempt to build something (barely) similar with&nbsp;<a href="http://fedepaol.github.io/blog/2012/01/postmanlib-android-and-rest-web.html">Postman Lib</a>&nbsp;. Unfortunately I never had time to polish it and it&#8217;s still an unfinished product. Moreover, the guys from Octo made a better job under every aspect of object reusing and performance, dealing with issues I would have never fix even if I took the library to a decent state. I am quite curious to dig into their code just for the fun of it :-)</div><div><br /></div><h3>OpenCv:</h3><div>Erik Hellman from Sony introduced how opencv library for computer vision can be (almost) easily integrated into an android app. Still, something I would always loved to play with, maybe I will if I get some extra spare time.</div><br /><br /><h3>NetMera (<a href="http://www.netmera.com/pages/web/home">link</a>):</h3>Well, this is not a real library, but it&#8217;s a brand new concept (at least, new to me) for a platform as an sdk. &nbsp;It was introduced by Friedger Muffke during his talk&nbsp;<a href="https://docs.google.com/presentation/d/1GjAWqrB-OrEtsoudPLMq1KUEwjSuPygHmNBjv1FEq0A/edit">&#8220;Serverless Android Applications&#8221;</a>. They provide a full remote backend without having you bother at all for it. Sounds like the holy grail for&nbsp;<i>developers with no time(tm)&nbsp;</i>but I don&#8217;t like the idea of having my code bound to a specific service.<br /><br /><br /><h2>Talks I missed:</h2><div>I was told that this talks were excellent:</div><div>- <a href="http://prezi.com/fh2uslbr1xs3/the-fragment-transition/">The fragment transition</a>&nbsp;by Corey Latislaw</div><div>- <a href="https://docs.google.com/presentation/d/1OcGVS5bci9jaYiI7uvXFf9asj5TS4xZa72LX-i8lEcs/present#slide=id.p25">Writing games for an Android video game console</a>&nbsp;by Al Sutton</div><div>- Proguard by Eric Lafortune</div><div>-&nbsp;Dynamic animations with custom views by Anders Ericsson</div><br /><br /><h2>Epilogue:</h2>I had a great time at droidcon, I really enjoyed it under every aspect (even though I suspect I still have to digest an hotdog of two from the dinner of Thursday). It really boosted my hunger for learning new things. As an immediate effect I decided to polish my old apps, those I developed three years ago which now look ugly and old (the code as well).<br /><br />See you next year, DroidConUk!<br /><br /><div class="separator" style="clear: both; text-align: center;"><a href="http://2.bp.blogspot.com/-yzyd64vYHrA/UI7eL43qhqI/AAAAAAAAJCI/Ua-AJTnGAu8/s1600/IMG_20121027_072842.jpg" imageanchor="1" style="margin-left: 1em; margin-right: 1em;"><img border="0" height="320" src="http://2.bp.blogspot.com/-yzyd64vYHrA/UI7eL43qhqI/AAAAAAAAJCI/Ua-AJTnGAu8/s320/IMG_20121027_072842.jpg" width="240" /></a></div><span style="font-size: x-small;">(This picture was taken at Liverpool Street while waiting for the bus to Stanstead Airport). Way too early for a Saturday morning.</span><br /><br /><br /></div>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Gridlayout Support Library With Maven]]></title>
-    <link href="http://fedepaol.github.io/blog/2012/09/15/gridlayout-support-library-with-maven/"/>
-    <updated>2012-09-15T00:00:00+02:00</updated>
-    <id>http://fedepaol.github.io/blog/2012/09/15/gridlayout-support-library-with-maven</id>
-    <content type="html"><![CDATA[<div class='post'>
-<br /><span style="font-size: x-large;">EDIT 17/10/2012:</span><br />Gridlayout support is now working natively with maven android deployer. I strongly suggest to use it instead of my method.<br /><span style="font-size: x-large;"><br /></span><span style="font-size: x-large;">&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;</span><br /><span style="font-size: x-large;"><br /></span><br /><a href="http://developer.android.com/reference/android/widget/GridLayout.html">Gridlayout</a> has been introduced since api level 14, and is being suggested layout as a more efficient alternative over nested linear layouts and relative layout.<br /><br />It has also been recently added as part of the android support library, in order to have it available on older devices.<br /><br />Trying to use it in a maven setup is a bit tricky.<br />At the time of writing, the version added by <a href="https://github.com/mosabua/maven-android-sdk-deployer">maven android deployer</a> won&#8217;t work because of this <a href="https://github.com/mosabua/maven-android-sdk-deployer/issues/50">issue</a>&nbsp;.<br />The problem is, you can&#8217;t just add the jar because the library is intended to be an android project library, which means that brings with itself a couple of resources.<br /><br /><br />The error you might get is<br /><br /><b><span style="font-size: large;">java.lang.NoClassDefFoundError: android/support/v7/gridlayout/R$dimen</span></b><br /><br />I don&#8217;t know if the following is the best &#8220;mavenic&#8221; way to solve the problem, however it worked for me and I am sharing it here.<br /><br />What you need to do is to build your own apk lib to add to your maven repo to link against.<br /><br /><h3>Step 1: building an apk lib</h3><div>The information you can find on android maven plugin <a href="http://code.google.com/p/maven-android-plugin/wiki/ApkLib">website</a>&nbsp;wasn&#8217;t very clear to me. However they ship a couple of <a href="https://github.com/jayway/maven-android-plugin-samples/archives/stable">examples</a> you can take inspiration from.</div><div><br /></div><div><br /></div><div>Assuming that you have a proper ANDROID_HOME variable set up, and you already used maven android deployer to have a working setup, the first thing you have to do is to download the support library.&nbsp;</div><div>You will find it under $ANDROID_HOME/extras/android/support/v7/gridlayout</div><div><br /></div><div>Make your own copy somewhere else in your hard disk.</div><div><br /></div><div><br /></div><div>Now copy my pom.xml file:</div><!-- HTML generated using hilite.me --><br /><div style="background: #ffffff; background: white; border-width: .1em .1em .1em .8em; border: solid gray; color: black; overflow: auto; padding: .2em .6em; width: auto;"><pre style="line-height: 125%; margin: 0;"><span style="color: #507090;">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span><br /><span style="color: #007000;">&lt;project</span> <span style="color: #0000c0;">xmlns=</span><span style="background-color: #fff0f0;">"http://maven.apache.org/POM/4.0.0"</span> <span style="color: #0000c0;">xmlns:xsi=</span><span style="background-color: #fff0f0;">"http://www.w3.org/2001/XMLSchema-instance"</span><br />         <span style="color: #0000c0;">xsi:schemaLocation=</span><span style="background-color: #fff0f0;">"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd"</span><span style="color: #007000;">&gt;</span><br />    <span style="color: #007000;">&lt;modelVersion&gt;</span>4.0.0<span style="color: #007000;">&lt;/modelVersion&gt;</span><br /><br /><br />    <span style="color: #007000;">&lt;version&gt;</span>1.0.0-SNAPSHOT<span style="color: #007000;">&lt;/version&gt;</span><br />    <span style="color: #007000;">&lt;groupId&gt;</span>com.support.gridlayout<span style="color: #007000;">&lt;/groupId&gt;</span><br />    <span style="color: #007000;">&lt;artifactId&gt;</span>gridlayout_compat<span style="color: #007000;">&lt;/artifactId&gt;</span><br />    <span style="color: #007000;">&lt;packaging&gt;</span>apklib<span style="color: #007000;">&lt;/packaging&gt;</span><br />    <span style="color: #007000;">&lt;name&gt;</span>Gridlayout compatibility library<span style="color: #007000;">&lt;/name&gt;</span><br /><br />    <span style="color: #007000;">&lt;dependencies&gt;</span><br />        <span style="color: #007000;">&lt;dependency&gt;</span><br />            <span style="color: #007000;">&lt;groupId&gt;</span>android<span style="color: #007000;">&lt;/groupId&gt;</span><br />            <span style="color: #007000;">&lt;artifactId&gt;</span>android<span style="color: #007000;">&lt;/artifactId&gt;</span><br />            <span style="color: #007000;">&lt;scope&gt;</span>provided<span style="color: #007000;">&lt;/scope&gt;</span><br />            <span style="color: #007000;">&lt;version&gt;</span>4.0.3_r3<span style="color: #007000;">&lt;/version&gt;</span><br />        <span style="color: #007000;">&lt;/dependency&gt;</span><br /><br />        <span style="color: #007000;">&lt;dependency&gt;</span><br />            <span style="color: #007000;">&lt;groupId&gt;</span>com.grid<span style="color: #007000;">&lt;/groupId&gt;</span><br />            <span style="color: #007000;">&lt;artifactId&gt;</span>gridlayout<span style="color: #007000;">&lt;/artifactId&gt;</span><br />            <span style="color: #007000;">&lt;version&gt;</span>1.0<span style="color: #007000;">&lt;/version&gt;</span><br />        <span style="color: #007000;">&lt;/dependency&gt;</span><br />    <span style="color: #007000;">&lt;/dependencies&gt;</span><br /><br />    <span style="color: #007000;">&lt;build&gt;</span><br />        <span style="color: #007000;">&lt;plugins&gt;</span><br />            <span style="color: #007000;">&lt;plugin&gt;</span><br />                <span style="color: #007000;">&lt;groupId&gt;</span>com.jayway.maven.plugins.android.generation2<span style="color: #007000;">&lt;/groupId&gt;</span><br />                <span style="color: #007000;">&lt;version&gt;</span>3.1.1<span style="color: #007000;">&lt;/version&gt;</span><br />                <span style="color: #007000;">&lt;artifactId&gt;</span>android-maven-plugin<span style="color: #007000;">&lt;/artifactId&gt;</span><br />                <span style="color: #007000;">&lt;extensions&gt;</span>true<span style="color: #007000;">&lt;/extensions&gt;</span><br />            <span style="color: #007000;">&lt;/plugin&gt;</span><br />        <span style="color: #007000;">&lt;/plugins&gt;</span><br />    <span style="color: #007000;">&lt;/build&gt;</span><br />    <span style="color: #007000;">&lt;repositories&gt;</span><br />        <span style="color: #007000;">&lt;repository&gt;</span><br />            <span style="color: #007000;">&lt;id&gt;</span>repo<span style="color: #007000;">&lt;/id&gt;</span><br />            <span style="color: #007000;">&lt;releases&gt;</span><br />                <span style="color: #007000;">&lt;enabled&gt;</span>true<span style="color: #007000;">&lt;/enabled&gt;</span><br />                <span style="color: #007000;">&lt;checksumPolicy&gt;</span>ignore<span style="color: #007000;">&lt;/checksumPolicy&gt;</span><br />            <span style="color: #007000;">&lt;/releases&gt;</span><br />            <span style="color: #007000;">&lt;snapshots&gt;</span><br />                <span style="color: #007000;">&lt;enabled&gt;</span>false<span style="color: #007000;">&lt;/enabled&gt;</span><br />            <span style="color: #007000;">&lt;/snapshots&gt;</span><br />            <span style="color: #007000;">&lt;url&gt;</span>file://${project.basedir}/repo<span style="color: #007000;">&lt;/url&gt;</span><br />        <span style="color: #007000;">&lt;/repository&gt;</span><br />    <span style="color: #007000;">&lt;/repositories&gt;</span><br /><br /><span style="color: #007000;">&lt;/project&gt;</span><br /></pre></div><div><br /></div><div><br /></div><div>You will have another thing to do. Since you cannot include jar files directly but you have to specify them as depedencies, you can:</div><div><ul><li>refer to the jar provided by maven android deployer</li><li>have a dependency pointing a local repo, as described <a href="http://stackoverflow.com/questions/364114/can-i-add-jars-to-maven-2-build-classpath-without-installing-them">here</a></li></ul><div><br /></div></div><div>I chose the second approach.<br /><br />As you can see in the lower part of the pom file, I add a local repository.<br />You need to put the jar file in that repository. As suggested by the stackoverflow answer, you can let maven build it for you with<br /><!-- HTML generated using hilite.me --><br /><div style="background: #ffffff; background: white; border-width: .1em .1em .1em .8em; border: solid gray; color: black; overflow: auto; padding: .2em .6em; width: auto;"><pre style="line-height: 125%; margin: 0;">mvn install:install-file -DlocalRepositoryPath=repo -DcreateChecksum=true -Dpackaging=jar -Dfile=libs/android-support-v7-gridlayout.jar -DgroupId=com.grid -DartifactId=gridlayout -Dversion=1.0<br /></pre></div><br /><h3>Step 2: Including the apklib to your project</h3><br />Now you have your apklib ready to use. You can add it as a dependency in the pom.xml of your app<br /><br /><!-- HTML generated using hilite.me --><br /><div style="background: #ffffff; background: white; border-width: .1em .1em .1em .8em; border: solid gray; color: black; overflow: auto; padding: .2em .6em; width: auto;"><pre style="line-height: 125%; margin: 0;">       <span style="color: #007000;">&lt;dependency&gt;</span><br />          <span style="color: #007000;">&lt;groupId&gt;</span>com.support.gridlayout<span style="color: #007000;">&lt;/groupId&gt;</span><br />          <span style="color: #007000;">&lt;artifactId&gt;</span>gridlayout_compat<span style="color: #007000;">&lt;/artifactId&gt;</span><br />          <span style="color: #007000;">&lt;version&gt;</span>1.0.0-SNAPSHOT<span style="color: #007000;">&lt;/version&gt;</span><br />          <span style="color: #007000;">&lt;type&gt;</span>apklib<span style="color: #007000;">&lt;/type&gt;</span><br />        <span style="color: #007000;">&lt;/dependency&gt;</span><br /></pre></div><br /><br /><br />This costed me a couple of sleepless nights figuring out why it was not working&#8230;<br /><br /><h3>Edit:</h3><div>As markus pointed out in his comment, I forgot the last trivial step which is to run</div><div><i>mvn install&nbsp;</i><br /><i><br /></i><i><br /></i><i><br /></i><i><br /></i></div><h4>Epilogue:</h4><div>Please read the README file included in the gridlayout support library BEFORE trying to use it. It will save you a bit of extra headache.</div><div><br /></div><br />If you liked this post, you might be interested in following me on twitter <a href="https://twitter.com/fedepaol">@fedepaol</a><br /><br /><br /><br /></div><div><br /></div></div>
-<h2>Comments</h2>
-<div class='comments'>
-<div class='comment'>
-<div class='author'>Markus</div>
-<div class='content'>
-Last Step is mvn install.</div>
-</div>
-</div>
 ]]></content>
   </entry>
   
