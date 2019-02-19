@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+
+
+<title>Developing python on symbian from a linux box | My little software warehouse</title>
+
+<link rel="stylesheet" href="http://fedepaol.github.io//css/styles.css">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css" 
+integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbiDQ" crossorigin="anonymous">
+<script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/zenburn.min.css" crossorigin="anonymous" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js" integrity="sha256-/BfiIkHlHoVihZdc6TFuj7MmJ0TWcWsMXkeDFwhi0zw=" crossorigin="anonymous"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+<script src="http://fedepaol.github.io//js/highlight.js"></script>
+
+
+
+
+
+
+<div class="container">
+    <nav class="navbar level">
+      <div class="navbar-brand">
+          <a class="nav-item" href="http://fedepaol.github.io/"><h1 class="title is-3">My little software warehouse</h1></a>
+      </div>           
+      <div class="navbar-menu has-text-centered is-active">
+          <div class="navbar-end is-centered">
+              
+                <a href="https://twitter.com/fedepaol">
+                  <span class="icon">
+                    <i class="fab fa-twitter"></i>
+                  </span>
+                </a>
+              
+                <a href="http://fedepaol.github.io/about">
+                  <span class="icon">
+                    <i class="fas fa-info"></i>
+                  </span>
+                </a>
+              
+                <a href="https://github.com/fedepaol">
+                  <span class="icon">
+                    <i class="fab fa-github"></i>
+                  </span>
+                </a>
+              
+                <a href="http://fedepaol.github.io/www.linkedin.com/in/federico-paolinelli-2374954/">
+                  <span class="icon">
+                    <i class="fab fa-linkedin-in"></i>
+                  </span>
+                </a>
+              
+           </div>
+      </div>
+    </nav>
+  </div>
+<div class="container">
+  <h2 class="subtitle is-6">June 10, 2008</h2>
+  <h1 class="subtitle is-size-4-mobile is-size-3-desktop">Developing python on symbian from a linux box</h1>
+  <div class="content">
+    
+<div class='post'>
+Since my mobile device is a s60v3 one (Nokia E61), I found particulary difficult to develop any simple python script on the phone. The hardest thing to do was the write - test cycle.<br /><br />On linux you can't simply send the file to the phone with obex, since it will be stored in your incoming messages.<br /><br />From the excellent<a href="http://www.mobilenin.com/"> Jürgen Scheible</a>'s tutorial website I discovered the existance of the nice putools for making easier the development cycle <a href="http://people.csail.mit.edu/kapu/symbian/python.html">here</a><br /><br />It allows you to sync and reload the scripts on the phone directly from the pc.<br /><br />Unfortunately, the instructions in the website are for a windows machine, but the whole tool is python based, so it is supposed do be (and it is) multiplatform.<br /><br />In the sync.config file you are asked to choose the right serial port over bluetooth file, which can be one of /dev/rfcommxx<br />ie: COM_PORT = '/dev/rfcomm2' instead of windows COMxx port<br /><br />The first problem I had then was related to a bug of my ubuntu distribution (8.04) described <a href="https://bugs.launchpad.net/ubuntu/+source/bluez-utils/+bug/227429">here</a>  which can be easly fixed installing the bluez-utils package from Debian Sid<br /><br />At this point, you can follow the instruction on the putools website by opening a serial port<br /><span style="font-family:trebuchet ms;"> $ sdptool add --channel=2 SP</span><br /><br /><span style="font-family:trebuchet ms;"> $ rfcomm listen rfcomm2 2 </span><br /><br />and launching the script on the phone and finally launching from another shell the push command from the pcfiles folder.</div>
+<h2>Comments</h2>
+<div class='comments'>
+<div class='comment'>
+<div class='author'>Deuce868</div>
+<div class='content'>
+nvm, got it working by changing the com port in the config from just 3 to the entire /dev... path<BR/><BR/>Thanks for the excellent post.</div>
+</div>
+<div class='comment'>
+<div class='author'>Deuce868</div>
+<div class='content'>
+Other than the bug in the ubuntu package, any idea why I'd get the "port not open" exception? <BR/><BR/>I'm running intrepid which has the updated bluez-utils package, but wheneven I try push I get:<BR/>python push<BR/>file /home/rharding/.push/config<BR/>Connecting to serial port /dev/ttyS2<BR/>Traceback (most recent call last):<BR/>  File "push", line 75, in module<BR/>    main()<BR/>  File "push", line 55, in main<BR/>    app = App(0)<BR/>  File "/usr/lib/python2.5/site-packages/wx-2.8-gtk2-unicode/wx/_core.py", line 7912, in __init__<BR/>    self._BootstrapApp()<BR/>  File "/usr/lib/python2.5/site-packages/wx-2.8-gtk2-unicode/wx/_core.py", line 7487, in _BootstrapApp<BR/>    return _core_.PyApp__BootstrapApp(*args, **kwargs)<BR/>  File "push", line 38, in OnInit<BR/>    title='push' )<BR/>  File "/home/rharding/Desktop/putools/pcfiles/phoneshell.py", line 56, in __init__<BR/>    *args, **kwds)<BR/>  File "/home/rharding/Desktop/putools/pcfiles/phoneshell.py", line 243, in __init__<BR/>    *args, **kwds)<BR/>  File "/home/rharding/Desktop/putools/pcfiles/btinterpreter.py", line 105, in __init__<BR/>    self.bt.send( 'reset' )<BR/>  File "/home/rharding/Desktop/putools/pcfiles/../libs/phcomm.py", line 339, in send<BR/>    self.write( cmd )<BR/>  File "/home/rharding/Desktop/putools/pcfiles/../libs/phcomm.py", line 367, in write<BR/>    self.sock.send(msg)<BR/>  File "/home/rharding/Desktop/putools/pcfiles/../libs/phcomm.py", line 147, in send<BR/>    self.file.write( msg )<BR/>  File "/usr/lib/python2.5/site-packages/serial/serialposix.py", line 328, in write<BR/>    if self.fd is None: raise portNotOpenError<BR/>serial.serialutil.SerialException: Port not open</div>
+</div>
+</div>
+
+  </div>
+</div>
+<div class="container has-text-centered">
+    
+</div>
+
+<div class="container has-text-centered">
+  
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      (function() {
+          
+          
+          if (window.location.hostname == "localhost")
+              return;
+      
+          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+          var disqus_shortname = 'fedepaolgithubio';
+          dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com/" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+  
+</div>
+<section class="section">
+  <div class="container has-text-centered">
+    <p></p>
+  </div>
+</section>
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-16514009-2', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+

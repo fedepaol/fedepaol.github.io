@@ -1,280 +1,117 @@
-
 <!DOCTYPE html>
-<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
-<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
-<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
-<head>
-  <meta charset="utf-8">
-  <title>MyDearSanta - My little software store</title>
-  <meta name="author" content="Federico Paolinelli">
-
-  
-  <meta name="description" content="This time, while PastTimer has not been released yet, I started an experiment with an old friend. We wanted not just to release another standalone &hellip;">
-  
-
-  <!-- http://t.co/dKP3o1e -->
-  <meta name="HandheldFriendly" content="True">
-  <meta name="MobileOptimized" content="320">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  
-  <link rel="canonical" href="http://fedepaol.github.io/blog/2011/12/05/mydearsanta">
-  <link href="/favicon.png" rel="icon">
-  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
-  <link href="/atom.xml" rel="alternate" title="My little software store" type="application/atom+xml">
-  <script src="/javascripts/modernizr-2.0.js"></script>
-  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
-  <script src="/javascripts/octopress.js" type="text/javascript"></script>
-  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
-<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
-<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
-
-  
-  <script type="text/javascript">
-    var _gaq = _gaq || [];
-    _gaq.push(['_setAccount', 'UA-16514009-2']);
-    _gaq.push(['_trackPageview']);
-
-    (function() {
-      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-    })();
-  </script>
-
-
-</head>
-
-<body   >
-  <header role="banner"><hgroup>
-  <h1><a href="/">My little software store</a></h1>
-  
-    <h2>Random thoughts about my experience as moonlight software developer.</h2>
-  
-</hgroup>
-
-</header>
-  <nav role="navigation"><ul class="subscription" data-subscription="rss">
-  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
-  
-</ul>
-  
-<form action="https://www.google.com/search" method="get">
-  <fieldset role="search">
-    <input type="hidden" name="q" value="site:fedepaol.github.io" />
-    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
-  </fieldset>
-</form>
-  
-<ul class="main-navigation">
-  <li><a href="/">Blog</a></li>
-  <li><a href="/blog/archives">Archives</a></li>
-</ul>
-
-</nav>
-  <div id="main">
-    <div id="content">
-      <div>
-<article class="hentry" role="article">
-  
-  <header>
-    
-      <h1 class="entry-title">MyDearSanta</h1>
-    
-    
-      <p class="meta">
-        
+<html lang="en-us">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 
 
 
-<time class='entry-date' datetime='2011-12-05'><span class='date'><span class='date-month'>Dec</span> <span class='date-day'>5</span><span class='date-suffix'>th</span>, <span class='date-year'>2011</span></span> <span class='time'>12:00 am</span></time>
-        
-      </p>
-    
-  </header>
+<title>MyDearSanta | My little software warehouse</title>
+
+<link rel="stylesheet" href="http://fedepaol.github.io//css/styles.css">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css" 
+integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbiDQ" crossorigin="anonymous">
+<script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
 
 
-<div class="entry-content"><div class='post'>
-This time, while PastTimer has not been released yet, I started an experiment with an old friend. We wanted not just to release another standalone app, but interact in some way with a backend.<br /><br />The result is&nbsp;<a href="http://www.mydearsanta.info/">www.mydearsanta.info</a>&nbsp;, a web based Christmas list, which comes together with and Android app&nbsp;<a href="https://market.android.com/details?id=com.smokingbytes.santas">https://market.android.com/details?id=com.smokingbytes.santas</a>&nbsp;and an Iphone app (currently under the approval process) .<br /><br />The backend was written using the Django framework, and the apps interact with it using a json based rest api.</div>
-</div>
-
-
-  <footer>
-    <p class="meta">
-      
-  
-
-<span class="byline author vcard">Posted by <span class="fn">Federico Paolinelli</span></span>
-
-      
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/zenburn.min.css" crossorigin="anonymous" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js" integrity="sha256-/BfiIkHlHoVihZdc6TFuj7MmJ0TWcWsMXkeDFwhi0zw=" crossorigin="anonymous"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+<script src="http://fedepaol.github.io//js/highlight.js"></script>
 
 
 
 
-<time class='entry-date' datetime='2011-12-05'><span class='date'><span class='date-month'>Dec</span> <span class='date-day'>5</span><span class='date-suffix'>th</span>, <span class='date-year'>2011</span></span> <span class='time'>12:00 am</span></time>
-      
-
-<span class="categories">
-  
-    <a class='category' href='/blog/categories/android-rest-django/'>android rest django</a>
-  
-</span>
 
 
-    </p>
-    
-      <div class="sharing">
-  
-  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://fedepaol.github.io/blog/2011/12/05/mydearsanta/" data-via="fedepaol" data-counturl="http://fedepaol.github.io/blog/2011/12/05/mydearsanta/" >Tweet</a>
-  
-  
-  <div class="g-plusone" data-size="medium"></div>
-  
-  
-</div>
-
-    
-    <p class="meta">
-      
-        <a class="basic-alignment left" href="/blog/2011/10/18/new-app-android-kitchen-timer/" title="Previous Post: A new app - Android Kitchen Timer">&laquo; A new app - Android Kitchen Timer</a>
-      
-      
-        <a class="basic-alignment right" href="/blog/2012/01/22/pastimer-android-kitchen-timer-released/" title="Next Post: Pastimer - Android Kitchen Timer (Released)">Pastimer - Android Kitchen Timer (Released) &raquo;</a>
-      
-    </p>
-  </footer>
-</article>
-
-</div>
-
-<aside class="sidebar">
-  
-    <section>
-  <h1>About Me</h1>
-  <p>Lead developer with electronic trading software by day, passionate about opensource. I spend a lot of my spare time writing Go and Android software. Table Tennis player, snowboarder, dad. I also contributed to Firefox for Android.</p>
-  <a href="mailto:fedepaol@gmail.com" target="_top">fedepaol@gmail.com</a>
-</section>
-<section>
-  <h1>Recent Posts</h1>
-  <ul id="recent_posts">
-    
-      <li class="post">
-        <a href="/blog/2018/12/11/fast-messaging-with-nats-and-go-part-2/">Fast Messaging With Nats and Go Part 2</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2018/10/27/fast-messaging-with-nats-and-go/">Fast Messaging With Nats and Go</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2018/10/26/a-new-chapter/">A New (Side) Chapter</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2017/04/30/android-okhttp-and-websockets/">Android, Okhttp and Websockets</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2016/08/27/android-mvp-testing/">Android, MVP, Dagger and Testing</a>
-      </li>
-    
-  </ul>
-</section>
-
-<section>
-  <h1>GitHub Repos</h1>
-  <ul id="gh_repos">
-    <li class="loading">Status updating...</li>
-  </ul>
-  
-  <a href="https://github.com/fedepaol">@fedepaol</a> on GitHub
-  
-  <script type="text/javascript">
-    $(document).ready(function(){
-        if (!window.jXHR){
-            var jxhr = document.createElement('script');
-            jxhr.type = 'text/javascript';
-            jxhr.src = '/javascripts/libs/jXHR.js';
-            var s = document.getElementsByTagName('script')[0];
-            s.parentNode.insertBefore(jxhr, s);
-        }
-
-        github.showRepos({
-            user: 'fedepaol',
-            count: 0,
-            skip_forks: true,
-            target: '#gh_repos'
-        });
-    });
-  </script>
-  <script src="/javascripts/github.js" type="text/javascript"> </script>
-</section>
-
-
-
-<section class="googleplus">
-  <h1>
-    <a href="https://plus.google.com/+FedericoPaolinelli?rel=author">
-      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
-      Google+
-    </a>
-  </h1>
-</section>
-
-
-
-<section>
-	<h1>On Twitter:</h1>
-	<div>
-		<p><br /><a href="http://twitter.com/fedepaol" target="_blank">My Tweets, on Twitter.</a></p>
-		<a href="http://twitter.com/fedepaol" class="twitter-follow-button" data-show-count="">Follow @fedepaol</a>
-	</div>
-</section>
-
-
-  
-</aside>
-
-
-    </div>
+<div class="container">
+    <nav class="navbar level">
+      <div class="navbar-brand">
+          <a class="nav-item" href="http://fedepaol.github.io/"><h1 class="title is-3">My little software warehouse</h1></a>
+      </div>           
+      <div class="navbar-menu has-text-centered is-active">
+          <div class="navbar-end is-centered">
+              
+                <a href="https://twitter.com/fedepaol">
+                  <span class="icon">
+                    <i class="fab fa-twitter"></i>
+                  </span>
+                </a>
+              
+                <a href="http://fedepaol.github.io/about">
+                  <span class="icon">
+                    <i class="fas fa-info"></i>
+                  </span>
+                </a>
+              
+                <a href="https://github.com/fedepaol">
+                  <span class="icon">
+                    <i class="fab fa-github"></i>
+                  </span>
+                </a>
+              
+                <a href="http://fedepaol.github.io/www.linkedin.com/in/federico-paolinelli-2374954/">
+                  <span class="icon">
+                    <i class="fab fa-linkedin-in"></i>
+                  </span>
+                </a>
+              
+           </div>
+      </div>
+    </nav>
   </div>
-  <footer role="contentinfo"><p>
-  Copyright &copy; 2018 - Federico Paolinelli -
-  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
-</p>
+<div class="container">
+  <h2 class="subtitle is-6">December 5, 2011</h2>
+  <h1 class="subtitle is-size-4-mobile is-size-3-desktop">MyDearSanta</h1>
+  <div class="content">
+    
+<div class='post'>
+This time, while PastTimer has not been released yet, I started an experiment with an old friend. We wanted not just to release another standalone app, but interact in some way with a backend.<br /><br />The result is&nbsp;<a href="http://www.mydearsanta.info/">www.mydearsanta.info</a>&nbsp;, a web based Christmas list, which comes together with and Android app&nbsp;<a href="https://market.android.com/details?id=com.smokingbytes.santas">https://market.android.com/details?id=com.smokingbytes.santas</a>&nbsp;and an Iphone app (currently under the approval process) .<br /><br />The backend was written using the Django framework, and the apps interact with it using a json based rest api.</div>
 
-</footer>
+  </div>
+</div>
+<div class="container has-text-centered">
+    
+</div>
+
+<div class="container has-text-centered">
   
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      (function() {
+          
+          
+          if (window.location.hostname == "localhost")
+              return;
+      
+          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+          var disqus_shortname = 'fedepaolgithubio';
+          dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com/" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+  
+</div>
+<section class="section">
+  <div class="container has-text-centered">
+    <p></p>
+  </div>
+</section>
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-16514009-2', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
 
 
 
-
-
-  <script type="text/javascript">
-    (function() {
-      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
-      script.src = 'https://apis.google.com/js/plusone.js';
-      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
-    })();
-  </script>
-
-
-
-  <script type="text/javascript">
-    (function(){
-      var twitterWidgets = document.createElement('script');
-      twitterWidgets.type = 'text/javascript';
-      twitterWidgets.async = true;
-      twitterWidgets.src = '//platform.twitter.com/widgets.js';
-      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
-    })();
-  </script>
-
-
-
-
-
-</body>
-</html>

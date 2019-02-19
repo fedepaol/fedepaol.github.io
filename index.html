@@ -1,2195 +1,349 @@
-
-<!DOCTYPE html>
-<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
-<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
-<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
-<head>
-  <meta charset="utf-8">
-  <title>My little software store</title>
-  <meta name="author" content="Federico Paolinelli">
-
-  
-  <meta name="description" content="This is the second of a follow up serie of the talk Fast messaging with Nats and Go I gave at golab 2018.
-The first part can be found here What can &hellip;">
-  
-
-  <!-- http://t.co/dKP3o1e -->
-  <meta name="HandheldFriendly" content="True">
-  <meta name="MobileOptimized" content="320">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  
-  <link rel="canonical" href="http://fedepaol.github.io">
-  <link href="/favicon.png" rel="icon">
-  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
-  <link href="/atom.xml" rel="alternate" title="My little software store" type="application/atom+xml">
-  <script src="/javascripts/modernizr-2.0.js"></script>
-  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
-  <script src="/javascripts/octopress.js" type="text/javascript"></script>
-  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
-<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
-<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
-
-  
-  <script type="text/javascript">
-    var _gaq = _gaq || [];
-    _gaq.push(['_setAccount', 'UA-16514009-2']);
-    _gaq.push(['_trackPageview']);
-
-    (function() {
-      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-    })();
-  </script>
-
-
-</head>
-
-<body   >
-  <header role="banner"><hgroup>
-  <h1><a href="/">My little software store</a></h1>
-  
-    <h2>Random thoughts about my experience as moonlight software developer.</h2>
-  
-</hgroup>
-
-</header>
-  <nav role="navigation"><ul class="subscription" data-subscription="rss">
-  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
-  
-</ul>
-  
-<form action="https://www.google.com/search" method="get">
-  <fieldset role="search">
-    <input type="hidden" name="q" value="site:fedepaol.github.io" />
-    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
-  </fieldset>
-</form>
-  
-<ul class="main-navigation">
-  <li><a href="/">Blog</a></li>
-  <li><a href="/blog/archives">Archives</a></li>
-</ul>
-
-</nav>
-  <div id="main">
-    <div id="content">
-      <div class="blog-index">
-  
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2018/12/11/fast-messaging-with-nats-and-go-part-2/">Fast Messaging With Nats and Go Part 2</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2018-12-11T22:32:15+01:00'><span class='date'><span class='date-month'>Dec</span> <span class='date-day'>11</span><span class='date-suffix'>th</span>, <span class='date-year'>2018</span></span> <span class='time'>10:32 pm</span></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>This is the second of a follow up serie of the talk <em>Fast messaging with Nats and Go</em> I gave at <a href="golab.io">golab 2018</a>.
-The first part can be found <a href="http://fedepaol.github.io/blog/2018/10/27/fast-messaging-with-nats-and-go/">here</a></p>
-
-<h2>What can we do with nats?</h2>
-
-<h3>Pub sub</h3>
-
-<p>As you can probably guess, given that Nats is a pure pub / sub system, we can easily implement pub / sub.</p>
-
-<p><img src="/images/nats/pubsub.png" width="350"></p>
-
-<p>Please remember that a nats publisher does not assume the audience. The published message can reach one, 1000 or 0 subscriber. If no subscribers are connected the message is gone forever.</p>
-
-<h3>Queueing</h3>
-
-<p>Queueing is a variant of pub / sub where the subscriber announces itself to belong to a subscription group. In that case the Nats server will send randomly the subscribed message <strong>only to one subscriber</strong>.</p>
-
-<p><img src="/images/nats/queueing.png" width="450"></p>
-
-<p>This is useful in case you want to implement a load balancing policy. On top of that is really easy to scale up (or down) by adding new subscribers to the subscription group.</p>
-
-<h3>Request / Reply</h3>
-
-<p>Request / Reply is <strong>just syntactic sugar</strong> over the pub / sub mechanism provided by Nats: the publisher sends a reply subject together with the message and expects any reply to be sent to that reply subject.</p>
-
-<p>The subscribers receive the request message together with the reply subject and sends the reply to that subject.</p>
-
-<p><img src="/images/nats/reqreply.png" width="450"></p>
-
-<p>Given the nature of Nats, the request gets received to all the registered subscribers. The requestor just handles the first reply it receives and discards all the other replies.</p>
-
-<p>Apart from this (quite) not efficient way to handle req / reply, this mechanism can be used together with queueing we just discussed making only one receiver of the subscription group receive the request.</p>
-
-<h2>Using Nats with Go</h2>
-
-<p>First of all, there are clients for a lot of languages already available, from the most fancy ones (rust or elixir) to some out of fashiones (even perl!).</p>
-
-<p>The go client does a bit more than just implementing the text based protocol. In particular:</p>
-
-<h4>Handles the connection / reconnection gracefully</h4>
-
-<p>Given that a client connected to the cluster gets notified of all the nodes of the cluster via the gossiping mechanism, whenever a client detects a disconnection from a node, it tries to reconnect to one of the other nodes of the cluster.</p>
-
-<p>While the reconnection is in progress, any messages that we would like to send are buffered up to a configurable limit (the default is something like 8 Mb).</p>
-
-<h4>Tries to avoid slow client errors by emptying the socket</h4>
-
-<p>The client tries to receive all the available messages and pass them to the application. To do that, it buffers the messages received in order to avoid to be marked as a <em>slow client</em> by the server. When the receive buffer is full, it tries to notify the client of the library by raising errors.</p>
-
-<h3>Some code</h3>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">nc</span><span class="p">,</span> <span class="nx">_</span> <span class="o">:=</span> <span class="nx">nats</span><span class="p">.</span><span class="nx">Connect</span><span class="p">(</span><span class="nx">nats</span><span class="p">.</span><span class="nx">DefaultURL</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="nx">nc</span><span class="p">.</span><span class="nx">Publish</span><span class="p">(</span><span class="s">&quot;foo&quot;</span><span class="p">,</span> <span class="p">[]</span><span class="nb">byte</span><span class="p">(</span><span class="s">&quot;Hello World&quot;</span><span class="p">))</span>
-</span><span class='line'><span class="nx">nc</span><span class="p">.</span><span class="nx">Subscribe</span><span class="p">(</span><span class="s">&quot;foo&quot;</span><span class="p">,</span> <span class="kd">func</span><span class="p">(</span><span class="nx">m</span> <span class="o">*</span><span class="nx">nats</span><span class="p">.</span><span class="nx">Msg</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>    <span class="c1">// handle the message</span>
-</span><span class='line'><span class="p">})</span>
-</span><span class='line'><span class="nx">nc</span><span class="p">.</span><span class="nx">Flush</span><span class="p">()</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// chan subscribe</span>
-</span><span class='line'><span class="nx">ch</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="o">*</span><span class="nx">nats</span><span class="p">.</span><span class="nx">Msg</span><span class="p">,</span> <span class="mi">64</span><span class="p">)</span>
-</span><span class='line'><span class="nx">sub</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">nc</span><span class="p">.</span><span class="nx">ChanSubscribe</span><span class="p">(</span><span class="s">&quot;foo&quot;</span><span class="p">,</span> <span class="nx">ch</span><span class="p">)</span>
-</span><span class='line'><span class="nx">msg</span> <span class="o">:=</span> <span class="o">&lt;-</span> <span class="nx">ch</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Sending and receiving takes just a few lines of code. There is also a channel based subscription where the received messages are sent through a channel.
-Beware that sending are asynchronous operations, <code>nc.Flush()</code> is needed in order to force the client to send the messages out.</p>
-
-<p>Using request / reply is just as straightforward:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="c1">// Requests    </span>
-</span><span class='line'><span class="kd">var</span> <span class="nx">response</span> <span class="kt">string</span>
-</span><span class='line'><span class="nx">err</span> <span class="o">:=</span> <span class="nx">c</span><span class="p">.</span><span class="nx">Request</span><span class="p">(</span><span class="s">&quot;help&quot;</span><span class="p">,</span> <span class="s">&quot;help me&quot;</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">response</span><span class="p">,</span> <span class="mi">10</span><span class="o">*</span><span class="nx">time</span><span class="p">.</span><span class="nx">Millisecond</span><span class="p">)</span>
-</span><span class='line'><span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
-</span><span class='line'>        <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;Request failed: %v\n&quot;</span><span class="p">,</span> <span class="nx">err</span><span class="p">)</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// Replying</span>
-</span><span class='line'><span class="nx">c</span><span class="p">.</span><span class="nx">Subscribe</span><span class="p">(</span><span class="s">&quot;help&quot;</span><span class="p">,</span> <span class="kd">func</span><span class="p">(</span><span class="nx">subj</span><span class="p">,</span> <span class="nx">reply</span> <span class="kt">string</span><span class="p">,</span> <span class="nx">msg</span> <span class="kt">string</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>        <span class="nx">c</span><span class="p">.</span><span class="nx">Publish</span><span class="p">(</span><span class="nx">reply</span><span class="p">,</span> <span class="s">&quot;I can help!&quot;</span><span class="p">)</span>
-</span><span class='line'><span class="p">})</span>
-</span><span class='line'><span class="c1">// Queue group reply</span>
-</span><span class='line'><span class="nx">nc</span><span class="p">.</span><span class="nx">QueueSubscribe</span><span class="p">(</span><span class="s">&quot;help&quot;</span><span class="p">,</span> <span class="s">&quot;workers&quot;</span><span class="p">,</span> <span class="kd">func</span><span class="p">(</span><span class="nx">msg</span> <span class="o">*</span><span class="nx">Msg</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>      <span class="nx">c</span><span class="p">.</span><span class="nx">Publish</span><span class="p">(</span><span class="nx">msg</span><span class="p">.</span><span class="nx">Reply</span><span class="p">,</span> <span class="s">&quot;I can help!&quot;</span><span class="p">)</span>
-</span><span class='line'><span class="p">})</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p></p>
-
-<p>Request / reply are blocking (whereas pub / sub are asynchronous) and as we already mentioned can be used together with subscription groups.</p>
-
-<p>The request accepts a <code>timeout</code> parameter but there is also a variant that accepts a <code>context</code> in order to let the caller be able to interrupt the request.</p>
-
-<h3>The go client does a lot more</h3>
-
-<ul>
-<li>it provides connection lifecycle callbacks (if you want to override the reconnection mechanism)</li>
-<li>it provides asynchronous and synchronous versions of the apis</li>
-<li>it provides encoders (json and protobuf) in order to use type safe callbacks</li>
-</ul>
-
-
-<p>This (and a lot more) can be found on the official nats go client <a href="https://github.com/nats-io/go-nats">here</a>.</p>
-
-<p>I hope I triggered your curiosity in trying a powerful (yet simple) messaging system.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2018/10/27/fast-messaging-with-nats-and-go/">Fast Messaging With Nats and Go</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2018-10-27T21:48:29+02:00'><span class='date'><span class='date-month'>Oct</span> <span class='date-day'>27</span><span class='date-suffix'>th</span>, <span class='date-year'>2018</span></span> <span class='time'>9:48 pm</span></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>This is the first of follow up serie of the talk <em>Fast messaging with Nats and Go</em> I gave at <a href="golab.io">golab 2018</a>.</p>
-
-<h3>The slides of the talk can be found here:</h3>
-
-<script async class="speakerdeck-embed" data-id="001030954dc6483285e47ccf4906a7d0" data-ratio="1.33333333333333" src="//speakerdeck.com/assets/embed.js"></script>
-
-
-<h3>What is Nats</h3>
-
-<p><a href="nats.io">Nats</a> is a messaging system hosted under the <a href="www.cncf.io">CNCF</a> umbrella, which is an <em>open source software foundation dedicated to making cloud native computing universal and sustainable</em>. It&rsquo;s my place-to-go while looking for software related to distributed systems. I am just a user of Nats reporting my experience and my understanding of how it works. What follows might be inaccurate or wrong :-)</p>
-
-<h3>Why messaging</h3>
-
-<p>The way we architect and build our applications changed in the past few years, moving from monolithic apps to distributed and therefore interacting (micro) services. Together with that, some communication patterns emerged.</p>
-
-<p>Even if the most popular one is to use rest and there are popular libraries for synchronous interaction such as <a href="https://grpc.io/">grpc</a> or <a href="https://thrift.apache.org/">thrift</a>, some interactions are better represented using events and messaging.</p>
-
-<h3>Good points of messaging</h3>
-
-<p>Messaging is a natural way to decouple producers of messages from consumers of those messages. The producer does not know who (if any) is going to consume the message, the consumer does not know where that message is coming from.</p>
-
-<p><strong>This makes scalability easier:</strong> you can throw in / remove producers (or consumers) and your application will scale accordingly without having to change anything.</p>
-
-<p>Messaging <strong>enables different kinds of interaction</strong>, for example <a href="https://martinfowler.com/eaaDev/EventSourcing.html">event sourcing</a>, where the state of a service is emitted as a sequence of updates which are collected in order to reconstruct the current state in another service.</p>
-
-<p>Messaging makes it easier to implement all the kinds of <em>reactive</em> paradigms, where the evolution of our system is driven by the emission and the reaction to messages sent and received by our services.</p>
-
-<h3>There are a lot of messaging systems, what do I need to look for in one of them?</h3>
-
-<p>Some aspects that we need to take in consideration are:</p>
-
-<p><strong>Messaging patterns:</strong> Does the messaging system support pub/sub? Request/reply? Fan-in? Any other kind of exotic messaging pattern?</p>
-
-<p><strong>Durability of the messages:</strong> How long will the messages last? Will be there forever(ish)? Will they expire after a short timeout? Will they be thrown away if they are not consumed immediately?</p>
-
-<p><strong>Ordering guarantees:</strong> Will the messages be always received in the same order the publisher is publishing them?</p>
-
-<p><strong>Routing capabilities:</strong> How does the system route the messages? Is it topic based? Does it support wildcarding?</p>
-
-<p><strong>Dev / Ops experience:</strong> This is often underestimated: how easy it is to interact with the system? How much boilerplate code is required? And also, how easy is to configure and to maintain the system? Does it require a lot of knobs to be turned in order to configure it properly?</p>
-
-<p><strong>Performance:</strong> Is it fast? How does it behaves under load?</p>
-
-<p><strong>Auth / Authz:</strong> Does it support authentication / authorization? How?</p>
-
-<h3>What makes a good communication system?</h3>
-
-<p>The two extremes of the spectrum are</p>
-
-<h4>The Enterprise Service Bus:</h4>
-
-<p>Popular during the SOA movement, the bus held a lot of logic itself. Transformation, routing rules, manipulation and filtering of the messages. The result was that the logic was split between the endpoints and the bus itself, making really difficult to understand the big picture.</p>
-
-<h4>What Martin Fowler says:</h4>
-
-<p>In <a href="https://martinfowler.com/articles/microservices.html">his really popular article about microservices</a>: <em>&ldquo;The microservice community favours an alternative approach: smart endpoints and dumb pipes&rdquo;</em>.</p>
-
-<p><strong>Nats is on the dumb side</strong>, but it&rsquo;s just dumb enough to be useful.</p>
-
-<h2>The protocol</h2>
-
-<p>The nats protocol is text based, which means that you can even telnet them to a Nats server. The messages are delimited by CR - LF .</p>
-
-<p>The main messages are:</p>
-
-<table>
-    <tr>
-        <td>PUB    -</td>
-        <td>Publish a message to a subject, with optional reply subject</td>
-    </tr>
-    <tr>
-        <td>SUB   -</td>
-        <td>Subscribe to a subject</td>
-    </tr>
-    <tr>
-        <td>MSG   -</td>
-        <td>Delivers a message payload to a subscriber</td>
-    </tr>
-    <tr>
-        <td>UNSUB  - </td>
-        <td>Unsubscribe from a subject</td>
-    </tr>
-</table>
-
-
-<p></p>
-
-<p>There are also other messages used to establish and keep the connection up, such as <em>CONNECT</em>, <em>PING</em>, <em>INFO</em> .</p>
-
-<h4>The protocol supports wildcards</h4>
-
-<p>Nats subjects support wildcards. The subject are tokens separated by a dot, such as <strong>foo.bar</strong> or <strong>foo.bar.baz</strong>.</p>
-
-<p>There are two types of wildcards: by using <strong>*</strong> a wildcard matches the token (foo.* matches foo.bar but not foo.bar.baz). If you want to match any foo.something you need to use <strong>></strong> (as in <strong>foo.></strong>).</p>
-
-<h2>The server (or, the ops point of view)</h2>
-
-<p>The nats server is a (small) single Go executable. In order to run it, you just start it with</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>gnatsd -p 4222</span></code></pre></td></tr></table></div></figure>
-
-
-<p>and you are done.</p>
-
-<h4>Autodiscovery</h4>
-
-<p>The nats server provides also a gossip based autodiscovery mechanism. By using it, you can seamlessly add and remove new nodes to the cluster to scale up / down. A new server addition is propagated to all its peers and to all the clients.</p>
-
-<p>The auto discovery is enabled by setting one or more servers as <em>seed server</em> and by pointing them from the peers:</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>gnatsd -p 4222 -cluster nats://localhost:4248
-</span><span class='line'>gnatsd -p 5222 -routes nats://localhost:4248</span></code></pre></td></tr></table></div></figure>
-
-
-<h4>All the servers form a full mesh:</h4>
-
-<p><img src="/images/nats/fullmesh.png" width="450"></p>
-
-<p>Each server is connected to each other, meaning that two clients will always be one hop distant <strong>at most</strong>. Once a client subscribes a subject, its interest will be propagated through all the servers of the mesh.</p>
-
-<h2>Delivery guarantees</h2>
-
-<p>Nats provides very few guarantees:</p>
-
-<ul>
-<li><p>It guarantees ordering of messages.</p></li>
-<li><p>It&rsquo;s an <strong>at most once delivery</strong> system, which means that if the client is not connected while the message is being published, it won&rsquo;t receive that message. Ever. <strong>The message is not kept on the server</strong>, if a client looses it for some reason and wants it, some kind of recovery mechanism must be implemented (more on this later).</p></li>
-</ul>
-
-
-<p>It&rsquo;s kind of like the tree falling in the forest while nobody is hearing.</p>
-
-<h2>Availability</h2>
-
-<p>The <em>at most once delivery guarantee</em> allows Nats to be <strong>fast and reliable</strong>. (Almost) no state is kept on the server.
-<strong>A slow client</strong> is a client that is not able to consume the messages the server is sending to it for more than 1 second (the timeout is configurable).</p>
-
-<p><strong>The nats server behaves in a very selfish manner cutting the connection of the slow clients</strong>, and not having to do the extra work of trying to help slow clients it achieves high levels of consistency and availability,</p>
-
-<h2>That&rsquo;s it for now</h2>
-
-<p>I&rsquo;ll publish the second part soon, where I&rsquo;ll continue continue analyzing Nats following the outline of the talk.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2018/10/26/a-new-chapter/">A New (Side) Chapter</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2018-10-26T07:33:23+02:00'><span class='date'><span class='date-month'>Oct</span> <span class='date-day'>26</span><span class='date-suffix'>th</span>, <span class='date-year'>2018</span></span> <span class='time'>7:33 am</span></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>It&rsquo;s been a while</h3>
-
-<p>It&rsquo;s more than a year since my last blogpost which incidentally (or not) it happened right a month before the birth of my second child. In the past year I lost a lot of sleep, and now I am kind of getting back to normality (which means new side gigs :-)).</p>
-
-<p>My interests moved from Android and mobile in general to Go and distributed systems, which is what I am probably going to write about in the next blogpost. Still, I am not sure if the green robot will catch my attention again but at the moment I am focusing on Go.</p>
-
-<p>That&rsquo;s the reason why I replaced the name of the blog to a more general one.</p>
-
-<h4>A lot of interesting things happened:</h4>
-
-<p><strong>I attended conferences</strong>: I went to QCon London and to Gophercon London.</p>
-
-<p>After the experience of speaking at <a href="http://fedepaol.github.io/blog/2014/02/20/rest-interaction-in-android/">Droidcon Italy 2014</a>, <strong>I re-started speaking in public:</strong></p>
-
-<ul>
-<li>DevFest Pisa 0.1, where I spoke about transitioning from C to Go <a href="https://talks.godoc.org/github.com/fedepaol/go-for-c-devs-talk/goforcdevs.slide#1">Golang for C developers</a></li>
-<li>Local GDG meetup, where I introduced Go and spoke about some concurrency patterns and <a href="https://talks.godoc.org/github.com/fedepaol/howtotrainyourgophers/howtotrainyourgophers.slide#1">How to train your gophers</a></li>
-<li>Golab.io, the Italian Go conference, where I spoke about <a href="https://speakerdeck.com/fedepaol/fast-messaging-with-nats-and-go">messaging with nats and go</a></li>
-</ul>
-
-
-<p>The last one was an awesome experience where I had the chance to speak in front of an international audience and meet so many interesting people.</p>
-
-<p><strong>I started contributing to a Go OSS project</strong>, namely <a href="github.com/gomods/athens">Athens</a>, the proxy for Go dependencies. It&rsquo;s nice to have a way to give something back to a thriving community.</p>
-
-<h4>What is coming next</h4>
-
-<p>Blogposts! I will probably write about the same stuff I spoke at golab, and keep blogging about Go and distributed systems.</p>
-
-<p>Keep tuned !</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2017/04/30/android-okhttp-and-websockets/">Android, Okhttp and Websockets</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2017-04-30T23:04:19+02:00'><span class='date'><span class='date-month'>Apr</span> <span class='date-day'>30</span><span class='date-suffix'>th</span>, <span class='date-year'>2017</span></span> <span class='time'>11:04 pm</span></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2>Websockets</h2>
-
-<p>Rest http calls are the most common interaction between Android apps and remote servers. However, there are some scenarios where the interaction is better handled via a persistent connection: think about a chat, or a multiplayer game where data flows in both directions and the server needs to push data to the clients and to be aware of which client are connected.</p>
-
-<p>This kind of scenario can be implemented through Websockets.</p>
-
-<h3>OkHttp and Websockets</h3>
-
-<p>Given the quality of the libraries offered by Square, OkHttp was the first library I checked when I recently had to deal with websockets. Luckily, <a href="https://medium.com/square-corner-blog/web-sockets-now-shipping-in-okhttp-3-5-463a9eec82d1">WebSocket support was introduced in December, 2016</a>. In this post I will try to describe how to use it, and to show how it is different from using it with regular http calls.</p>
-
-<h3>Establishing the connection</h3>
-
-<p>Establishing the connection is pretty straightforward. You declare the OkHttp client as always:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'> <span class="n">client</span> <span class="o">=</span> <span class="k">new</span> <span class="n">OkHttpClient</span><span class="o">.</span><span class="na">Builder</span><span class="o">()</span>
-</span><span class='line'>                <span class="o">.</span><span class="na">readTimeout</span><span class="o">(</span><span class="mi">3</span><span class="o">,</span>  <span class="n">TimeUnit</span><span class="o">.</span><span class="na">SECONDS</span><span class="o">)</span>
-</span><span class='line'>                <span class="o">.</span><span class="na">build</span><span class="o">();</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>and then take a websocket object out of it:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">Request</span> <span class="n">request</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Request</span><span class="o">.</span><span class="na">Builder</span><span class="o">()</span>
-</span><span class='line'>            <span class="o">.</span><span class="na">url</span><span class="o">(</span><span class="n">serverUrl</span><span class="o">)</span>
-</span><span class='line'>            <span class="o">.</span><span class="na">build</span><span class="o">();</span>
-</span><span class='line'>    <span class="n">webSocket</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="na">newWebSocket</span><span class="o">(</span><span class="n">request</span><span class="o">,</span> <span class="k">new</span> <span class="nf">WebSocketListener</span><span class="o">()</span> <span class="o">{</span>
-</span><span class='line'>                      <span class="o">...</span>
-</span><span class='line'>                  <span class="o">});</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Please note that by creating the websocket, OkHttp will try to establish the connection with the server. The second parameter of the <code>newWebSocket</code> factory method needs to implement the <code>WebSocketListener</code> interface, in order to get asynchronously notified of the various events occurred to the socket (such as an incoming message, or the disconnection of the socket, or a failure).</p>
-
-<h3>Sending a message</h3>
-
-<p>Sending a message is easy. Just call <code>send</code> with a <em>String</em> or a <em>ByteString</em> as an argument. Since OkHttp will send the data using its own background thread, <code>send</code> can be called from any thread without worrying of blocking the current thread (and risking to get a NetworkOnMainThreadException).</p>
-
-<p>The only caveat here is that a positive result only indicates that the message was enqueued, but it does not reflect the result of the trasmission. From my understanding, the user of the library is notified only in case of failure via the <code>onFailure</code> callback, so an optimistic approach must be taken in place.</p>
-
-<h3>The callbacks</h3>
-
-<p>The <a href="https://github.com/square/okhttp/blob/master/okhttp/src/main/java/okhttp3/WebSocketListener.java">WebSocketListener</a> interface provides callbacks to handle the asynchronous events related to the socket. Those includes the fact that the socket was opened (or closed), or that a new message was received.</p>
-
-<p>Unlike the trasmission of the data, the interaction between the callbacks and the main Android thread needs to be implemented carefully, since <code>WebSocketListener</code>&rsquo;s method will be executed inside a background thread. Using a <code>handler</code> is the &ldquo;vanilla Android&rdquo; approach to let a background thread interact with a thread associated to a looper (such as Android&rsquo;s main thread).</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="nd">@Override</span>
-</span><span class='line'><span class="kd">public</span> <span class="kt">void</span> <span class="nf">onMessage</span><span class="o">(</span><span class="n">WebSocket</span> <span class="n">webSocket</span><span class="o">,</span> <span class="n">String</span> <span class="n">text</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'><span class="o">...</span>
-</span><span class='line'>    <span class="n">handler</span><span class="o">.</span><span class="na">sendMessage</span><span class="o">(..);</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Another way to achieve the same result would be to go reactive and expose observables to publish this events.</p>
-
-<h3>Closing the connection</h3>
-
-<p>OkHttp provides two methods to close the connection:</p>
-
-<h2>Close</h2>
-
-<p><code>webSocket.close(0, "Bye");</code> asks the server to gracefully close the connection and waits for confirmation.
-All the queued messages are trasmitted <strong>before</strong> closing the connection.</p>
-
-<p>Since some interaction is involved, the socket might not be immediately closed. If the initialization and the closure of the connection are bound to the lifecycle of the activity (i.e. in onPause / onResume), what could happen is that some messages are received <strong>after</strong> close was invoked, so this needs to be handled carefully.</p>
-
-<h2>Cancel</h2>
-
-<p>Cancel is more brutal: it just discards all the queued messages and brutally closes the socket. This has the advantage of not having to wait for the housekeeping and the trasmission of enqueued messages. However, choosing <code>cancel</code> over <code>close</code> really depends on the use case.</p>
-
-<h1>Talk is cheap, show me the code</h1>
-
-<p><a href="https://github.com/fedepaol/websocket-sample">Here</a> I pushed a simple example that allows an app to open the websocket when the app goes in foreground and shuts the websocket down when the app goes on background. This is the suggested approach for persistent connections. Using a service to hold the persisten connection is considered a misbehaviour and doze mode will make your app&rsquo;s life really hard.</p>
-
-<p>The example has some weak point that could be improved:</p>
-
-<h4>Cancel is invoked when the app goes in background.</h4>
-
-<p>This means that some messages could eventually get discarded. A better approach would be to invoke close and wait the connection to be gracefully closed and all the messages sent. Since in <code>onPause</code> the activity disposes the subscriptions, no leaking is happening. We can just hope that the application process will live long enough to let OkHttp thread to do what it needs to do in order to gracefully close the connection. A more complex approach could involve a Service or using the JobScheduler.</p>
-
-<h4>No failure of trasmission is taken into account</h4>
-
-<p>onFailure should listen for failures and notify the user of the failure (or even retry to send failed messages) while in the sample it just forces the disconnection.</p>
-
-<h4>No RxJava!</h4>
-
-<p>I wanted to keep the app simple and to avoid to introduce extra complexity, but handlers are so 2013. A better solution would have used RxJava (and probably there are many cool libraries that support that out of the box). Using RxJava would make super easy to use and transform the incoming messages and / or implement smart reconnection policies such as exponential backoff.</p>
-
-<h1>Conclusion</h1>
-
-<p>Using websockets is a completely different beast from getting / posting to http endpoints where you fetch (or post) and forget about the call, however the OkHttp implementation is really easy to use.</p>
-
-<p>On your side, you&rsquo;ll have not only to handle the trasmission / reception of the messages, but you will also need to monitor the state of the connection and behave accordingly.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2016/08/27/android-mvp-testing/">Android, MVP, Dagger and Testing</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2016-08-27T22:52:07+02:00'><span class='date'><span class='date-month'>Aug</span> <span class='date-day'>27</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>10:52 pm</span></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>MVP is Model View Presenter</h3>
-
-<p>.. which is a pattern that is very popular among Android developers nowdays.</p>
-
-<p>I don&rsquo;t intend to write (yet) another guide about MVP in Android, because others have done a better job, for example:</p>
-
-<ul>
-<li><a href="http://antonioleiva.com/MVP-android/">Antonio Leiva&rsquo;s introduction to MVP</a></li>
-<li><a href="http://hannesdorfmann.com/mosby/MVP/">Hannes Dorfmann&rsquo;s introduction to Mosby</a></li>
-<li><a href="http://fernandocejas.com/2014/09/03/architecting-android-the-clean-way/">Fernando Cejas&#8217; post on clean architecture</a></li>
-</ul>
-
-
-<p>A lot have been said about MVP (and other similar patterns), like:</p>
-
-<ul>
-<li>it isolates the business logic from the UI</li>
-<li>it makes faster and easier to unit test the business logic</li>
-<li>it avoids having a god Fragment or Activity class that manages everything</li>
-<li>it makes it easier to maintain the app</li>
-</ul>
-
-
-<p>However, the first thing you notice while switching into &ldquo;MVP mode&rdquo;, <em>is a great sense of order</em>.</p>
-
-<p>In all the (few) apps I wrote before, I ended up with the well known hodgepodgey fragment or activity that contained both the UI logic and the business logic.</p>
-
-<p>By defining the responsabilities of the view and of the presenter with MVP, you implicitly define the interfaces between those two components (and the model), <strong>and everything fits its place</strong>.</p>
-
-<p>Every touch, drag, and eventyally lifecycle events are just events that are reported back to the presenter, which then chooses what to do with them. This is powerful.</p>
-
-<h2>This post is about my experience with the MVP pattern, Dagger (2) and testing.</h2>
-
-<p>Given the definition of the interface between the view and the presenter, <strong>I ingenuosly expected that testing of both (using unit tests and Espresso tests) would have been super smooth</strong>. As it often happens, the reality is quite different from what one expects and reads from blogs. In this post I will try to sum up all the issues I had during that process and the solutions I tried to put in place.</p>
-
-<p>In order to better illustrate the concepts, I wrote a little example that can be found on my <a href="https://github.com/fedepaol/MVPtesting">github repo</a></p>
-
-<p>The structure of the app is the same one the can be found googling for Dagger / MVP , for example <a href="https://github.com/antoniolg/androidMVP">here</a>.</p>
-
-<p>The only thing I added is a local component / module that I use in order to inject the stuff needed only by that particular set of classes.</p>
-
-<p>This means that in addition to the global Component / Module classes, used to inject stuff like the storage, there will be a <em>local</em> Component / Module used, for example, to inject the presenter into the View.</p>
-
-<h3>The easy part: testing the presenter</h3>
-
-<p>The dependencies are resolved by passing what it needs as constructor parameters:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="nd">@Before</span>
-</span><span class='line'><span class="kd">public</span> <span class="kt">void</span> <span class="nf">setup</span><span class="o">()</span> <span class="o">{</span>
-</span><span class='line'>    <span class="n">mMockView</span> <span class="o">=</span> <span class="n">mock</span><span class="o">(</span><span class="n">MainView</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
-</span><span class='line'>    <span class="n">mMockStorage</span> <span class="o">=</span> <span class="n">mock</span><span class="o">(</span><span class="n">KeyValueStorage</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
-</span><span class='line'>    <span class="n">mToTest</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">MainPresenterImpl</span><span class="o">(</span><span class="n">mMockView</span><span class="o">,</span> <span class="n">mMockStorage</span><span class="o">);</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Since no injection magic is involved here, we can just mock the view and all the other stuff the presenter needs and easily write unit tests for a Presenter instance.</p>
-
-<p>Moreover, all the dependencies with external models / sources of data like retrofit can be tested by testing the behaviour of the presenter.</p>
-
-<h3>The &ldquo;I expected it to be easier part&rdquo;: testing the view</h3>
-
-<p>A common approach I heard around is to test the view not against a mock presenter, but against a presenter injected with mocked &ldquo;external components&rdquo;, such as api client and storage.</p>
-
-<p>What I wanted to achieve here on the other hand, is to test the view driving the behaviour of the presenter it interacts with.</p>
-
-<p>With this strong separation of roles, I expected it to be easy to mock the presenter and test the view with Espresso.</p>
-
-<h4>Injecting a mock presenter</h4>
-
-<p>Since the presenter is provided by the local module and injected into the view by Dagger, I had to find a way to override the Module in order to provide the mock presenter that could drive the tests.</p>
-
-<p>By using the common method to inject the view</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">DaggerMainComponent</span><span class="o">.</span><span class="na">builder</span><span class="o">()</span>
-</span><span class='line'>            <span class="o">.</span><span class="na">applicationComponent</span><span class="o">(</span><span class="n">app</span><span class="o">.</span><span class="na">getComponent</span><span class="o">())</span>
-</span><span class='line'>            <span class="o">.</span><span class="na">mainModule</span><span class="o">(</span><span class="k">new</span> <span class="nf">MainModule</span><span class="o">(</span><span class="k">this</span><span class="o">))</span>
-</span><span class='line'>            <span class="o">.</span><span class="na">build</span><span class="o">().</span><span class="na">inject</span><span class="o">(</span><span class="k">this</span><span class="o">);</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>the only way to override the presenter since it is provided by the &ldquo;real&rdquo; MainModule is to use build flavours, as shown in <a href="https://codelabs.developers.google.com/codelabs/android-testing/#0">Android testing codelab</a>.</p>
-
-<p><strong>However, I wanted to take advantage of Dagger 2 injecting a mock presenter.</strong></p>
-
-<h3>The key of replacing a dependency is by overriding the Application object</h3>
-
-<p>By adding a factory method that returns an istance of the module in the Application class</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">DaggerMainComponent</span><span class="o">.</span><span class="na">builder</span><span class="o">()</span>
-</span><span class='line'>                <span class="o">.</span><span class="na">applicationComponent</span><span class="o">(</span><span class="n">app</span><span class="o">.</span><span class="na">getComponent</span><span class="o">())</span>
-</span><span class='line'>                <span class="o">.</span><span class="na">mainModule</span><span class="o">(</span><span class="n">app</span><span class="o">.</span><span class="na">getMainModule</span><span class="o">(</span><span class="k">this</span><span class="o">))</span>
-</span><span class='line'>                <span class="o">.</span><span class="na">build</span><span class="o">().</span><span class="na">inject</span><span class="o">(</span><span class="k">this</span><span class="o">);</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Then we can be use a custom test runner that provides a subclass of that application object declared in the Manifest.</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">EspressoTestRunner</span> <span class="kd">extends</span> <span class="n">AndroidJUnitRunner</span> <span class="o">{</span>
-</span><span class='line'>    <span class="nd">@Override</span>
-</span><span class='line'>    <span class="kd">public</span> <span class="n">Application</span> <span class="nf">newApplication</span><span class="o">(</span><span class="n">ClassLoader</span> <span class="n">cl</span><span class="o">,</span> <span class="n">String</span> <span class="n">className</span><span class="o">,</span> <span class="n">Context</span> <span class="n">context</span><span class="o">)</span> <span class="kd">throws</span>
-</span><span class='line'>            <span class="n">IllegalAccessException</span><span class="o">,</span> <span class="n">ClassNotFoundException</span><span class="o">,</span> <span class="n">InstantiationException</span> <span class="o">{</span>
-</span><span class='line'>        <span class="k">return</span> <span class="kd">super</span><span class="o">.</span><span class="na">newApplication</span><span class="o">(</span><span class="n">cl</span><span class="o">,</span> <span class="n">TestMvpApplication</span><span class="o">.</span><span class="na">class</span><span class="o">.</span><span class="na">getName</span><span class="o">(),</span> <span class="n">context</span><span class="o">);</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>and declare it in our gradle file</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='groovy'><span class='line'><span class="n">android</span> <span class="o">{</span>
-</span><span class='line'>    <span class="o">...</span>
-</span><span class='line'>    <span class="n">defaultConfig</span> <span class="o">{</span>
-</span><span class='line'>  <span class="o">...</span>
-</span><span class='line'>        <span class="n">testInstrumentationRunner</span> <span class="s1">&#39;com.whiterabbit.windlocator.EspressoTestRunner&#39;</span>
-</span><span class='line'>  <span class="o">...</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>The Application object (and its test variant) is the one responsible of providing all the modules, so by subclassing it we can drive what is provided to be injected:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestMvpApplication</span> <span class="kd">extends</span> <span class="n">MvpApplication</span> <span class="o">{</span>
-</span><span class='line'>    <span class="kd">private</span> <span class="n">MainModule</span> <span class="n">mMainModule</span><span class="o">;</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c1">// By usint this two method we can drive whatever module we want during the tests</span>
-</span><span class='line'>    <span class="c1">// (and with that, drive what classes inject)</span>
-</span><span class='line'>    <span class="nd">@Override</span>
-</span><span class='line'>    <span class="kd">public</span> <span class="n">MainModule</span> <span class="nf">getMainModule</span><span class="o">(</span><span class="n">MainView</span> <span class="n">view</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>        <span class="k">return</span> <span class="n">mMainModule</span><span class="o">;</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setMainModule</span><span class="o">(</span><span class="n">MainModule</span> <span class="n">m</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>        <span class="n">mMainModule</span> <span class="o">=</span> <span class="n">m</span><span class="o">;</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>This is what the setup method would look like:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="nd">@Before</span>
-</span><span class='line'><span class="kd">public</span> <span class="kt">void</span> <span class="nf">setUp</span><span class="o">()</span> <span class="kd">throws</span> <span class="n">Exception</span> <span class="o">{</span>
-</span><span class='line'>    <span class="c1">// a mock module with the mock presenter to be injected..</span>
-</span><span class='line'>    <span class="n">MainModule</span> <span class="n">m</span> <span class="o">=</span> <span class="n">mock</span><span class="o">(</span><span class="n">MainModule</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
-</span><span class='line'>    <span class="n">mMockPresenter</span> <span class="o">=</span> <span class="n">mock</span><span class="o">(</span><span class="n">MainPresenter</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="n">when</span><span class="o">(</span><span class="n">m</span><span class="o">.</span><span class="na">provideMainView</span><span class="o">()).</span><span class="na">thenReturn</span><span class="o">(</span><span class="n">mock</span><span class="o">(</span><span class="n">MainView</span><span class="o">.</span><span class="na">class</span><span class="o">));</span> <span class="c1">// this is needed to fool dagger</span>
-</span><span class='line'>    <span class="n">when</span><span class="o">(</span><span class="n">m</span><span class="o">.</span><span class="na">provideMainPresenter</span><span class="o">(</span><span class="n">any</span><span class="o">(</span><span class="n">MainView</span><span class="o">.</span><span class="na">class</span><span class="o">),</span> <span class="n">any</span><span class="o">(</span><span class="n">KeyValueStorage</span><span class="o">.</span><span class="na">class</span><span class="o">)))</span>
-</span><span class='line'>      <span class="o">.</span><span class="na">thenReturn</span><span class="o">(</span><span class="n">mMockPresenter</span><span class="o">);</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="n">Instrumentation</span> <span class="n">instrumentation</span> <span class="o">=</span> <span class="n">InstrumentationRegistry</span><span class="o">.</span><span class="na">getInstrumentation</span><span class="o">();</span>
-</span><span class='line'>    <span class="n">TestMvpApplication</span> <span class="n">app</span>
-</span><span class='line'>      <span class="o">=</span> <span class="o">(</span><span class="n">TestMvpApplication</span><span class="o">)</span> <span class="n">instrumentation</span><span class="o">.</span><span class="na">getTargetContext</span><span class="o">().</span><span class="na">getApplicationContext</span><span class="o">();</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c1">// forced to the application object</span>
-</span><span class='line'>    <span class="n">app</span><span class="o">.</span><span class="na">setMainModule</span><span class="o">(</span><span class="n">m</span><span class="o">);</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>A mock module is needed to provide a mock presenter. Then the mock module is passed to the application object.
-Please note that in order to have Dagger 2 working, the mock module needs to provide a view instance (even a mock one) that will never be used.</p>
-
-<p>Now we can finally write a test method:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="nd">@Test</span>
-</span><span class='line'><span class="kd">public</span> <span class="kt">void</span> <span class="nf">testButtonClick</span><span class="o">()</span> <span class="o">{</span>
-</span><span class='line'>    <span class="n">activity</span><span class="o">.</span><span class="na">launchActivity</span><span class="o">(</span><span class="k">new</span> <span class="nf">Intent</span><span class="o">());</span>
-</span><span class='line'>    <span class="n">onView</span><span class="o">(</span><span class="n">withId</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">id</span><span class="o">.</span><span class="na">main_button</span><span class="o">)).</span><span class="na">perform</span><span class="o">(</span><span class="n">click</span><span class="o">());</span>
-</span><span class='line'>    <span class="n">verify</span><span class="o">(</span><span class="n">mMockPresenter</span><span class="o">).</span><span class="na">onButtonClicked</span><span class="o">();</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>After all this struggling, we can &ldquo;just test the view&rdquo;, meaning that we do not need to test if the mocked rest end point was called, nor if the storage was asked to write something.
-<strong>We just test the view against the presenter interface</strong></p>
-
-<p>One piece is still missing: what if we want to test the behaviour of the view when one of its methods gets called by the presenter? In the example, the view interface offers a method to set the text displayed.</p>
-
-<p>Again, one could naively think that it would be sufficient to call the method with something like</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">activity</span><span class="o">.</span><span class="na">getActivity</span><span class="o">().</span><span class="na">showValue</span><span class="o">(</span><span class="s">&quot;23&quot;</span><span class="o">);</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>The truth is, espresso tests run in a thread different from the UI thread. By doing that, it would result in</p>
-
-<pre><code>Only the original thread that created a view hierarchy can touch its views
-</code></pre>
-
-<p>One way to overcome this, is to call the methods in the ui thread</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">activity</span><span class="o">.</span><span class="na">getActivity</span><span class="o">().</span><span class="na">runOnUiThread</span><span class="o">(</span><span class="k">new</span> <span class="nf">Runnable</span><span class="o">()</span> <span class="o">{</span> <span class="c1">// fancy using a lambda here?</span>
-</span><span class='line'>                                                 <span class="nd">@Override</span>
-</span><span class='line'>                                                 <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">()</span> <span class="o">{</span>
-</span><span class='line'>                                                     <span class="n">activity</span><span class="o">.</span><span class="na">getActivity</span><span class="o">().</span><span class="na">showValue</span><span class="o">(</span><span class="s">&quot;23&quot;</span><span class="o">);</span>
-</span><span class='line'>                                                 <span class="o">}</span>
-</span><span class='line'>                                             <span class="o">});</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h4>Why I did not use the <code>@UiThreadTest</code> annotation?</h4>
-
-<p>Simply because it would have ended with another exception since startactivity cannot be called directly from the ui thread.</p>
-
-<h3>To sum up</h3>
-
-<ul>
-<li>Make the application provide the Module that provides the presenter(s)</li>
-<li>Change the testrunner in order to provide a different application</li>
-<li>Let the &ldquo;test&rdquo; application provide a mock module that provides a mock presenter</li>
-<li>Test!</li>
-</ul>
-
-
-<h2>Conclusion</h2>
-
-<p>The Mvp pattern isolates the view (which needs to be as dumb as it can) from the presenter.
-By instrumenting the view with a mocked presenter, you will drain those tests from any kind of logic we expect to be in the presenter. You just test that the interface between the presenter and the view is working as expected.</p>
-
-<p>By doing this, you can focus on testing the business logic inside the presenter with vanilla unit tests. Your tdd loop will definetely be faster.</p>
-
-<p><em>A big thank as always to my proofreaders Fabio Collini &amp; Riccardo Ciovati</em></p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2016/06/20/how-to-a-timer/">Reactive Android Timers, Countdowns and Lifecycle</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2016-06-20T23:06:59+02:00'><span class='date'><span class='date-month'>Jun</span> <span class='date-day'>20</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>11:06 pm</span></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h4>Ok, I must confess</h4>
-
-<p>the title is built to draw people&rsquo;s attention, because you know, nowdays everything is done in a reactive fashion. RxJava is superhelpful, but <strong>if we forget the ecosystem our apps are running into</strong>, we risk to forget the <em>proper</em> way to implement certain tasks in Android.</p>
-
-<h4>Why do we need a whole post about timers?</h4>
-
-<p>Recently, I had to implement a countdown timer in Android.</p>
-
-<p>If you google for <del>code to cut and paste</del> <em>inspiration</em>, you&rsquo;ll get a lot of results like:</p>
-
-<ul>
-<li>use a <a href="https://developer.android.com/reference/android/os/CountDownTimer.html">countdown timer</a></li>
-<li>use a dyi implementation using handlers</li>
-<li>be <em>a la mode</em> and use <a href="http://reactivex.io/documentation/operators/timer.html">RxJava&rsquo;s timer</a></li>
-</ul>
-
-
-<p>There is even a <a href="https://androidcookbook.com/Recipe.seam;jsessionid=DF53064E03C7505C4EBF727E56E0728E?recipeId=1205">cookbook recipe</a> that shows how to implement it.</p>
-
-<p>That might work if you had to measure the cooking time of a <a href="http://www.bettycrocker.com/how-to/tipslibrary/charts-timetables-measuring/timetable-cooking-pasta">portion of capellini</a> (the fastest cooking pasta I could think of).</p>
-
-<h3>But wait, what if I had to bake a plum cake?</h3>
-
-<p>Baking a plum cake takes longer than an hour. All the solutions I just mentioned rely on the fact that your application is running <strong>for the whole lenght of the timer</strong>.</p>
-
-<p>This could be acceptable in the desktop / server world, but it&rsquo;s far from acceptable in the Android context: if the app goes in background because the user wants to check his email, answer to a phone call or play a game, <strong>the operating system is likely to reclaim the resources and shutdown the app itself</strong>. In any case, the device will turn off after a short time. If you think that using a <a href="https://developer.android.com/training/scheduling/wakelock.html">wakelock</a> will solve the problem&hellip; it will, but the user won&rsquo;t be happy of all the battery wasted by the screen.</p>
-
-<h3>I can use a foreground service!</h3>
-
-<p>So one can start looking for a way to keep the app running in background. A <a href="https://developer.android.com/guide/components/services.html">Service</a> is an Android component made specifically for this purpose.</p>
-
-<p>By using a Service with the <a href="https://developer.android.com/guide/components/services.html#Foreground">startForeground</a> option, your app will stay alive through the whole lenght of the timer. When the timer is finished, it just has to throw a notification and a broadcast so the user will know that the timer expired.</p>
-
-<p><img class="center" src="/images/soareyoutelling_timer.jpg" width="300"></p>
-
-<p>This approach will work, but it has a drawback. Your app (or let&rsquo;s say at least the service) needs to be running for the whole length of the timer. This is a waste of memory and cpu.</p>
-
-<h3>The right way</h3>
-
-<p>The right way is to take advantage of what the OS offers. The idea here is to run the countdown timer as long as the app is foregrounded, showing the progress to the user <em>one second at the time</em>, but set a system alarm whenever the app goes in background. Whenever the user gets back to the app, you&rsquo;ll cancel the system alarm and restart the timer from where it is supposed to start.</p>
-
-<p>Here what it would look like when the user gets back to the app before the timer is expired (on the left) and when the timer expires while the app is in background (on the right):</p>
-
-<p><img src="/images/timer_resume.png" width="300"> <img src="/images/timer_pause.png" width="300"></p>
-
-<p>From the user&rsquo;s perspective, the timer is running even if the app is in background, because whenever he returns to the app he sees what he is expecting to see (the time passed). On the other hand, if the timer expires when the app is in background, a friendly notification will remind him that he has to take the plum cake out of the oven.</p>
-
-<p>Inside the app however, the timer will run <strong>only when the app is in foreground</strong> and has all the rights to consume cpu because the user is using the app.</p>
-
-<h3>Some code</h3>
-
-<p>A simplified version of what I am describing can be found in my <a href="https://github.com/fedepaol/AndroidTimerSample">github repo</a></p>
-
-<p>There are three things you have to take into account:</p>
-
-<h2>Running the timer in the app</h2>
-
-<p>This is the easiest part: you can use a countdown timer, a handler, rxjava or whatever you want to <del>copy and paste</del> take inspiration from.
-In my example I&rsquo;ll use a countdown timer since it&rsquo;s simple to use and serves the purpouse.</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">private</span> <span class="kt">void</span> <span class="nf">startTimer</span><span class="o">()</span> <span class="o">{</span>
-</span><span class='line'>    <span class="n">mCountDownTimer</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">CountDownTimer</span><span class="o">(</span><span class="n">mTimeToGo</span> <span class="o">*</span> <span class="mi">1000</span><span class="o">,</span> <span class="mi">1000</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onTick</span><span class="o">(</span><span class="kt">long</span> <span class="n">millisUntilFinished</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>  <span class="n">mTimeToGo</span> <span class="o">-=</span> <span class="mi">1000</span><span class="o">;</span>
-</span><span class='line'>  <span class="n">updateTimeUi</span><span class="o">();</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onFinish</span><span class="o">()</span> <span class="o">{</span>
-</span><span class='line'>  <span class="n">mState</span> <span class="o">=</span> <span class="n">TimerState</span><span class="o">.</span><span class="na">STOPPED</span><span class="o">;</span>
-</span><span class='line'>  <span class="n">onTimerFinish</span><span class="o">();</span>
-</span><span class='line'>  <span class="n">updateTimeUi</span><span class="o">();</span>
-</span><span class='line'><span class="o">}</span>
-</span><span class='line'>    <span class="o">}.</span><span class="na">start</span><span class="o">();</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>Remembering when the timer was started / how long it was supposed to run</h2>
-
-<p>This is the trickiest part.
-In the example I store the starting time inside the shared preferences storage. It will persist even if the app is killed.</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">mPreferences</span><span class="o">.</span><span class="na">setStartedTime</span><span class="o">(</span><span class="n">getNow</span><span class="o">());</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>That value is used when resuming the app in order to check how long the timer has to run (or if the time did expire):</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">private</span> <span class="kt">void</span> <span class="nf">initTimer</span><span class="o">()</span> <span class="o">{</span>
-</span><span class='line'>    <span class="kt">long</span> <span class="n">startTime</span> <span class="o">=</span> <span class="n">mPreferences</span><span class="o">.</span><span class="na">getStartedTime</span><span class="o">();</span>
-</span><span class='line'>    <span class="n">mTimeToGo</span> <span class="o">=</span> <span class="o">(</span><span class="n">TIMER_LENGHT</span> <span class="o">-</span> <span class="o">(</span><span class="n">getNow</span><span class="o">()</span> <span class="o">-</span> <span class="n">startTime</span><span class="o">));</span>
-</span><span class='line'>    <span class="k">if</span> <span class="o">(</span><span class="n">mTimeToGo</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span> <span class="c1">// TIMER EXPIRED</span>
-</span><span class='line'>        <span class="n">mTimeToGo</span> <span class="o">=</span> <span class="n">TIMER_LENGHT</span><span class="o">;</span>
-</span><span class='line'>        <span class="n">onTimerFinish</span><span class="o">();</span>
-</span><span class='line'>    <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
-</span><span class='line'>        <span class="n">startTimer</span><span class="o">();</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>The app tries to retrieve the start time value. If there still is  some time to run, the countdown restarts for the remaining length of time. Otherwise the timer is reset and the user is notified of the timer expiration.</p>
-
-<p>Please note that this is a ultra simplified version that assumes that <em>the timer is running</em>. The <a href="https://github.com/fedepaol/AndroidTimerSample">github sample</a> checks also if the timer was started or not.</p>
-
-<h2>Handling the alarm</h2>
-
-<p>This is simple. You should set the alarm that triggers a broadcast receiver through the alarm manager:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="nd">@Override</span>
-</span><span class='line'><span class="kd">protected</span> <span class="kt">void</span> <span class="nf">onPause</span><span class="o">()</span> <span class="o">{</span>
-</span><span class='line'>    <span class="kd">super</span><span class="o">.</span><span class="na">onPause</span><span class="o">();</span>
-</span><span class='line'>    <span class="kt">long</span> <span class="n">wakeUpTime</span> <span class="o">=</span> <span class="o">(</span><span class="n">mPreferences</span><span class="o">.</span><span class="na">getStartedTime</span><span class="o">()</span> <span class="o">+</span> <span class="n">TIMER_LENGHT</span><span class="o">)</span> <span class="o">*</span> <span class="mi">1000</span><span class="o">;</span>
-</span><span class='line'>    <span class="n">AlarmManager</span> <span class="n">am</span> <span class="o">=</span> <span class="o">(</span><span class="n">AlarmManager</span><span class="o">)</span> <span class="n">getSystemService</span><span class="o">(</span><span class="n">Context</span><span class="o">.</span><span class="na">ALARM_SERVICE</span><span class="o">);</span>
-</span><span class='line'>    <span class="n">Intent</span> <span class="n">intent</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">Intent</span><span class="o">(</span><span class="k">this</span><span class="o">,</span> <span class="n">TimerExpiredReceiver</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
-</span><span class='line'>    <span class="n">PendingIntent</span> <span class="n">sender</span> <span class="o">=</span> <span class="n">PendingIntent</span><span class="o">.</span><span class="na">getBroadcast</span><span class="o">(</span><span class="k">this</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="n">intent</span><span class="o">,</span> <span class="n">PendingIntent</span><span class="o">.</span><span class="na">FLAG_CANCEL_CURRENT</span><span class="o">);</span>
-</span><span class='line'>    <span class="k">if</span> <span class="o">(</span><span class="n">Build</span><span class="o">.</span><span class="na">VERSION</span><span class="o">.</span><span class="na">SDK_INT</span> <span class="o">&gt;=</span> <span class="n">Build</span><span class="o">.</span><span class="na">VERSION_CODES</span><span class="o">.</span><span class="na">LOLLIPOP</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>        <span class="n">am</span><span class="o">.</span><span class="na">setAlarmClock</span><span class="o">(</span><span class="k">new</span> <span class="n">AlarmManager</span><span class="o">.</span><span class="na">AlarmClockInfo</span><span class="o">(</span><span class="n">wakeUpTime</span><span class="o">,</span> <span class="n">sender</span><span class="o">),</span> <span class="n">sender</span><span class="o">);</span>
-</span><span class='line'>    <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
-</span><span class='line'>        <span class="n">am</span><span class="o">.</span><span class="na">set</span><span class="o">(</span><span class="n">AlarmManager</span><span class="o">.</span><span class="na">RTC_WAKEUP</span><span class="o">,</span> <span class="n">wakeUpTime</span><span class="o">,</span> <span class="n">sender</span><span class="o">);</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>and cancel it in onResume:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="nd">@Override</span>
-</span><span class='line'><span class="kd">protected</span> <span class="kt">void</span> <span class="nf">onResume</span><span class="o">()</span> <span class="o">{</span>
-</span><span class='line'>    <span class="kd">super</span><span class="o">.</span><span class="na">onResume</span><span class="o">();</span>
-</span><span class='line'>    <span class="n">Intent</span> <span class="n">intent</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">Intent</span><span class="o">(</span><span class="k">this</span><span class="o">,</span> <span class="n">TimerExpiredReceiver</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
-</span><span class='line'>    <span class="n">PendingIntent</span> <span class="n">sender</span> <span class="o">=</span> <span class="n">PendingIntent</span><span class="o">.</span><span class="na">getBroadcast</span><span class="o">(</span><span class="k">this</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="n">intent</span><span class="o">,</span> <span class="n">PendingIntent</span><span class="o">.</span><span class="na">FLAG_CANCEL_CURRENT</span><span class="o">);</span>
-</span><span class='line'>    <span class="n">AlarmManager</span> <span class="n">am</span> <span class="o">=</span> <span class="o">(</span><span class="n">AlarmManager</span><span class="o">)</span> <span class="n">getSystemService</span><span class="o">(</span><span class="n">Context</span><span class="o">.</span><span class="na">ALARM_SERVICE</span><span class="o">);</span>
-</span><span class='line'>    <span class="n">am</span><span class="o">.</span><span class="na">cancel</span><span class="o">(</span><span class="n">sender</span><span class="o">);</span>
-</span><span class='line'>   <span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Launching a system notification that brings the user back to the app when clicked is trivial. You can check the <a href="https://github.com/fedepaol/AndroidTimerSample">sample on github</a>.</p>
-
-<h2>Conclusion</h2>
-
-<p>What I wrote today may sound obvious to a lot of experienced developers.</p>
-
-<p>However, I thought it was a post worth writing since it&rsquo;s a good example of how you should always remember the ecosystem your app is being run into.
-If you forget this and think that <strong>your app is the most important app the user has in his phone</strong>, you&rsquo;ll face some unexpected behaviours (the app gets killed) or you will piss the user off (the app needs to be active for the whole length of the timer).</p>
-
-<p>Thanks as always to Fabio Collini and Riccardo Ciovati for proofreading.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2016/04/20/happines-is-relative/">Happiness Is (a) Relative (Layout)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2016-04-20T06:34:46+02:00'><span class='date'><span class='date-month'>Apr</span> <span class='date-day'>20</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>6:34 am</span></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h4>Using relative layout is bad</h4>
-
-<p>.. or at least they say so.
-The truth is, it is <em>relatively</em> easy to build complex layouts using RelativeLayouts, but this ease of use comes with a cost: in order to provide that kind of flexibility, RelativeLayout does two measurement passes.</p>
-
-<p>There are a lot of talks and <a href="https://medium.com/google-developers/developing-for-android-iii-2efc140167fd#.wpqgdu3xs">posts</a> explaining that if you have nested relative layouts, you&rsquo;ll end up with many measurement passes that will consume your cpu and will contribute to miss the dreaded 16 ms threshold. The higher the RelativeLayouts are placed in your view hierarchy, the more will be the number of measurements.</p>
-
-<p><strong>It&rsquo;s easier than you think</strong>: let&rsquo;s pretend you have a RelativeLayout as the root of your activity view (because hey, it&rsquo;s what Android Studio sets as default from the BlankActivity template).</p>
-
-<p>Then you have a fragment, and for some reason you have a list you want to place aside a button and you need a RelativeLayout over there.</p>
-
-<p>Finally, you&rsquo;ll have to place an image and a text inside the list elements, isn&rsquo;t there an easier way than RelativeLayout? (Actually, <a href="http://antonioleiva.com/textview_power_drawables/">there is and it&rsquo;s much more efficient</a>)</p>
-
-<p><img class="center" src="/images/relative_hierarchy.png" width="300"></p>
-
-<p>What will happen here is that with this unharmful scenario the <code>onMeasure()</code> method of each children of the list <strong>will be called 8 times</strong> each frame.</p>
-
-<h3>But why does RelativeLayout need two passes?</h3>
-
-<p>Given that Android is an open source framework, I could satisfy my curiosity by digging into the source code. Here I will try to provide a high level explanation of my understanding on how it works, without going too much into the details.</p>
-
-<p>Let&rsquo;s pretend you want four children (A, B, C, D) for your layout, and the rules are the following:</p>
-
-<ul>
-<li>A is above C</li>
-<li>B is to right of A</li>
-<li>D is below B and its right margin is aligned to B</li>
-<li>C is to left of D and its top is aligned to D</li>
-</ul>
-
-
-<p><img class="center" src="/images/relative_sample.png" width="200"></p>
-
-<p>The concept behind RelativeLayout is fairly simple. <strong>In order to measure (and place) a certain child, you need to measure (and place) all the views that child depends on</strong> in term of relationship. For this reason, the first thing RelativeLayout does is to build a graph of dependencies between the children. Those dependencies determine the order in which the children are measured (i.e. first the views with no dependencies, then the views that depend only from the root, etc).</p>
-
-<p>This explains the need for two measurement passes: <strong>the order the views need to be measured horizontally can be different from the order the views need to be measured vertically</strong>. In my example, A does not have any <em>horizontal</em> dependency but <em>vertically</em> it depends on the size and the position of C.</p>
-
-<p>In the example, the sequence of measurement are:</p>
-
-<p>Horizontal dimension:
-A -> B -> D -> C</p>
-
-<p><img src="/images/relative_horizontal.png" width="800"></p>
-
-<p>Note that given the vertical size is not calculated yet, the views are temporarly assigned with the height of the parent view while measuring the horizontal sizes.</p>
-
-<p>Vertical dimension:
-B -> D -> C -> A</p>
-
-<p><img src="/images/relative_vertical.png" width="800"></p>
-
-<p>Other than these two passes, RelativeLayout can also loop its children up to three other times to finalize their placement (for example for those that are aligned to the bottom of the parent in case of wrap content).</p>
-
-<p>The position of the views is calculated during the measurement double pass. For this reason the <code>onLayout()</code> implementation is pretty trivial.</p>
-
-<p>Finally, the dependency lists are cached, but those cached elements are invalidated whenever a <code>requestLayout()</code> happens. This, together with the fact that <code>requestLayout()</code> goes up to the root and is called on all the children is another reason for not having deep view hierarchy especially with RelativeLayouts.</p>
-
-<h3>Optimizing RelativeLayout</h3>
-
-<p>First of all, remember that you don&rsquo;t always need to. If you are in the early stage of the development or under strict time constraints and you prefer the simplicity of use of <code>RelativeLayout</code> against performance then use it, <strong>just be aware of the implications</strong>. This small piece of technical debt might come back in the future to claim its price.</p>
-
-<p><strong>Measure twice and cut once</strong> (but remember to do that from time to time). Hierarchy Viewer is a convenient way to understand if your hierarchy is too complex and to see at glance what&rsquo;s costing too much:</p>
-
-<p><img class="center" src="/images/hierarchy.png" width="700"></p>
-
-<p><a href="https://github.com/lucasr/probe">Probe</a> by Lucas Rocha is also an effective tool to check if your views are getting measured too many times.</p>
-
-<p>After that, if you realize that your view groups suffer from performance issues, the most efficient way to optimize is to write a custom viewgroup. It might look scary at first, but it&rsquo;s just a matter of measuring and placing boxes <strong>knowing exactly where you want to place them and how their container looks like</strong>. This will flat your hierarchy and make it a lot more efficient.</p>
-
-<p>I don&rsquo;t want to write (yet another) tutorial on building custom viewgroups here since it will double the lenght of this post, but some good starting points are:</p>
-
-<ul>
-<li><a href="https://newcircle.com/s/post/1663/tutorial_enhancing_android_ui_with_custom_views_dave_smith_video">Dave Smith&rsquo;s post on custom views</a></li>
-<li><a href="https://sriramramani.wordpress.com/2015/05/06/custom-viewgroups/">Sriram Ramani&rsquo;s post on custom viewgroups</a></li>
-<li><a href="https://www.youtube.com/watch?v=NYtB6mlu7vA">This talk from google io 2013</a></li>
-<li><a href="https://www.youtube.com/watch?v=-xAdDqwaWJk">Loving lean layouts from Droidcon SF</a></li>
-</ul>
-
-
-<h3>What&rsquo;s the take home lesson</h3>
-
-<p>RelativeLayout is an awesome piece of software. It makes it super easy to describe complex scenarios without needing to do nasty nested linear layouts.</p>
-
-<p><strong>However</strong> from today, before placing it inside a view I will start thinking not only about the two passes, but also to all the hard work this complex piece of software needs to do behind the scene in order to offer me the flexibility I am used to.</p>
-
-<p>The two measurement passes can be the biggest source of problems because of the risk of exponential explosion, but <strong>other than that there are a lot of computation and additional data structures involved</strong> in building (and maintain) those dependency lists, and a good amount of extra loops through the children needed to place them correctly.</p>
-
-<p>Thanks to Riccardo Ciovati and Fabio Collini for proofreading this post.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2016/01/01/cached-rest-requests-with-rxjava/">Subscribe It While It's Hot: Cached Rest Requests With RxJava</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2016-01-01T17:54:21+01:00'><span class='date'><span class='date-month'>Jan</span> <span class='date-day'>1</span><span class='date-suffix'>st</span>, <span class='date-year'>2016</span></span> <span class='time'>5:54 pm</span></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h4>Disclaimer:</h4>
-
-<p>In this post I am trying to cover a proper approach to a common problem. I am still in the process of wrapping my head around RxJava so what I write here might not be the best way to solve the problem.</p>
-
-<h1>Cached requests with RxJava</h1>
-
-<p>Lately I&rsquo;ve been trying to develop a rest backed app using RxJava. I must admit that once you get in the proper mental mood, RxJava almost feels like cheating. Everything looks cleaner, multiple requests can be composed and manipulated easily, the StrictMode gets satisfied by observing on the ui thread and subscribing on a different thread, and all the nice things that can be read about how cool is RxJava with Android.
-What I could not find easily, was how to store the result of a request and be sure that even in case of no network, a cached content was available for the user, while still handling everything in a reactive fashion.</p>
-
-<h3>Caching vs non caching</h3>
-
-<p>Going straight from rest result to the UI is appropriate in many cases, for example when displaying the result of a search whose arguments are not predictable (think about Ebay, or Amazon where the user is looking for something different every time).</p>
-
-<p><em>However</em>, there are cases when the results fetched earlier are still significant and displaying them can improve the user experience significantly, compared to a spinning wheel or a white page. Those cases include your twitter feed, a local weather forecast that was fetched just 5 minutes before, or the list of the github repos of a given user.</p>
-
-<p>Here you can see the difference between a non cached version and a cached version of the same activity:</p>
-
-<p><img src="/images/uncached.gif" width="300">      <img src="/images/cached.gif" width="300"></p>
-
-<p>For this reason I tried to figure out what could have been a clean way to cache the results of a request while keeping the flow in a reactive fashion.</p>
-
-<h3>The storage as the unique source of the truth</h3>
-
-<h4>All reactive</h4>
-
-<p>If we want to cache the data while keeping everything inside the same subscription, things get a bit messy. The result of the request is thrown at the UI and the response is also stored in the storage. The UI subscribes from the storage too but checks which result came first and if the data is too old.</p>
-
-<p><img src="/images/messy.jpg" width="500"></p>
-
-<h4>Cached</h4>
-
-<p>In this <em>hybrid</em> variant, the UI subscribes only to the storage, and a facade class wraps the storage and the subscription to the retrofit client that feeds the storage. Once the storage is filled with new data, the UI thread is automatically notified of every change.
-<img src="/images/clean.jpg" width="500"></p>
-
-<p>In this scenario the observable acts as a <em>hot</em> observable, the first time it gets subscribed it emits the content of the storage, and any other change it might happen to it.</p>
-
-<h3>Talk is cheap, show me the code</h3>
-
-<p>A working example of the following code can be found <a href="https://github.com/fedepaol/RxRestSample">in my github repo here</a>
-To write this sample, I started from the abused Github apis which seems to power the 99% of the rest related examples. Sorry about that.</p>
-
-<p>First there is the storage. I wrapped a SQLite helper (which I happily generated with <a href="https://github.com/fedepaol/Android-sql-lite-helper">my handy script</a>) with a class that contains a <a href="http://reactivex.io/RxJava/javadoc/rx/subjects/PublishSubject.html">PublishSubject</a> which can be subscribed to and which we will notify when the insertion methods are called:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-</pre></td><td class='code'><pre><code class='Java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">ObservableRepoDb</span> <span class="o">{</span>
-</span><span class='line'>    <span class="kd">private</span> <span class="n">PublishSubject</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">Repo</span><span class="o">&gt;&gt;</span> <span class="n">mSubject</span> <span class="o">=</span> <span class="n">PublishSubject</span><span class="o">.</span><span class="na">create</span><span class="o">();</span>
-</span><span class='line'>    <span class="kd">private</span> <span class="n">RepoDbHelper</span> <span class="n">mDbHelper</span><span class="o">;</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="kd">private</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">Repo</span><span class="o">&gt;</span> <span class="nf">getAllReposFromDb</span><span class="o">()</span> <span class="o">{</span>
-</span><span class='line'>        <span class="n">List</span><span class="o">&lt;</span><span class="n">Repo</span><span class="o">&gt;</span> <span class="n">repos</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ArrayList</span><span class="o">&lt;&gt;();</span>
-</span><span class='line'>        <span class="c1">// .. performs the query and fills the result</span>
-</span><span class='line'>        <span class="k">return</span> <span class="n">repos</span><span class="o">;</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="kd">public</span> <span class="n">Observable</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">Repo</span><span class="o">&gt;&gt;</span> <span class="nf">getObservable</span><span class="o">()</span> <span class="o">{</span>
-</span><span class='line'>        <span class="n">Observable</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">Repo</span><span class="o">&gt;&gt;</span> <span class="n">firstTimeObservable</span> <span class="o">=</span>
-</span><span class='line'>                <span class="n">Observable</span><span class="o">.</span><span class="na">fromCallable</span><span class="o">(</span><span class="k">this</span><span class="o">::</span><span class="n">getAllReposFromDb</span><span class="o">);</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="k">return</span> <span class="n">firstTimeObservable</span><span class="o">.</span><span class="na">concatWith</span><span class="o">(</span><span class="n">mSubject</span><span class="o">);</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">insertRepo</span><span class="o">(</span><span class="n">Repo</span> <span class="n">r</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>        <span class="c1">// ...</span>
-</span><span class='line'>        <span class="c1">// performs the insertion on the SQLite helper</span>
-</span><span class='line'>        <span class="c1">// ...</span>
-</span><span class='line'>        <span class="n">List</span><span class="o">&lt;</span><span class="n">Repo</span><span class="o">&gt;</span> <span class="n">result</span> <span class="o">=</span> <span class="n">getAllReposFromDb</span><span class="o">();</span>
-</span><span class='line'>        <span class="n">mSubject</span><span class="o">.</span><span class="na">onNext</span><span class="o">(</span><span class="n">result</span><span class="o">);</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>What we have here is the first piece of the puzzle: a storage that can be subscribed to. The concatenation is needed because we want it to emit the content of the storage as soon as it gets subscribed.</p>
-
-<p>Then there is the facade class, where we get the observable from and to which we start a new update:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-</pre></td><td class='code'><pre><code class='Java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">ObservableGithubRepos</span> <span class="o">{</span>
-</span><span class='line'>    <span class="n">ObservableRepoDb</span> <span class="n">mDatabase</span><span class="o">;</span>
-</span><span class='line'>    <span class="kd">private</span> <span class="n">BehaviorSubject</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span> <span class="n">mRestSubject</span><span class="o">;</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c1">// ...</span>
-</span><span class='line'>    <span class="kd">public</span> <span class="n">Observable</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">Repo</span><span class="o">&gt;&gt;</span> <span class="nf">getDbObservable</span><span class="o">()</span> <span class="o">{</span>
-</span><span class='line'>        <span class="k">return</span> <span class="n">mDatabase</span><span class="o">.</span><span class="na">getObservable</span><span class="o">();</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">updateRepo</span><span class="o">(</span><span class="n">String</span> <span class="n">userName</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>        <span class="n">Observable</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">Repo</span><span class="o">&gt;&gt;</span> <span class="n">observable</span> <span class="o">=</span> <span class="n">mClient</span><span class="o">.</span><span class="na">getRepos</span><span class="o">(</span><span class="n">userName</span><span class="o">);</span>
-</span><span class='line'>        <span class="n">observable</span><span class="o">.</span><span class="na">subscribeOn</span><span class="o">(</span><span class="n">Schedulers</span><span class="o">.</span><span class="na">io</span><span class="o">())</span>
-</span><span class='line'>                  <span class="o">.</span><span class="na">observeOn</span><span class="o">(</span><span class="n">Schedulers</span><span class="o">.</span><span class="na">io</span><span class="o">())</span>
-</span><span class='line'>                  <span class="o">.</span><span class="na">subscribe</span><span class="o">(</span><span class="n">l</span> <span class="o">-&gt;</span> <span class="n">mDatabase</span><span class="o">.</span><span class="na">insertRepoList</span><span class="o">(</span><span class="n">l</span><span class="o">));</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Note that everything happens far from the UI thread. This is because we are going to subscribe to the database observable as the unique source of truth.</p>
-
-<p>Now, given that the observable is now <em>hot</em>, we can&rsquo;t listen for its <em>onComplete</em> in order to stop any progress indicators we might put in place.
-What we need is another subject that can be bound to the update request, so here it is the new facade class:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-</pre></td><td class='code'><pre><code class='Java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">ObservableGithubRepos</span> <span class="o">{</span>
-</span><span class='line'>    <span class="c1">// ...</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="kd">public</span> <span class="n">Observable</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">Repo</span><span class="o">&gt;&gt;</span> <span class="nf">getDbObservable</span><span class="o">()</span> <span class="o">{</span>
-</span><span class='line'>        <span class="k">return</span> <span class="n">mDatabase</span><span class="o">.</span><span class="na">getObservable</span><span class="o">();</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="kd">public</span> <span class="n">Observable</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span> <span class="nf">updateRepo</span><span class="o">(</span><span class="n">String</span> <span class="n">userName</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>        <span class="n">BehaviorSubject</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span> <span class="n">requestSubject</span> <span class="o">=</span> <span class="n">BehaviorSubject</span><span class="o">.</span><span class="na">create</span><span class="o">();</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="n">Observable</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">Repo</span><span class="o">&gt;&gt;</span> <span class="n">observable</span> <span class="o">=</span> <span class="n">mClient</span><span class="o">.</span><span class="na">getRepos</span><span class="o">(</span><span class="n">userName</span><span class="o">);</span>
-</span><span class='line'>        <span class="n">observable</span><span class="o">.</span><span class="na">subscribeOn</span><span class="o">(</span><span class="n">Schedulers</span><span class="o">.</span><span class="na">io</span><span class="o">())</span>
-</span><span class='line'>                  <span class="o">.</span><span class="na">observeOn</span><span class="o">(</span><span class="n">Schedulers</span><span class="o">.</span><span class="na">io</span><span class="o">())</span>
-</span><span class='line'>                  <span class="o">.</span><span class="na">subscribe</span><span class="o">(</span><span class="n">l</span> <span class="o">-&gt;</span> <span class="o">{</span>
-</span><span class='line'>                                    <span class="n">mDatabase</span><span class="o">.</span><span class="na">insertRepoList</span><span class="o">(</span><span class="n">l</span><span class="o">);</span>
-</span><span class='line'>                                    <span class="n">requestSubject</span><span class="o">.</span><span class="na">onNext</span><span class="o">(</span><span class="n">userName</span><span class="o">);},</span>
-</span><span class='line'>                             <span class="n">e</span> <span class="o">-&gt;</span> <span class="n">requestSubject</span><span class="o">.</span><span class="na">onError</span><span class="o">(</span><span class="n">e</span><span class="o">),</span>
-</span><span class='line'>                             <span class="o">()</span> <span class="o">-&gt;</span> <span class="n">requestSubject</span><span class="o">.</span><span class="na">onCompleted</span><span class="o">());</span>
-</span><span class='line'>        <span class="k">return</span> <span class="n">requestSubject</span><span class="o">;</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>In the UI client (activity or fragment) we&rsquo;ll need to subscribe to the storage in order to get the data and to the request observable in order to stop the progress indicators. An observable that emits the state of the pending request is returned every time an update is being requested.</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-</pre></td><td class='code'><pre><code class='Java'><span class='line'><span class="n">mObservable</span> <span class="o">=</span> <span class="n">mRepo</span><span class="o">.</span><span class="na">getDbObservable</span><span class="o">();</span>
-</span><span class='line'><span class="n">mProgressObservable</span> <span class="o">=</span> <span class="n">mRepo</span><span class="o">.</span><span class="na">getProgressObservable</span><span class="o">()</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">mObservable</span><span class="o">.</span><span class="na">subscribeOn</span><span class="o">(</span><span class="n">Schedulers</span><span class="o">.</span><span class="na">io</span><span class="o">())</span>
-</span><span class='line'>               <span class="o">.</span><span class="na">observeOn</span><span class="o">(</span><span class="n">AndroidSchedulers</span><span class="o">.</span><span class="na">mainThread</span><span class="o">()).</span><span class="na">subscribe</span><span class="o">(</span><span class="n">l</span> <span class="o">-&gt;</span> <span class="o">{</span>
-</span><span class='line'>                <span class="n">mAdapter</span><span class="o">.</span><span class="na">updateData</span><span class="o">(</span><span class="n">l</span><span class="o">);</span>
-</span><span class='line'>            <span class="o">});</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">Observable</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">Repo</span><span class="o">&gt;&gt;</span> <span class="n">progressObservable</span> <span class="o">=</span> <span class="n">mRepo</span><span class="o">.</span><span class="na">updateRepo</span><span class="o">(</span><span class="s">&quot;fedepaol&quot;</span><span class="o">);</span>
-</span><span class='line'><span class="n">progressObservable</span><span class="o">.</span><span class="na">subscribeOn</span><span class="o">(</span><span class="n">Schedulers</span><span class="o">.</span><span class="na">io</span><span class="o">())</span>
-</span><span class='line'>                       <span class="o">.</span><span class="na">observeOn</span><span class="o">(</span><span class="n">AndroidSchedulers</span><span class="o">.</span><span class="na">mainThread</span><span class="o">())</span>
-</span><span class='line'>                       <span class="o">.</span><span class="na">subscribe</span><span class="o">(</span><span class="n">s</span> <span class="o">-&gt;</span> <span class="o">{},</span>
-</span><span class='line'>                                  <span class="n">e</span> <span class="o">-&gt;</span> <span class="o">{</span> <span class="n">Log</span><span class="o">.</span><span class="na">d</span><span class="o">(</span><span class="s">&quot;RX&quot;</span><span class="o">,</span> <span class="s">&quot;There has been an error&quot;</span><span class="o">);</span>
-</span><span class='line'>                                        <span class="n">mSwipeLayout</span><span class="o">.</span><span class="na">setRefreshing</span><span class="o">(</span><span class="kc">false</span><span class="o">);</span>
-</span><span class='line'>                                  <span class="o">},</span>
-</span><span class='line'>                                  <span class="o">()</span> <span class="o">-&gt;</span> <span class="n">mSwipeLayout</span><span class="o">.</span><span class="na">setRefreshing</span><span class="o">(</span><span class="kc">false</span><span class="o">));</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Please remember that the DbObservable is a hot one, so every time a call to updateRepo happens, the db will be fed with the result of the query and the ui will get subsequently notified.</p>
-
-<h3>SqlBrite</h3>
-
-<p>If all this wrapping seems too laboruous, the prolific guys from Square wrote <a href="https://github.com/square/sqlbrite">SqlBrite</a> which is a super generic database wrapper that was written for this same purpouse. I am sure it&rsquo;s better and more battle field tested than the poor man&rsquo;s version we can write by ourselves.</p>
-
-<h2>Conclusion</h2>
-
-<p>I don&rsquo;t know if this is an healthy way to use RxJava. Maybe I ended up with this scenario only because I am not 100% confident with RxJava and I am putting some non rx-ness in the middle to better control it.
-Here we need to choose where to place the operators, since we can modify the flow that feeds the storage from the http client, or the flow that comes out of the storage itself.</p>
-
-<p>In any case, having an unique source of truth seems more clear, and I feel that in this way it would be a lot easier to do stuff like prefetching, scheduling updates so the user is presented with fresh data (remember having your <a href="https://www.youtube.com/watch?v=GcNNx2zdXN4">app work like magic?</a>), checking if an update is worth to be done at all (such as displaying a 5 minutes old weather forecast) and stuff like that.</p>
-
-<p>Thanks to Fabio Collini for spotting a lot of mistakes in the first draft of this posts, and to Riccardo Ciovati for proof reading it.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/09/13/testing-rxjava-observables-subscriptions/">Unit Testing RxJava Observables and Subscriptions</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2015-09-13T21:26:15+02:00'><span class='date'><span class='date-month'>Sep</span> <span class='date-day'>13</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>9:26 pm</span></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2>Testing RxJava</h2>
-
-<p>While catching up with the latest Android novelties I could not ignore RxJava, which seems to grow in popularity between android developers.</p>
-
-<p>If you just heard about it, and you want to get your feet wet, I really recommend Dan Lew&rsquo;s <a href="http://blog.danlew.net/2014/09/15/grokking-rxjava-part-1/">Grokking with RxJava</a> series as a starting point.</p>
-
-<p><strong>RxJava is asynchronous by nature</strong>, so unit testing it might seem a daunting at first, especially if you use that asynchronous interaction to test stuff. Luckily, RxJava (and RxAndroid) come with a couple of tools that will make our life a lot easier.</p>
-
-<h2>What to (unit) test</h2>
-
-<p>There are at least a couple of things you&rsquo;ll want to test:</p>
-
-<ol>
-<li>You will want to test the <strong>observables</strong>, meaning not only the observables you built, but also the resulting composition of the various operators you may want to apply to them.</li>
-<li>Given a certain observable (or its mock), you will want to test <strong>how the rest of your application behaves while triggered by the subscription</strong>.</li>
-</ol>
-
-
-<h2>Testing the observables</h2>
-
-<p>Despite the fact that a subscription is asynchronous, there are (at least) a couple of ways to make the stream of your observable synchronous.</p>
-
-<p>The first way is by using</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='Java'><span class='line'><span class="n">ResultToCheck</span> <span class="n">res</span> <span class="o">=</span> <span class="n">myObservable</span><span class="o">.</span><span class="na">toBlocking</span><span class="o">().</span><span class="na">first</span><span class="o">();</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>This works because <a href="http://reactivex.io/RxJava/javadoc/rx/Observable.html#toBlocking%28%29">toBlocking</a> converts the observable to a blocking one, while <a href="http://reactivex.io/documentation/operators/first.html">first</a> returns the first emitted element.
-The calling code will wait synchronously until the observer calls onCompleted().</p>
-
-<p><strong>The official way to test an observable</strong> is by using a <a href="http://reactivex.io/RxJava/javadoc/rx/observers/TestSubscriber.html">TestSubscriber</a>, an helper subscriber provided directly by the RxJava library.
-As with toBlocking, a test subscription is synchronous.
-Here you can find an example:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='Java'><span class='line'><span class="n">Observable</span><span class="o">&lt;</span><span class="n">RubberChicken</span><span class="o">&gt;</span> <span class="n">obs</span> <span class="o">=</span> <span class="n">obsFactory</span><span class="o">.</span><span class="na">getObservable</span><span class="o">();</span>
-</span><span class='line'><span class="n">TestSubscriber</span><span class="o">&lt;</span><span class="n">RubberChicken</span><span class="o">&gt;</span> <span class="n">testSubscriber</span> <span class="o">=</span> <span class="k">new</span> <span class="n">TestSubscriber</span><span class="o">&lt;&gt;();</span>
-</span><span class='line'><span class="n">obs</span><span class="o">.</span><span class="na">subscribe</span><span class="o">(</span><span class="n">testSubscriber</span><span class="o">);</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">testSubscriber</span><span class="o">.</span><span class="na">assertNoErrors</span><span class="o">();</span>
-</span><span class='line'><span class="n">List</span><span class="o">&lt;</span><span class="n">RubberChicken</span><span class="o">&gt;</span> <span class="n">chickens</span> <span class="o">=</span> <span class="n">testSubscriber</span><span class="o">.</span><span class="na">getOnNextEvents</span><span class="o">();</span>
-</span><span class='line'><span class="c1">// Assert your chickens integrity here</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p><code>TestSubscriber</code> comes with a bunch of helper methods for testing, like specific assertions and other stuff. On top of that, its <code>getOnNextEvents()</code> method is blocking and  will return all the emitted items as elements of a list.
-This is a neat way to test not only your observers, but also to check if the compositions you put in place are working as expected. That makes testing observables super easy.</p>
-
-<h2>Testing the subscription</h2>
-
-<p>Once your observables are in place, you will likely to be observing them on some thread, and subscribing them on some other thread. This will make it harder for us to test how our activity (or fragment) reacts to a triggered subscription.</p>
-
-<p>RxJava (and RxAndroid) provide a way to override the schedulers exposed when <code>Schedulers.io()</code> or <code>AndroidSchedulers.mainThread()</code> are called. By replacing them with <code>Schedulers.immediate()</code>, your code will run immediately and you&rsquo;ll be able to see its results.</p>
-
-<p>The solution is a bit hacky, since we need to call <code>reset()</code> method before overriding RxJava&rsquo;s schedulers, which is package protected. I <em>took inspiration</em> from Alexis Mas&#8217; <a href="http://alexismas.com/blog/2015/05/20/unit-testing-rxjava/">blogpost</a> extending RxJavaPlugins class (there no need for that with RxAndroid):</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class='Java'><span class='line'><span class="kn">package</span> <span class="n">rx</span><span class="o">.</span><span class="na">plugins</span><span class="o">;</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">RxJavaTestPlugins</span> <span class="kd">extends</span> <span class="n">RxJavaPlugins</span> <span class="o">{</span>
-</span><span class='line'>    <span class="n">RxJavaTestPlugins</span><span class="o">()</span> <span class="o">{</span>
-</span><span class='line'>        <span class="kd">super</span><span class="o">();</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">resetPlugins</span><span class="o">(){</span>
-</span><span class='line'>        <span class="n">getInstance</span><span class="o">().</span><span class="na">reset</span><span class="o">();</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Registering a scheduler hook that provides a custom implemetation (Schedulers.immediate()) will end up in overriding the schedulers we are using.</p>
-
-<p>As pointed out by <a href="https://twitter.com/pakerfeldt">Patrik Åkerfeldt</a> in the comments, since the hooks are asked to provide a scheduler implementation during the initialization of the Schedulers class, we have only one chance to override the default schedulers. For this reason, there is no point in setting them up in the <code>setup</code> phases of all our tests.</p>
-
-<p>The best place to override them once seems to be the <code>TestRunner</code>&rsquo;s constructor.</p>
-
-<p>The custom <code>TestRunner</code> will look like this:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-</pre></td><td class='code'><pre><code class='Java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">RxJavaTestRunner</span> <span class="kd">extends</span> <span class="n">RobolectricGradleTestRunner</span> <span class="o">{</span>
-</span><span class='line'>    <span class="kd">public</span> <span class="nf">RxJavaTestRunner</span><span class="o">(</span><span class="n">Class</span><span class="o">&lt;?&gt;</span> <span class="n">testClass</span><span class="o">)</span> <span class="kd">throws</span> <span class="n">InitializationError</span> <span class="o">{</span>
-</span><span class='line'>        <span class="kd">super</span><span class="o">(</span><span class="n">testClass</span><span class="o">);</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="n">RxJavaTestPlugins</span><span class="o">.</span><span class="na">resetPlugins</span><span class="o">();</span>
-</span><span class='line'>        <span class="n">RxJavaPlugins</span><span class="o">.</span><span class="na">getInstance</span><span class="o">().</span><span class="na">registerSchedulersHook</span><span class="o">(</span><span class="k">new</span> <span class="nf">RxJavaSchedulersHook</span><span class="o">()</span> <span class="o">{</span>
-</span><span class='line'>            <span class="nd">@Override</span>
-</span><span class='line'>            <span class="kd">public</span> <span class="n">Scheduler</span> <span class="nf">getIOScheduler</span><span class="o">()</span> <span class="o">{</span>
-</span><span class='line'>                <span class="k">return</span> <span class="n">Schedulers</span><span class="o">.</span><span class="na">immediate</span><span class="o">();</span>
-</span><span class='line'>            <span class="o">}</span>
-</span><span class='line'>        <span class="o">});</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>And this is how the <code>setup()</code> and <code>teardown()</code> methods will look like (here I am using robolectric but it makes no difference with AndroidTests):</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-</pre></td><td class='code'><pre><code class='Java'><span class='line'><span class="nd">@RunWith</span><span class="o">(</span><span class="n">RxJavaTestRunner</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
-</span><span class='line'><span class="nd">@Config</span><span class="o">(</span><span class="n">constants</span> <span class="o">=</span> <span class="n">BuildConfig</span><span class="o">.</span><span class="na">class</span><span class="o">,</span>
-</span><span class='line'><span class="n">application</span> <span class="o">=</span> <span class="n">TestRobolectricApplication</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
-</span><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">SubscriberTest</span> <span class="o">{</span>
-</span><span class='line'>    <span class="nd">@Before</span>
-</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setup</span><span class="o">()</span> <span class="o">{</span>
-</span><span class='line'>        <span class="n">RxAndroidPlugins</span><span class="o">.</span><span class="na">getInstance</span><span class="o">().</span><span class="na">registerSchedulersHook</span><span class="o">(</span><span class="k">new</span> <span class="nf">RxAndroidSchedulersHook</span><span class="o">()</span> <span class="o">{</span>
-</span><span class='line'>            <span class="nd">@Override</span>
-</span><span class='line'>            <span class="kd">public</span> <span class="n">Scheduler</span> <span class="nf">getMainThreadScheduler</span><span class="o">()</span> <span class="o">{</span>
-</span><span class='line'>                <span class="k">return</span> <span class="n">Schedulers</span><span class="o">.</span><span class="na">immediate</span><span class="o">();</span>
-</span><span class='line'>            <span class="o">}</span>
-</span><span class='line'>        <span class="o">});</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="nd">@After</span>
-</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">tearDown</span><span class="o">()</span> <span class="o">{</span>
-</span><span class='line'>        <span class="n">RxAndroidPlugins</span><span class="o">.</span><span class="na">getInstance</span><span class="o">().</span><span class="na">reset</span><span class="o">();</span>
-</span><span class='line'>    <span class="o">}}</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="cm">/* Your tests here */</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>As I already mentioned, you can inject the custom schedulers only once per test session. On the other hand, RxAndroidPlugins come with a reset method that will allow us to hook in different schedulers in different threads.</p>
-
-<p>This, together with a non blocking observable (for instance by replacing your long taking observable with a mocked <code>Observable.just()</code>) will make our test synchronous.</p>
-
-<p>In order to inject a mocked observable, we can override the Application object used by Robolectric,  as described in my <a href="http://fedepaol.github.io/blog/2015/09/05/mocking-with-robolectric-and-dagger-2/">previous post here</a> .</p>
-
-<h2>Bonus point: debugging</h2>
-
-<p>If the unit tests are not enough, and you want to check what is happening inside the chaining / transformation of the stream, you can set an <code>ObservableExecutionHook</code> that will be triggered when observables are being called:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-</pre></td><td class='code'><pre><code class='Java'><span class='line'>   <span class="kd">private</span> <span class="kt">void</span> <span class="nf">enableRxTrack</span><span class="o">()</span> <span class="o">{</span>
-</span><span class='line'>        <span class="n">RxJavaPlugins</span><span class="o">.</span><span class="na">getInstance</span><span class="o">().</span><span class="na">registerObservableExecutionHook</span><span class="o">(</span><span class="k">new</span> <span class="nf">DebugHook</span><span class="o">(</span><span class="k">new</span> <span class="nf">DebugNotificationListener</span><span class="o">()</span> <span class="o">{</span>
-</span><span class='line'>            <span class="kd">final</span> <span class="n">String</span> <span class="n">TAG</span> <span class="o">=</span> <span class="s">&quot;RXDEBUG&quot;</span><span class="o">;</span>
-</span><span class='line'>            <span class="kd">public</span> <span class="n">Object</span> <span class="nf">onNext</span><span class="o">(</span><span class="n">DebugNotification</span> <span class="n">n</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>                <span class="n">Log</span><span class="o">.</span><span class="na">v</span><span class="o">(</span><span class="n">TAG</span><span class="o">,</span> <span class="s">&quot;onNext on &quot;</span> <span class="o">+</span> <span class="n">n</span><span class="o">);</span>
-</span><span class='line'>                <span class="k">return</span> <span class="kd">super</span><span class="o">.</span><span class="na">onNext</span><span class="o">(</span><span class="n">n</span><span class="o">);</span>
-</span><span class='line'>            <span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'>            <span class="kd">public</span> <span class="n">Object</span> <span class="nf">start</span><span class="o">(</span><span class="n">DebugNotification</span> <span class="n">n</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>                <span class="n">Log</span><span class="o">.</span><span class="na">v</span><span class="o">(</span><span class="n">TAG</span><span class="o">,</span><span class="s">&quot;start on &quot;</span><span class="o">+</span><span class="n">n</span><span class="o">);</span>
-</span><span class='line'>                <span class="k">return</span> <span class="kd">super</span><span class="o">.</span><span class="na">start</span><span class="o">(</span><span class="n">n</span><span class="o">);</span>
-</span><span class='line'>            <span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'>            <span class="kd">public</span> <span class="kt">void</span> <span class="nf">complete</span><span class="o">(</span><span class="n">Object</span> <span class="n">context</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>                <span class="kd">super</span><span class="o">.</span><span class="na">complete</span><span class="o">(</span><span class="n">context</span><span class="o">);</span>
-</span><span class='line'>                <span class="n">Log</span><span class="o">.</span><span class="na">v</span><span class="o">(</span><span class="n">TAG</span><span class="o">,</span><span class="s">&quot;oncomplete n &quot;</span><span class="o">+</span><span class="n">context</span><span class="o">);</span>
-</span><span class='line'>            <span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'>            <span class="kd">public</span> <span class="kt">void</span> <span class="nf">error</span><span class="o">(</span><span class="n">Object</span> <span class="n">context</span><span class="o">,</span> <span class="n">Throwable</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>                <span class="kd">super</span><span class="o">.</span><span class="na">error</span><span class="o">(</span><span class="n">context</span><span class="o">,</span> <span class="n">e</span><span class="o">);</span>
-</span><span class='line'>                <span class="n">Log</span><span class="o">.</span><span class="na">e</span><span class="o">(</span><span class="n">TAG</span><span class="o">,</span><span class="s">&quot;error on &quot;</span><span class="o">+</span><span class="n">context</span><span class="o">);</span>
-</span><span class='line'>            <span class="o">}</span>
-</span><span class='line'>        <span class="o">}));</span>
-</span><span class='line'>    <span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>TL;DR:</h1>
-
-<ul>
-<li>Use TestSubscriber when testing how an observable (or a composition of observables) behaves</li>
-<li>Mock your observable and override the default schedulers to test how the subscribing class works</li>
-<li>Enable the tracking of your observables by registering an observable execution hook</li>
-</ul>
-
-
-<p>A working example (rubber chickens included) can be found on my <a href="https://github.com/fedepaol/TestingRxJava">github repo</a>.</p>
-
-<h3>References</h3>
-
-<ul>
-<li><a href="https://medium.com/ribot-labs/unit-testing-rxjava-6e9540d4a329">Unit testing rxjava (observables)</a> by Iván Carballo</li>
-<li><a href="http://alexismas.com/blog/2015/05/20/unit-testing-rxjava/">Unit testing rxjava (subscription)</a> by Alexis Mas</li>
-<li><a href="http://fragmentedpodcast.com/episodes/3/">This</a> and <a href="http://fragmentedpodcast.com/episodes/4/">this</a> episodes of <a href="http://fragmentedpodcast.com">Fragmented Podcast</a> where Dan Lew gave some insights about RxJava, where I heard about the scheduler overriding trick</li>
-<li>Patrik Åkerfeldt&rsquo;s example that demonstrates how the scheduler injection works only before Scheduler class initialization</li>
-</ul>
-
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/09/05/mocking-with-robolectric-and-dagger-2/">Mocking With Robolectric and Dagger 2</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2015-09-05T08:22:47+02:00'><span class='date'><span class='date-month'>Sep</span> <span class='date-day'>5</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>8:22 am</span></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2>Why robolectric</h2>
-
-<p>I&rsquo;ve been a fan of robolectric since the old days, since <a href="http://fedepaol.github.io/blog/2012/07/23/intellij-robolectric-and-android/">when Android Studio was not an option and few developers embraced IntelliJ</a>. I left it a bit behind after the introduction of Android Studio, since its support was far from optimal.</p>
-
-<p>Things have changed, and after listening Corey Latislaw advocating its usage during <a href="http://fragmentedpodcast.com/episodes/13/">this fragmented podcast episode</a> I wanted to give it a spin. Even if there is a bit of debate over its usage, mainly because tests are performed against mocked objects instead of the real framework code, it is the fastest lane to your tdd cycle because tests are run on the local jvm instead of being packed in an apk, deployed on a device and run over there.</p>
-
-<h2>Dependency Injection</h2>
-
-<p>One really cool thing about robolectric 3.0 is the fact that you can override the Application object declared in your manifest with a custom one (which can inherit from your application&rsquo;s one).</p>
-
-<p>If you are using dagger (or dagger 2) and you are using the application as the source of dependency injection for your classes, this allow to easily replace your injected objects with mocks. You can even choose which mocks inject in the setup phase of your tests.</p>
-
-<h2>Let&rsquo;s see an example:</h2>
-
-<p>Let&rsquo;s say you have your application class that exposes all the injected objects in a Dagger 2 fashion, and that you are using it to inject classes in your activities:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="nd">@Override</span>
-</span><span class='line'><span class="kd">protected</span> <span class="kt">void</span> <span class="nf">onCreate</span><span class="o">(</span><span class="n">Bundle</span> <span class="n">savedInstanceState</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>    <span class="c1">// stuff </span>
-</span><span class='line'>    <span class="o">((</span><span class="n">MyApplication</span><span class="o">)</span> <span class="n">getApplication</span><span class="o">()).</span><span class="na">getComponent</span><span class="o">().</span><span class="na">inject</span><span class="o">(</span><span class="k">this</span><span class="o">);</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Now, if we can drive the component injected within our tests, the rest of the app would use them and (hopefully) behave in a way we expect, depending on our mocks instead of the real objects.</p>
-
-<p>The dependencies are provided by a module:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="nd">@Module</span>
-</span><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">ApplicationModule</span> <span class="o">{</span>
-</span><span class='line'>    <span class="c1">// stuff</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="nd">@Provides</span>
-</span><span class='line'>    <span class="nd">@Singleton</span>
-</span><span class='line'>    <span class="n">GitHubClient</span> <span class="nf">provideClient</span><span class="o">()</span> <span class="o">{</span>
-</span><span class='line'>        <span class="k">return</span> <span class="k">new</span> <span class="nf">GitHubClient</span><span class="o">(</span><span class="n">mApp</span><span class="o">.</span><span class="na">getApplicationContext</span><span class="o">());</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'>    <span class="c1">// .. Provides other stuff</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p><code>GitHubClient</code> is a Retrofit (2) powered client that helps to retrieve all the repos for a given user.</p>
-
-<p>By using a test only application, we can provide a module from our tests.</p>
-
-<p>Let&rsquo;s see ApplicationModule&rsquo;s mocked alter ego. Note that we can override only the dependencies that we want to mock:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">MockApplicationModule</span> <span class="kd">extends</span> <span class="n">ApplicationModule</span> <span class="o">{</span>
-</span><span class='line'>    <span class="n">List</span><span class="o">&lt;</span><span class="n">Repo</span><span class="o">&gt;</span> <span class="n">result</span><span class="o">;</span>
-</span><span class='line'>    <span class="c1">// stuff</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="nd">@Override</span>
-</span><span class='line'>    <span class="n">GitHubClient</span> <span class="nf">provideClient</span><span class="o">()</span> <span class="o">{</span>
-</span><span class='line'>        <span class="n">GitHubClient</span> <span class="n">client</span> <span class="o">=</span> <span class="n">mock</span><span class="o">(</span><span class="n">GitHubClient</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
-</span><span class='line'>        <span class="c1">// mock behaviour</span>
-</span><span class='line'>        <span class="k">return</span> <span class="n">client</span><span class="o">;</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setResult</span><span class="o">(</span><span class="n">List</span><span class="o">&lt;</span><span class="n">Repo</span><span class="o">&gt;</span> <span class="n">result</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>        <span class="k">this</span><span class="o">.</span><span class="na">result</span> <span class="o">=</span> <span class="n">result</span><span class="o">;</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Now that everything is in place, we can use the mocked objects in our tests:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="nd">@RunWith</span><span class="o">(</span><span class="n">RobolectricGradleTestRunner</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
-</span><span class='line'><span class="nd">@Config</span><span class="o">(</span><span class="n">constants</span> <span class="o">=</span> <span class="n">BuildConfig</span><span class="o">.</span><span class="na">class</span><span class="o">,</span>
-</span><span class='line'>        <span class="n">application</span> <span class="o">=</span> <span class="n">TestApplication</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
-</span><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">SampleTest</span> <span class="o">{</span>
-</span><span class='line'>    <span class="nd">@Before</span>
-</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setup</span><span class="o">()</span> <span class="o">{</span>
-</span><span class='line'>        <span class="n">TestApplication</span> <span class="n">app</span> <span class="o">=</span> <span class="o">(</span><span class="n">TestApplication</span><span class="o">)</span> <span class="n">RuntimeEnvironment</span><span class="o">.</span><span class="na">application</span><span class="o">;</span>
-</span><span class='line'>        <span class="c1">// Setting up the mock module</span>
-</span><span class='line'>        <span class="n">MockApplicationModule</span> <span class="n">module</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">MockApplicationModule</span><span class="o">(</span><span class="n">app</span><span class="o">);</span>
-</span><span class='line'>        <span class="n">module</span><span class="o">.</span><span class="na">setResult</span><span class="o">(</span><span class="n">mockedResult</span><span class="o">);</span>
-</span><span class='line'>        <span class="n">app</span><span class="o">.</span><span class="na">setApplicationModule</span><span class="o">(</span><span class="n">module</span><span class="o">);</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>From now on, the our tested activities will be injected with our mocked github client and we will be able to test their behaviour.</p>
-
-<h2>Quirks</h2>
-
-<p>Since the Test Application object is created before running the tests, a default application module must be provided, otherwise you&rsquo;ll get a dreaded NPE while running your tests.</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestApplication</span> <span class="kd">extends</span> <span class="n">MyApplication</span> <span class="o">{</span>
-</span><span class='line'>    <span class="nd">@Override</span>
-</span><span class='line'>    <span class="n">ApplicationModule</span> <span class="nf">getApplicationModule</span><span class="o">()</span> <span class="o">{</span>
-</span><span class='line'>        <span class="k">if</span> <span class="o">(</span><span class="n">mApplicationModule</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>            <span class="k">return</span> <span class="kd">super</span><span class="o">.</span><span class="na">getApplicationModule</span><span class="o">();</span>
-</span><span class='line'>        <span class="o">}</span>
-</span><span class='line'>        <span class="k">return</span> <span class="n">mApplicationModule</span><span class="o">;</span>
-</span><span class='line'>    <span class="o">}}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p></p>
-
-<p>moreover, the dependency graph is generally built inside the Application&rsquo;s onCreate method. Given that we want to recreate it with our mocked module, I had to add a method for that:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">MyApplication</span> <span class="kd">extends</span> <span class="n">Application</span> <span class="o">{</span>
-</span><span class='line'>    <span class="c1">// Stuff </span>
-</span><span class='line'>    <span class="nd">@Override</span>
-</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onCreate</span><span class="o">()</span> <span class="o">{</span>
-</span><span class='line'>        <span class="kd">super</span><span class="o">.</span><span class="na">onCreate</span><span class="o">();</span>
-</span><span class='line'>        <span class="n">initComponent</span><span class="o">();</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="kt">void</span> <span class="nf">initComponent</span><span class="o">()</span> <span class="o">{</span>
-</span><span class='line'>        <span class="n">mComponent</span> <span class="o">=</span> <span class="n">DaggerRoboSampleComponent</span><span class="o">.</span><span class="na">builder</span><span class="o">()</span>
-</span><span class='line'>                <span class="o">.</span><span class="na">applicationModule</span><span class="o">(</span><span class="n">getApplicationModule</span><span class="o">())</span>
-</span><span class='line'>                <span class="o">.</span><span class="na">build</span><span class="o">();</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>Conclusion</h2>
-
-<p>The fact that robolectric allows you to use a custom test application object (even a different one for different tests) together with dagger is an easy way to inject mock object without having to rely on ugly setters.</p>
-
-<p>Robolectric is a fast and effective way to speed up your tdd process. All the time spent to set the tests and the mocks app is well repaid in code coverage and writing and debugging speed afterwards.</p>
-
-<h2>See it in action (and have something to copy from)</h2>
-
-<p><a href="https://github.com/fedepaol/RobolectricDependenyInjection">Here on github</a> I put a working example that demonstrates how to inject a mocked module using robolectring.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  <div class="pagination">
-    
-      <a class="prev" href="/posts/2">&larr; Older</a>
-    
-    <a href="/blog/archives">Blog Archives</a>
-    
+<div class="container">
+  <!DOCTYPE html>
+<html lang="en-us">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+
+
+<title>My little software warehouse</title>
+
+<link rel="stylesheet" href="http://fedepaol.github.io//css/styles.css">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css" 
+integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbiDQ" crossorigin="anonymous">
+<script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/zenburn.min.css" crossorigin="anonymous" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js" integrity="sha256-/BfiIkHlHoVihZdc6TFuj7MmJ0TWcWsMXkeDFwhi0zw=" crossorigin="anonymous"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+<script src="http://fedepaol.github.io//js/highlight.js"></script>
+
+
+
+
+
+
+  <div class="container">
+    <nav class="navbar level">
+      <div class="navbar-brand">
+          <a class="nav-item" href="http://fedepaol.github.io/"><h1 class="title is-3">My little software warehouse</h1></a>
+      </div>           
+      <div class="navbar-menu has-text-centered is-active">
+          <div class="navbar-end is-centered">
+              
+                <a href="https://twitter.com/fedepaol">
+                  <span class="icon">
+                    <i class="fab fa-twitter"></i>
+                  </span>
+                </a>
+              
+                <a href="http://fedepaol.github.io/about">
+                  <span class="icon">
+                    <i class="fas fa-info"></i>
+                  </span>
+                </a>
+              
+                <a href="https://github.com/fedepaol">
+                  <span class="icon">
+                    <i class="fab fa-github"></i>
+                  </span>
+                </a>
+              
+                <a href="http://fedepaol.github.io/www.linkedin.com/in/federico-paolinelli-2374954/">
+                  <span class="icon">
+                    <i class="fab fa-linkedin-in"></i>
+                  </span>
+                </a>
+              
+           </div>
+      </div>
+    </nav>
   </div>
-</div>
-<aside class="sidebar">
-  
-    <section>
-  <h1>About Me</h1>
-  <p>Lead developer with electronic trading software by day, passionate about opensource. I spend a lot of my spare time writing Go and Android software. Table Tennis player, snowboarder, dad. I also contributed to Firefox for Android.</p>
-  <a href="mailto:fedepaol@gmail.com" target="_top">fedepaol@gmail.com</a>
-</section>
-<section>
-  <h1>Recent Posts</h1>
-  <ul id="recent_posts">
-    
-      <li class="post">
-        <a href="/blog/2018/12/11/fast-messaging-with-nats-and-go-part-2/">Fast Messaging With Nats and Go Part 2</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2018/10/27/fast-messaging-with-nats-and-go/">Fast Messaging With Nats and Go</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2018/10/26/a-new-chapter/">A New (Side) Chapter</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2017/04/30/android-okhttp-and-websockets/">Android, Okhttp and Websockets</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2016/08/27/android-mvp-testing/">Android, MVP, Dagger and Testing</a>
-      </li>
-    
-  </ul>
-</section>
-
-<section>
-  <h1>GitHub Repos</h1>
-  <ul id="gh_repos">
-    <li class="loading">Status updating...</li>
-  </ul>
-  
-  <a href="https://github.com/fedepaol">@fedepaol</a> on GitHub
-  
-  <script type="text/javascript">
-    $(document).ready(function(){
-        if (!window.jXHR){
-            var jxhr = document.createElement('script');
-            jxhr.type = 'text/javascript';
-            jxhr.src = '/javascripts/libs/jXHR.js';
-            var s = document.getElementsByTagName('script')[0];
-            s.parentNode.insertBefore(jxhr, s);
-        }
-
-        github.showRepos({
-            user: 'fedepaol',
-            count: 0,
-            skip_forks: true,
-            target: '#gh_repos'
-        });
-    });
-  </script>
-  <script src="/javascripts/github.js" type="text/javascript"> </script>
-</section>
-
-
-
-<section class="googleplus">
-  <h1>
-    <a href="https://plus.google.com/+FedericoPaolinelli?rel=author">
-      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
-      Google+
-    </a>
-  </h1>
-</section>
-
-
-
-<section>
-	<h1>On Twitter:</h1>
-	<div>
-		<p><br /><a href="http://twitter.com/fedepaol" target="_blank">My Tweets, on Twitter.</a></p>
-		<a href="http://twitter.com/fedepaol" class="twitter-follow-button" data-show-count="">Follow @fedepaol</a>
-	</div>
-</section>
-
-
-  
-</aside>
-
-    </div>
+  <main class="container">
+      
+      
+      <h1 class="title is-3">2019</h1>
+      
+      <article class="columns">
+        <div class="column is-2">
+          <h6 class="is-inline" style="white-space: nowrap">Feb 13</h2>
+        </div>
+        <div class="column">
+          <h2 class="subtitle is-inline is-size-4-mobile is-size-3-desktop"><a href="http://fedepaol.github.io/blog/2019/02/13/an-optimization-story/">An optimization story</a></h1>
+          <div class="content is-hidden-mobile">
+            There are some scenarios where the order matters Let&rsquo;s say that you have an api that can receive &ldquo;actions&rdquo; to be performed on a given endpoint.
+Think about you buying something on Amazon and then changing your mind and revoking your order. You don&rsquo;t want those two actions to be swapped, otherwise the cancellation will be refused (the order you want to cancel do not exists …
+            
+            <br>
+            <a class="button is-marginless is-paddingless" href="http://fedepaol.github.io/blog/2019/02/13/an-optimization-story/">
+            <span class="icon-link is-small" style="line-height: 100%">
+                <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+              </span>
+              <p style="padding:0 5px"></p>more</p>
+            </a>
+            
+          </div>
+      </article>
+      
+      
+      <h1 class="title is-3">2018</h1>
+      
+      <article class="columns">
+        <div class="column is-2">
+          <h6 class="is-inline" style="white-space: nowrap">Dec 11</h2>
+        </div>
+        <div class="column">
+          <h2 class="subtitle is-inline is-size-4-mobile is-size-3-desktop"><a href="http://fedepaol.github.io/blog/2018/12/11/fast-messaging-with-nats-and-go-part-2/">Fast messaging with nats and go part 2</a></h1>
+          <div class="content is-hidden-mobile">
+            This is the second of a follow up serie of the talk Fast messaging with Nats and Go I gave at golab 2018. The first part can be found here
+What can we do with nats? Pub sub As you can probably guess, given that Nats is a pure pub / sub system, we can easily implement pub / sub.
+Please remember that a nats publisher does not assume the audience.
+            
+            <br>
+            <a class="button is-marginless is-paddingless" href="http://fedepaol.github.io/blog/2018/12/11/fast-messaging-with-nats-and-go-part-2/">
+            <span class="icon-link is-small" style="line-height: 100%">
+                <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+              </span>
+              <p style="padding:0 5px"></p>more</p>
+            </a>
+            
+          </div>
+      </article>
+      
+      <article class="columns">
+        <div class="column is-2">
+          <h6 class="is-inline" style="white-space: nowrap">Oct 27</h2>
+        </div>
+        <div class="column">
+          <h2 class="subtitle is-inline is-size-4-mobile is-size-3-desktop"><a href="http://fedepaol.github.io/blog/2018/10/27/fast-messaging-with-nats-and-go/">Fast messaging with nats and go</a></h1>
+          <div class="content is-hidden-mobile">
+            This is the first of follow up serie of the talk Fast messaging with Nats and Go I gave at golab 2018.
+The slides of the talk can be found here:  What is Nats Nats is a messaging system hosted under the CNCF umbrella, which is an open source software foundation dedicated to making cloud native computing universal and sustainable. It&rsquo;s my place-to-go while looking for software related to …
+            
+            <br>
+            <a class="button is-marginless is-paddingless" href="http://fedepaol.github.io/blog/2018/10/27/fast-messaging-with-nats-and-go/">
+            <span class="icon-link is-small" style="line-height: 100%">
+                <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+              </span>
+              <p style="padding:0 5px"></p>more</p>
+            </a>
+            
+          </div>
+      </article>
+      
+      <article class="columns">
+        <div class="column is-2">
+          <h6 class="is-inline" style="white-space: nowrap">Oct 26</h2>
+        </div>
+        <div class="column">
+          <h2 class="subtitle is-inline is-size-4-mobile is-size-3-desktop"><a href="http://fedepaol.github.io/blog/2018/10/26/a-new-chapter/">A new chapter</a></h1>
+          <div class="content is-hidden-mobile">
+            It&rsquo;s been a while It&rsquo;s more than a year since my last blogpost which incidentally (or not) it happened right a month before the birth of my second child. In the past year I lost a lot of sleep, and now I am kind of getting back to normality (which means new side gigs :-)).
+My interests moved from Android and mobile in general to Go and distributed systems, which is what I am probably …
+            
+            <br>
+            <a class="button is-marginless is-paddingless" href="http://fedepaol.github.io/blog/2018/10/26/a-new-chapter/">
+            <span class="icon-link is-small" style="line-height: 100%">
+                <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+              </span>
+              <p style="padding:0 5px"></p>more</p>
+            </a>
+            
+          </div>
+      </article>
+      
+      
+      <h1 class="title is-3">2017</h1>
+      
+      <article class="columns">
+        <div class="column is-2">
+          <h6 class="is-inline" style="white-space: nowrap">Apr 30</h2>
+        </div>
+        <div class="column">
+          <h2 class="subtitle is-inline is-size-4-mobile is-size-3-desktop"><a href="http://fedepaol.github.io/blog/2017/04/30/android-okhttp-and-websockets/">Android okhttp and websockets</a></h1>
+          <div class="content is-hidden-mobile">
+            Websockets Rest http calls are the most common interaction between Android apps and remote servers. However, there are some scenarios where the interaction is better handled via a persistent connection: think about a chat, or a multiplayer game where data flows in both directions and the server needs to push data to the clients and to be aware of which client are connected.
+This kind of scenario …
+            
+            <br>
+            <a class="button is-marginless is-paddingless" href="http://fedepaol.github.io/blog/2017/04/30/android-okhttp-and-websockets/">
+            <span class="icon-link is-small" style="line-height: 100%">
+                <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+              </span>
+              <p style="padding:0 5px"></p>more</p>
+            </a>
+            
+          </div>
+      </article>
+      
+      
+      <h1 class="title is-3">2016</h1>
+      
+      <article class="columns">
+        <div class="column is-2">
+          <h6 class="is-inline" style="white-space: nowrap">Aug 27</h2>
+        </div>
+        <div class="column">
+          <h2 class="subtitle is-inline is-size-4-mobile is-size-3-desktop"><a href="http://fedepaol.github.io/blog/2016/08/27/android-mvp-testing/">Android mvp testing</a></h1>
+          <div class="content is-hidden-mobile">
+            MVP is Model View Presenter .. which is a pattern that is very popular among Android developers nowdays.
+I don&rsquo;t intend to write (yet) another guide about MVP in Android, because others have done a better job, for example:
+ Antonio Leiva&rsquo;s introduction to MVP Hannes Dorfmann&rsquo;s introduction to Mosby Fernando Cejas&rsquo; post on clean architecture  A lot have been said about MVP …
+            
+            <br>
+            <a class="button is-marginless is-paddingless" href="http://fedepaol.github.io/blog/2016/08/27/android-mvp-testing/">
+            <span class="icon-link is-small" style="line-height: 100%">
+                <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+              </span>
+              <p style="padding:0 5px"></p>more</p>
+            </a>
+            
+          </div>
+      </article>
+      
+      <article class="columns">
+        <div class="column is-2">
+          <h6 class="is-inline" style="white-space: nowrap">Jun 20</h2>
+        </div>
+        <div class="column">
+          <h2 class="subtitle is-inline is-size-4-mobile is-size-3-desktop"><a href="http://fedepaol.github.io/blog/2016/06/20/how-to-a-timer/">How to a timer</a></h1>
+          <div class="content is-hidden-mobile">
+            Ok, I must confess the title is built to draw people&rsquo;s attention, because you know, nowdays everything is done in a reactive fashion. RxJava is superhelpful, but if we forget the ecosystem our apps are running into, we risk to forget the proper way to implement certain tasks in Android.
+Why do we need a whole post about timers? Recently, I had to implement a countdown timer in Android.
+            
+            <br>
+            <a class="button is-marginless is-paddingless" href="http://fedepaol.github.io/blog/2016/06/20/how-to-a-timer/">
+            <span class="icon-link is-small" style="line-height: 100%">
+                <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+              </span>
+              <p style="padding:0 5px"></p>more</p>
+            </a>
+            
+          </div>
+      </article>
+      
+      <article class="columns">
+        <div class="column is-2">
+          <h6 class="is-inline" style="white-space: nowrap">Apr 20</h2>
+        </div>
+        <div class="column">
+          <h2 class="subtitle is-inline is-size-4-mobile is-size-3-desktop"><a href="http://fedepaol.github.io/blog/2016/04/20/happines-is-relative/">Happines is relative</a></h1>
+          <div class="content is-hidden-mobile">
+            Using relative layout is bad .. or at least they say so. The truth is, it is relatively easy to build complex layouts using RelativeLayouts, but this ease of use comes with a cost: in order to provide that kind of flexibility, RelativeLayout does two measurement passes.
+There are a lot of talks and posts explaining that if you have nested relative layouts, you&rsquo;ll end up with many measurement …
+            
+            <br>
+            <a class="button is-marginless is-paddingless" href="http://fedepaol.github.io/blog/2016/04/20/happines-is-relative/">
+            <span class="icon-link is-small" style="line-height: 100%">
+                <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+              </span>
+              <p style="padding:0 5px"></p>more</p>
+            </a>
+            
+          </div>
+      </article>
+      
+      <article class="columns">
+        <div class="column is-2">
+          <h6 class="is-inline" style="white-space: nowrap">Jan 1</h2>
+        </div>
+        <div class="column">
+          <h2 class="subtitle is-inline is-size-4-mobile is-size-3-desktop"><a href="http://fedepaol.github.io/blog/2016/01/01/cached-rest-requests-with-rxjava/">Cached rest requests with rxjava</a></h1>
+          <div class="content is-hidden-mobile">
+            Disclaimer: In this post I am trying to cover a proper approach to a common problem. I am still in the process of wrapping my head around RxJava so what I write here might not be the best way to solve the problem.
+Cached requests with RxJava Lately I&rsquo;ve been trying to develop a rest backed app using RxJava. I must admit that once you get in the proper mental mood, RxJava almost feels like …
+            
+            <br>
+            <a class="button is-marginless is-paddingless" href="http://fedepaol.github.io/blog/2016/01/01/cached-rest-requests-with-rxjava/">
+            <span class="icon-link is-small" style="line-height: 100%">
+                <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+              </span>
+              <p style="padding:0 5px"></p>more</p>
+            </a>
+            
+          </div>
+      </article>
+      
+      
+      <h1 class="title is-3">2015</h1>
+      
+      <article class="columns">
+        <div class="column is-2">
+          <h6 class="is-inline" style="white-space: nowrap">Sep 13</h2>
+        </div>
+        <div class="column">
+          <h2 class="subtitle is-inline is-size-4-mobile is-size-3-desktop"><a href="http://fedepaol.github.io/blog/2015/09/13/testing-rxjava-observables-subscriptions/">Testing rxjava observables subscriptions</a></h1>
+          <div class="content is-hidden-mobile">
+            Testing RxJava While catching up with the latest Android novelties I could not ignore RxJava, which seems to grow in popularity between android developers.
+If you just heard about it, and you want to get your feet wet, I really recommend Dan Lew&rsquo;s Grokking with RxJava series as a starting point.
+RxJava is asynchronous by nature, so unit testing it might seem a daunting at first, especially …
+            
+            <br>
+            <a class="button is-marginless is-paddingless" href="http://fedepaol.github.io/blog/2015/09/13/testing-rxjava-observables-subscriptions/">
+            <span class="icon-link is-small" style="line-height: 100%">
+                <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+              </span>
+              <p style="padding:0 5px"></p>more</p>
+            </a>
+            
+          </div>
+      </article>
+      
+      
+      
+    </main>
+  <section class="section">
+  <div class="container">
+    <nav class="level is-mobile">
+      <div class="level-left">
+        <div class="level-item">
+          
+          <a class="button is-rounded" disabled>
+            <span class="icon is-small is-marginless">
+              <i class="fa fa-angle-left"></i>
+            </span>
+            Newer
+          </a>
+          
+        </div>
+      </div>
+      <div class="level-right is-marginless">
+        <div class="level-item">
+          
+          <a class="button is-rounded" href="/page/2/">
+            Older
+            <span class="icon is-small is-marginless">
+              <i class="fa fa-angle-right"></i>
+            </span>
+          </a>
+          
+        </div>
+      </div>
+    </nav>
   </div>
-  <footer role="contentinfo"><p>
-  Copyright &copy; 2018 - Federico Paolinelli -
-  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
-</p>
+</section>
 
-</footer>
-  
+  <section class="section">
+  <div class="container has-text-centered">
+    <p></p>
+  </div>
+</section>
 
-<script type="text/javascript">
-      var disqus_shortname = 'fedepaolgithubio';
-      
-        
-        var disqus_script = 'count.js';
-      
-    (function () {
-      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
-      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-    }());
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-16514009-2', 'auto');
+	
+	ga('send', 'pageview');
+}
 </script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
 
 
 
-
-
-  <script type="text/javascript">
-    (function() {
-      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
-      script.src = 'https://apis.google.com/js/plusone.js';
-      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
-    })();
-  </script>
-
-
-
-  <script type="text/javascript">
-    (function(){
-      var twitterWidgets = document.createElement('script');
-      twitterWidgets.type = 'text/javascript';
-      twitterWidgets.async = true;
-      twitterWidgets.src = '//platform.twitter.com/widgets.js';
-      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
-    })();
-  </script>
-
-
-
-
-
-</body>
-</html>
+</div>

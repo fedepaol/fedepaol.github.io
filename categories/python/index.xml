@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Python on My little software warehouse</title>
+    <link>http://fedepaol.github.io/categories/python/</link>
+    <description>Recent content in Python on My little software warehouse</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sun, 24 Aug 2014 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="http://fedepaol.github.io/categories/python/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Migrating from blogger to octopress done</title>
+      <link>http://fedepaol.github.io/blog/2014/08/24/migrating-from-blogger-to-octopress-done/</link>
+      <pubDate>Sun, 24 Aug 2014 00:00:00 +0000</pubDate>
+      
+      <guid>http://fedepaol.github.io/blog/2014/08/24/migrating-from-blogger-to-octopress-done/</guid>
+      <description>It feels a bit like this but when I had to write a new blogpost and had to embed some code snippets into my blogger hosted blog, I got so pissed of that I chose to migrate my existing blog to a github hosted instance of octopress.
+Jason Jarrett made a pretty nice tutorial about the whole process here. However, I had to change a couple of things and I thought those might be helpful to anybody who faces the same problems.</description>
+    </item>
+    
+    <item>
+      <title>Android Content Providers Generator</title>
+      <link>http://fedepaol.github.io/blog/2012/11/11/android-content-providers-generator/</link>
+      <pubDate>Sun, 11 Nov 2012 00:00:00 +0000</pubDate>
+      
+      <guid>http://fedepaol.github.io/blog/2012/11/11/android-content-providers-generator/</guid>
+      <description>During the refactoring of my two years old app DroidAlone, I decided to try to access to the storage through a ContentProvider.
+Even if the official documentation warns that there is no need to use content providers if your app does not want to export it&#39;s data against other apps, there are a bunch of advantages in using a content provider in your app.
+The main and more obvious advantage is that you can use a Loader with your data.</description>
+    </item>
+    
+    <item>
+      <title>My sqllite helper builder</title>
+      <link>http://fedepaol.github.io/blog/2010/11/18/my-sqllite-helper-builder/</link>
+      <pubDate>Thu, 18 Nov 2010 00:00:00 +0000</pubDate>
+      
+      <guid>http://fedepaol.github.io/blog/2010/11/18/my-sqllite-helper-builder/</guid>
+      <description>EDIT 11/11/2012: as described in this new blog post, I modified the script to generate a content provider as well
+This is my first post about something related to android.
+Just to break the ice, I would like to introduce a simple helper script I developed this summer.
+Android ships with a very nice local storage, which is sqllite. It&#39;s said almost everywhere that, in order to make your life easier, you should develop an helper class.</description>
+    </item>
+    
+  </channel>
+</rss>

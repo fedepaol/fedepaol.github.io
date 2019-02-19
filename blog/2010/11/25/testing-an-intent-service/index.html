@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+
+
+<title>Testing an intent service | My little software warehouse</title>
+
+<link rel="stylesheet" href="http://fedepaol.github.io//css/styles.css">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css" 
+integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbiDQ" crossorigin="anonymous">
+<script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/zenburn.min.css" crossorigin="anonymous" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js" integrity="sha256-/BfiIkHlHoVihZdc6TFuj7MmJ0TWcWsMXkeDFwhi0zw=" crossorigin="anonymous"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+<script src="http://fedepaol.github.io//js/highlight.js"></script>
+
+
+
+
+
+
+<div class="container">
+    <nav class="navbar level">
+      <div class="navbar-brand">
+          <a class="nav-item" href="http://fedepaol.github.io/"><h1 class="title is-3">My little software warehouse</h1></a>
+      </div>           
+      <div class="navbar-menu has-text-centered is-active">
+          <div class="navbar-end is-centered">
+              
+                <a href="https://twitter.com/fedepaol">
+                  <span class="icon">
+                    <i class="fab fa-twitter"></i>
+                  </span>
+                </a>
+              
+                <a href="http://fedepaol.github.io/about">
+                  <span class="icon">
+                    <i class="fas fa-info"></i>
+                  </span>
+                </a>
+              
+                <a href="https://github.com/fedepaol">
+                  <span class="icon">
+                    <i class="fab fa-github"></i>
+                  </span>
+                </a>
+              
+                <a href="http://fedepaol.github.io/www.linkedin.com/in/federico-paolinelli-2374954/">
+                  <span class="icon">
+                    <i class="fab fa-linkedin-in"></i>
+                  </span>
+                </a>
+              
+           </div>
+      </div>
+    </nav>
+  </div>
+<div class="container">
+  <h2 class="subtitle is-6">November 25, 2010</h2>
+  <h1 class="subtitle is-size-4-mobile is-size-3-desktop">Testing an intent service</h1>
+  <div class="content">
+    
+<div class='post'>
+It may sound weird, but I discovered java development while trying to learn android development itself.<br />Along with Java, eclipse and all this nice stuff, I discovered junit too.<br /><br />One of the problems I encountered while developing my second app, droidalone, was to test intent services.<br /><br />Intent services are a powerful way to handle background task. They basically are services that run in their own thread and die (like non sticky services) after they finished their job. They don't have all the problems related to running an async task inside an activity (like knowing the result of the task if the activity goes in background). DroidAlone makes an intensive use of intentservices, because every event is handled by an intent service.<br /><br />A problem with testing the intent service itself (and in general, with a class that offers a "do in background, call a callback when finished" interface) is that the single test finishes when its caller function returns.  I had to find a way to make the test function hang and wait while the background service (or thread) performs its job. Then the test function has to be waken up in order to evaluate if the job result is consistent with what is expected from the test.<br /><br />The idea is pretty simple, a semaphore is locked until the task is done. When the task is done, the result is evaluated and then the semaphore is released.<br /><br />Let's see an example.<br /><br />Here the base class to perform this actions:<br /><br /><br /><pre style="font-family: Andale Mono,Lucida Console,Monaco,fixed,monospace; color: rgb(0, 0, 0); background-color: rgb(238, 238, 238); font-size: 12px; border: 1px dashed rgb(153, 153, 153); line-height: 14px; padding: 5px; overflow: auto; "><code>package com.wyb.testhelper;<br /><br />import java.util.concurrent.Semaphore;<br /><br />import android.content.BroadcastReceiver;<br />import android.content.Context;<br /><br />/**<br />* Asynchronous calls tester class<br />* @author fede<br />*<br />*/<br />public class AsyncCallTestClass {<br />/**<br /> * Interface to be implemented by the test implementation<br /> * @author fede<br /> *<br /> */<br />public interface AsyncCallTest{<br />    /**<br />     * The call to execute the test<br />     */<br />    public void execTest();<br />}<br /><br />private Semaphore mSem;<br />private AsyncCallTest mTest;<br /><br />public AsyncCallTestClass(Context c,<br />                          AsyncCallTest test) {<br />    mSem = new Semaphore(0);<br />    mTest = test;<br /><br /><br />}<br /><br />/**<br /> * must be called when the test is finished and the result was evaluated<br /> */<br />public void testFinished(){<br />    mSem.release();<br />}<br /><br /><br />/**<br /> * Runs the test itself<br /> */<br />public void runTest(){<br />    mTest.execTest();<br />    try{<br />        mSem.acquire();<br />    }catch(InterruptedException e){<br />    <br />    }<br />}<br /><br /><br /><br />}<br /><br /></code></pre><br />It accepts an interface that exposes execTest method, and offers a "testFinished" method to be called when the test result is evaluated.<br /><br />My intent service helper class accept a message to be processed in background, and offers a ResultNotify interface whose methods will be called when the task is finished.<br />Several kinds of messages can be processed, and I had to test all of them.<br /><br /><pre style="font-family: Andale Mono,Lucida Console,Monaco,fixed,monospace; color: rgb(0, 0, 0); background-color: rgb(238, 238, 238); font-size: 12px; border: 1px dashed rgb(153, 153, 153); line-height: 14px; padding: 5px; overflow: auto; width: 100%;"><code>/**<br />* Helper class to test several kinds of messages<br />* @author fede<br />*<br />*/<br />public class ServiceHelperTestClass {<br />     /**<br />      * Callbacks will be called when the test is finished<br />      * @author fede<br />      *<br />      */<br />     public interface ServiceTestFinishedInterface{<br />             /**<br />              * Asynchronous task finished (result needs to be evaluated)<br />              */<br />             public void onCallFinished();<br /><br />             /**<br />              * Asyncronous task returned an error<br />              * @param message<br />              */<br />             public void onError(String message);<br />     }<br /><br />     Context mContext;<br />     ServiceTestFinishedInterface mFinish;<br /><br /><br />     /**<br />      * Constructor<br />      * @param m     message to be tested<br />      * @param context context to run the test against<br />      * @param finish interface that will be called when the task will finish<br />      */<br />     public ServiceHelperTestClass(MessageToIntentService m, <br />                                   Context context, <br />                                   ServiceTestFinishedInterface finish) {<br />             mContext = context;<br />             mFinish = finish;<br />             final MessageToIntentService mess = m;<br />             final IntentServiceHelper helper = IntentServiceHelper.getInstance();<br />             final AsyncCallTestClass c =  new AsyncCallTestClass(mContext,<br />                                 new AsyncCallTest(){<br />                                        @Override<br />                                        public void execTest() {<br />                                           try{<br />                                             helper.processMessage(mContext, mess);<br />                                           }catch (Exception e){<br />                                             mFinish.onError(e.getMessage());<br />                                           }<br />                                        }<br /><br />                              });<br /><br />             // A result interface needs to be registered<br />             helper.registerResultListener(new IntentServiceResultNotify(){<br /><br />                     @Override<br />                     public void onIntentServiceError(String result) {<br />                             mFinish.onError(result);<br />                             c.testFinished();<br />                     }<br /><br />                     @Override<br />                     public void onIntentServiceResult(String result) {<br />                             mFinish.onCallFinished();<br />                             c.testFinished();<br />                     }<br /><br />             }, mContext);<br /><br /><br /><br />             c.runTest();<br /><br />     }<br /><br />}<br /><br /></code></pre><br /><br /><br />In this way, to test all the types of messages, OR to test the intent service under different scenarios, all I have to do in my test class is to implement a method like:<br /><br /><br /><pre style="font-family: Andale Mono,Lucida Console,Monaco,fixed,monospace; color: rgb(0, 0, 0); background-color: rgb(238, 238, 238); font-size: 12px; border: 1px dashed rgb(153, 153, 153); line-height: 14px; padding: 5px; overflow: auto; width: 100%;"><code>public void testHelloMessage() {<br />  ServiceHelperTestClass t = <br /><br />        new ServiceHelperTestClass(new HelloMessasge(), <br />                                   mContext,<br />                                   new ServiceTestFinishedInterface(){<br /><br />                                      @Override<br />                                      public void onCallFinished() {<br />                                              // Test Result here<br />                                              ;<br />                                      }<br /><br />                                      @Override<br />                                      public void onError(String message) {<br />                                              fail(message);<br />                                      }<br /><br />                              });<br />                     }<br /><br /></code></pre><br />This was just an example. However the basic idea is to make the test call block, and to unblock it (with a callback or with a broadcast receiver) when the task is finished.</div>
+<h2>Comments</h2>
+<div class='comments'>
+<div class='comment'>
+<div class='author'>bgenchel</div>
+<div class='content'>
+its hard to follow your code. why declare an interface. is that of type interface or did you define it yourself? where is AsyncTest defined? I&#39;m trying this myself and its not working.</div>
+</div>
+</div>
+
+  </div>
+</div>
+<div class="container has-text-centered">
+    
+</div>
+
+<div class="container has-text-centered">
+  
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      (function() {
+          
+          
+          if (window.location.hostname == "localhost")
+              return;
+      
+          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+          var disqus_shortname = 'fedepaolgithubio';
+          dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com/" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+  
+</div>
+<section class="section">
+  <div class="container has-text-centered">
+    <p></p>
+  </div>
+</section>
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-16514009-2', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+

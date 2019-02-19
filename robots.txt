@@ -1,4 +1,0 @@
-User-agent: *
-Disallow: 
-
-Sitemap: http://fedepaol.github.io/sitemap.xml 

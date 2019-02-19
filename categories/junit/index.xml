@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Junit on My little software warehouse</title>
+    <link>http://fedepaol.github.io/categories/junit/</link>
+    <description>Recent content in Junit on My little software warehouse</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Thu, 25 Nov 2010 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="http://fedepaol.github.io/categories/junit/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Testing an intent service</title>
+      <link>http://fedepaol.github.io/blog/2010/11/25/testing-an-intent-service/</link>
+      <pubDate>Thu, 25 Nov 2010 00:00:00 +0000</pubDate>
+      
+      <guid>http://fedepaol.github.io/blog/2010/11/25/testing-an-intent-service/</guid>
+      <description>It may sound weird, but I discovered java development while trying to learn android development itself.
+Along with Java, eclipse and all this nice stuff, I discovered junit too.
+One of the problems I encountered while developing my second app, droidalone, was to test intent services.
+Intent services are a powerful way to handle background task. They basically are services that run in their own thread and die (like non sticky services) after they finished their job.</description>
+    </item>
+    
+  </channel>
+</rss>

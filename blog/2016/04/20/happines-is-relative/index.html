@@ -1,103 +1,73 @@
-
 <!DOCTYPE html>
-<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
-<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
-<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
-<head>
-  <meta charset="utf-8">
-  <title>Happiness Is (a) Relative (Layout) - My little software store</title>
-  <meta name="author" content="Federico Paolinelli">
-
-  
-  <meta name="description" content="Using relative layout is bad .. or at least they say so.
-The truth is, it is relatively easy to build complex layouts using RelativeLayouts, but this &hellip;">
-  
-
-  <!-- http://t.co/dKP3o1e -->
-  <meta name="HandheldFriendly" content="True">
-  <meta name="MobileOptimized" content="320">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  
-  <link rel="canonical" href="http://fedepaol.github.io/blog/2016/04/20/happines-is-relative">
-  <link href="/favicon.png" rel="icon">
-  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
-  <link href="/atom.xml" rel="alternate" title="My little software store" type="application/atom+xml">
-  <script src="/javascripts/modernizr-2.0.js"></script>
-  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
-  <script src="/javascripts/octopress.js" type="text/javascript"></script>
-  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
-<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
-<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
-
-  
-  <script type="text/javascript">
-    var _gaq = _gaq || [];
-    _gaq.push(['_setAccount', 'UA-16514009-2']);
-    _gaq.push(['_trackPageview']);
-
-    (function() {
-      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-    })();
-  </script>
+<html lang="en-us">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 
-</head>
 
-<body   >
-  <header role="banner"><hgroup>
-  <h1><a href="/">My little software store</a></h1>
-  
-    <h2>Random thoughts about my experience as moonlight software developer.</h2>
-  
-</hgroup>
 
-</header>
-  <nav role="navigation"><ul class="subscription" data-subscription="rss">
-  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
-  
-</ul>
-  
-<form action="https://www.google.com/search" method="get">
-  <fieldset role="search">
-    <input type="hidden" name="q" value="site:fedepaol.github.io" />
-    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
-  </fieldset>
-</form>
-  
-<ul class="main-navigation">
-  <li><a href="/">Blog</a></li>
-  <li><a href="/blog/archives">Archives</a></li>
-</ul>
+<title>Happines is relative | My little software warehouse</title>
 
-</nav>
-  <div id="main">
-    <div id="content">
-      <div>
-<article class="hentry" role="article">
-  
-  <header>
+<link rel="stylesheet" href="http://fedepaol.github.io//css/styles.css">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css" 
+integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbiDQ" crossorigin="anonymous">
+<script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/zenburn.min.css" crossorigin="anonymous" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js" integrity="sha256-/BfiIkHlHoVihZdc6TFuj7MmJ0TWcWsMXkeDFwhi0zw=" crossorigin="anonymous"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+<script src="http://fedepaol.github.io//js/highlight.js"></script>
+
+
+
+
+
+
+<div class="container">
+    <nav class="navbar level">
+      <div class="navbar-brand">
+          <a class="nav-item" href="http://fedepaol.github.io/"><h1 class="title is-3">My little software warehouse</h1></a>
+      </div>           
+      <div class="navbar-menu has-text-centered is-active">
+          <div class="navbar-end is-centered">
+              
+                <a href="https://twitter.com/fedepaol">
+                  <span class="icon">
+                    <i class="fab fa-twitter"></i>
+                  </span>
+                </a>
+              
+                <a href="http://fedepaol.github.io/about">
+                  <span class="icon">
+                    <i class="fas fa-info"></i>
+                  </span>
+                </a>
+              
+                <a href="https://github.com/fedepaol">
+                  <span class="icon">
+                    <i class="fab fa-github"></i>
+                  </span>
+                </a>
+              
+                <a href="http://fedepaol.github.io/www.linkedin.com/in/federico-paolinelli-2374954/">
+                  <span class="icon">
+                    <i class="fab fa-linkedin-in"></i>
+                  </span>
+                </a>
+              
+           </div>
+      </div>
+    </nav>
+  </div>
+<div class="container">
+  <h2 class="subtitle is-6">April 20, 2016</h2>
+  <h1 class="subtitle is-size-4-mobile is-size-3-desktop">Happines is relative</h1>
+  <div class="content">
     
-      <h1 class="entry-title">Happiness Is (a) Relative (Layout)</h1>
-    
-    
-      <p class="meta">
-        
 
-
-
-
-<time class='entry-date' datetime='2016-04-20T06:34:46+02:00'><span class='date'><span class='date-month'>Apr</span> <span class='date-day'>20</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>6:34 am</span></time>
-        
-      </p>
-    
-  </header>
-
-
-<div class="entry-content"><h4>Using relative layout is bad</h4>
+<h4 id="using-relative-layout-is-bad">Using relative layout is bad</h4>
 
 <p>.. or at least they say so.
 The truth is, it is <em>relatively</em> easy to build complex layouts using RelativeLayouts, but this ease of use comes with a cost: in order to provide that kind of flexibility, RelativeLayout does two measurement passes.</p>
@@ -110,11 +80,11 @@ The truth is, it is <em>relatively</em> easy to build complex layouts using Rela
 
 <p>Finally, you&rsquo;ll have to place an image and a text inside the list elements, isn&rsquo;t there an easier way than RelativeLayout? (Actually, <a href="http://antonioleiva.com/textview_power_drawables/">there is and it&rsquo;s much more efficient</a>)</p>
 
-<p><img class="center" src="/images/relative_hierarchy.png" width="300"></p>
+<p><img src="/images/relative_hierarchy.png" alt="" /></p>
 
 <p>What will happen here is that with this unharmful scenario the <code>onMeasure()</code> method of each children of the list <strong>will be called 8 times</strong> each frame.</p>
 
-<h3>But why does RelativeLayout need two passes?</h3>
+<h3 id="but-why-does-relativelayout-need-two-passes">But why does RelativeLayout need two passes?</h3>
 
 <p>Given that Android is an open source framework, I could satisfy my curiosity by digging into the source code. Here I will try to provide a high level explanation of my understanding on how it works, without going too much into the details.</p>
 
@@ -127,8 +97,7 @@ The truth is, it is <em>relatively</em> easy to build complex layouts using Rela
 <li>C is to left of D and its top is aligned to D</li>
 </ul>
 
-
-<p><img class="center" src="/images/relative_sample.png" width="200"></p>
+<p><img src="/images/relative_sample.png" alt="" /></p>
 
 <p>The concept behind RelativeLayout is fairly simple. <strong>In order to measure (and place) a certain child, you need to measure (and place) all the views that child depends on</strong> in term of relationship. For this reason, the first thing RelativeLayout does is to build a graph of dependencies between the children. Those dependencies determine the order in which the children are measured (i.e. first the views with no dependencies, then the views that depend only from the root, etc).</p>
 
@@ -137,16 +106,16 @@ The truth is, it is <em>relatively</em> easy to build complex layouts using Rela
 <p>In the example, the sequence of measurement are:</p>
 
 <p>Horizontal dimension:
-A -> B -> D -> C</p>
+A -&gt; B -&gt; D -&gt; C</p>
 
-<p><img src="/images/relative_horizontal.png" width="800"></p>
+<p><img src="images/relative_horizontal.png" alt="" /></p>
 
 <p>Note that given the vertical size is not calculated yet, the views are temporarly assigned with the height of the parent view while measuring the horizontal sizes.</p>
 
 <p>Vertical dimension:
-B -> D -> C -> A</p>
+B -&gt; D -&gt; C -&gt; A</p>
 
-<p><img src="/images/relative_vertical.png" width="800"></p>
+<p><img src="images/relative_vertical.png" alt="" /></p>
 
 <p>Other than these two passes, RelativeLayout can also loop its children up to three other times to finalize their placement (for example for those that are aligned to the bottom of the parent in case of wrap content).</p>
 
@@ -154,13 +123,13 @@ B -> D -> C -> A</p>
 
 <p>Finally, the dependency lists are cached, but those cached elements are invalidated whenever a <code>requestLayout()</code> happens. This, together with the fact that <code>requestLayout()</code> goes up to the root and is called on all the children is another reason for not having deep view hierarchy especially with RelativeLayouts.</p>
 
-<h3>Optimizing RelativeLayout</h3>
+<h3 id="optimizing-relativelayout">Optimizing RelativeLayout</h3>
 
 <p>First of all, remember that you don&rsquo;t always need to. If you are in the early stage of the development or under strict time constraints and you prefer the simplicity of use of <code>RelativeLayout</code> against performance then use it, <strong>just be aware of the implications</strong>. This small piece of technical debt might come back in the future to claim its price.</p>
 
 <p><strong>Measure twice and cut once</strong> (but remember to do that from time to time). Hierarchy Viewer is a convenient way to understand if your hierarchy is too complex and to see at glance what&rsquo;s costing too much:</p>
 
-<p><img class="center" src="/images/hierarchy.png" width="700"></p>
+<p><img src="/images/hierarchy.png" alt="" /></p>
 
 <p><a href="https://github.com/lucasr/probe">Probe</a> by Lucas Rocha is also an effective tool to check if your views are getting measured too many times.</p>
 
@@ -175,8 +144,7 @@ B -> D -> C -> A</p>
 <li><a href="https://www.youtube.com/watch?v=-xAdDqwaWJk">Loving lean layouts from Droidcon SF</a></li>
 </ul>
 
-
-<h3>What&rsquo;s the take home lesson</h3>
+<h3 id="what-s-the-take-home-lesson">What&rsquo;s the take home lesson</h3>
 
 <p>RelativeLayout is an awesome piece of software. It makes it super easy to describe complex scenarios without needing to do nasty nested linear layouts.</p>
 
@@ -185,205 +153,50 @@ B -> D -> C -> A</p>
 <p>The two measurement passes can be the biggest source of problems because of the risk of exponential explosion, but <strong>other than that there are a lot of computation and additional data structures involved</strong> in building (and maintain) those dependency lists, and a good amount of extra loops through the children needed to place them correctly.</p>
 
 <p>Thanks to Riccardo Ciovati and Fabio Collini for proofreading this post.</p>
-</div>
 
-
-  <footer>
-    <p class="meta">
-      
-  
-
-<span class="byline author vcard">Posted by <span class="fn">Federico Paolinelli</span></span>
-
-      
-
-
-
-
-<time class='entry-date' datetime='2016-04-20T06:34:46+02:00'><span class='date'><span class='date-month'>Apr</span> <span class='date-day'>20</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>6:34 am</span></time>
-      
-
-<span class="categories">
-  
-    <a class='category' href='/blog/categories/android/'>android</a>, <a class='category' href='/blog/categories/custom-views/'>custom views</a>
-  
-</span>
-
-
-    </p>
-    
-      <div class="sharing">
-  
-  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://fedepaol.github.io/blog/2016/04/20/happines-is-relative/" data-via="fedepaol" data-counturl="http://fedepaol.github.io/blog/2016/04/20/happines-is-relative/" >Tweet</a>
-  
-  
-  <div class="g-plusone" data-size="medium"></div>
-  
-  
-</div>
-
-    
-    <p class="meta">
-      
-        <a class="basic-alignment left" href="/blog/2016/01/01/cached-rest-requests-with-rxjava/" title="Previous Post: Subscribe it while it's hot: cached rest requests with RxJava">&laquo; Subscribe it while it's hot: cached rest requests with RxJava</a>
-      
-      
-        <a class="basic-alignment right" href="/blog/2016/06/20/how-to-a-timer/" title="Next Post: Reactive Android timers, countdowns and lifecycle">Reactive Android timers, countdowns and lifecycle &raquo;</a>
-      
-    </p>
-  </footer>
-</article>
-
-  <section>
-    <h1>Comments</h1>
-    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-</div>
-  </section>
-
-</div>
-
-<aside class="sidebar">
-  
-    <section>
-  <h1>About Me</h1>
-  <p>Lead developer with electronic trading software by day, passionate about opensource. I spend a lot of my spare time writing Go and Android software. Table Tennis player, snowboarder, dad. I also contributed to Firefox for Android.</p>
-  <a href="mailto:fedepaol@gmail.com" target="_top">fedepaol@gmail.com</a>
-</section>
-<section>
-  <h1>Recent Posts</h1>
-  <ul id="recent_posts">
-    
-      <li class="post">
-        <a href="/blog/2018/12/11/fast-messaging-with-nats-and-go-part-2/">Fast Messaging With Nats and Go Part 2</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2018/10/27/fast-messaging-with-nats-and-go/">Fast Messaging With Nats and Go</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2018/10/26/a-new-chapter/">A New (Side) Chapter</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2017/04/30/android-okhttp-and-websockets/">Android, Okhttp and Websockets</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2016/08/27/android-mvp-testing/">Android, MVP, Dagger and Testing</a>
-      </li>
-    
-  </ul>
-</section>
-
-<section>
-  <h1>GitHub Repos</h1>
-  <ul id="gh_repos">
-    <li class="loading">Status updating...</li>
-  </ul>
-  
-  <a href="https://github.com/fedepaol">@fedepaol</a> on GitHub
-  
-  <script type="text/javascript">
-    $(document).ready(function(){
-        if (!window.jXHR){
-            var jxhr = document.createElement('script');
-            jxhr.type = 'text/javascript';
-            jxhr.src = '/javascripts/libs/jXHR.js';
-            var s = document.getElementsByTagName('script')[0];
-            s.parentNode.insertBefore(jxhr, s);
-        }
-
-        github.showRepos({
-            user: 'fedepaol',
-            count: 0,
-            skip_forks: true,
-            target: '#gh_repos'
-        });
-    });
-  </script>
-  <script src="/javascripts/github.js" type="text/javascript"> </script>
-</section>
-
-
-
-<section class="googleplus">
-  <h1>
-    <a href="https://plus.google.com/+FedericoPaolinelli?rel=author">
-      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
-      Google+
-    </a>
-  </h1>
-</section>
-
-
-
-<section>
-	<h1>On Twitter:</h1>
-	<div>
-		<p><br /><a href="http://twitter.com/fedepaol" target="_blank">My Tweets, on Twitter.</a></p>
-		<a href="http://twitter.com/fedepaol" class="twitter-follow-button" data-show-count="">Follow @fedepaol</a>
-	</div>
-</section>
-
-
-  
-</aside>
-
-
-    </div>
   </div>
-  <footer role="contentinfo"><p>
-  Copyright &copy; 2018 - Federico Paolinelli -
-  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
-</p>
+</div>
+<div class="container has-text-centered">
+    
+</div>
 
-</footer>
+<div class="container has-text-centered">
   
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      (function() {
+          
+          
+          if (window.location.hostname == "localhost")
+              return;
+      
+          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+          var disqus_shortname = 'fedepaolgithubio';
+          dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com/" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+  
+</div>
+<section class="section">
+  <div class="container has-text-centered">
+    <p></p>
+  </div>
+</section>
 
-<script type="text/javascript">
-      var disqus_shortname = 'fedepaolgithubio';
-      
-        
-        // var disqus_developer = 1;
-        var disqus_identifier = 'http://fedepaol.github.io/blog/2016/04/20/happines-is-relative/';
-        var disqus_url = 'http://fedepaol.github.io/blog/2016/04/20/happines-is-relative/';
-        var disqus_script = 'embed.js';
-      
-    (function () {
-      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
-      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-    }());
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-16514009-2', 'auto');
+	
+	ga('send', 'pageview');
+}
 </script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
 
 
 
-
-
-  <script type="text/javascript">
-    (function() {
-      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
-      script.src = 'https://apis.google.com/js/plusone.js';
-      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
-    })();
-  </script>
-
-
-
-  <script type="text/javascript">
-    (function(){
-      var twitterWidgets = document.createElement('script');
-      twitterWidgets.type = 'text/javascript';
-      twitterWidgets.async = true;
-      twitterWidgets.src = '//platform.twitter.com/widgets.js';
-      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
-    })();
-  </script>
-
-
-
-
-
-</body>
-</html>

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Firefox on My little software warehouse</title>
+    <link>http://fedepaol.github.io/categories/firefox/</link>
+    <description>Recent content in Firefox on My little software warehouse</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Mon, 29 Jul 2013 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="http://fedepaol.github.io/categories/firefox/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Contributing to Firefox for Android</title>
+      <link>http://fedepaol.github.io/blog/2013/07/29/contributing-to-firefox-for-android/</link>
+      <pubDate>Mon, 29 Jul 2013 00:00:00 +0000</pubDate>
+      
+      <guid>http://fedepaol.github.io/blog/2013/07/29/contributing-to-firefox-for-android/</guid>
+      <description>In the past two / three years I have been (mostly) developing Android code, even before it was cool(tm), as a way to do something different from what I do during my day time job.
+I wrote some apps, a couple of libraries, and some 80% finished projects I really hope I will finish some day.
+Recently I thought that joining some big android related open source project could have been interesting, and I went for them.</description>
+    </item>
+    
+  </channel>
+</rss>

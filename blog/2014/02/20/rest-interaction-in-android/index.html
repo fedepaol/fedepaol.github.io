@@ -1,102 +1,72 @@
-
 <!DOCTYPE html>
-<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
-<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
-<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
-<head>
-  <meta charset="utf-8">
-  <title>Rest Interaction in Android - My little software store</title>
-  <meta name="author" content="Federico Paolinelli">
-
-  
-  <meta name="description" content="In last December ('13) I was asked to submit a talk proposal for the first Italian Droidcon, which I did. It got accepted, so in Febraury I gave my &hellip;">
-  
-
-  <!-- http://t.co/dKP3o1e -->
-  <meta name="HandheldFriendly" content="True">
-  <meta name="MobileOptimized" content="320">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  
-  <link rel="canonical" href="http://fedepaol.github.io/blog/2014/02/20/rest-interaction-in-android">
-  <link href="/favicon.png" rel="icon">
-  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
-  <link href="/atom.xml" rel="alternate" title="My little software store" type="application/atom+xml">
-  <script src="/javascripts/modernizr-2.0.js"></script>
-  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
-  <script src="/javascripts/octopress.js" type="text/javascript"></script>
-  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
-<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
-<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
-
-  
-  <script type="text/javascript">
-    var _gaq = _gaq || [];
-    _gaq.push(['_setAccount', 'UA-16514009-2']);
-    _gaq.push(['_trackPageview']);
-
-    (function() {
-      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-    })();
-  </script>
+<html lang="en-us">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 
-</head>
 
-<body   >
-  <header role="banner"><hgroup>
-  <h1><a href="/">My little software store</a></h1>
-  
-    <h2>Random thoughts about my experience as moonlight software developer.</h2>
-  
-</hgroup>
 
-</header>
-  <nav role="navigation"><ul class="subscription" data-subscription="rss">
-  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
-  
-</ul>
-  
-<form action="https://www.google.com/search" method="get">
-  <fieldset role="search">
-    <input type="hidden" name="q" value="site:fedepaol.github.io" />
-    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
-  </fieldset>
-</form>
-  
-<ul class="main-navigation">
-  <li><a href="/">Blog</a></li>
-  <li><a href="/blog/archives">Archives</a></li>
-</ul>
+<title>Rest interaction in Android  | My little software warehouse</title>
 
-</nav>
-  <div id="main">
-    <div id="content">
-      <div>
-<article class="hentry" role="article">
-  
-  <header>
+<link rel="stylesheet" href="http://fedepaol.github.io//css/styles.css">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css" 
+integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbiDQ" crossorigin="anonymous">
+<script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/zenburn.min.css" crossorigin="anonymous" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js" integrity="sha256-/BfiIkHlHoVihZdc6TFuj7MmJ0TWcWsMXkeDFwhi0zw=" crossorigin="anonymous"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+<script src="http://fedepaol.github.io//js/highlight.js"></script>
+
+
+
+
+
+
+<div class="container">
+    <nav class="navbar level">
+      <div class="navbar-brand">
+          <a class="nav-item" href="http://fedepaol.github.io/"><h1 class="title is-3">My little software warehouse</h1></a>
+      </div>           
+      <div class="navbar-menu has-text-centered is-active">
+          <div class="navbar-end is-centered">
+              
+                <a href="https://twitter.com/fedepaol">
+                  <span class="icon">
+                    <i class="fab fa-twitter"></i>
+                  </span>
+                </a>
+              
+                <a href="http://fedepaol.github.io/about">
+                  <span class="icon">
+                    <i class="fas fa-info"></i>
+                  </span>
+                </a>
+              
+                <a href="https://github.com/fedepaol">
+                  <span class="icon">
+                    <i class="fab fa-github"></i>
+                  </span>
+                </a>
+              
+                <a href="http://fedepaol.github.io/www.linkedin.com/in/federico-paolinelli-2374954/">
+                  <span class="icon">
+                    <i class="fab fa-linkedin-in"></i>
+                  </span>
+                </a>
+              
+           </div>
+      </div>
+    </nav>
+  </div>
+<div class="container">
+  <h2 class="subtitle is-6">February 20, 2014</h2>
+  <h1 class="subtitle is-size-4-mobile is-size-3-desktop">Rest interaction in Android </h1>
+  <div class="content">
     
-      <h1 class="entry-title">Rest Interaction in Android</h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2014-02-20'><span class='date'><span class='date-month'>Feb</span> <span class='date-day'>20</span><span class='date-suffix'>th</span>, <span class='date-year'>2014</span></span> <span class='time'>12:00 am</span></time>
-        
-      </p>
-    
-  </header>
-
-
-<div class="entry-content"><div class='post'>
+<div class='post'>
 <div style="text-align: justify;">In last December ('13) I was asked to submit a talk proposal for the first <a href="http://it.droidcon.com/2014/lineup/">Italian Droidcon</a>, which I did. It got accepted, so in Febraury I gave my first public speech speaking of "(O)Authenticated Rest Interaction in Android" in front of real people. <br /><br />This post is meant to be a follow up with the information that can't be found in the slides<br /><br /></div><script async="" class="speakerdeck-embed" data-id="ddbb3d50725001312be21e64c86b5257" data-ratio="1.33333333333333" src="//speakerdeck.com/assets/embed.js"></script> <br /><div style="text-align: justify;"><br /></div><div style="text-align: justify;"><br /></div><div style="text-align: justify;"><br /></div><div style="text-align: justify;">I hoped to sum all the talk up in a post, but it got too long so I am going to split it in several pieces. This one will cover the asynchronous interaction with a remote webservice.&nbsp; </div><div style="text-align: justify;"><br /><br /></div><div style="text-align: justify;"><span style="font-size: small;">Disclaimer: I am not inventing anything new here, most of the content can be found on the internet. A great source of inspiration is <a href="http://www.youtube.com/watch?v=xHXn3Kg2IQE">this talk</a>, from where I took the inspiration for the approach I am going to explain, probably in a worse way. </span></div><div style="text-align: justify;"><br /><br /></div><h2 style="text-align: justify;"><span style="font-size: x-large;">Rule #1: decouple the interaction with the web service from UI components (activities / fragment)</span></h2><div style="text-align: justify;"><br /></div><div style="text-align: justify;">This means that <b><i>cut and past</i>ing that <i>AsyncTask that contains an HttpUrlConnection</i> code you found on google directly inside your activity is a bad idea</b> (I don't even want to remind you that you should NOT host the HttpUrlConnection directly inside your activity, if you are doing that you probably won't understand the rest of this post and you should restart your android journey <a href="http://developer.android.com/guide/index.html">here</a>).</div><div style="text-align: justify;"><br /></div><div style="text-align: justify;"><span style="font-size: large;">There are several reasons for that.&nbsp;</span></div><div style="text-align: justify;">You should start thinking that any network operation has a cost, in terms of bandwith and cpu power. Every time you turn the radio on involves consuming (a lot of) battery power, performing the request and parsing the result involves cpu (and therefore) battery power, <b>so any network operation is precious and you do not want to waste any performed request result</b>.</div><div style="text-align: justify;"><br /></div><div style="text-align: justify;">Said that, you should (must?) be aware that your activity might be killed at any time.. well, not at any time but as soon as it's not foregrounded anymore, which is something that is likely to happen if your beloved user chooses to leave your application in favour of candy crush, or if he receives an incoming phone call. </div><div style="text-align: justify;">BUT, the <b>result of a request started inside that activity might still be useful for a latter use</b>, so you do not want your request to be killed together with the activity that hosted it.</div><div style="text-align: justify;"><br /></div><div style="text-align: justify;">Moreover, you should be aware that every time a "configuration change" occurs, which is what commonly happens when the device gets rotated, the current activity gets killed and recreated.&nbsp;</div><div style="text-align: justify;">Well, guess what? <b>That ongoing request that costed you a lot of power / cpu is lost, and its result with that</b>. Even worse, it's not completely lost, but it might be notified to a leaked activity that nobody will look at anymore because the current one is the one which was recreated. There are ways to circumvent this, like hosting the components that you want to survive to a configuration change inside a <a href="http://www.vogella.com/tutorials/AndroidFragments/article.html#headlessfragments">headless fragment</a>, but again, you should be very careful.</div><div style="text-align: justify;"><br /></div><div style="text-align: justify;">Finally, given that you want to host the interaction with the service inside the activity, and because the activity is guaranteed to be active only as long as it is in foreground, it is obvious that in this way <b>is impossible to schedule requests</b> to be performed while the application is not being used.</div><div style="text-align: justify;"><br /></div><div style="text-align: justify;">Malus point: if you have a <i>god activity</i> that handles the UI interaction, a component like a AsyncTask or a Thread that is in charge of performing the request, the real interaction with the service AND the interaction with the activity in order to update the UI, well, you are likely to have a poor encapsulation of your code and you might have some issues while testing your code.</div><br /><br /><div class="separator" style="clear: both; text-align: center;"><a href="http://4.bp.blogspot.com/-uv98YZgJtOA/UwZwlqMlBKI/AAAAAAAAMWY/i68I8z_M-uE/s1600/fry.png" imageanchor="1" style="margin-left: 1em; margin-right: 1em;"><img border="0" src="http://4.bp.blogspot.com/-uv98YZgJtOA/UwZwlqMlBKI/AAAAAAAAMWY/i68I8z_M-uE/s1600/fry.png" height="240" width="320" /></a></div><h2 style="text-align: center;"><span style="font-size: large;">So where am I supposed to perform the calls?</span></h2><h3 style="text-align: center;">&nbsp;</h3><div style="text-align: justify;">The answer is pretty simple. Use a Service, which is <i>"is an application component that can perform long-running operations in the background and does not provide a user interface"</i>, so it's just right for our purpouse. The idea here is to host that <b>rest call inside a service</b>, so it can survive to any activity lifecycle event. </div><div style="text-align: justify;">There are a couple of ways to interact with a service, you can throw intents at it, or you can bind your activities to it. In the latter case, you'll get back a reference to the whole service object, and so you are able to implement a rich api your activity can interact with.</div><div style="text-align: justify;">On the other hand, you should be careful and stop your service when you do not need it anymore (ie when all the requests are satisfied), and you should also remember that you (still) need to host your asynchronous interaction inside of some kind of threaded component.&nbsp;</div><div style="text-align: justify;"><br /></div><h3 style="text-align: justify;"><span style="font-size: large;">IntentService!</span></h3><div style="text-align: justify;">Are my favourite flavour of services when speaking of rest interaction. Why is that?</div><ul><li>IntentService(s) provide only a <i>onHandleIntent</i> method, which is performed inside a different thread. No need to spawn an asynctask</li><li>IntentService(s) get destroyed as soon as <i>onHandleIntent</i> returns. No need to understand (or risk to forget) when the service needs to be shut down.</li></ul>Have you ever heard of <a href="http://en.wikipedia.org/wiki/Command_pattern">Command Pattern</a> ? You can just embed your requests parameter inside the intent, parse them in <i>onHandleIntent</i> and let the <i>intentservice</i> execute the request for you. Isn't that cool?<br /><br /><br /><h2><span style="font-size: large;">Cool! Now I have the data I retrieved from the service, what should I do with that?</span></h2><div style="text-align: center;"><br /></div><div style="text-align: justify;"><span style="font-size: large;">Store it!</span> The two most common alternatives are <b>plain sqllite or using a content provider</b>. The first benefit of using some kind of persistant storage is that <b>you don't want to perform the same costly request twice in order to retrieve the same data</b>.</div><div style="text-align: justify;">Moreover, storing the data enforces the decoupling of your service with the activity, since the activity will fetch the data from the storage, regarless of when the storage was filled. This is also better in terms of user experience, because it's better to find some kind of data instead of an empty listview if the device is offline.</div><div style="text-align: justify;"><br /></div><div style="text-align: justify;">Bonus point! If you want to perform the inserts a bit faster, check if you can fetch only new data, if the apis you are consuming are offering any kind of timestamp parameter. Plus, remember to use transactions and bulkinserts in order to speed up your inserts.</div><h2 style="text-align: justify;"></h2><h2 style="text-align: justify;"><span style="font-size: large;">Anything missing?</span></h2><div style="text-align: justify;">Ok, your activity asked to the service to perform the request, the request was performed, the result parsed and stored in your content provider. You should now notify the activity that the storage contains something new.&nbsp;</div><div style="text-align: justify;">You have some options:</div><ul><li>Bind the activity to the service and pass a callback</li><li>Use <a href="http://developer.android.com/reference/android/support/v4/content/LocalBroadcastManager.html">(local) broadcasts </a></li><li>Use a message bus (<a href="http://square.github.io/otto/">Otto</a>, <a href="https://github.com/greenrobot/EventBus">eventbus</a>)</li></ul>Or if you are using a content provider, you could take advantage of CursorLoader / <a href="http://www.grokkingandroid.com/use-contentobserver-to-listen-to-changes/">Observers </a>, which I think are the less error prone way to feed a listview out of a content provider's data.<br /><br />You just need to remember to add a couple of lines of code:<br /><div class="separator" style="clear: both; text-align: center;"><a href="http://3.bp.blogspot.com/-hX1BW7VBeHo/UwZ43lS-BBI/AAAAAAAAMWo/N5b4R1G8AGM/s1600/DroidconIt.034.jpg" imageanchor="1" style="margin-left: 1em; margin-right: 1em;"><img border="0" src="http://3.bp.blogspot.com/-hX1BW7VBeHo/UwZ43lS-BBI/AAAAAAAAMWo/N5b4R1G8AGM/s1600/DroidconIt.034.jpg" height="480" width="640" /></a></div><br /><h2><span style="font-size: large;">Final result:</span></h2><br />The final picture of this kind of architecture is the following (please forgive my extremely bad design skills):<br /><br /><div class="separator" style="clear: both; text-align: center;"><a href="http://3.bp.blogspot.com/-GZBxeNRISk0/UwZ5O3Q8D0I/AAAAAAAAMWw/JzGE9krKL88/s1600/DroidconIt.035.jpg" imageanchor="1" style="margin-left: 1em; margin-right: 1em;"><img border="0" src="http://3.bp.blogspot.com/-GZBxeNRISk0/UwZ5O3Q8D0I/AAAAAAAAMWw/JzGE9krKL88/s1600/DroidconIt.035.jpg" height="480" width="640" /></a></div><br />Please note how the the activity asks the Service to perform the request with the webservice and then forgets about it. Any time the data needs to be displayed, it's always fetched from the storage.<br />The only other interaction happens when the service tells the activity it needs to reload the data.<br />In this way, any ongoing request will survive even if the activity gets killed. When the user will return to your application, the newly created activity will load the latest fetched data from the storage.<br /><br /><br />This was the first post related to the <b>Rest Interaction in Android</b>. I really hope I did not say too many wrong things...<br /><br />If you liked this post, consider following me on twitter @fedepaol. <br /><br /><br /><br /></div>
 <h2>Comments</h2>
 <div class='comments'>
@@ -146,183 +116,50 @@ Thank you for the very useful info.<br /><br />What could you tell in regards to
 Hello, Federico. Could you explain how can we handle a case with endless list of content? As i understand we should download all content and find changes to persist. In general the main question is: How to maintain consistency beetween remote and local database? Thank you.</div>
 </div>
 </div>
-</div>
 
-
-  <footer>
-    <p class="meta">
-      
-  
-
-<span class="byline author vcard">Posted by <span class="fn">Federico Paolinelli</span></span>
-
-      
-
-
-
-
-<time class='entry-date' datetime='2014-02-20'><span class='date'><span class='date-month'>Feb</span> <span class='date-day'>20</span><span class='date-suffix'>th</span>, <span class='date-year'>2014</span></span> <span class='time'>12:00 am</span></time>
-      
-
-<span class="categories">
-  
-    <a class='category' href='/blog/categories/android/'>android</a>, <a class='category' href='/blog/categories/http/'>http</a>, <a class='category' href='/blog/categories/rest/'>rest</a>, <a class='category' href='/blog/categories/webservice/'>webservice</a>
-  
-</span>
-
-
-    </p>
-    
-      <div class="sharing">
-  
-  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://fedepaol.github.io/blog/2014/02/20/rest-interaction-in-android/" data-via="fedepaol" data-counturl="http://fedepaol.github.io/blog/2014/02/20/rest-interaction-in-android/" >Tweet</a>
-  
-  
-  <div class="g-plusone" data-size="medium"></div>
-  
-  
-</div>
-
-    
-    <p class="meta">
-      
-        <a class="basic-alignment left" href="/blog/2013/07/29/contributing-to-firefox-for-android/" title="Previous Post: Contributing to Firefox for Android">&laquo; Contributing to Firefox for Android</a>
-      
-      
-        <a class="basic-alignment right" href="/blog/2014/04/08/preloading-localized-data-in-sqllte/" title="Next Post: Generating preloaded sqlite data">Generating preloaded sqlite data &raquo;</a>
-      
-    </p>
-  </footer>
-</article>
-
-</div>
-
-<aside class="sidebar">
-  
-    <section>
-  <h1>About Me</h1>
-  <p>Lead developer with electronic trading software by day, passionate about opensource. I spend a lot of my spare time writing Go and Android software. Table Tennis player, snowboarder, dad. I also contributed to Firefox for Android.</p>
-  <a href="mailto:fedepaol@gmail.com" target="_top">fedepaol@gmail.com</a>
-</section>
-<section>
-  <h1>Recent Posts</h1>
-  <ul id="recent_posts">
-    
-      <li class="post">
-        <a href="/blog/2018/12/11/fast-messaging-with-nats-and-go-part-2/">Fast Messaging With Nats and Go Part 2</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2018/10/27/fast-messaging-with-nats-and-go/">Fast Messaging With Nats and Go</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2018/10/26/a-new-chapter/">A New (Side) Chapter</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2017/04/30/android-okhttp-and-websockets/">Android, Okhttp and Websockets</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2016/08/27/android-mvp-testing/">Android, MVP, Dagger and Testing</a>
-      </li>
-    
-  </ul>
-</section>
-
-<section>
-  <h1>GitHub Repos</h1>
-  <ul id="gh_repos">
-    <li class="loading">Status updating...</li>
-  </ul>
-  
-  <a href="https://github.com/fedepaol">@fedepaol</a> on GitHub
-  
-  <script type="text/javascript">
-    $(document).ready(function(){
-        if (!window.jXHR){
-            var jxhr = document.createElement('script');
-            jxhr.type = 'text/javascript';
-            jxhr.src = '/javascripts/libs/jXHR.js';
-            var s = document.getElementsByTagName('script')[0];
-            s.parentNode.insertBefore(jxhr, s);
-        }
-
-        github.showRepos({
-            user: 'fedepaol',
-            count: 0,
-            skip_forks: true,
-            target: '#gh_repos'
-        });
-    });
-  </script>
-  <script src="/javascripts/github.js" type="text/javascript"> </script>
-</section>
-
-
-
-<section class="googleplus">
-  <h1>
-    <a href="https://plus.google.com/+FedericoPaolinelli?rel=author">
-      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
-      Google+
-    </a>
-  </h1>
-</section>
-
-
-
-<section>
-	<h1>On Twitter:</h1>
-	<div>
-		<p><br /><a href="http://twitter.com/fedepaol" target="_blank">My Tweets, on Twitter.</a></p>
-		<a href="http://twitter.com/fedepaol" class="twitter-follow-button" data-show-count="">Follow @fedepaol</a>
-	</div>
-</section>
-
-
-  
-</aside>
-
-
-    </div>
   </div>
-  <footer role="contentinfo"><p>
-  Copyright &copy; 2018 - Federico Paolinelli -
-  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
-</p>
+</div>
+<div class="container has-text-centered">
+    
+</div>
 
-</footer>
+<div class="container has-text-centered">
   
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      (function() {
+          
+          
+          if (window.location.hostname == "localhost")
+              return;
+      
+          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+          var disqus_shortname = 'fedepaolgithubio';
+          dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com/" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+  
+</div>
+<section class="section">
+  <div class="container has-text-centered">
+    <p></p>
+  </div>
+</section>
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-16514009-2', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
 
 
 
-
-
-  <script type="text/javascript">
-    (function() {
-      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
-      script.src = 'https://apis.google.com/js/plusone.js';
-      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
-    })();
-  </script>
-
-
-
-  <script type="text/javascript">
-    (function(){
-      var twitterWidgets = document.createElement('script');
-      twitterWidgets.type = 'text/javascript';
-      twitterWidgets.async = true;
-      twitterWidgets.src = '//platform.twitter.com/widgets.js';
-      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
-    })();
-  </script>
-
-
-
-
-
-</body>
-</html>

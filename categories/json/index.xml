@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Json on My little software warehouse</title>
+    <link>http://fedepaol.github.io/categories/json/</link>
+    <description>Recent content in Json on My little software warehouse</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Mon, 30 Jan 2012 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="http://fedepaol.github.io/categories/json/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>PostmanLib - Android and Rest Web Services</title>
+      <link>http://fedepaol.github.io/blog/2012/01/30/postmanlib-android-and-rest-web-services/</link>
+      <pubDate>Mon, 30 Jan 2012 00:00:00 +0000</pubDate>
+      
+      <guid>http://fedepaol.github.io/blog/2012/01/30/postmanlib-android-and-rest-web-services/</guid>
+      <description>Edit 2013-03-10: I&#39;ve performed a substancial refactoring of postmanlib, and the details can be found in this new post
+With the development of MyDearSanta app, I needed to fetch and put some data to a rest service developed using django python framework with a simple set of json based rest apis.
+The development of the interaction between android and the rest web service was a bit messy because I was in hurry to release the app before Christmas (giving it&#39;s xmas related nature), but while developing it I thought it could have been a good start for my first android library.</description>
+    </item>
+    
+  </channel>
+</rss>

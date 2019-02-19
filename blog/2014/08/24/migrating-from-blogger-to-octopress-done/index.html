@@ -1,102 +1,73 @@
-
 <!DOCTYPE html>
-<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
-<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
-<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
-<head>
-  <meta charset="utf-8">
-  <title>Migrating From Blogger to Octopress (Done!) - My little software store</title>
-  <meta name="author" content="Federico Paolinelli">
-
-  
-  <meta name="description" content="It feels a bit like this but when I had to write a new blogpost and had to embed some code snippets into my blogger hosted blog, I got so pissed of &hellip;">
-  
-
-  <!-- http://t.co/dKP3o1e -->
-  <meta name="HandheldFriendly" content="True">
-  <meta name="MobileOptimized" content="320">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  
-  <link rel="canonical" href="http://fedepaol.github.io/blog/2014/08/24/migrating-from-blogger-to-octopress-done">
-  <link href="/favicon.png" rel="icon">
-  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
-  <link href="/atom.xml" rel="alternate" title="My little software store" type="application/atom+xml">
-  <script src="/javascripts/modernizr-2.0.js"></script>
-  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
-  <script src="/javascripts/octopress.js" type="text/javascript"></script>
-  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
-<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
-<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
-
-  
-  <script type="text/javascript">
-    var _gaq = _gaq || [];
-    _gaq.push(['_setAccount', 'UA-16514009-2']);
-    _gaq.push(['_trackPageview']);
-
-    (function() {
-      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-    })();
-  </script>
+<html lang="en-us">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 
-</head>
 
-<body   >
-  <header role="banner"><hgroup>
-  <h1><a href="/">My little software store</a></h1>
-  
-    <h2>Random thoughts about my experience as moonlight software developer.</h2>
-  
-</hgroup>
 
-</header>
-  <nav role="navigation"><ul class="subscription" data-subscription="rss">
-  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
-  
-</ul>
-  
-<form action="https://www.google.com/search" method="get">
-  <fieldset role="search">
-    <input type="hidden" name="q" value="site:fedepaol.github.io" />
-    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
-  </fieldset>
-</form>
-  
-<ul class="main-navigation">
-  <li><a href="/">Blog</a></li>
-  <li><a href="/blog/archives">Archives</a></li>
-</ul>
+<title>Migrating from blogger to octopress done | My little software warehouse</title>
 
-</nav>
-  <div id="main">
-    <div id="content">
-      <div>
-<article class="hentry" role="article">
-  
-  <header>
+<link rel="stylesheet" href="http://fedepaol.github.io//css/styles.css">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css" 
+integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbiDQ" crossorigin="anonymous">
+<script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/zenburn.min.css" crossorigin="anonymous" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js" integrity="sha256-/BfiIkHlHoVihZdc6TFuj7MmJ0TWcWsMXkeDFwhi0zw=" crossorigin="anonymous"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+<script src="http://fedepaol.github.io//js/highlight.js"></script>
+
+
+
+
+
+
+<div class="container">
+    <nav class="navbar level">
+      <div class="navbar-brand">
+          <a class="nav-item" href="http://fedepaol.github.io/"><h1 class="title is-3">My little software warehouse</h1></a>
+      </div>           
+      <div class="navbar-menu has-text-centered is-active">
+          <div class="navbar-end is-centered">
+              
+                <a href="https://twitter.com/fedepaol">
+                  <span class="icon">
+                    <i class="fab fa-twitter"></i>
+                  </span>
+                </a>
+              
+                <a href="http://fedepaol.github.io/about">
+                  <span class="icon">
+                    <i class="fas fa-info"></i>
+                  </span>
+                </a>
+              
+                <a href="https://github.com/fedepaol">
+                  <span class="icon">
+                    <i class="fab fa-github"></i>
+                  </span>
+                </a>
+              
+                <a href="http://fedepaol.github.io/www.linkedin.com/in/federico-paolinelli-2374954/">
+                  <span class="icon">
+                    <i class="fab fa-linkedin-in"></i>
+                  </span>
+                </a>
+              
+           </div>
+      </div>
+    </nav>
+  </div>
+<div class="container">
+  <h2 class="subtitle is-6">August 24, 2014</h2>
+  <h1 class="subtitle is-size-4-mobile is-size-3-desktop">Migrating from blogger to octopress done</h1>
+  <div class="content">
     
-      <h1 class="entry-title">Migrating From Blogger to Octopress (Done!)</h1>
-    
-    
-      <p class="meta">
-        
 
-
-
-
-<time class='entry-date' datetime='2014-08-24T19:29:46+02:00'><span class='date'><span class='date-month'>Aug</span> <span class='date-day'>24</span><span class='date-suffix'>th</span>, <span class='date-year'>2014</span></span> <span class='time'>7:29 pm</span></time>
-        
-      </p>
-    
-  </header>
-
-
-<div class="entry-content"><p>It feels a bit like this <img src="http://i.imgur.com/t0XHtgJ.gif" alt="Light bulb" /></p>
+<p>It feels a bit like this <img src="http://i.imgur.com/t0XHtgJ.gif" alt="Light bulb" /></p>
 
 <p>but when I had to write a new blogpost and had to embed some code snippets into my blogger hosted blog, I got so pissed of that I chose to migrate my existing blog to a github hosted instance of octopress.</p>
 
@@ -112,20 +83,19 @@ However, I had to change a couple of things and I thought those might be helpful
 <li>setup redirects from blogger to your new blog</li>
 </ul>
 
-
-<h2>Setting octopress up</h2>
+<h2 id="setting-octopress-up">Setting octopress up</h2>
 
 <p>Nothing to say here. Just go to octopress website and follow the instructions.</p>
 
-<h2>Importing posts from blogger</h2>
+<h2 id="importing-posts-from-blogger">Importing posts from blogger</h2>
 
 <p>This is pretty straightforward too. Export your blogger content as xml, and use <a href="https://gist.github.com/juniorz/1564581">this ruby script</a> that generates a <em>posts</em> folder containing all the posts exported from blogger. Anyway, refer to <a href="http://staxmanade.com/2014/04/migrating-blogspot-to-octopress-part-4-import-content-into-ctopress/">Jason&rsquo;s blog</a>, everything is described accurately there.</p>
 
-<h2>Fix internal links</h2>
+<h2 id="fix-internal-links">Fix internal links</h2>
 
 <p>You&rsquo;ll have to play a bit with <em>sed</em> in order to fix internal links, otherwise they will keep pointing to blogspot.</p>
 
-<h2>Setup redirects</h2>
+<h2 id="setup-redirects">Setup redirects</h2>
 
 <p>Here is where things get interesting, because you will want to make visitors of the old url be redirected to the new blog (possibily with 301). The whole process is a bit tricky due to blogger limitation (for more details check <a href="http://staxmanade.com/2014/04/migrating-blogspot-to-octopress-part-6-301-redirect-old-posts-to-new-location/">here</a>).</p>
 
@@ -136,80 +106,14 @@ However, I had to change a couple of things and I thought those might be helpful
 <p>And finally, since powershell is not an option, here is my python version of the script. It binds the post id with the title of the posts, loop all the html files in your post folder, injects the redirection in the yaml header.</p>
 
 <p>Using it is as easy as calling:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'>python blogger_import.py -p octopress/source/_posts/ -b ./blog-08-22-2014.xml
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">python blogger_import.py -p octopress/source/_posts/ -b ./blog-08-22-2014.xml</code></pre></div>
 <p>where p is the path of your posts folder, b is the xml file produced by blogspot.</p>
 
 <p>Here is the script:</p>
 
-<div><script src='https://gist.github.com/e46635e3d7de475b0546.js'></script>
-<noscript><pre><code>import argparse
-import xml.etree.cElementTree as ET
-import os
+<p>{% gist e46635e3d7de475b0546 %}</p>
 
-
-def is_post(node):
-    t = node.find(&#39;{http://www.w3.org/2005/Atom}category&#39;).get(&#39;term&#39;)
-    d = node.find(&#39;{http://purl.org/atom/app#}control&#39;)
-    return (not d) and (t == &#39;http://schemas.google.com/blogger/2008/kind#post&#39;)
-
-def get_posts_id(blogger_dump):
-    title_map = {}
-    tree = ET.parse(blogger_dump)
-    elem = tree.getroot()
-    feed = elem.findall(&#39;{http://www.w3.org/2005/Atom}entry&#39;)
-    for f in filter(is_post, feed):
-        post_id = f.find(&#39;{http://www.w3.org/2005/Atom}id&#39;)
-        id_number = post_id.text.split(&#39;-&#39;)[2]
-        post_title = f.find(&#39;{http://www.w3.org/2005/Atom}title&#39;).text
-        title_map[post_title] = id_number
-    return title_map
-
-def inject_redirect(file_name, title_map):
-    yaml_separator = 0
-    old_file = file_name + &#39;old&#39;
-    print file_name
-    print old_file
-    os.rename(file_name, old_file)
-    f = open(old_file, &#39;r&#39;)
-    n = open(file_name, &#39;w+&#39;)
-    for line in f:
-        if line == &#39;---&#39;:
-            yaml_separator = yaml_separator + 1
-        if yaml_separator == 2:
-            n.write(line)
-            continue
-        if line.startswith(&#39;title&#39;):
-            title = line.split(&#39;&quot;&#39;)[1]
-            try:
-                post_id = title_map[title]
-                n.write(&#39;redirect_from:\n&#39;)
-                n.write(&#39;  - /blog/%s/\n&#39;%post_id)
-            except KeyError:
-                print &#39;id not found for &#39; + title
-        n.write(line)
-
-def set_redirect(posts_path, titles_map):
-    for file_name in os.listdir(posts_path):
-        if (file_name.endswith(&#39;html&#39;)):
-            inject_redirect(os.path.join(posts_path, file_name), titles_map)
-
-if __name__ == &#39;__main__&#39;:
-    parser = argparse.ArgumentParser()
-    parser.add_argument(&#39;-p&#39;, &#39;--posts&#39;, dest=&#39;posts_path&#39;, help=&#39;path of the converted _posts&#39;)
-    parser.add_argument(&#39;-b&#39;, &#39;--blogger&#39;, dest=&#39;blogger_dump&#39;, help=&#39;blogger dump file&#39;)
-    args = parser.parse_args()
-
-    titles_map = get_posts_id(args.blogger_dump)
-    set_redirect(args.posts_path, titles_map)
-</code></pre></noscript></div>
-
-
-<h2>TL;DR</h2>
+<h2 id="tl-dr">TL;DR</h2>
 
 <ul>
 <li>Read <a href="http://staxmanade.com/2014/04/migrating-blogspot-to-octopress-part-1-introduction/">Jason&rsquo;s blog</a></li>
@@ -218,207 +122,51 @@ if __name__ == &#39;__main__&#39;:
 <li>Setup blogger template as described in Jason&rsquo;s blog</li>
 </ul>
 
-
 <p>PS: I still need to write the blogpost that made me switch to octopress.</p>
-</div>
 
-
-  <footer>
-    <p class="meta">
-      
-  
-
-<span class="byline author vcard">Posted by <span class="fn">Federico Paolinelli</span></span>
-
-      
-
-
-
-
-<time class='entry-date' datetime='2014-08-24T19:29:46+02:00'><span class='date'><span class='date-month'>Aug</span> <span class='date-day'>24</span><span class='date-suffix'>th</span>, <span class='date-year'>2014</span></span> <span class='time'>7:29 pm</span></time>
-      
-
-<span class="categories">
-  
-    <a class='category' href='/blog/categories/blog/'>blog</a>, <a class='category' href='/blog/categories/octopress/'>octopress</a>, <a class='category' href='/blog/categories/python/'>python</a>
-  
-</span>
-
-
-    </p>
-    
-      <div class="sharing">
-  
-  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://fedepaol.github.io/blog/2014/08/24/migrating-from-blogger-to-octopress-done/" data-via="fedepaol" data-counturl="http://fedepaol.github.io/blog/2014/08/24/migrating-from-blogger-to-octopress-done/" >Tweet</a>
-  
-  
-  <div class="g-plusone" data-size="medium"></div>
-  
-  
-</div>
-
-    
-    <p class="meta">
-      
-        <a class="basic-alignment left" href="/blog/2014/04/08/preloading-localized-data-in-sqllte/" title="Previous Post: Generating preloaded sqlite data">&laquo; Generating preloaded sqlite data</a>
-      
-      
-        <a class="basic-alignment right" href="/blog/2014/09/01/dragging-with-viewdraghelper/" title="Next Post: Dragging with ViewDragHelper">Dragging with ViewDragHelper &raquo;</a>
-      
-    </p>
-  </footer>
-</article>
-
-  <section>
-    <h1>Comments</h1>
-    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-</div>
-  </section>
-
-</div>
-
-<aside class="sidebar">
-  
-    <section>
-  <h1>About Me</h1>
-  <p>Lead developer with electronic trading software by day, passionate about opensource. I spend a lot of my spare time writing Go and Android software. Table Tennis player, snowboarder, dad. I also contributed to Firefox for Android.</p>
-  <a href="mailto:fedepaol@gmail.com" target="_top">fedepaol@gmail.com</a>
-</section>
-<section>
-  <h1>Recent Posts</h1>
-  <ul id="recent_posts">
-    
-      <li class="post">
-        <a href="/blog/2018/12/11/fast-messaging-with-nats-and-go-part-2/">Fast Messaging With Nats and Go Part 2</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2018/10/27/fast-messaging-with-nats-and-go/">Fast Messaging With Nats and Go</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2018/10/26/a-new-chapter/">A New (Side) Chapter</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2017/04/30/android-okhttp-and-websockets/">Android, Okhttp and Websockets</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2016/08/27/android-mvp-testing/">Android, MVP, Dagger and Testing</a>
-      </li>
-    
-  </ul>
-</section>
-
-<section>
-  <h1>GitHub Repos</h1>
-  <ul id="gh_repos">
-    <li class="loading">Status updating...</li>
-  </ul>
-  
-  <a href="https://github.com/fedepaol">@fedepaol</a> on GitHub
-  
-  <script type="text/javascript">
-    $(document).ready(function(){
-        if (!window.jXHR){
-            var jxhr = document.createElement('script');
-            jxhr.type = 'text/javascript';
-            jxhr.src = '/javascripts/libs/jXHR.js';
-            var s = document.getElementsByTagName('script')[0];
-            s.parentNode.insertBefore(jxhr, s);
-        }
-
-        github.showRepos({
-            user: 'fedepaol',
-            count: 0,
-            skip_forks: true,
-            target: '#gh_repos'
-        });
-    });
-  </script>
-  <script src="/javascripts/github.js" type="text/javascript"> </script>
-</section>
-
-
-
-<section class="googleplus">
-  <h1>
-    <a href="https://plus.google.com/+FedericoPaolinelli?rel=author">
-      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
-      Google+
-    </a>
-  </h1>
-</section>
-
-
-
-<section>
-	<h1>On Twitter:</h1>
-	<div>
-		<p><br /><a href="http://twitter.com/fedepaol" target="_blank">My Tweets, on Twitter.</a></p>
-		<a href="http://twitter.com/fedepaol" class="twitter-follow-button" data-show-count="">Follow @fedepaol</a>
-	</div>
-</section>
-
-
-  
-</aside>
-
-
-    </div>
   </div>
-  <footer role="contentinfo"><p>
-  Copyright &copy; 2018 - Federico Paolinelli -
-  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
-</p>
+</div>
+<div class="container has-text-centered">
+    
+</div>
 
-</footer>
+<div class="container has-text-centered">
   
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      (function() {
+          
+          
+          if (window.location.hostname == "localhost")
+              return;
+      
+          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+          var disqus_shortname = 'fedepaolgithubio';
+          dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com/" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+  
+</div>
+<section class="section">
+  <div class="container has-text-centered">
+    <p></p>
+  </div>
+</section>
 
-<script type="text/javascript">
-      var disqus_shortname = 'fedepaolgithubio';
-      
-        
-        // var disqus_developer = 1;
-        var disqus_identifier = 'http://fedepaol.github.io/blog/2014/08/24/migrating-from-blogger-to-octopress-done/';
-        var disqus_url = 'http://fedepaol.github.io/blog/2014/08/24/migrating-from-blogger-to-octopress-done/';
-        var disqus_script = 'embed.js';
-      
-    (function () {
-      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
-      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-    }());
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-16514009-2', 'auto');
+	
+	ga('send', 'pageview');
+}
 </script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
 
 
 
-
-
-  <script type="text/javascript">
-    (function() {
-      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
-      script.src = 'https://apis.google.com/js/plusone.js';
-      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
-    })();
-  </script>
-
-
-
-  <script type="text/javascript">
-    (function(){
-      var twitterWidgets = document.createElement('script');
-      twitterWidgets.type = 'text/javascript';
-      twitterWidgets.async = true;
-      twitterWidgets.src = '//platform.twitter.com/widgets.js';
-      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
-    })();
-  </script>
-
-
-
-
-
-</body>
-</html>

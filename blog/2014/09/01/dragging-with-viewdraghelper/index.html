@@ -1,106 +1,80 @@
-
 <!DOCTYPE html>
-<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
-<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
-<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
-<head>
-  <meta charset="utf-8">
-  <title>Dragging With ViewDragHelper - My little software store</title>
-  <meta name="author" content="Federico Paolinelli">
-
-  
-  <meta name="description" content="While working on my last side gig, a patch to Firefox for Android to allow the urlbar to be dragged in order to show content hidden behind the main &hellip;">
-  
-
-  <!-- http://t.co/dKP3o1e -->
-  <meta name="HandheldFriendly" content="True">
-  <meta name="MobileOptimized" content="320">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  
-  <link rel="canonical" href="http://fedepaol.github.io/blog/2014/09/01/dragging-with-viewdraghelper">
-  <link href="/favicon.png" rel="icon">
-  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
-  <link href="/atom.xml" rel="alternate" title="My little software store" type="application/atom+xml">
-  <script src="/javascripts/modernizr-2.0.js"></script>
-  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
-  <script src="/javascripts/octopress.js" type="text/javascript"></script>
-  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
-<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
-<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
-
-  
-  <script type="text/javascript">
-    var _gaq = _gaq || [];
-    _gaq.push(['_setAccount', 'UA-16514009-2']);
-    _gaq.push(['_trackPageview']);
-
-    (function() {
-      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-    })();
-  </script>
+<html lang="en-us">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 
-</head>
 
-<body   >
-  <header role="banner"><hgroup>
-  <h1><a href="/">My little software store</a></h1>
-  
-    <h2>Random thoughts about my experience as moonlight software developer.</h2>
-  
-</hgroup>
 
-</header>
-  <nav role="navigation"><ul class="subscription" data-subscription="rss">
-  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
-  
-</ul>
-  
-<form action="https://www.google.com/search" method="get">
-  <fieldset role="search">
-    <input type="hidden" name="q" value="site:fedepaol.github.io" />
-    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
-  </fieldset>
-</form>
-  
-<ul class="main-navigation">
-  <li><a href="/">Blog</a></li>
-  <li><a href="/blog/archives">Archives</a></li>
-</ul>
+<title>Dragging with viewdraghelper | My little software warehouse</title>
 
-</nav>
-  <div id="main">
-    <div id="content">
-      <div>
-<article class="hentry" role="article">
-  
-  <header>
+<link rel="stylesheet" href="http://fedepaol.github.io//css/styles.css">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css" 
+integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbiDQ" crossorigin="anonymous">
+<script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/zenburn.min.css" crossorigin="anonymous" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js" integrity="sha256-/BfiIkHlHoVihZdc6TFuj7MmJ0TWcWsMXkeDFwhi0zw=" crossorigin="anonymous"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+<script src="http://fedepaol.github.io//js/highlight.js"></script>
+
+
+
+
+
+
+<div class="container">
+    <nav class="navbar level">
+      <div class="navbar-brand">
+          <a class="nav-item" href="http://fedepaol.github.io/"><h1 class="title is-3">My little software warehouse</h1></a>
+      </div>           
+      <div class="navbar-menu has-text-centered is-active">
+          <div class="navbar-end is-centered">
+              
+                <a href="https://twitter.com/fedepaol">
+                  <span class="icon">
+                    <i class="fab fa-twitter"></i>
+                  </span>
+                </a>
+              
+                <a href="http://fedepaol.github.io/about">
+                  <span class="icon">
+                    <i class="fas fa-info"></i>
+                  </span>
+                </a>
+              
+                <a href="https://github.com/fedepaol">
+                  <span class="icon">
+                    <i class="fab fa-github"></i>
+                  </span>
+                </a>
+              
+                <a href="http://fedepaol.github.io/www.linkedin.com/in/federico-paolinelli-2374954/">
+                  <span class="icon">
+                    <i class="fab fa-linkedin-in"></i>
+                  </span>
+                </a>
+              
+           </div>
+      </div>
+    </nav>
+  </div>
+<div class="container">
+  <h2 class="subtitle is-6">September 1, 2014</h2>
+  <h1 class="subtitle is-size-4-mobile is-size-3-desktop">Dragging with viewdraghelper</h1>
+  <div class="content">
     
-      <h1 class="entry-title">Dragging With ViewDragHelper</h1>
-    
-    
-      <p class="meta">
-        
 
-
-
-
-<time class='entry-date' datetime='2014-09-01T20:48:20+02:00'><span class='date'><span class='date-month'>Sep</span> <span class='date-day'>1</span><span class='date-suffix'>st</span>, <span class='date-year'>2014</span></span> <span class='time'>8:48 pm</span></time>
-        
-      </p>
-    
-  </header>
-
-
-<div class="entry-content"><p>While working on my <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=909434">last side gig</a>, a patch to Firefox for Android to allow the urlbar to be dragged in order to show content hidden behind the main view, I had to deal with ViewDragHelper and understand how it works.</p>
+<p>While working on my <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=909434">last side gig</a>, a patch to Firefox for Android to allow the urlbar to be dragged in order to show content hidden behind the main view, I had to deal with ViewDragHelper and understand how it works.</p>
 
 <p>The final result (please note that the patch is still under review) is something like this:</p>
 
-<div class="embed-video-container"><iframe src="http://www.youtube.com/embed/rKRIZB6nQfg" allowfullscreen></iframe></div>
+
+<div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden;">
+  <iframe src="//www.youtube.com/embed/rKRIZB6nQfg" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border:0;" allowfullscreen title="YouTube Video"></iframe>
+</div>
 
 
 <p>It caused me more than one headache, and for this reason I am writing this post hoping it might be helpful to anybody wanting to tinker with it.</p>
@@ -111,7 +85,7 @@
 
 <p>Let&rsquo;s start with..</p>
 
-<h2>How touch events are handled</h2>
+<h2 id="how-touch-events-are-handled">How touch events are handled</h2>
 
 <p>A good source of information is the <a href="http://developer.android.com/training/gestures/viewgroup.html">official documentation</a>. However, I&rsquo;ll write a short introduction here.</p>
 
@@ -121,48 +95,26 @@
 
 <p>Children view can also rebel against their parent tiranny, and disable this mechanism by calling <code>requestDisallowInterceptTouchEvent()</code>. By doing that, they ensure that the touch event wont be passed to the parent view.</p>
 
-<p><img src="/images/touches.png" width="350" height="350" title="touches" alt="images"></p>
+<p><img src="/images/touches.png" alt="" /></p>
 
-<h2>How ViewDragHelper works</h2>
+<h2 id="how-viewdraghelper-works">How ViewDragHelper works</h2>
 
 <p>The idea behind it is pretty simple. You register a draghelper on a container view</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">mDragHelper</span> <span class="o">=</span> <span class="n">ViewDragHelper</span><span class="o">.</span><span class="na">create</span><span class="o">(</span><span class="k">this</span><span class="o">,</span> <span class="mf">1.0f</span><span class="o">,</span> <span class="k">new</span> <span class="nf">DragHelperCallback</span><span class="o">());</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">	mDragHelper <span style="color:#f92672">=</span> ViewDragHelper<span style="color:#f92672">.</span><span style="color:#a6e22e">create</span><span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">,</span> 1<span style="color:#f92672">.</span><span style="color:#a6e22e">0f</span><span style="color:#f92672">,</span> <span style="color:#66d9ef">new</span> DragHelperCallback<span style="color:#f92672">());</span></code></pre></div>
 <p>and then you set a couple of entry points, one to listen if a drag is being started (or is in progress), the other to handle the motion events and perform the dragging when the event is being passed to the view it registered against:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">boolean</span> <span style="color:#a6e22e">onInterceptTouchEvent</span><span style="color:#f92672">(</span>MotionEvent event<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>mDragHelper<span style="color:#f92672">.</span><span style="color:#a6e22e">shouldInterceptTouchEvent</span><span style="color:#f92672">(</span>event<span style="color:#f92672">))</span> <span style="color:#f92672">{</span>
+                <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">;</span>
+        <span style="color:#f92672">}</span>
+        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">super</span><span style="color:#f92672">.</span><span style="color:#a6e22e">onInterceptTouchEvent</span><span style="color:#f92672">(</span>event<span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
 
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="nd">@Override</span>
-</span><span class='line'><span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">onInterceptTouchEvent</span><span class="o">(</span><span class="n">MotionEvent</span> <span class="n">event</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>    <span class="k">if</span> <span class="o">(</span><span class="n">mDragHelper</span><span class="o">.</span><span class="na">shouldInterceptTouchEvent</span><span class="o">(</span><span class="n">event</span><span class="o">))</span> <span class="o">{</span>
-</span><span class='line'>            <span class="k">return</span> <span class="kc">true</span><span class="o">;</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'>    <span class="k">return</span> <span class="kd">super</span><span class="o">.</span><span class="na">onInterceptTouchEvent</span><span class="o">(</span><span class="n">event</span><span class="o">);</span>
-</span><span class='line'><span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="nd">@Override</span>
-</span><span class='line'><span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">onTouchEvent</span><span class="o">(</span><span class="n">MotionEvent</span> <span class="n">event</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>    <span class="n">mDragHelper</span><span class="o">.</span><span class="na">processTouchEvent</span><span class="o">(</span><span class="n">event</span><span class="o">);</span>
-</span><span class='line'>    <span class="k">return</span> <span class="kc">true</span><span class="o">;</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">boolean</span> <span style="color:#a6e22e">onTouchEvent</span><span style="color:#f92672">(</span>MotionEvent event<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        mDragHelper<span style="color:#f92672">.</span><span style="color:#a6e22e">processTouchEvent</span><span style="color:#f92672">(</span>event<span style="color:#f92672">);</span>
+        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span></code></pre></div>
 <p>ViewDragHelper will be asked to check if a motion event is part of a dragging process. The behaviour of the whole dragging process is ruled by a <code>DragHelperCallback</code> instance passed on creation.
 <code>DragHelperCallback</code> has method that need to be implemented to be notified of particular evens, such as:</p>
 
@@ -172,7 +124,6 @@
 <li>when and where the dragged view was released</li>
 </ul>
 
-
 <p>It also has methods used to influence the dragging behaviour:</p>
 
 <ul>
@@ -180,23 +131,19 @@
 <li>check whether a particular subview can be dragged</li>
 </ul>
 
-
 <p>A whole drag process is intended a sequence of <code>Down</code> / <code>Move</code> / <code>Up</code> events over a particular target view.
-Whenever a drag process starts, ViewDragHelper finds the topmost child that contains the location of the motion event, and asks us if that particular view can be dragged or not in <code>tryToCaptureView()</code> method.<br/>
+Whenever a drag process starts, ViewDragHelper finds the topmost child that contains the location of the motion event, and asks us if that particular view can be dragged or not in <code>tryToCaptureView()</code> method.<br />
 This is <em>more or less</em> the theory involved in the dragging process. On top of that, ViewDragHelper offers also <code>settleAt</code> methods to let the views settle to their rest location gracefully.</p>
 
 <p>Since explaining in words it&rsquo;s not the easiest thing (nor I am particularly good to explain), I&rsquo;ll introduce the simplified app I used to understand (a bit) how ViewDragHelper works.</p>
 
-<h1>Enters DragQueen</h1>
+<h1 id="enters-dragqueen">Enters DragQueen</h1>
 
-<p><img src="https://farm6.staticflickr.com/5128/5356147569_686637006e.jpg" width="350" height="350" title="dragqueen" alt="images"> <a href="https://www.flickr.com/photos/kbyte/5356147569/in/photolist-9aiE4T-oZtA-6YfGh-ebJmp8-jCeRGT-7xRKgx-7csUvo-nFTXP8-nFTXNg-9DAWnB-dbWyHz-m2FLMf-6x5QY2-5vkGLh-9jwh4a-KCBSK-dJTFb-4XRtDY-ouiHNw-od7U9J-oiKnUm-6DTq9a-6d1uXV-ocLauF-7VXBD4-n4y95v-ouj2w5-oaD6SK-owCHq3-6xQaS8-je4k6-ng25wJ-oDWV9V-os7FZk-8oeWRF-oRT83M-2PtLZZ-6x5Pkt-49vCUN-49rtdk-S9buU-f5Wr7L-49vCQw-nVMgN7-6wABHo-fX91x-6x5PQH-51DtKg-7mVAco-miQ2Q/">Licensed under commons creative</a></p>
+<p><img src="https://farm6.staticflickr.com/5128/5356147569_686637006e.jpg" alt="" /></p>
 
 <p>(Just kidding). DragQueen is a (ultra) simplified version of what I implemented on fennec with a button named queen that you can drag.</p>
 
-<div class="embed-video-container"><iframe src="http://www.youtube.com/embed/Vo4381SSNn0" allowfullscreen></iframe></div>
-
-
-<p></p>
+<p>{% youtube Vo4381SSNn0 %}</p>
 
 <p>It consists of:</p>
 
@@ -205,558 +152,239 @@ This is <em>more or less</em> the theory involved in the dragging process. On to
 <li>a front panel which can be dragged</li>
 </ul>
 
-
-<p><img src="/images/draghelper.png" width="350" height="350" title="draghelper" alt="images"></p>
+<p><img src="/images/draghelper.png" alt="" /></p>
 
 <p>To make the things a bit more complex we want to enable the dragging only from a particular subview, Queen. To make the things even more complex, we want to be also able to interact with Queen button while the dragging is not happening.</p>
 
 <p>We also allow only two rest locations, so if the view is released mid-way it will settle to its open / close location depending on the speed and the location of when the view is released.
 Finally, note that OuterLayout contains also a button that is hidden when main layout is in its closed state.</p>
 
-<h3>OuterLayout</h3>
+<h3 id="outerlayout">OuterLayout</h3>
 
-<p>Outerlayout is a ViewGroup that extends a RelativeLayout.<br/>
+<p>Outerlayout is a ViewGroup that extends a RelativeLayout.<br />
 As I wrote before, the two methods ViewDragHelper needs to hook into are</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">boolean</span> <span style="color:#a6e22e">onInterceptTouchEvent</span><span style="color:#f92672">(</span>MotionEvent event<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>isQueenTarget<span style="color:#f92672">(</span>event<span style="color:#f92672">)</span> <span style="color:#f92672">&amp;&amp;</span> mDragHelper<span style="color:#f92672">.</span><span style="color:#a6e22e">shouldInterceptTouchEvent</span><span style="color:#f92672">(</span>event<span style="color:#f92672">))</span> <span style="color:#f92672">{</span>
+                <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">;</span>
+        <span style="color:#f92672">}</span> <span style="color:#66d9ef">else</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">false</span><span style="color:#f92672">;</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
 
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="nd">@Override</span>
-</span><span class='line'><span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">onInterceptTouchEvent</span><span class="o">(</span><span class="n">MotionEvent</span> <span class="n">event</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>    <span class="k">if</span> <span class="o">(</span><span class="n">isQueenTarget</span><span class="o">(</span><span class="n">event</span><span class="o">)</span> <span class="o">&amp;&amp;</span> <span class="n">mDragHelper</span><span class="o">.</span><span class="na">shouldInterceptTouchEvent</span><span class="o">(</span><span class="n">event</span><span class="o">))</span> <span class="o">{</span>
-</span><span class='line'>            <span class="k">return</span> <span class="kc">true</span><span class="o">;</span>
-</span><span class='line'>    <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
-</span><span class='line'>        <span class="k">return</span> <span class="kc">false</span><span class="o">;</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'><span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="nd">@Override</span>
-</span><span class='line'><span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">onTouchEvent</span><span class="o">(</span><span class="n">MotionEvent</span> <span class="n">event</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>    <span class="k">if</span> <span class="o">(</span><span class="n">isQueenTarget</span><span class="o">(</span><span class="n">event</span><span class="o">)</span> <span class="o">||</span> <span class="n">isMoving</span><span class="o">())</span> <span class="o">{</span>
-</span><span class='line'>        <span class="n">mDragHelper</span><span class="o">.</span><span class="na">processTouchEvent</span><span class="o">(</span><span class="n">event</span><span class="o">);</span>
-</span><span class='line'>        <span class="k">return</span> <span class="kc">true</span><span class="o">;</span>
-</span><span class='line'>    <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
-</span><span class='line'>        <span class="k">return</span> <span class="kd">super</span><span class="o">.</span><span class="na">onTouchEvent</span><span class="o">(</span><span class="n">event</span><span class="o">);</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">boolean</span> <span style="color:#a6e22e">onTouchEvent</span><span style="color:#f92672">(</span>MotionEvent event<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>isQueenTarget<span style="color:#f92672">(</span>event<span style="color:#f92672">)</span> <span style="color:#f92672">||</span> isMoving<span style="color:#f92672">())</span> <span style="color:#f92672">{</span>
+            mDragHelper<span style="color:#f92672">.</span><span style="color:#a6e22e">processTouchEvent</span><span style="color:#f92672">(</span>event<span style="color:#f92672">);</span>
+            <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">;</span>
+        <span style="color:#f92672">}</span> <span style="color:#66d9ef">else</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">super</span><span style="color:#f92672">.</span><span style="color:#a6e22e">onTouchEvent</span><span style="color:#f92672">(</span>event<span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span></code></pre></div>
 <p>You may notice that <code>onInterceptTouchEvent</code> if has another condition. This is because we want to drag mainlayout only if the touch targets the Queen (it would not be drag-queen otherwise). This is a simplified version of what happens in Fennec, where we want to intercept the drag only if it starts from the toolbar to avoid to interfere with the web content.</p>
 
 <p>In any case, checking if Queen is targeted is quite easy:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">boolean</span> <span style="color:#a6e22e">isQueenTarget</span><span style="color:#f92672">(</span>MotionEvent event<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#66d9ef">int</span><span style="color:#f92672">[]</span> queenLocation <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#66d9ef">int</span><span style="color:#f92672">[</span>2<span style="color:#f92672">];</span>
+        mQueenButton<span style="color:#f92672">.</span><span style="color:#a6e22e">getLocationOnScreen</span><span style="color:#f92672">(</span>queenLocation<span style="color:#f92672">);</span>
+        <span style="color:#66d9ef">int</span> upperLimit <span style="color:#f92672">=</span> queenLocation<span style="color:#f92672">[</span>1<span style="color:#f92672">]</span> <span style="color:#f92672">+</span> mQueenButton<span style="color:#f92672">.</span><span style="color:#a6e22e">getMeasuredHeight</span><span style="color:#f92672">();</span>
+        <span style="color:#66d9ef">int</span> lowerLimit <span style="color:#f92672">=</span> queenLocation<span style="color:#f92672">[</span>1<span style="color:#f92672">];</span>
+        <span style="color:#66d9ef">int</span> y <span style="color:#f92672">=</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">int</span><span style="color:#f92672">)</span> event<span style="color:#f92672">.</span><span style="color:#a6e22e">getRawY</span><span style="color:#f92672">();</span>
+        <span style="color:#66d9ef">return</span> <span style="color:#f92672">(</span>y <span style="color:#f92672">&gt;</span> lowerLimit <span style="color:#f92672">&amp;&amp;</span> y <span style="color:#f92672">&lt;</span> upperLimit<span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span></code></pre></div>
+<h2 id="other-methods-that-influence-the-behaviour-of-the-dragging-are">Other methods that influence the behaviour of the dragging are:</h2>
 
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">private</span> <span class="kt">boolean</span> <span class="nf">isQueenTarget</span><span class="o">(</span><span class="n">MotionEvent</span> <span class="n">event</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>    <span class="kt">int</span><span class="o">[]</span> <span class="n">queenLocation</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">int</span><span class="o">[</span><span class="mi">2</span><span class="o">];</span>
-</span><span class='line'>    <span class="n">mQueenButton</span><span class="o">.</span><span class="na">getLocationOnScreen</span><span class="o">(</span><span class="n">queenLocation</span><span class="o">);</span>
-</span><span class='line'>    <span class="kt">int</span> <span class="n">upperLimit</span> <span class="o">=</span> <span class="n">queenLocation</span><span class="o">[</span><span class="mi">1</span><span class="o">]</span> <span class="o">+</span> <span class="n">mQueenButton</span><span class="o">.</span><span class="na">getMeasuredHeight</span><span class="o">();</span>
-</span><span class='line'>    <span class="kt">int</span> <span class="n">lowerLimit</span> <span class="o">=</span> <span class="n">queenLocation</span><span class="o">[</span><span class="mi">1</span><span class="o">];</span>
-</span><span class='line'>    <span class="kt">int</span> <span class="n">y</span> <span class="o">=</span> <span class="o">(</span><span class="kt">int</span><span class="o">)</span> <span class="n">event</span><span class="o">.</span><span class="na">getRawY</span><span class="o">();</span>
-</span><span class='line'>    <span class="k">return</span> <span class="o">(</span><span class="n">y</span> <span class="o">&gt;</span> <span class="n">lowerLimit</span> <span class="o">&amp;&amp;</span> <span class="n">y</span> <span class="o">&lt;</span> <span class="n">upperLimit</span><span class="o">);</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-<h2>Other methods that influence the behaviour of the dragging are:</h2>
-
-<h4>tryCaptureView</h4>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="nd">@Override</span>
-</span><span class='line'>    <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">tryCaptureView</span><span class="o">(</span><span class="n">View</span> <span class="n">view</span><span class="o">,</span> <span class="kt">int</span> <span class="n">i</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>        <span class="k">return</span> <span class="o">(</span><span class="n">view</span><span class="o">.</span><span class="na">getId</span><span class="o">()</span> <span class="o">==</span> <span class="n">R</span><span class="o">.</span><span class="na">id</span><span class="o">.</span><span class="na">main_layout</span><span class="o">);</span>
-</span><span class='line'>    <span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
+<h4 id="trycaptureview">tryCaptureView</h4>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">	<span style="color:#a6e22e">@Override</span>
+        <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">boolean</span> <span style="color:#a6e22e">tryCaptureView</span><span style="color:#f92672">(</span>View view<span style="color:#f92672">,</span> <span style="color:#66d9ef">int</span> i<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">return</span> <span style="color:#f92672">(</span>view<span style="color:#f92672">.</span><span style="color:#a6e22e">getId</span><span style="color:#f92672">()</span> <span style="color:#f92672">==</span> R<span style="color:#f92672">.</span><span style="color:#a6e22e">id</span><span style="color:#f92672">.</span><span style="color:#a6e22e">main_layout</span><span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span></code></pre></div>
 <p>which gives draghelper the permission to drag main layout). You <em>must</em> return true up there for the view you want to be dragged.</p>
 
-<h4>getViewVerticalDragRange &amp;&amp; clampViewPositionVertical (there are <em>Horizontal</em> flavours too)</h4>
+<h4 id="getviewverticaldragrange-clampviewpositionvertical-there-are-horizontal-flavours-too">getViewVerticalDragRange &amp;&amp; clampViewPositionVertical (there are <em>Horizontal</em> flavours too)</h4>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">        <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">int</span> <span style="color:#a6e22e">getViewVerticalDragRange</span><span style="color:#f92672">(</span>View child<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">return</span> mVerticalRange<span style="color:#f92672">;</span>
+        <span style="color:#f92672">}</span>
 
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'>    <span class="kd">public</span> <span class="kt">int</span> <span class="nf">getViewVerticalDragRange</span><span class="o">(</span><span class="n">View</span> <span class="n">child</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>        <span class="k">return</span> <span class="n">mVerticalRange</span><span class="o">;</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="nd">@Override</span>
-</span><span class='line'>    <span class="kd">public</span> <span class="kt">int</span> <span class="nf">clampViewPositionVertical</span><span class="o">(</span><span class="n">View</span> <span class="n">child</span><span class="o">,</span> <span class="kt">int</span> <span class="n">top</span><span class="o">,</span> <span class="kt">int</span> <span class="n">dy</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>        <span class="kd">final</span> <span class="kt">int</span> <span class="n">topBound</span> <span class="o">=</span> <span class="n">getPaddingTop</span><span class="o">();</span>
-</span><span class='line'>        <span class="kd">final</span> <span class="kt">int</span> <span class="n">bottomBound</span> <span class="o">=</span> <span class="n">mVerticalRange</span><span class="o">;</span>
-</span><span class='line'>        <span class="k">return</span> <span class="n">Math</span><span class="o">.</span><span class="na">min</span><span class="o">(</span><span class="n">Math</span><span class="o">.</span><span class="na">max</span><span class="o">(</span><span class="n">top</span><span class="o">,</span> <span class="n">topBound</span><span class="o">),</span> <span class="n">bottomBound</span><span class="o">);</span>
-</span><span class='line'>    <span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
+        <span style="color:#a6e22e">@Override</span>
+        <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">int</span> <span style="color:#a6e22e">clampViewPositionVertical</span><span style="color:#f92672">(</span>View child<span style="color:#f92672">,</span> <span style="color:#66d9ef">int</span> top<span style="color:#f92672">,</span> <span style="color:#66d9ef">int</span> dy<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">int</span> topBound <span style="color:#f92672">=</span> getPaddingTop<span style="color:#f92672">();</span>
+            <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">int</span> bottomBound <span style="color:#f92672">=</span> mVerticalRange<span style="color:#f92672">;</span>
+            <span style="color:#66d9ef">return</span> Math<span style="color:#f92672">.</span><span style="color:#a6e22e">min</span><span style="color:#f92672">(</span>Math<span style="color:#f92672">.</span><span style="color:#a6e22e">max</span><span style="color:#f92672">(</span>top<span style="color:#f92672">,</span> topBound<span style="color:#f92672">),</span> bottomBound<span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span></code></pre></div>
 <p>which do what you expect them to do, setting limit for the dragging. In this particular case, vertical range is set to half the size of screen.</p>
 
-<h3>DragQueen</h3>
+<h3 id="dragqueen">DragQueen</h3>
 
-<p>Note also how <code>mMainLayout</code> is set as clickable with <code>android:clickable="true"</code>. This prevents touch events to be passed down to the view below when it is closed..</p>
+<p>Note also how <code>mMainLayout</code> is set as clickable with <code>android:clickable=&quot;true&quot;</code>. This prevents touch events to be passed down to the view below when it is closed..</p>
 
-<hr />
+<p>+++</p>
 
-<h2>Callbacks</h2>
+<h2 id="callbacks">Callbacks</h2>
 
 <p>There are several callbacks you will want to implement in order to react to the events related to the dragging:</p>
 
-<h4>onViewDragStateChanged</h4>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="nd">@Override</span>
-</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onViewDragStateChanged</span><span class="o">(</span><span class="kt">int</span> <span class="n">state</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>        <span class="k">if</span> <span class="o">(</span><span class="n">state</span> <span class="o">==</span> <span class="n">mDraggingState</span><span class="o">)</span> <span class="o">{</span> <span class="c1">// no change</span>
-</span><span class='line'>            <span class="k">return</span><span class="o">;</span>
-</span><span class='line'>        <span class="o">}</span>
-</span><span class='line'>        <span class="k">if</span> <span class="o">((</span><span class="n">mDraggingState</span> <span class="o">==</span> <span class="n">ViewDragHelper</span><span class="o">.</span><span class="na">STATE_DRAGGING</span> <span class="o">||</span> <span class="n">mDraggingState</span> <span class="o">==</span> <span class="n">ViewDragHelper</span><span class="o">.</span><span class="na">STATE_SETTLING</span><span class="o">)</span> <span class="o">&amp;&amp;</span>
-</span><span class='line'>             <span class="n">state</span> <span class="o">==</span> <span class="n">ViewDragHelper</span><span class="o">.</span><span class="na">STATE_IDLE</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>            <span class="c1">// the view stopped from moving.</span>
-</span><span class='line'>
-</span><span class='line'>            <span class="k">if</span> <span class="o">(</span><span class="n">mDraggingBorder</span> <span class="o">==</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>                <span class="n">onStopDraggingToClosed</span><span class="o">();</span>
-</span><span class='line'>            <span class="o">}</span> <span class="k">else</span> <span class="nf">if</span> <span class="o">(</span><span class="n">mDraggingBorder</span> <span class="o">==</span> <span class="n">mVerticalRange</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>                <span class="n">mIsOpen</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
-</span><span class='line'>            <span class="o">}</span>
-</span><span class='line'>        <span class="o">}</span>
-</span><span class='line'>        <span class="k">if</span> <span class="o">(</span><span class="n">state</span> <span class="o">==</span> <span class="n">ViewDragHelper</span><span class="o">.</span><span class="na">STATE_DRAGGING</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>            <span class="n">onStartDragging</span><span class="o">();</span>
-</span><span class='line'>        <span class="o">}</span>
-</span><span class='line'>        <span class="n">mDraggingState</span> <span class="o">=</span> <span class="n">state</span><span class="o">;</span>
-</span><span class='line'>    <span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
+<h4 id="onviewdragstatechanged">onViewDragStateChanged</h4>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">	<span style="color:#a6e22e">@Override</span>
+        <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">onViewDragStateChanged</span><span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> state<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>state <span style="color:#f92672">==</span> mDraggingState<span style="color:#f92672">)</span> <span style="color:#f92672">{</span> <span style="color:#75715e">// no change
+</span><span style="color:#75715e"></span>                <span style="color:#66d9ef">return</span><span style="color:#f92672">;</span>
+            <span style="color:#f92672">}</span>
+            <span style="color:#66d9ef">if</span> <span style="color:#f92672">((</span>mDraggingState <span style="color:#f92672">==</span> ViewDragHelper<span style="color:#f92672">.</span><span style="color:#a6e22e">STATE_DRAGGING</span> <span style="color:#f92672">||</span> mDraggingState <span style="color:#f92672">==</span> ViewDragHelper<span style="color:#f92672">.</span><span style="color:#a6e22e">STATE_SETTLING</span><span style="color:#f92672">)</span> <span style="color:#f92672">&amp;&amp;</span>
+                 state <span style="color:#f92672">==</span> ViewDragHelper<span style="color:#f92672">.</span><span style="color:#a6e22e">STATE_IDLE</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                <span style="color:#75715e">// the view stopped from moving.
+</span><span style="color:#75715e"></span>
+                <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>mDraggingBorder <span style="color:#f92672">==</span> 0<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                    onStopDraggingToClosed<span style="color:#f92672">();</span>
+                <span style="color:#f92672">}</span> <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>mDraggingBorder <span style="color:#f92672">==</span> mVerticalRange<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                    mIsOpen <span style="color:#f92672">=</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">;</span>
+                <span style="color:#f92672">}</span>
+            <span style="color:#f92672">}</span>
+            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>state <span style="color:#f92672">==</span> ViewDragHelper<span style="color:#f92672">.</span><span style="color:#a6e22e">STATE_DRAGGING</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                onStartDragging<span style="color:#f92672">();</span>
+            <span style="color:#f92672">}</span>
+            mDraggingState <span style="color:#f92672">=</span> state<span style="color:#f92672">;</span>
+        <span style="color:#f92672">}</span></code></pre></div>
 <p>notifies the state transitions of DragHelper between <code>DRAGGING</code>, <code>IDLE</code> or <code>SETTLING</code> state.</p>
 
-<h4>onViewPositionChanged</h4>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kt">void</span> <span class="nf">onViewPositionChanged</span><span class="o">(</span><span class="n">View</span> <span class="n">changedView</span><span class="o">,</span> <span class="kt">int</span> <span class="n">left</span><span class="o">,</span> <span class="kt">int</span> <span class="n">top</span><span class="o">,</span> <span class="kt">int</span> <span class="n">dx</span><span class="o">,</span> <span class="kt">int</span> <span class="n">dy</span><span class="o">)</span> <span class="o">{</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
+<h4 id="onviewpositionchanged">onViewPositionChanged</h4>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">	<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">onViewPositionChanged</span><span style="color:#f92672">(</span>View changedView<span style="color:#f92672">,</span> <span style="color:#66d9ef">int</span> left<span style="color:#f92672">,</span> <span style="color:#66d9ef">int</span> top<span style="color:#f92672">,</span> <span style="color:#66d9ef">int</span> dx<span style="color:#f92672">,</span> <span style="color:#66d9ef">int</span> dy<span style="color:#f92672">)</span> <span style="color:#f92672">{</span></code></pre></div>
 <p>whose purpouse is pretty clear.</p>
 
-<h4>onViewReleased</h4>
+<h4 id="onviewreleased">onViewReleased</h4>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">        <span style="color:#a6e22e">@Override</span>
+        <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">onViewReleased</span><span style="color:#f92672">(</span>View releasedChild<span style="color:#f92672">,</span> <span style="color:#66d9ef">float</span> xvel<span style="color:#f92672">,</span> <span style="color:#66d9ef">float</span> yvel<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">float</span> rangeToCheck <span style="color:#f92672">=</span> mVerticalRange<span style="color:#f92672">;</span>
+            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>mDraggingBorder <span style="color:#f92672">==</span> 0<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                mIsOpen <span style="color:#f92672">=</span> <span style="color:#66d9ef">false</span><span style="color:#f92672">;</span>
+                <span style="color:#66d9ef">return</span><span style="color:#f92672">;</span>
+            <span style="color:#f92672">}</span>
+            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>mDraggingBorder <span style="color:#f92672">==</span> rangeToCheck<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                mIsOpen <span style="color:#f92672">=</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">;</span>
+                <span style="color:#66d9ef">return</span><span style="color:#f92672">;</span>
+            <span style="color:#f92672">}</span>
+            <span style="color:#66d9ef">boolean</span> settleToOpen <span style="color:#f92672">=</span> <span style="color:#66d9ef">false</span><span style="color:#f92672">;</span>
+            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>yvel <span style="color:#f92672">&gt;</span> AUTO_OPEN_SPEED_LIMIT<span style="color:#f92672">)</span> <span style="color:#f92672">{</span> <span style="color:#75715e">// speed has priority over position
+</span><span style="color:#75715e"></span>                settleToOpen <span style="color:#f92672">=</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">;</span>
+            <span style="color:#f92672">}</span> <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>yvel <span style="color:#f92672">&lt;</span> <span style="color:#f92672">-</span>AUTO_OPEN_SPEED_LIMIT<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                settleToOpen <span style="color:#f92672">=</span> <span style="color:#66d9ef">false</span><span style="color:#f92672">;</span>
+            <span style="color:#f92672">}</span> <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>mDraggingBorder <span style="color:#f92672">&gt;</span> rangeToCheck <span style="color:#f92672">/</span> 2<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                settleToOpen <span style="color:#f92672">=</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">;</span>
+            <span style="color:#f92672">}</span> <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>mDraggingBorder <span style="color:#f92672">&lt;</span> rangeToCheck <span style="color:#f92672">/</span> 2<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                settleToOpen <span style="color:#f92672">=</span> <span style="color:#66d9ef">false</span><span style="color:#f92672">;</span>
+            <span style="color:#f92672">}</span>
 
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'>    <span class="nd">@Override</span>
-</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onViewReleased</span><span class="o">(</span><span class="n">View</span> <span class="n">releasedChild</span><span class="o">,</span> <span class="kt">float</span> <span class="n">xvel</span><span class="o">,</span> <span class="kt">float</span> <span class="n">yvel</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>        <span class="kd">final</span> <span class="kt">float</span> <span class="n">rangeToCheck</span> <span class="o">=</span> <span class="n">mVerticalRange</span><span class="o">;</span>
-</span><span class='line'>        <span class="k">if</span> <span class="o">(</span><span class="n">mDraggingBorder</span> <span class="o">==</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>            <span class="n">mIsOpen</span> <span class="o">=</span> <span class="kc">false</span><span class="o">;</span>
-</span><span class='line'>            <span class="k">return</span><span class="o">;</span>
-</span><span class='line'>        <span class="o">}</span>
-</span><span class='line'>        <span class="k">if</span> <span class="o">(</span><span class="n">mDraggingBorder</span> <span class="o">==</span> <span class="n">rangeToCheck</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>            <span class="n">mIsOpen</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
-</span><span class='line'>            <span class="k">return</span><span class="o">;</span>
-</span><span class='line'>        <span class="o">}</span>
-</span><span class='line'>        <span class="kt">boolean</span> <span class="n">settleToOpen</span> <span class="o">=</span> <span class="kc">false</span><span class="o">;</span>
-</span><span class='line'>        <span class="k">if</span> <span class="o">(</span><span class="n">yvel</span> <span class="o">&gt;</span> <span class="n">AUTO_OPEN_SPEED_LIMIT</span><span class="o">)</span> <span class="o">{</span> <span class="c1">// speed has priority over position</span>
-</span><span class='line'>            <span class="n">settleToOpen</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
-</span><span class='line'>        <span class="o">}</span> <span class="k">else</span> <span class="nf">if</span> <span class="o">(</span><span class="n">yvel</span> <span class="o">&lt;</span> <span class="o">-</span><span class="n">AUTO_OPEN_SPEED_LIMIT</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>            <span class="n">settleToOpen</span> <span class="o">=</span> <span class="kc">false</span><span class="o">;</span>
-</span><span class='line'>        <span class="o">}</span> <span class="k">else</span> <span class="nf">if</span> <span class="o">(</span><span class="n">mDraggingBorder</span> <span class="o">&gt;</span> <span class="n">rangeToCheck</span> <span class="o">/</span> <span class="mi">2</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>            <span class="n">settleToOpen</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
-</span><span class='line'>        <span class="o">}</span> <span class="k">else</span> <span class="nf">if</span> <span class="o">(</span><span class="n">mDraggingBorder</span> <span class="o">&lt;</span> <span class="n">rangeToCheck</span> <span class="o">/</span> <span class="mi">2</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>            <span class="n">settleToOpen</span> <span class="o">=</span> <span class="kc">false</span><span class="o">;</span>
-</span><span class='line'>        <span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="kd">final</span> <span class="kt">int</span> <span class="n">settleDestY</span> <span class="o">=</span> <span class="n">settleToOpen</span> <span class="o">?</span> <span class="n">mVerticalRange</span> <span class="o">:</span> <span class="mi">0</span><span class="o">;</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="k">if</span><span class="o">(</span><span class="n">mDragHelper</span><span class="o">.</span><span class="na">settleCapturedViewAt</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="n">settleDestY</span><span class="o">))</span> <span class="o">{</span>
-</span><span class='line'>            <span class="n">ViewCompat</span><span class="o">.</span><span class="na">postInvalidateOnAnimation</span><span class="o">(</span><span class="n">OuterLayout</span><span class="o">.</span><span class="na">this</span><span class="o">);</span>
-</span><span class='line'>        <span class="o">}</span>
-</span><span class='line'>    <span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
+            <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">int</span> settleDestY <span style="color:#f92672">=</span> settleToOpen <span style="color:#f92672">?</span> mVerticalRange <span style="color:#f92672">:</span> 0<span style="color:#f92672">;</span>
 
-
+            <span style="color:#66d9ef">if</span><span style="color:#f92672">(</span>mDragHelper<span style="color:#f92672">.</span><span style="color:#a6e22e">settleCapturedViewAt</span><span style="color:#f92672">(</span>0<span style="color:#f92672">,</span> settleDestY<span style="color:#f92672">))</span> <span style="color:#f92672">{</span>
+                ViewCompat<span style="color:#f92672">.</span><span style="color:#a6e22e">postInvalidateOnAnimation</span><span style="color:#f92672">(</span>OuterLayout<span style="color:#f92672">.</span><span style="color:#a6e22e">this</span><span style="color:#f92672">);</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">}</span></code></pre></div>
 <p>is where you (<em>might</em>) want to let the view go into its rest place. I made it behave in such way that dragging speed (and direction) is more important than the place you are releasing the view.</p>
 
-<hr />
+<p>+++</p>
 
-<h2>Bonus methods</h2>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">mDragHelper</span><span class="o">.</span><span class="na">settleCapturedViewAt</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="n">settleDestY</span><span class="o">))</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
+<h2 id="bonus-methods">Bonus methods</h2>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">	mDragHelper<span style="color:#f92672">.</span><span style="color:#a6e22e">settleCapturedViewAt</span><span style="color:#f92672">(</span>0<span style="color:#f92672">,</span> settleDestY<span style="color:#f92672">))</span></code></pre></div>
 <p>is a helper method that will make your view smoothly settle at the given destination.</p>
 
-<hr />
+<p>+++</p>
 
-<h2>Quirks and reasons for headaches</h2>
+<h2 id="quirks-and-reasons-for-headaches">Quirks and reasons for headaches</h2>
 
-<h4>ViewDragHelper sets the offset of the target view ..</h4>
+<h4 id="viewdraghelper-sets-the-offset-of-the-target-view">ViewDragHelper sets the offset of the target view ..</h4>
 
-<p>  .. by calling <code>offsetTopAndBottom</code>, which is ok <em>but</em> you have to remember that a layout round called by any of the children of outerLayout (or the parent view you are passing to the draghelper) will reset that offset. What you are going to see in that case is your dragged view getting back at its rest position.</p>
+<p>.. by calling <code>offsetTopAndBottom</code>, which is ok <em>but</em> you have to remember that a layout round called by any of the children of outerLayout (or the parent view you are passing to the draghelper) will reset that offset. What you are going to see in that case is your dragged view getting back at its rest position.</p>
 
 <p>A possibile solution to this is to force back the parent where it was before:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">mMainLayout</span><span class="o">.</span><span class="na">addOnLayoutChangeListener</span><span class="o">(</span><span class="k">new</span> <span class="n">View</span><span class="o">.</span><span class="na">OnLayoutChangeListener</span><span class="o">()</span> <span class="o">{</span>
-</span><span class='line'>        <span class="nd">@Override</span>
-</span><span class='line'>        <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onLayoutChange</span><span class="o">(</span><span class="n">View</span> <span class="n">v</span><span class="o">,</span> <span class="kt">int</span> <span class="n">left</span><span class="o">,</span> <span class="kt">int</span> <span class="n">top</span><span class="o">,</span> <span class="kt">int</span> <span class="n">right</span><span class="o">,</span> <span class="kt">int</span> <span class="n">bottom</span><span class="o">,</span> <span class="kt">int</span> <span class="n">oldLeft</span><span class="o">,</span> <span class="kt">int</span> <span class="n">oldTop</span><span class="o">,</span> <span class="kt">int</span> <span class="n">oldRight</span><span class="o">,</span> <span class="kt">int</span> <span class="n">oldBottom</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>            <span class="k">if</span> <span class="o">(</span><span class="n">mOuterLayout</span><span class="o">.</span><span class="na">isMoving</span><span class="o">())</span> <span class="o">{</span>
-</span><span class='line'>                <span class="n">v</span><span class="o">.</span><span class="na">setTop</span><span class="o">(</span><span class="n">oldTop</span><span class="o">);</span>
-</span><span class='line'>                <span class="n">v</span><span class="o">.</span><span class="na">setBottom</span><span class="o">(</span><span class="n">oldBottom</span><span class="o">);</span>
-</span><span class='line'>                <span class="n">v</span><span class="o">.</span><span class="na">setLeft</span><span class="o">(</span><span class="n">oldLeft</span><span class="o">);</span>
-</span><span class='line'>                <span class="n">v</span><span class="o">.</span><span class="na">setRight</span><span class="o">(</span><span class="n">oldRight</span><span class="o">);</span>
-</span><span class='line'>            <span class="o">}</span>
-</span><span class='line'>        <span class="o">}</span>
-</span><span class='line'>    <span class="o">});</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-<h4>ViewDragHelper always want to intercept the top most child in z order</h4>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">	mMainLayout<span style="color:#f92672">.</span><span style="color:#a6e22e">addOnLayoutChangeListener</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> View<span style="color:#f92672">.</span><span style="color:#a6e22e">OnLayoutChangeListener</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+            <span style="color:#a6e22e">@Override</span>
+            <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">onLayoutChange</span><span style="color:#f92672">(</span>View v<span style="color:#f92672">,</span> <span style="color:#66d9ef">int</span> left<span style="color:#f92672">,</span> <span style="color:#66d9ef">int</span> top<span style="color:#f92672">,</span> <span style="color:#66d9ef">int</span> right<span style="color:#f92672">,</span> <span style="color:#66d9ef">int</span> bottom<span style="color:#f92672">,</span> <span style="color:#66d9ef">int</span> oldLeft<span style="color:#f92672">,</span> <span style="color:#66d9ef">int</span> oldTop<span style="color:#f92672">,</span> <span style="color:#66d9ef">int</span> oldRight<span style="color:#f92672">,</span> <span style="color:#66d9ef">int</span> oldBottom<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>mOuterLayout<span style="color:#f92672">.</span><span style="color:#a6e22e">isMoving</span><span style="color:#f92672">())</span> <span style="color:#f92672">{</span>
+                    v<span style="color:#f92672">.</span><span style="color:#a6e22e">setTop</span><span style="color:#f92672">(</span>oldTop<span style="color:#f92672">);</span>
+                    v<span style="color:#f92672">.</span><span style="color:#a6e22e">setBottom</span><span style="color:#f92672">(</span>oldBottom<span style="color:#f92672">);</span>
+                    v<span style="color:#f92672">.</span><span style="color:#a6e22e">setLeft</span><span style="color:#f92672">(</span>oldLeft<span style="color:#f92672">);</span>
+                    v<span style="color:#f92672">.</span><span style="color:#a6e22e">setRight</span><span style="color:#f92672">(</span>oldRight<span style="color:#f92672">);</span>
+                <span style="color:#f92672">}</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">});</span></code></pre></div>
+<h4 id="viewdraghelper-always-want-to-intercept-the-top-most-child-in-z-order">ViewDragHelper always want to intercept the top most child in z order</h4>
 
 <p>If you have some view in between, but you want to be able to drag a lower one, you have to let ViewDragHelper think that your view is the topmost one.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">        <span style="color:#a6e22e">@Override</span>
+        <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">int</span> <span style="color:#a6e22e">getOrderedChildIndex</span><span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> index<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            <span style="color:#66d9ef">int</span> mainLayoutIndex <span style="color:#f92672">=</span> indexOfChild<span style="color:#f92672">(</span>mMainLayout<span style="color:#f92672">);</span>
+            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>index <span style="color:#f92672">&gt;</span> mainLayoutIndex<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                <span style="color:#66d9ef">return</span> mainLayoutIndex<span style="color:#f92672">;</span>
+            <span style="color:#f92672">}</span> <span style="color:#66d9ef">else</span> <span style="color:#f92672">{</span>
+                <span style="color:#66d9ef">return</span> index<span style="color:#f92672">;</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">}</span></code></pre></div>
+<p>+++</p>
 
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'>    <span class="nd">@Override</span>
-</span><span class='line'>    <span class="kd">public</span> <span class="kt">int</span> <span class="nf">getOrderedChildIndex</span><span class="o">(</span><span class="kt">int</span> <span class="n">index</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>        <span class="kt">int</span> <span class="n">mainLayoutIndex</span> <span class="o">=</span> <span class="n">indexOfChild</span><span class="o">(</span><span class="n">mMainLayout</span><span class="o">);</span>
-</span><span class='line'>        <span class="k">if</span> <span class="o">(</span><span class="n">index</span> <span class="o">&gt;</span> <span class="n">mainLayoutIndex</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>            <span class="k">return</span> <span class="n">mainLayoutIndex</span><span class="o">;</span>
-</span><span class='line'>        <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
-</span><span class='line'>            <span class="k">return</span> <span class="n">index</span><span class="o">;</span>
-</span><span class='line'>        <span class="o">}</span>
-</span><span class='line'>    <span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-<hr />
-
-<h1>What&rsquo;s more</h1>
+<h1 id="what-s-more">What&rsquo;s more</h1>
 
 <p>ViewDragHelper offers a lot more features than those I just presented. <em>DragQueen</em> implements only vertical dragging, but you can drag your views horizontally too. Again, refer to the excellent post by Flavien for more details.</p>
 
 <p>Moreover, ViewDragHelper allows you to intercept drag events that start from the edge of the screen, which is the way its used in the <code>NavigationDrawer</code>.</p>
 
 <p>All it needs to enable it is to call</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">mDragHelper</span><span class="o">.</span><span class="na">setEdgeTrackingEnabled</span><span class="o">(</span><span class="n">ViewDragHelper</span><span class="o">.</span><span class="na">EDGE_LEFT</span><span class="o">);</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">mDragHelper<span style="color:#f92672">.</span><span style="color:#a6e22e">setEdgeTrackingEnabled</span><span style="color:#f92672">(</span>ViewDragHelper<span style="color:#f92672">.</span><span style="color:#a6e22e">EDGE_LEFT</span><span style="color:#f92672">);</span></code></pre></div>
 <p>and to implement</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="nd">@Override</span>
-</span><span class='line'><span class="kd">public</span> <span class="kt">void</span> <span class="nf">onEdgeDragStarted</span><span class="o">(</span><span class="kt">int</span> <span class="n">edgeFlags</span><span class="o">,</span> <span class="kt">int</span> <span class="n">pointerId</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>  <span class="n">mDragHelper</span><span class="o">.</span><span class="na">captureChildView</span><span class="o">(</span><span class="n">mMainLayout</span><span class="o">,</span> <span class="n">pointerId</span><span class="o">);</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-<h1>TL;DR</h1>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#a6e22e">@Override</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">onEdgeDragStarted</span><span style="color:#f92672">(</span><span style="color:#66d9ef">int</span> edgeFlags<span style="color:#f92672">,</span> <span style="color:#66d9ef">int</span> pointerId<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+	mDragHelper<span style="color:#f92672">.</span><span style="color:#a6e22e">captureChildView</span><span style="color:#f92672">(</span>mMainLayout<span style="color:#f92672">,</span> pointerId<span style="color:#f92672">);</span>
+<span style="color:#f92672">}</span></code></pre></div>
+<h1 id="tl-dr">TL;DR</h1>
 
 <p>ViewDragHelper is a bit complex and as I said before not well documented. However it allows you to drag views around with very little code, and it can be used to implement nice effects. In any case you can <del>unrestrainedly copy</del> <em>take inspiration</em> from DragQueen source code on <a href="https://github.com/fedepaol/dragqueen">GitHub</a> (it seems to work).
 I really hope this post does not contain too many errors and that you enjoyed reading it as much as I did writing.</p>
 
 <p>If you liked this post, consider following me on twitter <a href="https://twitter.com/fedepaol">@fedepaol</a></p>
-</div>
 
-
-  <footer>
-    <p class="meta">
-      
-  
-
-<span class="byline author vcard">Posted by <span class="fn">Federico Paolinelli</span></span>
-
-      
-
-
-
-
-<time class='entry-date' datetime='2014-09-01T20:48:20+02:00'><span class='date'><span class='date-month'>Sep</span> <span class='date-day'>1</span><span class='date-suffix'>st</span>, <span class='date-year'>2014</span></span> <span class='time'>8:48 pm</span></time>
-      
-
-<span class="categories">
-  
-    <a class='category' href='/blog/categories/android/'>android</a>, <a class='category' href='/blog/categories/mozilla/'>mozilla</a>, <a class='category' href='/blog/categories/viewdraghelper/'>viewdraghelper</a>
-  
-</span>
-
-
-    </p>
-    
-      <div class="sharing">
-  
-  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://fedepaol.github.io/blog/2014/09/01/dragging-with-viewdraghelper/" data-via="fedepaol" data-counturl="http://fedepaol.github.io/blog/2014/09/01/dragging-with-viewdraghelper/" >Tweet</a>
-  
-  
-  <div class="g-plusone" data-size="medium"></div>
-  
-  
-</div>
-
-    
-    <p class="meta">
-      
-        <a class="basic-alignment left" href="/blog/2014/08/24/migrating-from-blogger-to-octopress-done/" title="Previous Post: Migrating from blogger to octopress (done!)">&laquo; Migrating from blogger to octopress (done!)</a>
-      
-      
-        <a class="basic-alignment right" href="/blog/2015/09/04/its-been-a-while/" title="Next Post: It's been a while">It's been a while &raquo;</a>
-      
-    </p>
-  </footer>
-</article>
-
-  <section>
-    <h1>Comments</h1>
-    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-</div>
-  </section>
-
-</div>
-
-<aside class="sidebar">
-  
-    <section>
-  <h1>About Me</h1>
-  <p>Lead developer with electronic trading software by day, passionate about opensource. I spend a lot of my spare time writing Go and Android software. Table Tennis player, snowboarder, dad. I also contributed to Firefox for Android.</p>
-  <a href="mailto:fedepaol@gmail.com" target="_top">fedepaol@gmail.com</a>
-</section>
-<section>
-  <h1>Recent Posts</h1>
-  <ul id="recent_posts">
-    
-      <li class="post">
-        <a href="/blog/2018/12/11/fast-messaging-with-nats-and-go-part-2/">Fast Messaging With Nats and Go Part 2</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2018/10/27/fast-messaging-with-nats-and-go/">Fast Messaging With Nats and Go</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2018/10/26/a-new-chapter/">A New (Side) Chapter</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2017/04/30/android-okhttp-and-websockets/">Android, Okhttp and Websockets</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2016/08/27/android-mvp-testing/">Android, MVP, Dagger and Testing</a>
-      </li>
-    
-  </ul>
-</section>
-
-<section>
-  <h1>GitHub Repos</h1>
-  <ul id="gh_repos">
-    <li class="loading">Status updating...</li>
-  </ul>
-  
-  <a href="https://github.com/fedepaol">@fedepaol</a> on GitHub
-  
-  <script type="text/javascript">
-    $(document).ready(function(){
-        if (!window.jXHR){
-            var jxhr = document.createElement('script');
-            jxhr.type = 'text/javascript';
-            jxhr.src = '/javascripts/libs/jXHR.js';
-            var s = document.getElementsByTagName('script')[0];
-            s.parentNode.insertBefore(jxhr, s);
-        }
-
-        github.showRepos({
-            user: 'fedepaol',
-            count: 0,
-            skip_forks: true,
-            target: '#gh_repos'
-        });
-    });
-  </script>
-  <script src="/javascripts/github.js" type="text/javascript"> </script>
-</section>
-
-
-
-<section class="googleplus">
-  <h1>
-    <a href="https://plus.google.com/+FedericoPaolinelli?rel=author">
-      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
-      Google+
-    </a>
-  </h1>
-</section>
-
-
-
-<section>
-	<h1>On Twitter:</h1>
-	<div>
-		<p><br /><a href="http://twitter.com/fedepaol" target="_blank">My Tweets, on Twitter.</a></p>
-		<a href="http://twitter.com/fedepaol" class="twitter-follow-button" data-show-count="">Follow @fedepaol</a>
-	</div>
-</section>
-
-
-  
-</aside>
-
-
-    </div>
   </div>
-  <footer role="contentinfo"><p>
-  Copyright &copy; 2018 - Federico Paolinelli -
-  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
-</p>
+</div>
+<div class="container has-text-centered">
+    
+</div>
 
-</footer>
+<div class="container has-text-centered">
   
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      (function() {
+          
+          
+          if (window.location.hostname == "localhost")
+              return;
+      
+          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+          var disqus_shortname = 'fedepaolgithubio';
+          dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com/" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+  
+</div>
+<section class="section">
+  <div class="container has-text-centered">
+    <p></p>
+  </div>
+</section>
 
-<script type="text/javascript">
-      var disqus_shortname = 'fedepaolgithubio';
-      
-        
-        // var disqus_developer = 1;
-        var disqus_identifier = 'http://fedepaol.github.io/blog/2014/09/01/dragging-with-viewdraghelper/';
-        var disqus_url = 'http://fedepaol.github.io/blog/2014/09/01/dragging-with-viewdraghelper/';
-        var disqus_script = 'embed.js';
-      
-    (function () {
-      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
-      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-    }());
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-16514009-2', 'auto');
+	
+	ga('send', 'pageview');
+}
 </script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
 
 
 
-
-
-  <script type="text/javascript">
-    (function() {
-      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
-      script.src = 'https://apis.google.com/js/plusone.js';
-      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
-    })();
-  </script>
-
-
-
-  <script type="text/javascript">
-    (function(){
-      var twitterWidgets = document.createElement('script');
-      twitterWidgets.type = 'text/javascript';
-      twitterWidgets.async = true;
-      twitterWidgets.src = '//platform.twitter.com/widgets.js';
-      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
-    })();
-  </script>
-
-
-
-
-
-</body>
-</html>
