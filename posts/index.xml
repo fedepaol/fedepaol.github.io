@@ -6,20 +6,10 @@
     <description>Recent content in Posts on My little software warehouse</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Wed, 13 Feb 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 11 Dec 2018 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="http://fedepaol.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
     
-    
-    <item>
-      <title>An optimization story</title>
-      <link>http://fedepaol.github.io/blog/2019/02/13/an-optimization-story/</link>
-      <pubDate>Wed, 13 Feb 2019 00:00:00 +0000</pubDate>
-      
-      <guid>http://fedepaol.github.io/blog/2019/02/13/an-optimization-story/</guid>
-      <description>There are some scenarios where the order matters Let&amp;rsquo;s say that you have an api that can receive &amp;ldquo;actions&amp;rdquo; to be performed on a given endpoint.
-Think about you buying something on Amazon and then changing your mind and revoking your order. You don&amp;rsquo;t want those two actions to be swapped, otherwise the cancellation will be refused (the order you want to cancel do not exists yet) and then the item you don&amp;rsquo;t want anymore will be ordered (since the action of ordering the item receives the backend after the cancelation).</description>
-    </item>
     
     <item>
       <title>Fast messaging with nats and go part 2</title>
@@ -130,7 +120,7 @@ Things have changed, and after listening Corey Latislaw advocating its usage dur
       <pubDate>Fri, 04 Sep 2015 00:00:00 +0000</pubDate>
       
       <guid>http://fedepaol.github.io/blog/2015/09/04/its-been-a-while/</guid>
-      <description>###.. since my last blogpost. I&amp;rsquo;ve done a few things in the meanwhile, I wrote a game with LibGdx, I tinkered with various frameworks, but on top of all these things I&amp;rsquo;ve been taking care of my one (and a half) year old daughter.
+      <description>.. since my last blogpost. I&amp;rsquo;ve done a few things in the meanwhile, I wrote a game with LibGdx, I tinkered with various frameworks, but on top of all these things I&amp;rsquo;ve been taking care of my one (and a half) year old daughter.
 I do certainly have less time to devote to side projects, but I still like to learn new things and Android is exciting from that point of view.</description>
     </item>
     
