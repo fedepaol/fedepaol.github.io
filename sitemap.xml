@@ -8,6 +8,11 @@
   </url>
   
   <url>
+    <loc>http://fedepaol.github.io/blog/2019/02/13/a-concurrency-experiment/</loc>
+    <lastmod>2019-02-13T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>http://fedepaol.github.io/blog/2018/12/11/fast-messaging-with-nats-and-go-part-2/</loc>
     <lastmod>2018-12-11T00:00:00+00:00</lastmod>
   </url>
@@ -279,6 +284,12 @@
   </url>
   
   <url>
+    <loc>http://fedepaol.github.io/categories/concurrency/</loc>
+    <lastmod>2019-02-13T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
     <loc>http://fedepaol.github.io/categories/contentprovider/</loc>
     <lastmod>2012-11-11T00:00:00+00:00</lastmod>
     <priority>0</priority>
@@ -299,6 +310,12 @@
   <url>
     <loc>http://fedepaol.github.io/categories/firefox/</loc>
     <lastmod>2013-07-29T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/categories/go/</loc>
+    <lastmod>2019-02-13T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -376,7 +393,7 @@
   
   <url>
     <loc>http://fedepaol.github.io/posts/</loc>
-    <lastmod>2018-12-11T00:00:00+00:00</lastmod>
+    <lastmod>2019-02-13T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
