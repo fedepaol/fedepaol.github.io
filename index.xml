@@ -6,10 +6,20 @@
     <description>Recent content on My little software warehouse</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Mon, 18 Feb 2019 13:45:02 +0100</lastBuildDate>
+    <lastBuildDate>Sat, 30 Mar 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="http://fedepaol.github.io/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>A concurrency experiment</title>
+      <link>http://fedepaol.github.io/blog/2019/03/30/a-concurrency-experiment/</link>
+      <pubDate>Sat, 30 Mar 2019 00:00:00 +0000</pubDate>
+      
+      <guid>http://fedepaol.github.io/blog/2019/03/30/a-concurrency-experiment/</guid>
+      <description>There are some scenarios where the order matters Let&amp;rsquo;s say that you have an api that can receive &amp;ldquo;actions&amp;rdquo; to be performed on a given endpoint.
+Think about you buying something on Amazon and then changing your mind and revoking your order. You don&amp;rsquo;t want those two actions to be swapped, otherwise the cancellation will be refused (the order you want to cancel do not exists yet) and then the item you don&amp;rsquo;t want anymore will be ordered (since the action of ordering the item receives the backend after the cancelation).</description>
+    </item>
     
     <item>
       <title>About me</title>
@@ -19,16 +29,6 @@
       <guid>http://fedepaol.github.io/about/</guid>
       <description>Lead developer with electronic trading software by day, passionate about opensource. Used to write a lot of code in my spare time. Now I am a dad and you know where most of my spare time goes to. But I keep trying!
 Interests I&amp;rsquo;ve done a lot of Android in my spare time. It was kind of a second job. I started when AsyncTasks where the way to interact with a background thread and Eclipse was the official IDE, up to when architectural patterns like MVP and MVVP took their way in the Apps, together with RxJava and Dagger (2).</description>
-    </item>
-    
-    <item>
-      <title>A concurrency experiment</title>
-      <link>http://fedepaol.github.io/blog/2019/02/13/a-concurrency-experiment/</link>
-      <pubDate>Wed, 13 Feb 2019 00:00:00 +0000</pubDate>
-      
-      <guid>http://fedepaol.github.io/blog/2019/02/13/a-concurrency-experiment/</guid>
-      <description>There are some scenarios where the order matters Let&amp;rsquo;s say that you have an api that can receive &amp;ldquo;actions&amp;rdquo; to be performed on a given endpoint.
-Think about you buying something on Amazon and then changing your mind and revoking your order. You don&amp;rsquo;t want those two actions to be swapped, otherwise the cancellation will be refused (the order you want to cancel do not exists yet) and then the item you don&amp;rsquo;t want anymore will be ordered (since the action of ordering the item receives the backend after the cancelation).</description>
     </item>
     
     <item>
