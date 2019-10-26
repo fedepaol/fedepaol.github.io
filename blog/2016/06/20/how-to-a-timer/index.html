@@ -33,25 +33,25 @@ integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbi
       <div class="navbar-menu has-text-centered is-active">
           <div class="navbar-end is-centered">
               
-                <a href="https://twitter.com/fedepaol">
+                <a href="https://twitter.com/fedepaol" rel="me">
                   <span class="icon">
                     <i class="fab fa-twitter"></i>
                   </span>
                 </a>
               
-                <a href="http://fedepaol.github.io/about">
+                <a href="http://fedepaol.github.io/about" rel="me">
                   <span class="icon">
                     <i class="fas fa-info"></i>
                   </span>
                 </a>
               
-                <a href="https://github.com/fedepaol">
+                <a href="https://github.com/fedepaol" rel="me">
                   <span class="icon">
                     <i class="fab fa-github"></i>
                   </span>
                 </a>
               
-                <a href="https://linkedin.com/in/federico-paolinelli-2374954/">
+                <a href="https://linkedin.com/in/federico-paolinelli-2374954/" rel="me">
                   <span class="icon">
                     <i class="fab fa-linkedin-in"></i>
                   </span>
@@ -61,6 +61,7 @@ integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbi
       </div>
     </nav>
   </div>
+
 <div class="container">
   <h2 class="subtitle is-6">June 20, 2016</h2>
   <h1 class="subtitle is-size-4-mobile is-size-3-desktop">How to a timer</h1>
@@ -125,35 +126,35 @@ integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbi
 
 <p>This is the easiest part: you can use a countdown timer, a handler, rxjava or whatever you want to <del>copy and paste</del> take inspiration from.
 In my example I&rsquo;ll use a countdown timer since it&rsquo;s simple to use and serves the purpouse.</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">startTimer</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
-        mCountDownTimer <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> CountDownTimer<span style="color:#f92672">(</span>mTimeToGo <span style="color:#f92672">*</span> 1000<span style="color:#f92672">,</span> 1000<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
-	    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">onTick</span><span style="color:#f92672">(</span><span style="color:#66d9ef">long</span> millisUntilFinished<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
-		mTimeToGo <span style="color:#f92672">-=</span> 1000<span style="color:#f92672">;</span>
-		updateTimeUi<span style="color:#f92672">();</span>
-	    <span style="color:#f92672">}</span>
-	    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">onFinish</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
-		mState <span style="color:#f92672">=</span> TimerState<span style="color:#f92672">.</span><span style="color:#a6e22e">STOPPED</span><span style="color:#f92672">;</span>
-		onTimerFinish<span style="color:#f92672">();</span>
-		updateTimeUi<span style="color:#f92672">();</span>
-	<span style="color:#f92672">}</span>
-        <span style="color:#f92672">}.</span><span style="color:#a6e22e">start</span><span style="color:#f92672">();</span>
-    <span style="color:#f92672">}</span></code></pre></div>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">    <span style="color:#66d9ef">private</span> <span style="color:#a6e22e">void</span> startTimer() {
+        mCountDownTimer <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> CountDownTimer(mTimeToGo <span style="color:#f92672">*</span> 1000, 1000) {
+	    <span style="color:#66d9ef">public</span> <span style="color:#a6e22e">void</span> onTick(<span style="color:#66d9ef">long</span> <span style="color:#a6e22e">millisUntilFinished</span>) {
+		mTimeToGo <span style="color:#f92672">-=</span> 1000;
+		updateTimeUi();
+	    }
+	    <span style="color:#66d9ef">public</span> <span style="color:#a6e22e">void</span> onFinish() {
+		mState <span style="color:#f92672">=</span> TimerState.<span style="color:#a6e22e">STOPPED</span>;
+		onTimerFinish();
+		updateTimeUi();
+	}
+        }.<span style="color:#a6e22e">start</span>();
+    }</code></pre></div>
 <h2 id="remembering-when-the-timer-was-started-how-long-it-was-supposed-to-run">Remembering when the timer was started / how long it was supposed to run</h2>
 
 <p>This is the trickiest part.
 In the example I store the starting time inside the shared preferences storage. It will persist even if the app is killed.</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">    mPreferences<span style="color:#f92672">.</span><span style="color:#a6e22e">setStartedTime</span><span style="color:#f92672">(</span>getNow<span style="color:#f92672">());</span></code></pre></div>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">    mPreferences.<span style="color:#a6e22e">setStartedTime</span>(getNow());</code></pre></div>
 <p>That value is used when resuming the app in order to check how long the timer has to run (or if the time did expire):</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">initTimer</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
-        <span style="color:#66d9ef">long</span> startTime <span style="color:#f92672">=</span> mPreferences<span style="color:#f92672">.</span><span style="color:#a6e22e">getStartedTime</span><span style="color:#f92672">();</span>
-        mTimeToGo <span style="color:#f92672">=</span> <span style="color:#f92672">(</span>TIMER_LENGHT <span style="color:#f92672">-</span> <span style="color:#f92672">(</span>getNow<span style="color:#f92672">()</span> <span style="color:#f92672">-</span> startTime<span style="color:#f92672">));</span>
-        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>mTimeToGo <span style="color:#f92672">&lt;=</span> 0<span style="color:#f92672">)</span> <span style="color:#f92672">{</span> <span style="color:#75715e">// TIMER EXPIRED
-</span><span style="color:#75715e"></span>            mTimeToGo <span style="color:#f92672">=</span> TIMER_LENGHT<span style="color:#f92672">;</span>
-            onTimerFinish<span style="color:#f92672">();</span>
-        <span style="color:#f92672">}</span> <span style="color:#66d9ef">else</span> <span style="color:#f92672">{</span>
-            startTimer<span style="color:#f92672">();</span>
-        <span style="color:#f92672">}</span>
-    <span style="color:#f92672">}</span></code></pre></div>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">    <span style="color:#66d9ef">private</span> <span style="color:#a6e22e">void</span> initTimer() {
+        <span style="color:#66d9ef">long</span> <span style="color:#a6e22e">startTime</span> <span style="color:#f92672">=</span> mPreferences.<span style="color:#a6e22e">getStartedTime</span>();
+        mTimeToGo <span style="color:#f92672">=</span> (TIMER_LENGHT <span style="color:#f92672">-</span> (getNow() <span style="color:#f92672">-</span> startTime));
+        <span style="color:#66d9ef">if</span> (mTimeToGo <span style="color:#f92672">&lt;=</span> 0) { <span style="color:#75715e">// TIMER EXPIRED
+</span><span style="color:#75715e"></span>            mTimeToGo <span style="color:#f92672">=</span> TIMER_LENGHT;
+            onTimerFinish();
+        } <span style="color:#66d9ef">else</span> {
+            startTimer();
+        }
+    }</code></pre></div>
 <p>The app tries to retrieve the start time value. If there still is  some time to run, the countdown restarts for the remaining length of time. Otherwise the timer is reset and the user is notified of the timer expiration.</p>
 
 <p>Please note that this is a ultra simplified version that assumes that <em>the timer is running</em>. The <a href="https://github.com/fedepaol/AndroidTimerSample">github sample</a> checks also if the timer was started or not.</p>
@@ -162,27 +163,27 @@ In the example I store the starting time inside the shared preferences storage. 
 
 <p>This is simple. You should set the alarm that triggers a broadcast receiver through the alarm manager:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">    <span style="color:#a6e22e">@Override</span>
-    <span style="color:#66d9ef">protected</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">onPause</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
-        <span style="color:#66d9ef">super</span><span style="color:#f92672">.</span><span style="color:#a6e22e">onPause</span><span style="color:#f92672">();</span>
-        <span style="color:#66d9ef">long</span> wakeUpTime <span style="color:#f92672">=</span> <span style="color:#f92672">(</span>mPreferences<span style="color:#f92672">.</span><span style="color:#a6e22e">getStartedTime</span><span style="color:#f92672">()</span> <span style="color:#f92672">+</span> TIMER_LENGHT<span style="color:#f92672">)</span> <span style="color:#f92672">*</span> 1000<span style="color:#f92672">;</span>
-        AlarmManager am <span style="color:#f92672">=</span> <span style="color:#f92672">(</span>AlarmManager<span style="color:#f92672">)</span> getSystemService<span style="color:#f92672">(</span>Context<span style="color:#f92672">.</span><span style="color:#a6e22e">ALARM_SERVICE</span><span style="color:#f92672">);</span>
-        Intent intent <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Intent<span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">,</span> TimerExpiredReceiver<span style="color:#f92672">.</span><span style="color:#a6e22e">class</span><span style="color:#f92672">);</span>
-        PendingIntent sender <span style="color:#f92672">=</span> PendingIntent<span style="color:#f92672">.</span><span style="color:#a6e22e">getBroadcast</span><span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">,</span> 0<span style="color:#f92672">,</span> intent<span style="color:#f92672">,</span> PendingIntent<span style="color:#f92672">.</span><span style="color:#a6e22e">FLAG_CANCEL_CURRENT</span><span style="color:#f92672">);</span>
-        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>Build<span style="color:#f92672">.</span><span style="color:#a6e22e">VERSION</span><span style="color:#f92672">.</span><span style="color:#a6e22e">SDK_INT</span> <span style="color:#f92672">&gt;=</span> Build<span style="color:#f92672">.</span><span style="color:#a6e22e">VERSION_CODES</span><span style="color:#f92672">.</span><span style="color:#a6e22e">LOLLIPOP</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
-            am<span style="color:#f92672">.</span><span style="color:#a6e22e">setAlarmClock</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> AlarmManager<span style="color:#f92672">.</span><span style="color:#a6e22e">AlarmClockInfo</span><span style="color:#f92672">(</span>wakeUpTime<span style="color:#f92672">,</span> sender<span style="color:#f92672">),</span> sender<span style="color:#f92672">);</span>
-        <span style="color:#f92672">}</span> <span style="color:#66d9ef">else</span> <span style="color:#f92672">{</span>
-            am<span style="color:#f92672">.</span><span style="color:#a6e22e">set</span><span style="color:#f92672">(</span>AlarmManager<span style="color:#f92672">.</span><span style="color:#a6e22e">RTC_WAKEUP</span><span style="color:#f92672">,</span> wakeUpTime<span style="color:#f92672">,</span> sender<span style="color:#f92672">);</span>
-        <span style="color:#f92672">}</span>
-    <span style="color:#f92672">}</span></code></pre></div>
+    <span style="color:#66d9ef">protected</span> <span style="color:#a6e22e">void</span> onPause() {
+        <span style="color:#66d9ef">super</span>.<span style="color:#a6e22e">onPause</span>();
+        <span style="color:#66d9ef">long</span> <span style="color:#a6e22e">wakeUpTime</span> <span style="color:#f92672">=</span> (mPreferences.<span style="color:#a6e22e">getStartedTime</span>() <span style="color:#f92672">+</span> TIMER_LENGHT) <span style="color:#f92672">*</span> 1000;
+        AlarmManager <span style="color:#a6e22e">am</span> <span style="color:#f92672">=</span> (AlarmManager) getSystemService(Context.<span style="color:#a6e22e">ALARM_SERVICE</span>);
+        Intent <span style="color:#a6e22e">intent</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Intent(<span style="color:#66d9ef">this</span>, TimerExpiredReceiver.<span style="color:#a6e22e">class</span>);
+        PendingIntent <span style="color:#a6e22e">sender</span> <span style="color:#f92672">=</span> PendingIntent.<span style="color:#a6e22e">getBroadcast</span>(<span style="color:#66d9ef">this</span>, 0, intent, PendingIntent.<span style="color:#a6e22e">FLAG_CANCEL_CURRENT</span>);
+        <span style="color:#66d9ef">if</span> (Build.<span style="color:#a6e22e">VERSION</span>.<span style="color:#a6e22e">SDK_INT</span> <span style="color:#f92672">&gt;=</span> Build.<span style="color:#a6e22e">VERSION_CODES</span>.<span style="color:#a6e22e">LOLLIPOP</span>) {
+            am.<span style="color:#a6e22e">setAlarmClock</span>(<span style="color:#66d9ef">new</span> AlarmManager.<span style="color:#a6e22e">AlarmClockInfo</span>(wakeUpTime, sender), sender);
+        } <span style="color:#66d9ef">else</span> {
+            am.<span style="color:#a6e22e">set</span>(AlarmManager.<span style="color:#a6e22e">RTC_WAKEUP</span>, wakeUpTime, sender);
+        }
+    }</code></pre></div>
 <p>and cancel it in onResume:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">    <span style="color:#a6e22e">@Override</span>
-    <span style="color:#66d9ef">protected</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">onResume</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
-        <span style="color:#66d9ef">super</span><span style="color:#f92672">.</span><span style="color:#a6e22e">onResume</span><span style="color:#f92672">();</span>
-        Intent intent <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Intent<span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">,</span> TimerExpiredReceiver<span style="color:#f92672">.</span><span style="color:#a6e22e">class</span><span style="color:#f92672">);</span>
-        PendingIntent sender <span style="color:#f92672">=</span> PendingIntent<span style="color:#f92672">.</span><span style="color:#a6e22e">getBroadcast</span><span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">,</span> 0<span style="color:#f92672">,</span> intent<span style="color:#f92672">,</span> PendingIntent<span style="color:#f92672">.</span><span style="color:#a6e22e">FLAG_CANCEL_CURRENT</span><span style="color:#f92672">);</span>
-        AlarmManager am <span style="color:#f92672">=</span> <span style="color:#f92672">(</span>AlarmManager<span style="color:#f92672">)</span> getSystemService<span style="color:#f92672">(</span>Context<span style="color:#f92672">.</span><span style="color:#a6e22e">ALARM_SERVICE</span><span style="color:#f92672">);</span>
-        am<span style="color:#f92672">.</span><span style="color:#a6e22e">cancel</span><span style="color:#f92672">(</span>sender<span style="color:#f92672">);</span>
-   <span style="color:#f92672">}</span></code></pre></div>
+    <span style="color:#66d9ef">protected</span> <span style="color:#a6e22e">void</span> onResume() {
+        <span style="color:#66d9ef">super</span>.<span style="color:#a6e22e">onResume</span>();
+        Intent <span style="color:#a6e22e">intent</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Intent(<span style="color:#66d9ef">this</span>, TimerExpiredReceiver.<span style="color:#a6e22e">class</span>);
+        PendingIntent <span style="color:#a6e22e">sender</span> <span style="color:#f92672">=</span> PendingIntent.<span style="color:#a6e22e">getBroadcast</span>(<span style="color:#66d9ef">this</span>, 0, intent, PendingIntent.<span style="color:#a6e22e">FLAG_CANCEL_CURRENT</span>);
+        AlarmManager <span style="color:#a6e22e">am</span> <span style="color:#f92672">=</span> (AlarmManager) getSystemService(Context.<span style="color:#a6e22e">ALARM_SERVICE</span>);
+        am.<span style="color:#a6e22e">cancel</span>(sender);
+   }</code></pre></div>
 <p>Launching a system notification that brings the user back to the app when clicked is trivial. You can check the <a href="https://github.com/fedepaol/AndroidTimerSample">sample on github</a>.</p>
 
 <h2 id="conclusion">Conclusion</h2>

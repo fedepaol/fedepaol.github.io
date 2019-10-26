@@ -8,7 +8,7 @@
 
 
 
-<title>Intentservice | My little software warehouse</title>
+<title>intentservice | My little software warehouse</title>
 
 <link rel="stylesheet" href="http://fedepaol.github.io//css/styles.css">
 
@@ -35,25 +35,25 @@ integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbi
       <div class="navbar-menu has-text-centered is-active">
           <div class="navbar-end is-centered">
               
-                <a href="https://twitter.com/fedepaol">
+                <a href="https://twitter.com/fedepaol" rel="me">
                   <span class="icon">
                     <i class="fab fa-twitter"></i>
                   </span>
                 </a>
               
-                <a href="http://fedepaol.github.io/about">
+                <a href="http://fedepaol.github.io/about" rel="me">
                   <span class="icon">
                     <i class="fas fa-info"></i>
                   </span>
                 </a>
               
-                <a href="https://github.com/fedepaol">
+                <a href="https://github.com/fedepaol" rel="me">
                   <span class="icon">
                     <i class="fab fa-github"></i>
                   </span>
                 </a>
               
-                <a href="https://linkedin.com/in/federico-paolinelli-2374954/">
+                <a href="https://linkedin.com/in/federico-paolinelli-2374954/" rel="me">
                   <span class="icon">
                     <i class="fab fa-linkedin-in"></i>
                   </span>
@@ -63,25 +63,204 @@ integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbi
       </div>
     </nav>
   </div>
+
   <main class="container">
       
       
-      <h1 class="title is-3">2011</h1>
+      <h1 class="title is-3">2019</h1>
       
       <article class="columns">
         <div class="column is-2">
-          <h6 class="is-inline" style="white-space: nowrap">Apr 25</h2>
+          <h6 class="is-inline" style="white-space: nowrap">Oct 23</h2>
         </div>
         <div class="column">
-          <h2 class="subtitle is-inline is-size-4-mobile is-size-3-desktop"><a href="http://fedepaol.github.io/blog/2011/04/25/behind-activities-android-services-background-operations-and-threads/">Behind activities: android, services, background operations and threads</a></h1>
+          <h2 class="subtitle is-inline is-size-4-mobile is-size-3-desktop"><a href="http://fedepaol.github.io/blog/2019/10/23/golab-2019/">GoLab 2019</a></h1>
           <div class="content is-hidden-mobile">
-            This time I want to share something I learned about working in background on android.
-One of the biggest advantages of android over ios (or, at least, some ios version ago) is that your app is not sandboxed and can continue to live in background.
-To perform background (not visible) work, all you need to know is how to use android services.
-A service is a piece of an application that is allowed to …
+            Intro In this post I&rsquo;ll try to write about my experience at GoLab 2019.
+As per the 2018 edition, I had the honor to give a talk during the Italian Go conference GoLab. There are many reasons why I loved the conference:
+ The organization was flawless. The people from Develer have been organizing conferences for a long time and it&rsquo;s pretty clear they know how to do them.
             
             <br>
-            <a class="button is-marginless is-paddingless" href="http://fedepaol.github.io/blog/2011/04/25/behind-activities-android-services-background-operations-and-threads/">
+            <a class="button is-marginless is-paddingless" href="http://fedepaol.github.io/blog/2019/10/23/golab-2019/">
+            <span class="icon-link is-small" style="line-height: 100%">
+                <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+              </span>
+              <p style="padding:0 5px"></p>more</p>
+            </a>
+            
+          </div>
+      </article>
+      
+      <article class="columns">
+        <div class="column is-2">
+          <h6 class="is-inline" style="white-space: nowrap">Mar 30</h2>
+        </div>
+        <div class="column">
+          <h2 class="subtitle is-inline is-size-4-mobile is-size-3-desktop"><a href="http://fedepaol.github.io/blog/2019/03/30/a-concurrency-experiment/">A concurrency experiment</a></h1>
+          <div class="content is-hidden-mobile">
+            There are some scenarios where the order matters Let&rsquo;s say that you have an api that can receive &ldquo;actions&rdquo; to be performed on a given endpoint.
+Think about you buying something on Amazon and then changing your mind and revoking your order. You don&rsquo;t want those two actions to be swapped, otherwise the cancellation will be refused (the order you want to cancel do not exists …
+            
+            <br>
+            <a class="button is-marginless is-paddingless" href="http://fedepaol.github.io/blog/2019/03/30/a-concurrency-experiment/">
+            <span class="icon-link is-small" style="line-height: 100%">
+                <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+              </span>
+              <p style="padding:0 5px"></p>more</p>
+            </a>
+            
+          </div>
+      </article>
+      
+      
+      <h1 class="title is-3">2018</h1>
+      
+      <article class="columns">
+        <div class="column is-2">
+          <h6 class="is-inline" style="white-space: nowrap">Dec 11</h2>
+        </div>
+        <div class="column">
+          <h2 class="subtitle is-inline is-size-4-mobile is-size-3-desktop"><a href="http://fedepaol.github.io/blog/2018/12/11/fast-messaging-with-nats-and-go-part-2/">Fast messaging with nats and go part 2</a></h1>
+          <div class="content is-hidden-mobile">
+            This is the second of a follow up serie of the talk Fast messaging with Nats and Go I gave at golab 2018. The first part can be found here
+What can we do with nats? Pub sub As you can probably guess, given that Nats is a pure pub / sub system, we can easily implement pub / sub.
+Please remember that a nats publisher does not assume the audience.
+            
+            <br>
+            <a class="button is-marginless is-paddingless" href="http://fedepaol.github.io/blog/2018/12/11/fast-messaging-with-nats-and-go-part-2/">
+            <span class="icon-link is-small" style="line-height: 100%">
+                <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+              </span>
+              <p style="padding:0 5px"></p>more</p>
+            </a>
+            
+          </div>
+      </article>
+      
+      <article class="columns">
+        <div class="column is-2">
+          <h6 class="is-inline" style="white-space: nowrap">Oct 27</h2>
+        </div>
+        <div class="column">
+          <h2 class="subtitle is-inline is-size-4-mobile is-size-3-desktop"><a href="http://fedepaol.github.io/blog/2018/10/27/fast-messaging-with-nats-and-go/">Fast messaging with nats and go</a></h1>
+          <div class="content is-hidden-mobile">
+            This is the first of follow up serie of the talk Fast messaging with Nats and Go I gave at golab 2018.
+The slides of the talk can be found here:  What is Nats Nats is a messaging system hosted under the CNCF umbrella, which is an open source software foundation dedicated to making cloud native computing universal and sustainable. It&rsquo;s my place-to-go while looking for software related to …
+            
+            <br>
+            <a class="button is-marginless is-paddingless" href="http://fedepaol.github.io/blog/2018/10/27/fast-messaging-with-nats-and-go/">
+            <span class="icon-link is-small" style="line-height: 100%">
+                <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+              </span>
+              <p style="padding:0 5px"></p>more</p>
+            </a>
+            
+          </div>
+      </article>
+      
+      <article class="columns">
+        <div class="column is-2">
+          <h6 class="is-inline" style="white-space: nowrap">Oct 26</h2>
+        </div>
+        <div class="column">
+          <h2 class="subtitle is-inline is-size-4-mobile is-size-3-desktop"><a href="http://fedepaol.github.io/blog/2018/10/26/a-new-chapter/">A new chapter</a></h1>
+          <div class="content is-hidden-mobile">
+            It&rsquo;s been a while It&rsquo;s more than a year since my last blogpost which incidentally (or not) it happened right a month before the birth of my second child. In the past year I lost a lot of sleep, and now I am kind of getting back to normality (which means new side gigs :-)).
+My interests moved from Android and mobile in general to Go and distributed systems, which is what I am probably …
+            
+            <br>
+            <a class="button is-marginless is-paddingless" href="http://fedepaol.github.io/blog/2018/10/26/a-new-chapter/">
+            <span class="icon-link is-small" style="line-height: 100%">
+                <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+              </span>
+              <p style="padding:0 5px"></p>more</p>
+            </a>
+            
+          </div>
+      </article>
+      
+      
+      <h1 class="title is-3">2017</h1>
+      
+      <article class="columns">
+        <div class="column is-2">
+          <h6 class="is-inline" style="white-space: nowrap">Apr 30</h2>
+        </div>
+        <div class="column">
+          <h2 class="subtitle is-inline is-size-4-mobile is-size-3-desktop"><a href="http://fedepaol.github.io/blog/2017/04/30/android-okhttp-and-websockets/">Android okhttp and websockets</a></h1>
+          <div class="content is-hidden-mobile">
+            Websockets Rest http calls are the most common interaction between Android apps and remote servers. However, there are some scenarios where the interaction is better handled via a persistent connection: think about a chat, or a multiplayer game where data flows in both directions and the server needs to push data to the clients and to be aware of which client are connected.
+This kind of scenario …
+            
+            <br>
+            <a class="button is-marginless is-paddingless" href="http://fedepaol.github.io/blog/2017/04/30/android-okhttp-and-websockets/">
+            <span class="icon-link is-small" style="line-height: 100%">
+                <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+              </span>
+              <p style="padding:0 5px"></p>more</p>
+            </a>
+            
+          </div>
+      </article>
+      
+      
+      <h1 class="title is-3">2016</h1>
+      
+      <article class="columns">
+        <div class="column is-2">
+          <h6 class="is-inline" style="white-space: nowrap">Aug 27</h2>
+        </div>
+        <div class="column">
+          <h2 class="subtitle is-inline is-size-4-mobile is-size-3-desktop"><a href="http://fedepaol.github.io/blog/2016/08/27/android-mvp-testing/">Android mvp testing</a></h1>
+          <div class="content is-hidden-mobile">
+            MVP is Model View Presenter .. which is a pattern that is very popular among Android developers nowdays.
+I don&rsquo;t intend to write (yet) another guide about MVP in Android, because others have done a better job, for example:
+ Antonio Leiva&rsquo;s introduction to MVP Hannes Dorfmann&rsquo;s introduction to Mosby Fernando Cejas&rsquo; post on clean architecture  A lot have been said about MVP …
+            
+            <br>
+            <a class="button is-marginless is-paddingless" href="http://fedepaol.github.io/blog/2016/08/27/android-mvp-testing/">
+            <span class="icon-link is-small" style="line-height: 100%">
+                <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+              </span>
+              <p style="padding:0 5px"></p>more</p>
+            </a>
+            
+          </div>
+      </article>
+      
+      <article class="columns">
+        <div class="column is-2">
+          <h6 class="is-inline" style="white-space: nowrap">Jun 20</h2>
+        </div>
+        <div class="column">
+          <h2 class="subtitle is-inline is-size-4-mobile is-size-3-desktop"><a href="http://fedepaol.github.io/blog/2016/06/20/how-to-a-timer/">How to a timer</a></h1>
+          <div class="content is-hidden-mobile">
+            Ok, I must confess the title is built to draw people&rsquo;s attention, because you know, nowdays everything is done in a reactive fashion. RxJava is superhelpful, but if we forget the ecosystem our apps are running into, we risk to forget the proper way to implement certain tasks in Android.
+Why do we need a whole post about timers? Recently, I had to implement a countdown timer in Android.
+            
+            <br>
+            <a class="button is-marginless is-paddingless" href="http://fedepaol.github.io/blog/2016/06/20/how-to-a-timer/">
+            <span class="icon-link is-small" style="line-height: 100%">
+                <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+              </span>
+              <p style="padding:0 5px"></p>more</p>
+            </a>
+            
+          </div>
+      </article>
+      
+      <article class="columns">
+        <div class="column is-2">
+          <h6 class="is-inline" style="white-space: nowrap">Apr 20</h2>
+        </div>
+        <div class="column">
+          <h2 class="subtitle is-inline is-size-4-mobile is-size-3-desktop"><a href="http://fedepaol.github.io/blog/2016/04/20/happines-is-relative/">Happines is relative</a></h1>
+          <div class="content is-hidden-mobile">
+            Using relative layout is bad .. or at least they say so. The truth is, it is relatively easy to build complex layouts using RelativeLayouts, but this ease of use comes with a cost: in order to provide that kind of flexibility, RelativeLayout does two measurement passes.
+There are a lot of talks and posts explaining that if you have nested relative layouts, you&rsquo;ll end up with many measurement …
+            
+            <br>
+            <a class="button is-marginless is-paddingless" href="http://fedepaol.github.io/blog/2016/04/20/happines-is-relative/">
             <span class="icon-link is-small" style="line-height: 100%">
                 <i class="fa fa-angle-double-right" aria-hidden="true"></i>
               </span>
@@ -112,7 +291,7 @@ A service is a piece of an application that is allowed to …
       <div class="level-right is-marginless">
         <div class="level-item">
           
-          <a class="button is-rounded" disabled>
+          <a class="button is-rounded" href="/categories/intentservice/page/2/">
             Older
             <span class="icon is-small is-marginless">
               <i class="fa fa-angle-right"></i>

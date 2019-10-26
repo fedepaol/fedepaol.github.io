@@ -33,25 +33,25 @@ integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbi
       <div class="navbar-menu has-text-centered is-active">
           <div class="navbar-end is-centered">
               
-                <a href="https://twitter.com/fedepaol">
+                <a href="https://twitter.com/fedepaol" rel="me">
                   <span class="icon">
                     <i class="fab fa-twitter"></i>
                   </span>
                 </a>
               
-                <a href="http://fedepaol.github.io/about">
+                <a href="http://fedepaol.github.io/about" rel="me">
                   <span class="icon">
                     <i class="fas fa-info"></i>
                   </span>
                 </a>
               
-                <a href="https://github.com/fedepaol">
+                <a href="https://github.com/fedepaol" rel="me">
                   <span class="icon">
                     <i class="fab fa-github"></i>
                   </span>
                 </a>
               
-                <a href="https://linkedin.com/in/federico-paolinelli-2374954/">
+                <a href="https://linkedin.com/in/federico-paolinelli-2374954/" rel="me">
                   <span class="icon">
                     <i class="fab fa-linkedin-in"></i>
                   </span>
@@ -61,6 +61,7 @@ integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbi
       </div>
     </nav>
   </div>
+
 <div class="container">
   <h2 class="subtitle is-6">September 5, 2015</h2>
   <h1 class="subtitle is-size-4-mobile is-size-3-desktop">Mocking with robolectric and dagger 2</h1>
@@ -83,86 +84,86 @@ integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbi
 
 <p>Let&rsquo;s say you have your application class that exposes all the injected objects in a Dagger 2 fashion, and that you are using it to inject classes in your activities:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">    <span style="color:#a6e22e">@Override</span>
-    <span style="color:#66d9ef">protected</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">onCreate</span><span style="color:#f92672">(</span>Bundle savedInstanceState<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">protected</span> <span style="color:#a6e22e">void</span> onCreate(Bundle <span style="color:#a6e22e">savedInstanceState</span>) {
         <span style="color:#75715e">// stuff 
-</span><span style="color:#75715e"></span>        <span style="color:#f92672">((</span>MyApplication<span style="color:#f92672">)</span> getApplication<span style="color:#f92672">()).</span><span style="color:#a6e22e">getComponent</span><span style="color:#f92672">().</span><span style="color:#a6e22e">inject</span><span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">);</span>
-    <span style="color:#f92672">}</span></code></pre></div>
+</span><span style="color:#75715e"></span>        ((MyApplication) getApplication()).<span style="color:#a6e22e">getComponent</span>().<span style="color:#a6e22e">inject</span>(<span style="color:#66d9ef">this</span>);
+    }</code></pre></div>
 <p>Now, if we can drive the component injected within our tests, the rest of the app would use them and (hopefully) behave in a way we expect, depending on our mocks instead of the real objects.</p>
 
 <p>The dependencies are provided by a module:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#a6e22e">@Module</span>
-<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ApplicationModule</span> <span style="color:#f92672">{</span>
+<span style="color:#66d9ef">public</span> <span style="color:#a6e22e">class</span> ApplicationModule {
     <span style="color:#75715e">// stuff
 </span><span style="color:#75715e"></span>
     <span style="color:#a6e22e">@Provides</span>
     <span style="color:#a6e22e">@Singleton</span>
-    GitHubClient <span style="color:#a6e22e">provideClient</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
-        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> GitHubClient<span style="color:#f92672">(</span>mApp<span style="color:#f92672">.</span><span style="color:#a6e22e">getApplicationContext</span><span style="color:#f92672">());</span>
-    <span style="color:#f92672">}</span>
+    GitHubClient <span style="color:#a6e22e">provideClient</span>() {
+        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> GitHubClient(mApp.<span style="color:#a6e22e">getApplicationContext</span>());
+    }
     <span style="color:#75715e">// .. Provides other stuff
-</span><span style="color:#75715e"></span><span style="color:#f92672">}</span></code></pre></div>
+</span><span style="color:#75715e"></span>}</code></pre></div>
 <p><code>GitHubClient</code> is a Retrofit (2) powered client that helps to retrieve all the repos for a given user.</p>
 
 <p>By using a test only application, we can provide a module from our tests.</p>
 
 <p>Let&rsquo;s see ApplicationModule&rsquo;s mocked alter ego. Note that we can override only the dependencies that we want to mock:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">MockApplicationModule</span> <span style="color:#66d9ef">extends</span> ApplicationModule <span style="color:#f92672">{</span>
-    List<span style="color:#f92672">&lt;</span>Repo<span style="color:#f92672">&gt;</span> result<span style="color:#f92672">;</span>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#a6e22e">class</span> MockApplicationModule <span style="color:#a6e22e">extends</span> ApplicationModule {
+    List<span style="color:#f92672">&lt;</span>Repo<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">result</span>;
     <span style="color:#75715e">// stuff
 </span><span style="color:#75715e"></span>
     <span style="color:#a6e22e">@Override</span>
-    GitHubClient <span style="color:#a6e22e">provideClient</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
-        GitHubClient client <span style="color:#f92672">=</span> mock<span style="color:#f92672">(</span>GitHubClient<span style="color:#f92672">.</span><span style="color:#a6e22e">class</span><span style="color:#f92672">);</span>
+    GitHubClient <span style="color:#a6e22e">provideClient</span>() {
+        GitHubClient <span style="color:#a6e22e">client</span> <span style="color:#f92672">=</span> mock(GitHubClient.<span style="color:#a6e22e">class</span>);
         <span style="color:#75715e">// mock behaviour
-</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">return</span> client<span style="color:#f92672">;</span>
-    <span style="color:#f92672">}</span>
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">return</span> client;
+    }
 
-    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">setResult</span><span style="color:#f92672">(</span>List<span style="color:#f92672">&lt;</span>Repo<span style="color:#f92672">&gt;</span> result<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
-        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">result</span> <span style="color:#f92672">=</span> result<span style="color:#f92672">;</span>
-    <span style="color:#f92672">}</span>
-<span style="color:#f92672">}</span></code></pre></div>
+    <span style="color:#66d9ef">public</span> <span style="color:#a6e22e">void</span> setResult(List<span style="color:#f92672">&lt;</span>Repo<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">result</span>) {
+        <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">result</span> <span style="color:#f92672">=</span> result;
+    }
+}</code></pre></div>
 <p>Now that everything is in place, we can use the mocked objects in our tests:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#a6e22e">@RunWith</span><span style="color:#f92672">(</span>RobolectricGradleTestRunner<span style="color:#f92672">.</span><span style="color:#a6e22e">class</span><span style="color:#f92672">)</span>
-<span style="color:#a6e22e">@Config</span><span style="color:#f92672">(</span>constants <span style="color:#f92672">=</span> BuildConfig<span style="color:#f92672">.</span><span style="color:#a6e22e">class</span><span style="color:#f92672">,</span>
-        application <span style="color:#f92672">=</span> TestApplication<span style="color:#f92672">.</span><span style="color:#a6e22e">class</span><span style="color:#f92672">)</span>
-<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">SampleTest</span> <span style="color:#f92672">{</span>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#a6e22e">@RunWith</span>(RobolectricGradleTestRunner.<span style="color:#a6e22e">class</span>)
+<span style="color:#a6e22e">@Config</span>(constants <span style="color:#f92672">=</span> BuildConfig.<span style="color:#a6e22e">class</span>,
+        application <span style="color:#f92672">=</span> TestApplication.<span style="color:#a6e22e">class</span>)
+<span style="color:#66d9ef">public</span> <span style="color:#a6e22e">class</span> SampleTest {
     <span style="color:#a6e22e">@Before</span>
-    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">setup</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
-        TestApplication app <span style="color:#f92672">=</span> <span style="color:#f92672">(</span>TestApplication<span style="color:#f92672">)</span> RuntimeEnvironment<span style="color:#f92672">.</span><span style="color:#a6e22e">application</span><span style="color:#f92672">;</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#a6e22e">void</span> setup() {
+        TestApplication <span style="color:#a6e22e">app</span> <span style="color:#f92672">=</span> (TestApplication) RuntimeEnvironment.<span style="color:#a6e22e">application</span>;
         <span style="color:#75715e">// Setting up the mock module
-</span><span style="color:#75715e"></span>        MockApplicationModule module <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> MockApplicationModule<span style="color:#f92672">(</span>app<span style="color:#f92672">);</span>
-        module<span style="color:#f92672">.</span><span style="color:#a6e22e">setResult</span><span style="color:#f92672">(</span>mockedResult<span style="color:#f92672">);</span>
-        app<span style="color:#f92672">.</span><span style="color:#a6e22e">setApplicationModule</span><span style="color:#f92672">(</span>module<span style="color:#f92672">);</span>
-    <span style="color:#f92672">}</span>
-<span style="color:#f92672">}</span></code></pre></div>
+</span><span style="color:#75715e"></span>        MockApplicationModule <span style="color:#a6e22e">module</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> MockApplicationModule(app);
+        module.<span style="color:#a6e22e">setResult</span>(mockedResult);
+        app.<span style="color:#a6e22e">setApplicationModule</span>(module);
+    }
+}</code></pre></div>
 <p>From now on, the our tested activities will be injected with our mocked github client and we will be able to test their behaviour.</p>
 
 <h2 id="quirks">Quirks</h2>
 
 <p>Since the Test Application object is created before running the tests, a default application module must be provided, otherwise you&rsquo;ll get a dreaded NPE while running your tests.</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">TestApplication</span> <span style="color:#66d9ef">extends</span> MyApplication <span style="color:#f92672">{</span>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#a6e22e">class</span> TestApplication <span style="color:#a6e22e">extends</span> MyApplication {
     <span style="color:#a6e22e">@Override</span>
-    ApplicationModule <span style="color:#a6e22e">getApplicationModule</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
-        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>mApplicationModule <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
-            <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">super</span><span style="color:#f92672">.</span><span style="color:#a6e22e">getApplicationModule</span><span style="color:#f92672">();</span>
-        <span style="color:#f92672">}</span>
-        <span style="color:#66d9ef">return</span> mApplicationModule<span style="color:#f92672">;</span>
-    <span style="color:#f92672">}}</span></code></pre></div>
+    ApplicationModule <span style="color:#a6e22e">getApplicationModule</span>() {
+        <span style="color:#66d9ef">if</span> (mApplicationModule <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span>) {
+            <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">super</span>.<span style="color:#a6e22e">getApplicationModule</span>();
+        }
+        <span style="color:#66d9ef">return</span> mApplicationModule;
+    }}</code></pre></div>
 <p>moreover, the dependency graph is generally built inside the Application&rsquo;s onCreate method. Given that we want to recreate it with our mocked module, I had to add a method for that:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">MyApplication</span> <span style="color:#66d9ef">extends</span> Application <span style="color:#f92672">{</span>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#a6e22e">class</span> MyApplication <span style="color:#a6e22e">extends</span> Application {
     <span style="color:#75715e">// Stuff 
 </span><span style="color:#75715e"></span>    <span style="color:#a6e22e">@Override</span>
-    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">onCreate</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
-        <span style="color:#66d9ef">super</span><span style="color:#f92672">.</span><span style="color:#a6e22e">onCreate</span><span style="color:#f92672">();</span>
-        initComponent<span style="color:#f92672">();</span>
-    <span style="color:#f92672">}</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#a6e22e">void</span> onCreate() {
+        <span style="color:#66d9ef">super</span>.<span style="color:#a6e22e">onCreate</span>();
+        initComponent();
+    }
 
-    <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">initComponent</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
-        mComponent <span style="color:#f92672">=</span> DaggerRoboSampleComponent<span style="color:#f92672">.</span><span style="color:#a6e22e">builder</span><span style="color:#f92672">()</span>
-                <span style="color:#f92672">.</span><span style="color:#a6e22e">applicationModule</span><span style="color:#f92672">(</span>getApplicationModule<span style="color:#f92672">())</span>
-                <span style="color:#f92672">.</span><span style="color:#a6e22e">build</span><span style="color:#f92672">();</span>
-    <span style="color:#f92672">}</span>
-<span style="color:#f92672">}</span></code></pre></div>
+    <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">initComponent</span>() {
+        mComponent <span style="color:#f92672">=</span> DaggerRoboSampleComponent.<span style="color:#a6e22e">builder</span>()
+                .<span style="color:#a6e22e">applicationModule</span>(getApplicationModule())
+                .<span style="color:#a6e22e">build</span>();
+    }
+}</code></pre></div>
 <h2 id="conclusion">Conclusion</h2>
 
 <p>The fact that robolectric allows you to use a custom test application object (even a different one for different tests) together with dagger is an easy way to inject mock object without having to rely on ugly setters.</p>

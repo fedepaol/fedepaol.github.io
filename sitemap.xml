@@ -1,9 +1,39 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>http://fedepaol.github.io/blog/2019/10/23/golab-2019/</loc>
+    <lastmod>2019-10-23T22:23:55+02:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/</loc>
+    <lastmod>2019-10-23T22:23:55+02:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/posts/</loc>
+    <lastmod>2019-10-23T22:23:55+02:00</lastmod>
+  </url>
+  
+  <url>
     <loc>http://fedepaol.github.io/blog/2019/03/30/a-concurrency-experiment/</loc>
+    <lastmod>2019-03-30T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/categories/</loc>
+    <lastmod>2019-03-30T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/categories/concurrency/</loc>
+    <lastmod>2019-03-30T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/categories/go/</loc>
     <lastmod>2019-03-30T00:00:00+00:00</lastmod>
   </url>
   
@@ -73,8 +103,28 @@
   </url>
   
   <url>
+    <loc>http://fedepaol.github.io/categories/blog/</loc>
+    <lastmod>2014-08-24T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>http://fedepaol.github.io/blog/2014/08/24/migrating-from-blogger-to-octopress-done/</loc>
     <lastmod>2014-08-24T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/categories/octopress/</loc>
+    <lastmod>2014-08-24T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/categories/python/</loc>
+    <lastmod>2014-08-24T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/categories/android-sqlite/</loc>
+    <lastmod>2014-04-08T00:00:00+00:00</lastmod>
   </url>
   
   <url>
@@ -83,7 +133,27 @@
   </url>
   
   <url>
+    <loc>http://fedepaol.github.io/categories/android/</loc>
+    <lastmod>2014-02-20T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/categories/http/</loc>
+    <lastmod>2014-02-20T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/categories/rest/</loc>
+    <lastmod>2014-02-20T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>http://fedepaol.github.io/blog/2014/02/20/rest-interaction-in-android/</loc>
+    <lastmod>2014-02-20T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/categories/webservice/</loc>
     <lastmod>2014-02-20T00:00:00+00:00</lastmod>
   </url>
   
@@ -93,12 +163,42 @@
   </url>
   
   <url>
+    <loc>http://fedepaol.github.io/categories/firefox/</loc>
+    <lastmod>2013-07-29T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/categories/opensource/</loc>
+    <lastmod>2013-07-29T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/categories/android-oauth-rest/</loc>
+    <lastmod>2013-03-06T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>http://fedepaol.github.io/blog/2013/03/06/postman-ringstwice-reloaded-android-rest-and-oauth-make-easyer/</loc>
     <lastmod>2013-03-06T00:00:00+00:00</lastmod>
   </url>
   
   <url>
+    <loc>http://fedepaol.github.io/categories/calls/</loc>
+    <lastmod>2012-11-25T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/categories/droidalone/</loc>
+    <lastmod>2012-11-25T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>http://fedepaol.github.io/blog/2012/11/25/droidalone-reloaded/</loc>
+    <lastmod>2012-11-25T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/categories/refactor/</loc>
     <lastmod>2012-11-25T00:00:00+00:00</lastmod>
   </url>
   
@@ -108,8 +208,23 @@
   </url>
   
   <url>
+    <loc>http://fedepaol.github.io/categories/contentprovider/</loc>
+    <lastmod>2012-11-11T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/categories/droidcon/</loc>
+    <lastmod>2012-10-29T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>http://fedepaol.github.io/blog/2012/10/29/droidconuk-2012/</loc>
     <lastmod>2012-10-29T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/categories/gridlayout/</loc>
+    <lastmod>2012-09-15T00:00:00+00:00</lastmod>
   </url>
   
   <url>
@@ -118,13 +233,58 @@
   </url>
   
   <url>
+    <loc>http://fedepaol.github.io/categories/maven/</loc>
+    <lastmod>2012-09-15T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/categories/intellij/</loc>
+    <lastmod>2012-07-23T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>http://fedepaol.github.io/blog/2012/07/23/intellij-robolectric-and-android/</loc>
     <lastmod>2012-07-23T00:00:00+00:00</lastmod>
   </url>
   
   <url>
+    <loc>http://fedepaol.github.io/categories/robolectric/</loc>
+    <lastmod>2012-07-23T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/categories/java/</loc>
+    <lastmod>2012-05-01T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/categories/server/</loc>
+    <lastmod>2012-05-01T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/categories/service/</loc>
+    <lastmod>2012-05-01T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/categories/socket/</loc>
+    <lastmod>2012-05-01T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/categories/tcp/</loc>
+    <lastmod>2012-05-01T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>http://fedepaol.github.io/blog/2012/05/01/tcp-connections-in-android/</loc>
     <lastmod>2012-05-01T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/categories/json/</loc>
+    <lastmod>2012-01-30T00:00:00+00:00</lastmod>
   </url>
   
   <url>
@@ -138,6 +298,11 @@
   </url>
   
   <url>
+    <loc>http://fedepaol.github.io/categories/android-rest-django/</loc>
+    <lastmod>2011-12-05T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>http://fedepaol.github.io/blog/2011/12/05/mydearsanta/</loc>
     <lastmod>2011-12-05T00:00:00+00:00</lastmod>
   </url>
@@ -148,13 +313,38 @@
   </url>
   
   <url>
+    <loc>http://fedepaol.github.io/categories/android-timer-kitchen/</loc>
+    <lastmod>2011-10-18T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/categories/android-barcode-timer-kitchen/</loc>
+    <lastmod>2011-06-24T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>http://fedepaol.github.io/blog/2011/06/24/what-i-have-been-working-on..-android-kitchen-timer/</loc>
     <lastmod>2011-06-24T00:00:00+00:00</lastmod>
   </url>
   
   <url>
+    <loc>http://fedepaol.github.io/categories/background/</loc>
+    <lastmod>2011-04-25T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>http://fedepaol.github.io/blog/2011/04/25/behind-activities-android-services-background-operations-and-threads/</loc>
     <lastmod>2011-04-25T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/categories/intentservice/</loc>
+    <lastmod>2011-04-25T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/categories/android-game/</loc>
+    <lastmod>2011-03-21T00:00:00+00:00</lastmod>
   </url>
   
   <url>
@@ -188,6 +378,16 @@
   </url>
   
   <url>
+    <loc>http://fedepaol.github.io/categories/junit/</loc>
+    <lastmod>2010-11-25T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/categories/test/</loc>
+    <lastmod>2010-11-25T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>http://fedepaol.github.io/blog/2010/11/25/testing-an-intent-service/</loc>
     <lastmod>2010-11-25T00:00:00+00:00</lastmod>
   </url>
@@ -208,7 +408,17 @@
   </url>
   
   <url>
+    <loc>http://fedepaol.github.io/categories/me/</loc>
+    <lastmod>2010-07-06T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>http://fedepaol.github.io/blog/2008/06/10/developing-python-on-symbian-from-a-linux-box/</loc>
+    <lastmod>2008-06-10T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/categories/python-symbian/</loc>
     <lastmod>2008-06-10T00:00:00+00:00</lastmod>
   </url>
   
@@ -218,254 +428,7 @@
   </url>
   
   <url>
-    <loc>http://fedepaol.github.io/categories/android/</loc>
-    <lastmod>2014-02-20T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>http://fedepaol.github.io/categories/android-barcode-timer-kitchen/</loc>
-    <lastmod>2011-06-24T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>http://fedepaol.github.io/categories/android-game/</loc>
-    <lastmod>2011-03-21T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>http://fedepaol.github.io/categories/android-oauth-rest/</loc>
-    <lastmod>2013-03-06T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>http://fedepaol.github.io/categories/android-rest-django/</loc>
-    <lastmod>2011-12-05T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>http://fedepaol.github.io/categories/android-sqlite/</loc>
-    <lastmod>2014-04-08T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>http://fedepaol.github.io/categories/android-timer-kitchen/</loc>
-    <lastmod>2011-10-18T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>http://fedepaol.github.io/categories/background/</loc>
-    <lastmod>2011-04-25T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>http://fedepaol.github.io/categories/blog/</loc>
-    <lastmod>2014-08-24T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>http://fedepaol.github.io/categories/calls/</loc>
-    <lastmod>2012-11-25T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>http://fedepaol.github.io/categories/</loc>
-    <lastmod>2014-02-20T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>http://fedepaol.github.io/categories/concurrency/</loc>
-    <lastmod>2019-03-30T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>http://fedepaol.github.io/categories/contentprovider/</loc>
-    <lastmod>2012-11-11T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>http://fedepaol.github.io/categories/droidalone/</loc>
-    <lastmod>2012-11-25T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>http://fedepaol.github.io/categories/droidcon/</loc>
-    <lastmod>2012-10-29T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>http://fedepaol.github.io/categories/firefox/</loc>
-    <lastmod>2013-07-29T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>http://fedepaol.github.io/categories/go/</loc>
-    <lastmod>2019-03-30T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>http://fedepaol.github.io/categories/gridlayout/</loc>
-    <lastmod>2012-09-15T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>http://fedepaol.github.io/categories/http/</loc>
-    <lastmod>2014-02-20T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>http://fedepaol.github.io/categories/intellij/</loc>
-    <lastmod>2012-07-23T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>http://fedepaol.github.io/categories/intentservice/</loc>
-    <lastmod>2011-04-25T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>http://fedepaol.github.io/categories/java/</loc>
-    <lastmod>2012-05-01T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>http://fedepaol.github.io/categories/json/</loc>
-    <lastmod>2012-01-30T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>http://fedepaol.github.io/categories/junit/</loc>
-    <lastmod>2010-11-25T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>http://fedepaol.github.io/categories/maven/</loc>
-    <lastmod>2012-09-15T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>http://fedepaol.github.io/categories/me/</loc>
-    <lastmod>2010-07-06T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>http://fedepaol.github.io/</loc>
-    <lastmod>2019-03-30T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>http://fedepaol.github.io/categories/octopress/</loc>
-    <lastmod>2014-08-24T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>http://fedepaol.github.io/categories/opensource/</loc>
-    <lastmod>2013-07-29T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>http://fedepaol.github.io/posts/</loc>
-    <lastmod>2019-03-30T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>http://fedepaol.github.io/categories/python/</loc>
-    <lastmod>2014-08-24T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>http://fedepaol.github.io/categories/python-symbian/</loc>
-    <lastmod>2008-06-10T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>http://fedepaol.github.io/categories/refactor/</loc>
-    <lastmod>2012-11-25T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>http://fedepaol.github.io/categories/rest/</loc>
-    <lastmod>2014-02-20T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>http://fedepaol.github.io/categories/robolectric/</loc>
-    <lastmod>2012-07-23T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>http://fedepaol.github.io/categories/server/</loc>
-    <lastmod>2012-05-01T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>http://fedepaol.github.io/categories/service/</loc>
-    <lastmod>2012-05-01T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>http://fedepaol.github.io/categories/socket/</loc>
-    <lastmod>2012-05-01T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
     <loc>http://fedepaol.github.io/tags/</loc>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>http://fedepaol.github.io/categories/tcp/</loc>
-    <lastmod>2012-05-01T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>http://fedepaol.github.io/categories/test/</loc>
-    <lastmod>2010-11-25T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>http://fedepaol.github.io/categories/webservice/</loc>
-    <lastmod>2014-02-20T00:00:00+00:00</lastmod>
-    <priority>0</priority>
   </url>
   
 </urlset>

@@ -33,25 +33,25 @@ integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbi
       <div class="navbar-menu has-text-centered is-active">
           <div class="navbar-end is-centered">
               
-                <a href="https://twitter.com/fedepaol">
+                <a href="https://twitter.com/fedepaol" rel="me">
                   <span class="icon">
                     <i class="fab fa-twitter"></i>
                   </span>
                 </a>
               
-                <a href="http://fedepaol.github.io/about">
+                <a href="http://fedepaol.github.io/about" rel="me">
                   <span class="icon">
                     <i class="fas fa-info"></i>
                   </span>
                 </a>
               
-                <a href="https://github.com/fedepaol">
+                <a href="https://github.com/fedepaol" rel="me">
                   <span class="icon">
                     <i class="fab fa-github"></i>
                   </span>
                 </a>
               
-                <a href="https://linkedin.com/in/federico-paolinelli-2374954/">
+                <a href="https://linkedin.com/in/federico-paolinelli-2374954/" rel="me">
                   <span class="icon">
                     <i class="fab fa-linkedin-in"></i>
                   </span>
@@ -61,6 +61,7 @@ integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbi
       </div>
     </nav>
   </div>
+
 <div class="container">
   <h2 class="subtitle is-6">September 13, 2015</h2>
   <h1 class="subtitle is-size-4-mobile is-size-3-desktop">Testing rxjava observables subscriptions</h1>
@@ -89,20 +90,20 @@ integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbi
 <p>Despite the fact that a subscription is asynchronous, there are (at least) a couple of ways to make the stream of your observable synchronous.</p>
 
 <p>The first way is by using</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Java" data-lang="Java">ResultToCheck res <span style="color:#f92672">=</span> myObservable<span style="color:#f92672">.</span><span style="color:#a6e22e">toBlocking</span><span style="color:#f92672">().</span><span style="color:#a6e22e">first</span><span style="color:#f92672">();</span></code></pre></div>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Java" data-lang="Java">ResultToCheck <span style="color:#a6e22e">res</span> <span style="color:#f92672">=</span> myObservable.<span style="color:#a6e22e">toBlocking</span>().<span style="color:#a6e22e">first</span>();</code></pre></div>
 <p>This works because <a href="http://reactivex.io/RxJava/javadoc/rx/Observable.html#toBlocking%28%29">toBlocking</a> converts the observable to a blocking one, while <a href="http://reactivex.io/documentation/operators/first.html">first</a> returns the first emitted element.
 The calling code will wait synchronously until the observer calls onCompleted().</p>
 
 <p><strong>The official way to test an observable</strong> is by using a <a href="http://reactivex.io/RxJava/javadoc/rx/observers/TestSubscriber.html">TestSubscriber</a>, an helper subscriber provided directly by the RxJava library.
 As with toBlocking, a test subscription is synchronous.
 Here you can find an example:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Java" data-lang="Java">Observable<span style="color:#f92672">&lt;</span>RubberChicken<span style="color:#f92672">&gt;</span> obs <span style="color:#f92672">=</span> obsFactory<span style="color:#f92672">.</span><span style="color:#a6e22e">getObservable</span><span style="color:#f92672">();</span>
-TestSubscriber<span style="color:#f92672">&lt;</span>RubberChicken<span style="color:#f92672">&gt;</span> testSubscriber <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> TestSubscriber<span style="color:#f92672">&lt;&gt;();</span>
-obs<span style="color:#f92672">.</span><span style="color:#a6e22e">subscribe</span><span style="color:#f92672">(</span>testSubscriber<span style="color:#f92672">);</span>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Java" data-lang="Java">Observable<span style="color:#f92672">&lt;</span>RubberChicken<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">obs</span> <span style="color:#f92672">=</span> obsFactory.<span style="color:#a6e22e">getObservable</span>();
+TestSubscriber<span style="color:#f92672">&lt;</span>RubberChicken<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">testSubscriber</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> TestSubscriber<span style="color:#f92672">&lt;&gt;</span>();
+obs.<span style="color:#a6e22e">subscribe</span>(testSubscriber);
 
-testSubscriber<span style="color:#f92672">.</span><span style="color:#a6e22e">assertNoErrors</span><span style="color:#f92672">();</span>
-List<span style="color:#f92672">&lt;</span>RubberChicken<span style="color:#f92672">&gt;</span> chickens <span style="color:#f92672">=</span> testSubscriber<span style="color:#f92672">.</span><span style="color:#a6e22e">getOnNextEvents</span><span style="color:#f92672">();</span>
-<span style="color:#f92672">//</span> Assert your chickens integrity here</code></pre></div>
+testSubscriber.<span style="color:#a6e22e">assertNoErrors</span>();
+List<span style="color:#f92672">&lt;</span>RubberChicken<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">chickens</span> <span style="color:#f92672">=</span> testSubscriber.<span style="color:#a6e22e">getOnNextEvents</span>();
+<span style="color:#f92672">//</span> Assert <span style="color:#a6e22e">your</span> chickens <span style="color:#a6e22e">integrity</span> here</code></pre></div>
 <p><code>TestSubscriber</code> comes with a bunch of helper methods for testing, like specific assertions and other stuff. On top of that, its <code>getOnNextEvents()</code> method is blocking and  will return all the emitted items as elements of a list.
 This is a neat way to test not only your observers, but also to check if the compositions you put in place are working as expected. That makes testing observables super easy.</p>
 
@@ -113,17 +114,17 @@ This is a neat way to test not only your observers, but also to check if the com
 <p>RxJava (and RxAndroid) provide a way to override the schedulers exposed when <code>Schedulers.io()</code> or <code>AndroidSchedulers.mainThread()</code> are called. By replacing them with <code>Schedulers.immediate()</code>, your code will run immediately and you&rsquo;ll be able to see its results.</p>
 
 <p>The solution is a bit hacky, since we need to call <code>reset()</code> method before overriding RxJava&rsquo;s schedulers, which is package protected. I <em>took inspiration</em> from Alexis Mas&rsquo; <a href="http://alexismas.com/blog/2015/05/20/unit-testing-rxjava/">blogpost</a> extending RxJavaPlugins class (there no need for that with RxAndroid):</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Java" data-lang="Java"><span style="color:#f92672">package</span> rx.plugins<span style="color:#f92672">;</span>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Java" data-lang="Java"><span style="color:#f92672">package</span> <span style="color:#a6e22e">rx</span>.<span style="color:#a6e22e">plugins</span>;
 
-<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">RxJavaTestPlugins</span> <span style="color:#66d9ef">extends</span> RxJavaPlugins <span style="color:#f92672">{</span>
-    RxJavaTestPlugins<span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
-        <span style="color:#66d9ef">super</span><span style="color:#f92672">();</span>
-    <span style="color:#f92672">}</span>
+<span style="color:#66d9ef">public</span> <span style="color:#a6e22e">class</span> RxJavaTestPlugins <span style="color:#a6e22e">extends</span> RxJavaPlugins {
+    RxJavaTestPlugins() {
+        <span style="color:#66d9ef">super</span>();
+    }
 
-    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">resetPlugins</span><span style="color:#f92672">(){</span>
-        getInstance<span style="color:#f92672">().</span><span style="color:#a6e22e">reset</span><span style="color:#f92672">();</span>
-    <span style="color:#f92672">}</span>
-<span style="color:#f92672">}</span></code></pre></div>
+    <span style="color:#66d9ef">public</span> <span style="color:#a6e22e">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">resetPlugins</span>(){
+        getInstance().<span style="color:#a6e22e">reset</span>();
+    }
+}</code></pre></div>
 <p>Registering a scheduler hook that provides a custom implemetation (Schedulers.immediate()) will end up in overriding the schedulers we are using.</p>
 
 <p>As pointed out by <a href="https://twitter.com/pakerfeldt">Patrik Åkerfeldt</a> in the comments, since the hooks are asked to provide a scheduler implementation during the initialization of the Schedulers class, we have only one chance to override the default schedulers. For this reason, there is no point in setting them up in the <code>setup</code> phases of all our tests.</p>
@@ -131,41 +132,41 @@ This is a neat way to test not only your observers, but also to check if the com
 <p>The best place to override them once seems to be the <code>TestRunner</code>&rsquo;s constructor.</p>
 
 <p>The custom <code>TestRunner</code> will look like this:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Java" data-lang="Java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">RxJavaTestRunner</span> <span style="color:#66d9ef">extends</span> RobolectricGradleTestRunner <span style="color:#f92672">{</span>
-    <span style="color:#66d9ef">public</span> <span style="color:#a6e22e">RxJavaTestRunner</span><span style="color:#f92672">(</span>Class<span style="color:#f92672">&lt;?&gt;</span> testClass<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> InitializationError <span style="color:#f92672">{</span>
-        <span style="color:#66d9ef">super</span><span style="color:#f92672">(</span>testClass<span style="color:#f92672">);</span>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Java" data-lang="Java"><span style="color:#66d9ef">public</span> <span style="color:#a6e22e">class</span> RxJavaTestRunner <span style="color:#a6e22e">extends</span> RobolectricGradleTestRunner {
+    <span style="color:#66d9ef">public</span> <span style="color:#a6e22e">RxJavaTestRunner</span>(Class<span style="color:#f92672">&lt;?&gt;</span> testClass) <span style="color:#66d9ef">throws</span> <span style="color:#a6e22e">InitializationError</span> {
+        <span style="color:#66d9ef">super</span>(testClass);
 
-        RxJavaTestPlugins<span style="color:#f92672">.</span><span style="color:#a6e22e">resetPlugins</span><span style="color:#f92672">();</span>
-        RxJavaPlugins<span style="color:#f92672">.</span><span style="color:#a6e22e">getInstance</span><span style="color:#f92672">().</span><span style="color:#a6e22e">registerSchedulersHook</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> RxJavaSchedulersHook<span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        RxJavaTestPlugins.<span style="color:#a6e22e">resetPlugins</span>();
+        RxJavaPlugins.<span style="color:#a6e22e">getInstance</span>().<span style="color:#a6e22e">registerSchedulersHook</span>(<span style="color:#66d9ef">new</span> RxJavaSchedulersHook() {
             <span style="color:#a6e22e">@Override</span>
-            <span style="color:#66d9ef">public</span> Scheduler <span style="color:#a6e22e">getIOScheduler</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
-                <span style="color:#66d9ef">return</span> Schedulers<span style="color:#f92672">.</span><span style="color:#a6e22e">immediate</span><span style="color:#f92672">();</span>
-            <span style="color:#f92672">}</span>
-        <span style="color:#f92672">});</span>
-    <span style="color:#f92672">}</span>
-<span style="color:#f92672">}</span></code></pre></div>
+            <span style="color:#66d9ef">public</span> <span style="color:#a6e22e">Scheduler</span> getIOScheduler() {
+                <span style="color:#66d9ef">return</span> Schedulers.<span style="color:#a6e22e">immediate</span>();
+            }
+        });
+    }
+}</code></pre></div>
 <p>And this is how the <code>setup()</code> and <code>teardown()</code> methods will look like (here I am using robolectric but it makes no difference with AndroidTests):</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Java" data-lang="Java"><span style="color:#a6e22e">@RunWith</span><span style="color:#f92672">(</span>RxJavaTestRunner<span style="color:#f92672">.</span><span style="color:#a6e22e">class</span><span style="color:#f92672">)</span>
-<span style="color:#a6e22e">@Config</span><span style="color:#f92672">(</span>constants <span style="color:#f92672">=</span> BuildConfig<span style="color:#f92672">.</span><span style="color:#a6e22e">class</span><span style="color:#f92672">,</span>
-application <span style="color:#f92672">=</span> TestRobolectricApplication<span style="color:#f92672">.</span><span style="color:#a6e22e">class</span><span style="color:#f92672">)</span>
-<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">SubscriberTest</span> <span style="color:#f92672">{</span>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Java" data-lang="Java"><span style="color:#a6e22e">@RunWith</span>(RxJavaTestRunner.<span style="color:#a6e22e">class</span>)
+<span style="color:#a6e22e">@Config</span>(constants <span style="color:#f92672">=</span> BuildConfig.<span style="color:#a6e22e">class</span>,
+application <span style="color:#f92672">=</span> TestRobolectricApplication.<span style="color:#a6e22e">class</span>)
+<span style="color:#66d9ef">public</span> <span style="color:#a6e22e">class</span> SubscriberTest {
     <span style="color:#a6e22e">@Before</span>
-    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">setup</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
-        RxAndroidPlugins<span style="color:#f92672">.</span><span style="color:#a6e22e">getInstance</span><span style="color:#f92672">().</span><span style="color:#a6e22e">registerSchedulersHook</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> RxAndroidSchedulersHook<span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#a6e22e">void</span> setup() {
+        RxAndroidPlugins.<span style="color:#a6e22e">getInstance</span>().<span style="color:#a6e22e">registerSchedulersHook</span>(<span style="color:#66d9ef">new</span> RxAndroidSchedulersHook() {
             <span style="color:#a6e22e">@Override</span>
-            <span style="color:#66d9ef">public</span> Scheduler <span style="color:#a6e22e">getMainThreadScheduler</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
-                <span style="color:#66d9ef">return</span> Schedulers<span style="color:#f92672">.</span><span style="color:#a6e22e">immediate</span><span style="color:#f92672">();</span>
-            <span style="color:#f92672">}</span>
-        <span style="color:#f92672">});</span>
-    <span style="color:#f92672">}</span>
+            <span style="color:#66d9ef">public</span> <span style="color:#a6e22e">Scheduler</span> getMainThreadScheduler() {
+                <span style="color:#66d9ef">return</span> Schedulers.<span style="color:#a6e22e">immediate</span>();
+            }
+        });
+    }
 
     <span style="color:#a6e22e">@After</span>
-    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">tearDown</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
-        RxAndroidPlugins<span style="color:#f92672">.</span><span style="color:#a6e22e">getInstance</span><span style="color:#f92672">().</span><span style="color:#a6e22e">reset</span><span style="color:#f92672">();</span>
-    <span style="color:#f92672">}}</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#a6e22e">void</span> tearDown() {
+        RxAndroidPlugins.<span style="color:#a6e22e">getInstance</span>().<span style="color:#a6e22e">reset</span>();
+    }}
 
     <span style="color:#75715e">/* Your tests here */</span>
-<span style="color:#f92672">}</span></code></pre></div>
+}</code></pre></div>
 <p>As I already mentioned, you can inject the custom schedulers only once per test session. On the other hand, RxAndroidPlugins come with a reset method that will allow us to hook in different schedulers in different threads.</p>
 
 <p>This, together with a non blocking observable (for instance by replacing your long taking observable with a mocked <code>Observable.just()</code>) will make our test synchronous.</p>
@@ -175,32 +176,32 @@ application <span style="color:#f92672">=</span> TestRobolectricApplication<span
 <h2 id="bonus-point-debugging">Bonus point: debugging</h2>
 
 <p>If the unit tests are not enough, and you want to check what is happening inside the chaining / transformation of the stream, you can set an <code>ObservableExecutionHook</code> that will be triggered when observables are being called:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Java" data-lang="Java">   <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">enableRxTrack</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
-        RxJavaPlugins<span style="color:#f92672">.</span><span style="color:#a6e22e">getInstance</span><span style="color:#f92672">().</span><span style="color:#a6e22e">registerObservableExecutionHook</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> DebugHook<span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> DebugNotificationListener<span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
-            <span style="color:#66d9ef">final</span> String TAG <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;RXDEBUG&#34;</span><span style="color:#f92672">;</span>
-            <span style="color:#66d9ef">public</span> Object <span style="color:#a6e22e">onNext</span><span style="color:#f92672">(</span>DebugNotification n<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
-                Log<span style="color:#f92672">.</span><span style="color:#a6e22e">v</span><span style="color:#f92672">(</span>TAG<span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;onNext on &#34;</span> <span style="color:#f92672">+</span> n<span style="color:#f92672">);</span>
-                <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">super</span><span style="color:#f92672">.</span><span style="color:#a6e22e">onNext</span><span style="color:#f92672">(</span>n<span style="color:#f92672">);</span>
-            <span style="color:#f92672">}</span>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Java" data-lang="Java">   <span style="color:#66d9ef">private</span> <span style="color:#a6e22e">void</span> enableRxTrack() {
+        RxJavaPlugins.<span style="color:#a6e22e">getInstance</span>().<span style="color:#a6e22e">registerObservableExecutionHook</span>(<span style="color:#66d9ef">new</span> DebugHook(<span style="color:#66d9ef">new</span> DebugNotificationListener() {
+            <span style="color:#66d9ef">final</span> <span style="color:#a6e22e">String</span> TAG <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;RXDEBUG&#34;</span>;
+            <span style="color:#66d9ef">public</span> <span style="color:#a6e22e">Object</span> onNext(DebugNotification <span style="color:#a6e22e">n</span>) {
+                Log.<span style="color:#a6e22e">v</span>(TAG, <span style="color:#e6db74">&#34;onNext on &#34;</span> <span style="color:#f92672">+</span> n);
+                <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">super</span>.<span style="color:#a6e22e">onNext</span>(n);
+            }
 
 
-            <span style="color:#66d9ef">public</span> Object <span style="color:#a6e22e">start</span><span style="color:#f92672">(</span>DebugNotification n<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
-                Log<span style="color:#f92672">.</span><span style="color:#a6e22e">v</span><span style="color:#f92672">(</span>TAG<span style="color:#f92672">,</span><span style="color:#e6db74">&#34;start on &#34;</span><span style="color:#f92672">+</span>n<span style="color:#f92672">);</span>
-                <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">super</span><span style="color:#f92672">.</span><span style="color:#a6e22e">start</span><span style="color:#f92672">(</span>n<span style="color:#f92672">);</span>
-            <span style="color:#f92672">}</span>
+            <span style="color:#66d9ef">public</span> <span style="color:#a6e22e">Object</span> start(DebugNotification <span style="color:#a6e22e">n</span>) {
+                Log.<span style="color:#a6e22e">v</span>(TAG,<span style="color:#e6db74">&#34;start on &#34;</span><span style="color:#f92672">+</span>n);
+                <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">super</span>.<span style="color:#a6e22e">start</span>(n);
+            }
 
 
-            <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">complete</span><span style="color:#f92672">(</span>Object context<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
-                <span style="color:#66d9ef">super</span><span style="color:#f92672">.</span><span style="color:#a6e22e">complete</span><span style="color:#f92672">(</span>context<span style="color:#f92672">);</span>
-                Log<span style="color:#f92672">.</span><span style="color:#a6e22e">v</span><span style="color:#f92672">(</span>TAG<span style="color:#f92672">,</span><span style="color:#e6db74">&#34;oncomplete n &#34;</span><span style="color:#f92672">+</span>context<span style="color:#f92672">);</span>
-            <span style="color:#f92672">}</span>
+            <span style="color:#66d9ef">public</span> <span style="color:#a6e22e">void</span> complete(Object <span style="color:#a6e22e">context</span>) {
+                <span style="color:#66d9ef">super</span>.<span style="color:#a6e22e">complete</span>(context);
+                Log.<span style="color:#a6e22e">v</span>(TAG,<span style="color:#e6db74">&#34;oncomplete n &#34;</span><span style="color:#f92672">+</span>context);
+            }
 
-            <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">error</span><span style="color:#f92672">(</span>Object context<span style="color:#f92672">,</span> Throwable e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
-                <span style="color:#66d9ef">super</span><span style="color:#f92672">.</span><span style="color:#a6e22e">error</span><span style="color:#f92672">(</span>context<span style="color:#f92672">,</span> e<span style="color:#f92672">);</span>
-                Log<span style="color:#f92672">.</span><span style="color:#a6e22e">e</span><span style="color:#f92672">(</span>TAG<span style="color:#f92672">,</span><span style="color:#e6db74">&#34;error on &#34;</span><span style="color:#f92672">+</span>context<span style="color:#f92672">);</span>
-            <span style="color:#f92672">}</span>
-        <span style="color:#f92672">}));</span>
-    <span style="color:#f92672">}</span></code></pre></div>
+            <span style="color:#66d9ef">public</span> <span style="color:#a6e22e">void</span> error(Object <span style="color:#a6e22e">context</span>, Throwable <span style="color:#a6e22e">e</span>) {
+                <span style="color:#66d9ef">super</span>.<span style="color:#a6e22e">error</span>(context, e);
+                Log.<span style="color:#a6e22e">e</span>(TAG,<span style="color:#e6db74">&#34;error on &#34;</span><span style="color:#f92672">+</span>context);
+            }
+        }));
+    }</code></pre></div>
 <h1 id="tl-dr">TL;DR:</h1>
 
 <ul>

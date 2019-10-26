@@ -33,25 +33,25 @@ integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbi
       <div class="navbar-menu has-text-centered is-active">
           <div class="navbar-end is-centered">
               
-                <a href="https://twitter.com/fedepaol">
+                <a href="https://twitter.com/fedepaol" rel="me">
                   <span class="icon">
                     <i class="fab fa-twitter"></i>
                   </span>
                 </a>
               
-                <a href="http://fedepaol.github.io/about">
+                <a href="http://fedepaol.github.io/about" rel="me">
                   <span class="icon">
                     <i class="fas fa-info"></i>
                   </span>
                 </a>
               
-                <a href="https://github.com/fedepaol">
+                <a href="https://github.com/fedepaol" rel="me">
                   <span class="icon">
                     <i class="fab fa-github"></i>
                   </span>
                 </a>
               
-                <a href="https://linkedin.com/in/federico-paolinelli-2374954/">
+                <a href="https://linkedin.com/in/federico-paolinelli-2374954/" rel="me">
                   <span class="icon">
                     <i class="fab fa-linkedin-in"></i>
                   </span>
@@ -61,6 +61,7 @@ integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbi
       </div>
     </nav>
   </div>
+
 <div class="container">
   <h2 class="subtitle is-6">April 30, 2017</h2>
   <h1 class="subtitle is-size-4-mobile is-size-3-desktop">Android okhttp and websockets</h1>
@@ -80,16 +81,16 @@ integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbi
 <h3 id="establishing-the-connection">Establishing the connection</h3>
 
 <p>Establishing the connection is pretty straightforward. You declare the OkHttp client as always:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">	client <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> OkHttpClient<span style="color:#f92672">.</span><span style="color:#a6e22e">Builder</span><span style="color:#f92672">()</span>
-                <span style="color:#f92672">.</span><span style="color:#a6e22e">readTimeout</span><span style="color:#f92672">(</span>3<span style="color:#f92672">,</span>  TimeUnit<span style="color:#f92672">.</span><span style="color:#a6e22e">SECONDS</span><span style="color:#f92672">)</span>
-                <span style="color:#f92672">.</span><span style="color:#a6e22e">build</span><span style="color:#f92672">();</span></code></pre></div>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">	client <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> OkHttpClient.<span style="color:#a6e22e">Builder</span>()
+                .<span style="color:#a6e22e">readTimeout</span>(3,  TimeUnit.<span style="color:#a6e22e">SECONDS</span>)
+                .<span style="color:#a6e22e">build</span>();</code></pre></div>
 <p>and then take a websocket object out of it:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">	Request request <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Request<span style="color:#f92672">.</span><span style="color:#a6e22e">Builder</span><span style="color:#f92672">()</span>
-                <span style="color:#f92672">.</span><span style="color:#a6e22e">url</span><span style="color:#f92672">(</span>serverUrl<span style="color:#f92672">)</span>
-                <span style="color:#f92672">.</span><span style="color:#a6e22e">build</span><span style="color:#f92672">();</span>
-        webSocket <span style="color:#f92672">=</span> client<span style="color:#f92672">.</span><span style="color:#a6e22e">newWebSocket</span><span style="color:#f92672">(</span>request<span style="color:#f92672">,</span> <span style="color:#66d9ef">new</span> WebSocketListener<span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
-							<span style="color:#f92672">...</span>
-						<span style="color:#f92672">});</span></code></pre></div>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">	Request <span style="color:#a6e22e">request</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Request.<span style="color:#a6e22e">Builder</span>()
+                .<span style="color:#a6e22e">url</span>(serverUrl)
+                .<span style="color:#a6e22e">build</span>();
+        webSocket <span style="color:#f92672">=</span> client.<span style="color:#a6e22e">newWebSocket</span>(request, <span style="color:#66d9ef">new</span> WebSocketListener() {
+							...
+						});</code></pre></div>
 <p>Please note that by creating the websocket, OkHttp will try to establish the connection with the server. The second parameter of the <code>newWebSocket</code> factory method needs to implement the <code>WebSocketListener</code> interface, in order to get asynchronously notified of the various events occurred to the socket (such as an incoming message, or the disconnection of the socket, or a failure).</p>
 
 <h3 id="sending-a-message">Sending a message</h3>
@@ -104,10 +105,10 @@ integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbi
 
 <p>Unlike the trasmission of the data, the interaction between the callbacks and the main Android thread needs to be implemented carefully, since <code>WebSocketListener</code>&rsquo;s method will be executed inside a background thread. Using a <code>handler</code> is the &ldquo;vanilla Android&rdquo; approach to let a background thread interact with a thread associated to a looper (such as Android&rsquo;s main thread).</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">    <span style="color:#a6e22e">@Override</span>
-    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">onMessage</span><span style="color:#f92672">(</span>WebSocket webSocket<span style="color:#f92672">,</span> String text<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
-	<span style="color:#f92672">...</span>
-        handler<span style="color:#f92672">.</span><span style="color:#a6e22e">sendMessage</span><span style="color:#f92672">(..);</span>
-    <span style="color:#f92672">}</span></code></pre></div>
+    <span style="color:#66d9ef">public</span> <span style="color:#a6e22e">void</span> onMessage(WebSocket <span style="color:#a6e22e">webSocket</span>, String <span style="color:#a6e22e">text</span>) {
+	...
+        handler.<span style="color:#a6e22e">sendMessage</span>(..);
+    }</code></pre></div>
 <p>Another way to achieve the same result would be to go reactive and expose observables to publish this events.</p>
 
 <h3 id="closing-the-connection">Closing the connection</h3>
