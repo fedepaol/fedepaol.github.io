@@ -3,17 +3,37 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>http://fedepaol.github.io/blog/2020/02/13/how-and-why-to-contribute-to-open-source/</loc>
-    <lastmod>2020-02-13T21:07:08+01:00</lastmod>
+    <loc>http://fedepaol.github.io/categories/</loc>
+    <lastmod>2020-12-07T23:01:51+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/categories/go/</loc>
+    <lastmod>2020-12-07T23:01:51+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/categories/kubernetes/</loc>
+    <lastmod>2020-12-07T23:01:51+01:00</lastmod>
   </url>
   
   <url>
     <loc>http://fedepaol.github.io/</loc>
-    <lastmod>2020-02-13T21:07:08+01:00</lastmod>
+    <lastmod>2020-12-07T23:01:51+01:00</lastmod>
   </url>
   
   <url>
     <loc>http://fedepaol.github.io/posts/</loc>
+    <lastmod>2020-12-07T23:01:51+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/blog/2020/12/07/writing-a-kubernetes-controller/</loc>
+    <lastmod>2020-12-07T23:01:51+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://fedepaol.github.io/blog/2020/02/13/how-and-why-to-contribute-to-open-source/</loc>
     <lastmod>2020-02-13T21:07:08+01:00</lastmod>
   </url>
   
@@ -28,17 +48,7 @@
   </url>
   
   <url>
-    <loc>http://fedepaol.github.io/categories/</loc>
-    <lastmod>2019-03-30T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
     <loc>http://fedepaol.github.io/categories/concurrency/</loc>
-    <lastmod>2019-03-30T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>http://fedepaol.github.io/categories/go/</loc>
     <lastmod>2019-03-30T00:00:00+00:00</lastmod>
   </url>
   

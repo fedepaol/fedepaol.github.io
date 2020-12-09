@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Kubernetes on My little software warehouse</title>
+    <link>http://fedepaol.github.io/categories/kubernetes/</link>
+    <description>Recent content in Kubernetes on My little software warehouse</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Mon, 07 Dec 2020 23:01:51 +0100</lastBuildDate>
+    
+	<atom:link href="http://fedepaol.github.io/categories/kubernetes/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Writing a Kubernetes Controller</title>
+      <link>http://fedepaol.github.io/blog/2020/12/07/writing-a-kubernetes-controller/</link>
+      <pubDate>Mon, 07 Dec 2020 23:01:51 +0100</pubDate>
+      
+      <guid>http://fedepaol.github.io/blog/2020/12/07/writing-a-kubernetes-controller/</guid>
+      <description>Even when knowing Go, writing a Kubernetes controller is intimidating.
+In this post, I&amp;rsquo;ll introduce the Kubernetes operating model, how objects are mapped and what are the tools provided by the go-client framework to write bullet proof controllers.
+I will describe the core components like:
+ ClientSets Informers Work Queues (and RateLimiting Work Queues)  and how they fit together in writing a Kubernetes controller.
+The content of this post is inspired by the &amp;ldquo;It&amp;rsquo;s all about reconciliation, anatomy of a kubernetes controller&amp;rdquo; talk I gave this summer as part of the GoWay conference.</description>
+    </item>
+    
+  </channel>
+</rss>
