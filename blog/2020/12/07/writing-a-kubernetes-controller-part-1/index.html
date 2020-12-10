@@ -93,23 +93,23 @@ integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbi
 <p>The kubernetes model is declarative and not imperative. This means that instead of asking a kubernetes cluster to execute actions, we declare the state we want it to be in, and we wait for it to reconcile our request and to reach that state.</p>
 
 <p>In the following (abused) example of <code>ReplicaSet</code>, we ask the cluster to deploy 3 replicas of a given pod:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml">apiVersion: apps/v1
-kind: ReplicaSet
-metadata:
-  name: frontend
-spec:
-  replicas: <span style="color:#ae81ff">3</span>
-  selector:
-    matchLabels:
-      tier: frontend
-  template:
-    metadata:
-      labels:
-        tier: frontend
-    spec:
-      containers:
-      - name: php-redis
-        image: gcr.io/google_samples/gb-frontend:v3</code></pre></div>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml">	apiVersion: apps/v1
+	kind: ReplicaSet
+	metadata:
+	  name: frontend
+	spec:
+	  replicas: <span style="color:#ae81ff">3</span>
+	  selector:
+	    matchLabels:
+	      tier: frontend
+	  template:
+	    metadata:
+	      labels:
+		tier: frontend
+	    spec:
+	      containers:
+	      - name: php-redis
+		image: gcr.io/google_samples/gb-frontend:v3</code></pre></div>
 <p>When we change our mind, and we set the number of replicas to 2, we are not sending a command to the cluster asking to remove a pod, we are declaring the new state we want the cluster to be in. <strong>This makes a substantial difference and is the key in understanding how Kubernetes works</strong>.</p>
 
 <p>The representation of the state is stored in a key-value storage shared among all the components that make a Kubernetes cluster. Those components in charge of reading the desired state and reconciling it are commonly referred to as <strong>controllers</strong>.</p>
