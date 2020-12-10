@@ -12,16 +12,15 @@
     
     
     <item>
-      <title>Writing a Kubernetes Controller</title>
-      <link>http://fedepaol.github.io/blog/2020/12/07/writing-a-kubernetes-controller/</link>
+      <title>Writing a Kubernetes Controller: part 1</title>
+      <link>http://fedepaol.github.io/blog/2020/12/07/writing-a-kubernetes-controller-part-1/</link>
       <pubDate>Mon, 07 Dec 2020 23:01:51 +0100</pubDate>
       
-      <guid>http://fedepaol.github.io/blog/2020/12/07/writing-a-kubernetes-controller/</guid>
+      <guid>http://fedepaol.github.io/blog/2020/12/07/writing-a-kubernetes-controller-part-1/</guid>
       <description>Even when knowing Go, writing a Kubernetes controller is intimidating.
-In this post, I&amp;rsquo;ll introduce the Kubernetes operating model, how objects are mapped and what are the tools provided by the go-client framework to write bullet proof controllers.
+In this post, I&amp;rsquo;ll introduce the Kubernetes operating model, how objects are mapped and what are the tools provided by the go-client framework to write bullet proof controllers. In a following post I will explain how to put all the pieces together and how to define and consume custom types.
 I will describe the core components like:
- ClientSets Informers Work Queues (and RateLimiting Work Queues)  and how they fit together in writing a Kubernetes controller.
-The content of this post is inspired by the &amp;ldquo;It&amp;rsquo;s all about reconciliation, anatomy of a kubernetes controller&amp;rdquo; talk I gave this summer as part of the GoWay conference.</description>
+ ClientSets Informers Work Queues (and RateLimiting Work Queues)  and how they fit together in writing a Kubernetes controller.</description>
     </item>
     
   </channel>
