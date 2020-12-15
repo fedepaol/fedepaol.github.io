@@ -2,21 +2,21 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Calls on My little software warehouse</title>
-    <link>http://fedepaol.github.io/categories/calls/</link>
+    <link>/categories/calls/</link>
     <description>Recent content in Calls on My little software warehouse</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Sun, 25 Nov 2012 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="http://fedepaol.github.io/categories/calls/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="/categories/calls/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>DroidAlone - reloaded</title>
-      <link>http://fedepaol.github.io/blog/2012/11/25/droidalone-reloaded/</link>
+      <link>/blog/2012/11/25/droidalone-reloaded/</link>
       <pubDate>Sun, 25 Nov 2012 00:00:00 +0000</pubDate>
       
-      <guid>http://fedepaol.github.io/blog/2012/11/25/droidalone-reloaded/</guid>
+      <guid>/blog/2012/11/25/droidalone-reloaded/</guid>
       <description>Whenever I speak with another android developer, the occasional chat goes to &#34;what did you develop?&#34; question.
 Last time it happened at droidcon uk, and for the first time I felt something wasn&#39;t completely right when I showed my DroidAlone app.
 DroidAlone is a useful app (so they say) that comes into play whenever you forget your phone at home. With a simple sms protected by a password choosen by the user, it can be activated.</description>

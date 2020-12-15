@@ -2,21 +2,21 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Android game on My little software warehouse</title>
-    <link>http://fedepaol.github.io/categories/android-game/</link>
+    <link>/categories/android-game/</link>
     <description>Recent content in Android game on My little software warehouse</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Mon, 21 Mar 2011 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="http://fedepaol.github.io/categories/android-game/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="/categories/android-game/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>first 18 days of pegdroid</title>
-      <link>http://fedepaol.github.io/blog/2011/03/21/first-18-days-of-pegdroid/</link>
+      <link>/blog/2011/03/21/first-18-days-of-pegdroid/</link>
       <pubDate>Mon, 21 Mar 2011 00:00:00 +0000</pubDate>
       
-      <guid>http://fedepaol.github.io/blog/2011/03/21/first-18-days-of-pegdroid/</guid>
+      <guid>/blog/2011/03/21/first-18-days-of-pegdroid/</guid>
       <description>It&#39;s already been 18 days, and it&#39;s time to make some considerations.
 For those who don&#39;t know what pegdroid is, it&#39;s a simple peg solitaire for android. I released it 18 days ago, it&#39;s free and it&#39;s basically ad-supported (but I don&#39;t get much from that).
 I integrated google analytics in my app, so I can get some help from the statistics I get every day. In the meanwhile, the market dashboard got updated and I also can see which kind of device are the most popular.</description>

@@ -2,21 +2,21 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>android barcode timer kitchen on My little software warehouse</title>
-    <link>http://fedepaol.github.io/categories/android-barcode-timer-kitchen/</link>
+    <link>/categories/android-barcode-timer-kitchen/</link>
     <description>Recent content in android barcode timer kitchen on My little software warehouse</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Fri, 24 Jun 2011 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="http://fedepaol.github.io/categories/android-barcode-timer-kitchen/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="/categories/android-barcode-timer-kitchen/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>What I have been working on.. Android Kitchen Timer</title>
-      <link>http://fedepaol.github.io/blog/2011/06/24/what-i-have-been-working-on..-android-kitchen-timer/</link>
+      <link>/blog/2011/06/24/what-i-have-been-working-on..-android-kitchen-timer/</link>
       <pubDate>Fri, 24 Jun 2011 00:00:00 +0000</pubDate>
       
-      <guid>http://fedepaol.github.io/blog/2011/06/24/what-i-have-been-working-on..-android-kitchen-timer/</guid>
+      <guid>/blog/2011/06/24/what-i-have-been-working-on..-android-kitchen-timer/</guid>
       <description>Apart from some rest, and reading some good books (like excellent Kent Beck&#39;s Test Driven development by example, and &#34;growing object-oriented software guided by tests&#34;), I have been working on a new app in the last month or so.
 A week end locked at home because my gf was ill, was a good excuse to start a deep programming session. The app I am about to release (well, to be honest it still lacks all the nice ui parts, it just look like a bunch of grey buttons thrown on the screen) solves (or at least tries to simplify) a problem I have every time I need to cook pasta.</description>
     </item>

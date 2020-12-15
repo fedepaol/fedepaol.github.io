@@ -2,21 +2,21 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>intellij on My little software warehouse</title>
-    <link>http://fedepaol.github.io/categories/intellij/</link>
+    <link>/categories/intellij/</link>
     <description>Recent content in intellij on My little software warehouse</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Mon, 23 Jul 2012 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="http://fedepaol.github.io/categories/intellij/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="/categories/intellij/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>Intellij, Robolectric and Android</title>
-      <link>http://fedepaol.github.io/blog/2012/07/23/intellij-robolectric-and-android/</link>
+      <link>/blog/2012/07/23/intellij-robolectric-and-android/</link>
       <pubDate>Mon, 23 Jul 2012 00:00:00 +0000</pubDate>
       
-      <guid>http://fedepaol.github.io/blog/2012/07/23/intellij-robolectric-and-android/</guid>
+      <guid>/blog/2012/07/23/intellij-robolectric-and-android/</guid>
       <description>I have been curious about intellij since droicon uk 2011, where I noticed that some of the speakers were using IntelliJ instead of eclipse.
 A post from Richard Hyndman, who is a developer advocate from Google, was the final straw that pushed me to download IntelliJ and give it a try.
 The first thing an eclipse user will notice in intellij is how slick and fast compares to the behemoth which is eclipse.</description>

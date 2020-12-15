@@ -2,31 +2,31 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Android on My little software warehouse</title>
-    <link>http://fedepaol.github.io/categories/android/</link>
+    <link>/categories/android/</link>
     <description>Recent content in Android on My little software warehouse</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Thu, 20 Feb 2014 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="http://fedepaol.github.io/categories/android/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="/categories/android/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>Rest interaction in Android </title>
-      <link>http://fedepaol.github.io/blog/2014/02/20/rest-interaction-in-android/</link>
+      <link>/blog/2014/02/20/rest-interaction-in-android/</link>
       <pubDate>Thu, 20 Feb 2014 00:00:00 +0000</pubDate>
       
-      <guid>http://fedepaol.github.io/blog/2014/02/20/rest-interaction-in-android/</guid>
+      <guid>/blog/2014/02/20/rest-interaction-in-android/</guid>
       <description>In last December (&#39;13) I was asked to submit a talk proposal for the first Italian Droidcon, which I did. It got accepted, so in Febraury I gave my first public speech speaking of &#34;(O)Authenticated Rest Interaction in Android&#34; in front of real people. This post is meant to be a follow up with the information that can&#39;t be found in the slides
  I hoped to sum all the talk up in a post, but it got too long so I am going to split it in several pieces.</description>
     </item>
     
     <item>
       <title>Contributing to Firefox for Android</title>
-      <link>http://fedepaol.github.io/blog/2013/07/29/contributing-to-firefox-for-android/</link>
+      <link>/blog/2013/07/29/contributing-to-firefox-for-android/</link>
       <pubDate>Mon, 29 Jul 2013 00:00:00 +0000</pubDate>
       
-      <guid>http://fedepaol.github.io/blog/2013/07/29/contributing-to-firefox-for-android/</guid>
+      <guid>/blog/2013/07/29/contributing-to-firefox-for-android/</guid>
       <description>In the past two / three years I have been (mostly) developing Android code, even before it was cool(tm), as a way to do something different from what I do during my day time job.
 I wrote some apps, a couple of libraries, and some 80% finished projects I really hope I will finish some day.
 Recently I thought that joining some big android related open source project could have been interesting, and I went for them.</description>
@@ -34,10 +34,10 @@ Recently I thought that joining some big android related open source project cou
     
     <item>
       <title>DroidAlone - reloaded</title>
-      <link>http://fedepaol.github.io/blog/2012/11/25/droidalone-reloaded/</link>
+      <link>/blog/2012/11/25/droidalone-reloaded/</link>
       <pubDate>Sun, 25 Nov 2012 00:00:00 +0000</pubDate>
       
-      <guid>http://fedepaol.github.io/blog/2012/11/25/droidalone-reloaded/</guid>
+      <guid>/blog/2012/11/25/droidalone-reloaded/</guid>
       <description>Whenever I speak with another android developer, the occasional chat goes to &#34;what did you develop?&#34; question.
 Last time it happened at droidcon uk, and for the first time I felt something wasn&#39;t completely right when I showed my DroidAlone app.
 DroidAlone is a useful app (so they say) that comes into play whenever you forget your phone at home. With a simple sms protected by a password choosen by the user, it can be activated.</description>
@@ -45,10 +45,10 @@ DroidAlone is a useful app (so they say) that comes into play whenever you forge
     
     <item>
       <title>Android Content Providers Generator</title>
-      <link>http://fedepaol.github.io/blog/2012/11/11/android-content-providers-generator/</link>
+      <link>/blog/2012/11/11/android-content-providers-generator/</link>
       <pubDate>Sun, 11 Nov 2012 00:00:00 +0000</pubDate>
       
-      <guid>http://fedepaol.github.io/blog/2012/11/11/android-content-providers-generator/</guid>
+      <guid>/blog/2012/11/11/android-content-providers-generator/</guid>
       <description>During the refactoring of my two years old app DroidAlone, I decided to try to access to the storage through a ContentProvider.
 Even if the official documentation warns that there is no need to use content providers if your app does not want to export it&#39;s data against other apps, there are a bunch of advantages in using a content provider in your app.
 The main and more obvious advantage is that you can use a Loader with your data.</description>
@@ -56,10 +56,10 @@ The main and more obvious advantage is that you can use a Loader with your data.
     
     <item>
       <title>DroidconUk 2012</title>
-      <link>http://fedepaol.github.io/blog/2012/10/29/droidconuk-2012/</link>
+      <link>/blog/2012/10/29/droidconuk-2012/</link>
       <pubDate>Mon, 29 Oct 2012 00:00:00 +0000</pubDate>
       
-      <guid>http://fedepaol.github.io/blog/2012/10/29/droidconuk-2012/</guid>
+      <guid>/blog/2012/10/29/droidconuk-2012/</guid>
       <description>Here I am, back again from my third DroidconUk experience.
 
 I can still remember explaining to my non tech friends what Android was the evening of the 1st droidcon, and since then it became a sort of ritual, a couple of days when I can take some rest from my day time job and take part to the community of some of the best android developers coming from all over the Europe.</description>
@@ -67,10 +67,10 @@ I can still remember explaining to my non tech friends what Android was the even
     
     <item>
       <title>Gridlayout support library with maven</title>
-      <link>http://fedepaol.github.io/blog/2012/09/15/gridlayout-support-library-with-maven/</link>
+      <link>/blog/2012/09/15/gridlayout-support-library-with-maven/</link>
       <pubDate>Sat, 15 Sep 2012 00:00:00 +0000</pubDate>
       
-      <guid>http://fedepaol.github.io/blog/2012/09/15/gridlayout-support-library-with-maven/</guid>
+      <guid>/blog/2012/09/15/gridlayout-support-library-with-maven/</guid>
       <description>EDIT 17/10/2012:
 Gridlayout support is now working natively with maven android deployer. I strongly suggest to use it instead of my method.
 ---------------------------
@@ -81,10 +81,10 @@ It has also been recently added as part of the android support library, in order
     
     <item>
       <title>Intellij, Robolectric and Android</title>
-      <link>http://fedepaol.github.io/blog/2012/07/23/intellij-robolectric-and-android/</link>
+      <link>/blog/2012/07/23/intellij-robolectric-and-android/</link>
       <pubDate>Mon, 23 Jul 2012 00:00:00 +0000</pubDate>
       
-      <guid>http://fedepaol.github.io/blog/2012/07/23/intellij-robolectric-and-android/</guid>
+      <guid>/blog/2012/07/23/intellij-robolectric-and-android/</guid>
       <description>I have been curious about intellij since droicon uk 2011, where I noticed that some of the speakers were using IntelliJ instead of eclipse.
 A post from Richard Hyndman, who is a developer advocate from Google, was the final straw that pushed me to download IntelliJ and give it a try.
 The first thing an eclipse user will notice in intellij is how slick and fast compares to the behemoth which is eclipse.</description>
@@ -92,10 +92,10 @@ The first thing an eclipse user will notice in intellij is how slick and fast co
     
     <item>
       <title>Tcp connections in Android</title>
-      <link>http://fedepaol.github.io/blog/2012/05/01/tcp-connections-in-android/</link>
+      <link>/blog/2012/05/01/tcp-connections-in-android/</link>
       <pubDate>Tue, 01 May 2012 00:00:00 +0000</pubDate>
       
-      <guid>http://fedepaol.github.io/blog/2012/05/01/tcp-connections-in-android/</guid>
+      <guid>/blog/2012/05/01/tcp-connections-in-android/</guid>
       <description>Or how to keep your app connected and stop worrying.&amp;nbsp;
 Disclaimer:
 This is not another place where you can find java code snippet to open a socket and read and write to some server.
@@ -104,10 +104,10 @@ If you need that, go back to your favorite search engine and look for another re
     
     <item>
       <title>PostmanLib - Android and Rest Web Services</title>
-      <link>http://fedepaol.github.io/blog/2012/01/30/postmanlib-android-and-rest-web-services/</link>
+      <link>/blog/2012/01/30/postmanlib-android-and-rest-web-services/</link>
       <pubDate>Mon, 30 Jan 2012 00:00:00 +0000</pubDate>
       
-      <guid>http://fedepaol.github.io/blog/2012/01/30/postmanlib-android-and-rest-web-services/</guid>
+      <guid>/blog/2012/01/30/postmanlib-android-and-rest-web-services/</guid>
       <description>Edit 2013-03-10: I&#39;ve performed a substancial refactoring of postmanlib, and the details can be found in this new post
 With the development of MyDearSanta app, I needed to fetch and put some data to a rest service developed using django python framework with a simple set of json based rest apis.
 The development of the interaction between android and the rest web service was a bit messy because I was in hurry to release the app before Christmas (giving it&#39;s xmas related nature), but while developing it I thought it could have been a good start for my first android library.</description>
@@ -115,10 +115,10 @@ The development of the interaction between android and the rest web service was 
     
     <item>
       <title>Behind activities: android, services, background operations and threads</title>
-      <link>http://fedepaol.github.io/blog/2011/04/25/behind-activities-android-services-background-operations-and-threads/</link>
+      <link>/blog/2011/04/25/behind-activities-android-services-background-operations-and-threads/</link>
       <pubDate>Mon, 25 Apr 2011 00:00:00 +0000</pubDate>
       
-      <guid>http://fedepaol.github.io/blog/2011/04/25/behind-activities-android-services-background-operations-and-threads/</guid>
+      <guid>/blog/2011/04/25/behind-activities-android-services-background-operations-and-threads/</guid>
       <description>This time I want to share something I learned about working in background on android.
 One of the biggest advantages of android over ios (or, at least, some ios version ago) is that your app is not sandboxed and can continue to live in background.
 To perform background (not visible) work, all you need to know is how to use android services.
@@ -127,10 +127,10 @@ A service is a piece of an application that is allowed to be active even if the 
     
     <item>
       <title>DroidAlone - Opensourced</title>
-      <link>http://fedepaol.github.io/blog/2010/12/27/droidalone-opensourced/</link>
+      <link>/blog/2010/12/27/droidalone-opensourced/</link>
       <pubDate>Mon, 27 Dec 2010 00:00:00 +0000</pubDate>
       
-      <guid>http://fedepaol.github.io/blog/2010/12/27/droidalone-opensourced/</guid>
+      <guid>/blog/2010/12/27/droidalone-opensourced/</guid>
       <description>I released DroidAlone on the market in the early summer. You can find a description at the following url&amp;nbsp;DroidAlone - Missed call for Android
 It is a paid app, and it costs something like 0.99 euros. It has been downloaded something like 150 times since then.
 I also had some issues in choosing its name: at first it was homealone, but I was afraid to Mr Culkin knokin&#39; to my door for royalties, then it was phonealone but there was already one, and then it moved to DroidAlone.</description>
@@ -138,10 +138,10 @@ I also had some issues in choosing its name: at first it was homealone, but I wa
     
     <item>
       <title>Testing an intent service</title>
-      <link>http://fedepaol.github.io/blog/2010/11/25/testing-an-intent-service/</link>
+      <link>/blog/2010/11/25/testing-an-intent-service/</link>
       <pubDate>Thu, 25 Nov 2010 00:00:00 +0000</pubDate>
       
-      <guid>http://fedepaol.github.io/blog/2010/11/25/testing-an-intent-service/</guid>
+      <guid>/blog/2010/11/25/testing-an-intent-service/</guid>
       <description>It may sound weird, but I discovered java development while trying to learn android development itself.
 Along with Java, eclipse and all this nice stuff, I discovered junit too.
 One of the problems I encountered while developing my second app, droidalone, was to test intent services.
@@ -150,10 +150,10 @@ Intent services are a powerful way to handle background task. They basically are
     
     <item>
       <title>My sqllite helper builder</title>
-      <link>http://fedepaol.github.io/blog/2010/11/18/my-sqllite-helper-builder/</link>
+      <link>/blog/2010/11/18/my-sqllite-helper-builder/</link>
       <pubDate>Thu, 18 Nov 2010 00:00:00 +0000</pubDate>
       
-      <guid>http://fedepaol.github.io/blog/2010/11/18/my-sqllite-helper-builder/</guid>
+      <guid>/blog/2010/11/18/my-sqllite-helper-builder/</guid>
       <description>EDIT 11/11/2012: as described in this new blog post, I modified the script to generate a content provider as well
 This is my first post about something related to android.
 Just to break the ice, I would like to introduce a simple helper script I developed this summer.

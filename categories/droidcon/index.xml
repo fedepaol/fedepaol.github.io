@@ -2,21 +2,21 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>droidcon on My little software warehouse</title>
-    <link>http://fedepaol.github.io/categories/droidcon/</link>
+    <link>/categories/droidcon/</link>
     <description>Recent content in droidcon on My little software warehouse</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Mon, 29 Oct 2012 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="http://fedepaol.github.io/categories/droidcon/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="/categories/droidcon/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>DroidconUk 2012</title>
-      <link>http://fedepaol.github.io/blog/2012/10/29/droidconuk-2012/</link>
+      <link>/blog/2012/10/29/droidconuk-2012/</link>
       <pubDate>Mon, 29 Oct 2012 00:00:00 +0000</pubDate>
       
-      <guid>http://fedepaol.github.io/blog/2012/10/29/droidconuk-2012/</guid>
+      <guid>/blog/2012/10/29/droidconuk-2012/</guid>
       <description>Here I am, back again from my third DroidconUk experience.
 
 I can still remember explaining to my non tech friends what Android was the evening of the 1st droidcon, and since then it became a sort of ritual, a couple of days when I can take some rest from my day time job and take part to the community of some of the best android developers coming from all over the Europe.</description>

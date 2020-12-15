@@ -2,21 +2,21 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>me on My little software warehouse</title>
-    <link>http://fedepaol.github.io/categories/me/</link>
+    <link>/categories/me/</link>
     <description>Recent content in me on My little software warehouse</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Tue, 06 Jul 2010 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="http://fedepaol.github.io/categories/me/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="/categories/me/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>It&#39;s been a long time...</title>
-      <link>http://fedepaol.github.io/blog/2010/07/06/its-been-a-long-time.../</link>
+      <link>/blog/2010/07/06/its-been-a-long-time.../</link>
       <pubDate>Tue, 06 Jul 2010 00:00:00 +0000</pubDate>
       
-      <guid>http://fedepaol.github.io/blog/2010/07/06/its-been-a-long-time.../</guid>
+      <guid>/blog/2010/07/06/its-been-a-long-time.../</guid>
       <description>A lot of things have changed since my last post, but some are still the same.
 One of them is my curiosity and my passion for technologies.
 Why I am back here? Because I am trying to understand and develop some applications with Android framework, and I think it would be useful for me to have a place where collect the new things I learn. At the same time I hope these things will be useful for somebody out there.</description>

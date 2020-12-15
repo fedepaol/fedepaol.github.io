@@ -2,21 +2,21 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>service on My little software warehouse</title>
-    <link>http://fedepaol.github.io/categories/service/</link>
+    <link>/categories/service/</link>
     <description>Recent content in service on My little software warehouse</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Tue, 01 May 2012 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="http://fedepaol.github.io/categories/service/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="/categories/service/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>Tcp connections in Android</title>
-      <link>http://fedepaol.github.io/blog/2012/05/01/tcp-connections-in-android/</link>
+      <link>/blog/2012/05/01/tcp-connections-in-android/</link>
       <pubDate>Tue, 01 May 2012 00:00:00 +0000</pubDate>
       
-      <guid>http://fedepaol.github.io/blog/2012/05/01/tcp-connections-in-android/</guid>
+      <guid>/blog/2012/05/01/tcp-connections-in-android/</guid>
       <description>Or how to keep your app connected and stop worrying.&amp;nbsp;
 Disclaimer:
 This is not another place where you can find java code snippet to open a socket and read and write to some server.
@@ -25,10 +25,10 @@ If you need that, go back to your favorite search engine and look for another re
     
     <item>
       <title>Behind activities: android, services, background operations and threads</title>
-      <link>http://fedepaol.github.io/blog/2011/04/25/behind-activities-android-services-background-operations-and-threads/</link>
+      <link>/blog/2011/04/25/behind-activities-android-services-background-operations-and-threads/</link>
       <pubDate>Mon, 25 Apr 2011 00:00:00 +0000</pubDate>
       
-      <guid>http://fedepaol.github.io/blog/2011/04/25/behind-activities-android-services-background-operations-and-threads/</guid>
+      <guid>/blog/2011/04/25/behind-activities-android-services-background-operations-and-threads/</guid>
       <description>This time I want to share something I learned about working in background on android.
 One of the biggest advantages of android over ios (or, at least, some ios version ago) is that your app is not sandboxed and can continue to live in background.
 To perform background (not visible) work, all you need to know is how to use android services.

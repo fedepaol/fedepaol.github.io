@@ -2,21 +2,21 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>gridlayout on My little software warehouse</title>
-    <link>http://fedepaol.github.io/categories/gridlayout/</link>
+    <link>/categories/gridlayout/</link>
     <description>Recent content in gridlayout on My little software warehouse</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Sat, 15 Sep 2012 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="http://fedepaol.github.io/categories/gridlayout/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="/categories/gridlayout/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>Gridlayout support library with maven</title>
-      <link>http://fedepaol.github.io/blog/2012/09/15/gridlayout-support-library-with-maven/</link>
+      <link>/blog/2012/09/15/gridlayout-support-library-with-maven/</link>
       <pubDate>Sat, 15 Sep 2012 00:00:00 +0000</pubDate>
       
-      <guid>http://fedepaol.github.io/blog/2012/09/15/gridlayout-support-library-with-maven/</guid>
+      <guid>/blog/2012/09/15/gridlayout-support-library-with-maven/</guid>
       <description>EDIT 17/10/2012:
 Gridlayout support is now working natively with maven android deployer. I strongly suggest to use it instead of my method.
 ---------------------------

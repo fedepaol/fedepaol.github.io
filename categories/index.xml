@@ -2,363 +2,363 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Categories on My little software warehouse</title>
-    <link>http://fedepaol.github.io/categories/</link>
+    <link>/categories/</link>
     <description>Recent content in Categories on My little software warehouse</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Mon, 07 Dec 2020 23:01:51 +0100</lastBuildDate>
     
-	<atom:link href="http://fedepaol.github.io/categories/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="/categories/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>Go</title>
-      <link>http://fedepaol.github.io/categories/go/</link>
+      <link>/categories/go/</link>
       <pubDate>Mon, 07 Dec 2020 23:01:51 +0100</pubDate>
       
-      <guid>http://fedepaol.github.io/categories/go/</guid>
+      <guid>/categories/go/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Kubernetes</title>
-      <link>http://fedepaol.github.io/categories/kubernetes/</link>
+      <link>/categories/kubernetes/</link>
       <pubDate>Mon, 07 Dec 2020 23:01:51 +0100</pubDate>
       
-      <guid>http://fedepaol.github.io/categories/kubernetes/</guid>
+      <guid>/categories/kubernetes/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Concurrency</title>
-      <link>http://fedepaol.github.io/categories/concurrency/</link>
+      <link>/categories/concurrency/</link>
       <pubDate>Sat, 30 Mar 2019 00:00:00 +0000</pubDate>
       
-      <guid>http://fedepaol.github.io/categories/concurrency/</guid>
+      <guid>/categories/concurrency/</guid>
       <description></description>
     </item>
     
     <item>
       <title>blog</title>
-      <link>http://fedepaol.github.io/categories/blog/</link>
+      <link>/categories/blog/</link>
       <pubDate>Sun, 24 Aug 2014 00:00:00 +0000</pubDate>
       
-      <guid>http://fedepaol.github.io/categories/blog/</guid>
+      <guid>/categories/blog/</guid>
       <description></description>
     </item>
     
     <item>
       <title>octopress</title>
-      <link>http://fedepaol.github.io/categories/octopress/</link>
+      <link>/categories/octopress/</link>
       <pubDate>Sun, 24 Aug 2014 00:00:00 +0000</pubDate>
       
-      <guid>http://fedepaol.github.io/categories/octopress/</guid>
+      <guid>/categories/octopress/</guid>
       <description></description>
     </item>
     
     <item>
       <title>python</title>
-      <link>http://fedepaol.github.io/categories/python/</link>
+      <link>/categories/python/</link>
       <pubDate>Sun, 24 Aug 2014 00:00:00 +0000</pubDate>
       
-      <guid>http://fedepaol.github.io/categories/python/</guid>
+      <guid>/categories/python/</guid>
       <description></description>
     </item>
     
     <item>
       <title>android sqlite</title>
-      <link>http://fedepaol.github.io/categories/android-sqlite/</link>
+      <link>/categories/android-sqlite/</link>
       <pubDate>Tue, 08 Apr 2014 00:00:00 +0000</pubDate>
       
-      <guid>http://fedepaol.github.io/categories/android-sqlite/</guid>
+      <guid>/categories/android-sqlite/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Android</title>
-      <link>http://fedepaol.github.io/categories/android/</link>
+      <link>/categories/android/</link>
       <pubDate>Thu, 20 Feb 2014 00:00:00 +0000</pubDate>
       
-      <guid>http://fedepaol.github.io/categories/android/</guid>
+      <guid>/categories/android/</guid>
       <description></description>
     </item>
     
     <item>
       <title>http</title>
-      <link>http://fedepaol.github.io/categories/http/</link>
+      <link>/categories/http/</link>
       <pubDate>Thu, 20 Feb 2014 00:00:00 +0000</pubDate>
       
-      <guid>http://fedepaol.github.io/categories/http/</guid>
+      <guid>/categories/http/</guid>
       <description></description>
     </item>
     
     <item>
       <title>rest</title>
-      <link>http://fedepaol.github.io/categories/rest/</link>
+      <link>/categories/rest/</link>
       <pubDate>Thu, 20 Feb 2014 00:00:00 +0000</pubDate>
       
-      <guid>http://fedepaol.github.io/categories/rest/</guid>
+      <guid>/categories/rest/</guid>
       <description></description>
     </item>
     
     <item>
       <title>webservice</title>
-      <link>http://fedepaol.github.io/categories/webservice/</link>
+      <link>/categories/webservice/</link>
       <pubDate>Thu, 20 Feb 2014 00:00:00 +0000</pubDate>
       
-      <guid>http://fedepaol.github.io/categories/webservice/</guid>
+      <guid>/categories/webservice/</guid>
       <description></description>
     </item>
     
     <item>
       <title>firefox</title>
-      <link>http://fedepaol.github.io/categories/firefox/</link>
+      <link>/categories/firefox/</link>
       <pubDate>Mon, 29 Jul 2013 00:00:00 +0000</pubDate>
       
-      <guid>http://fedepaol.github.io/categories/firefox/</guid>
+      <guid>/categories/firefox/</guid>
       <description></description>
     </item>
     
     <item>
       <title>opensource</title>
-      <link>http://fedepaol.github.io/categories/opensource/</link>
+      <link>/categories/opensource/</link>
       <pubDate>Mon, 29 Jul 2013 00:00:00 +0000</pubDate>
       
-      <guid>http://fedepaol.github.io/categories/opensource/</guid>
+      <guid>/categories/opensource/</guid>
       <description></description>
     </item>
     
     <item>
       <title>android oauth rest</title>
-      <link>http://fedepaol.github.io/categories/android-oauth-rest/</link>
+      <link>/categories/android-oauth-rest/</link>
       <pubDate>Wed, 06 Mar 2013 00:00:00 +0000</pubDate>
       
-      <guid>http://fedepaol.github.io/categories/android-oauth-rest/</guid>
+      <guid>/categories/android-oauth-rest/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Calls</title>
-      <link>http://fedepaol.github.io/categories/calls/</link>
+      <link>/categories/calls/</link>
       <pubDate>Sun, 25 Nov 2012 00:00:00 +0000</pubDate>
       
-      <guid>http://fedepaol.github.io/categories/calls/</guid>
+      <guid>/categories/calls/</guid>
       <description></description>
     </item>
     
     <item>
       <title>DroidAlone</title>
-      <link>http://fedepaol.github.io/categories/droidalone/</link>
+      <link>/categories/droidalone/</link>
       <pubDate>Sun, 25 Nov 2012 00:00:00 +0000</pubDate>
       
-      <guid>http://fedepaol.github.io/categories/droidalone/</guid>
+      <guid>/categories/droidalone/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Refactor</title>
-      <link>http://fedepaol.github.io/categories/refactor/</link>
+      <link>/categories/refactor/</link>
       <pubDate>Sun, 25 Nov 2012 00:00:00 +0000</pubDate>
       
-      <guid>http://fedepaol.github.io/categories/refactor/</guid>
+      <guid>/categories/refactor/</guid>
       <description></description>
     </item>
     
     <item>
       <title>ContentProvider</title>
-      <link>http://fedepaol.github.io/categories/contentprovider/</link>
+      <link>/categories/contentprovider/</link>
       <pubDate>Sun, 11 Nov 2012 00:00:00 +0000</pubDate>
       
-      <guid>http://fedepaol.github.io/categories/contentprovider/</guid>
+      <guid>/categories/contentprovider/</guid>
       <description></description>
     </item>
     
     <item>
       <title>droidcon</title>
-      <link>http://fedepaol.github.io/categories/droidcon/</link>
+      <link>/categories/droidcon/</link>
       <pubDate>Mon, 29 Oct 2012 00:00:00 +0000</pubDate>
       
-      <guid>http://fedepaol.github.io/categories/droidcon/</guid>
+      <guid>/categories/droidcon/</guid>
       <description></description>
     </item>
     
     <item>
       <title>gridlayout</title>
-      <link>http://fedepaol.github.io/categories/gridlayout/</link>
+      <link>/categories/gridlayout/</link>
       <pubDate>Sat, 15 Sep 2012 00:00:00 +0000</pubDate>
       
-      <guid>http://fedepaol.github.io/categories/gridlayout/</guid>
+      <guid>/categories/gridlayout/</guid>
       <description></description>
     </item>
     
     <item>
       <title>maven</title>
-      <link>http://fedepaol.github.io/categories/maven/</link>
+      <link>/categories/maven/</link>
       <pubDate>Sat, 15 Sep 2012 00:00:00 +0000</pubDate>
       
-      <guid>http://fedepaol.github.io/categories/maven/</guid>
+      <guid>/categories/maven/</guid>
       <description></description>
     </item>
     
     <item>
       <title>intellij</title>
-      <link>http://fedepaol.github.io/categories/intellij/</link>
+      <link>/categories/intellij/</link>
       <pubDate>Mon, 23 Jul 2012 00:00:00 +0000</pubDate>
       
-      <guid>http://fedepaol.github.io/categories/intellij/</guid>
+      <guid>/categories/intellij/</guid>
       <description></description>
     </item>
     
     <item>
       <title>robolectric</title>
-      <link>http://fedepaol.github.io/categories/robolectric/</link>
+      <link>/categories/robolectric/</link>
       <pubDate>Mon, 23 Jul 2012 00:00:00 +0000</pubDate>
       
-      <guid>http://fedepaol.github.io/categories/robolectric/</guid>
+      <guid>/categories/robolectric/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Java</title>
-      <link>http://fedepaol.github.io/categories/java/</link>
+      <link>/categories/java/</link>
       <pubDate>Tue, 01 May 2012 00:00:00 +0000</pubDate>
       
-      <guid>http://fedepaol.github.io/categories/java/</guid>
+      <guid>/categories/java/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Server</title>
-      <link>http://fedepaol.github.io/categories/server/</link>
+      <link>/categories/server/</link>
       <pubDate>Tue, 01 May 2012 00:00:00 +0000</pubDate>
       
-      <guid>http://fedepaol.github.io/categories/server/</guid>
+      <guid>/categories/server/</guid>
       <description></description>
     </item>
     
     <item>
       <title>service</title>
-      <link>http://fedepaol.github.io/categories/service/</link>
+      <link>/categories/service/</link>
       <pubDate>Tue, 01 May 2012 00:00:00 +0000</pubDate>
       
-      <guid>http://fedepaol.github.io/categories/service/</guid>
+      <guid>/categories/service/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Socket</title>
-      <link>http://fedepaol.github.io/categories/socket/</link>
+      <link>/categories/socket/</link>
       <pubDate>Tue, 01 May 2012 00:00:00 +0000</pubDate>
       
-      <guid>http://fedepaol.github.io/categories/socket/</guid>
+      <guid>/categories/socket/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Tcp</title>
-      <link>http://fedepaol.github.io/categories/tcp/</link>
+      <link>/categories/tcp/</link>
       <pubDate>Tue, 01 May 2012 00:00:00 +0000</pubDate>
       
-      <guid>http://fedepaol.github.io/categories/tcp/</guid>
+      <guid>/categories/tcp/</guid>
       <description></description>
     </item>
     
     <item>
       <title>json</title>
-      <link>http://fedepaol.github.io/categories/json/</link>
+      <link>/categories/json/</link>
       <pubDate>Mon, 30 Jan 2012 00:00:00 +0000</pubDate>
       
-      <guid>http://fedepaol.github.io/categories/json/</guid>
+      <guid>/categories/json/</guid>
       <description></description>
     </item>
     
     <item>
       <title>android rest django</title>
-      <link>http://fedepaol.github.io/categories/android-rest-django/</link>
+      <link>/categories/android-rest-django/</link>
       <pubDate>Mon, 05 Dec 2011 00:00:00 +0000</pubDate>
       
-      <guid>http://fedepaol.github.io/categories/android-rest-django/</guid>
+      <guid>/categories/android-rest-django/</guid>
       <description></description>
     </item>
     
     <item>
       <title>android timer kitchen</title>
-      <link>http://fedepaol.github.io/categories/android-timer-kitchen/</link>
+      <link>/categories/android-timer-kitchen/</link>
       <pubDate>Tue, 18 Oct 2011 00:00:00 +0000</pubDate>
       
-      <guid>http://fedepaol.github.io/categories/android-timer-kitchen/</guid>
+      <guid>/categories/android-timer-kitchen/</guid>
       <description></description>
     </item>
     
     <item>
       <title>android barcode timer kitchen</title>
-      <link>http://fedepaol.github.io/categories/android-barcode-timer-kitchen/</link>
+      <link>/categories/android-barcode-timer-kitchen/</link>
       <pubDate>Fri, 24 Jun 2011 00:00:00 +0000</pubDate>
       
-      <guid>http://fedepaol.github.io/categories/android-barcode-timer-kitchen/</guid>
+      <guid>/categories/android-barcode-timer-kitchen/</guid>
       <description></description>
     </item>
     
     <item>
       <title>background</title>
-      <link>http://fedepaol.github.io/categories/background/</link>
+      <link>/categories/background/</link>
       <pubDate>Mon, 25 Apr 2011 00:00:00 +0000</pubDate>
       
-      <guid>http://fedepaol.github.io/categories/background/</guid>
+      <guid>/categories/background/</guid>
       <description></description>
     </item>
     
     <item>
       <title>intentservice</title>
-      <link>http://fedepaol.github.io/categories/intentservice/</link>
+      <link>/categories/intentservice/</link>
       <pubDate>Mon, 25 Apr 2011 00:00:00 +0000</pubDate>
       
-      <guid>http://fedepaol.github.io/categories/intentservice/</guid>
+      <guid>/categories/intentservice/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Android game</title>
-      <link>http://fedepaol.github.io/categories/android-game/</link>
+      <link>/categories/android-game/</link>
       <pubDate>Mon, 21 Mar 2011 00:00:00 +0000</pubDate>
       
-      <guid>http://fedepaol.github.io/categories/android-game/</guid>
+      <guid>/categories/android-game/</guid>
       <description></description>
     </item>
     
     <item>
       <title>junit</title>
-      <link>http://fedepaol.github.io/categories/junit/</link>
+      <link>/categories/junit/</link>
       <pubDate>Thu, 25 Nov 2010 00:00:00 +0000</pubDate>
       
-      <guid>http://fedepaol.github.io/categories/junit/</guid>
+      <guid>/categories/junit/</guid>
       <description></description>
     </item>
     
     <item>
       <title>test</title>
-      <link>http://fedepaol.github.io/categories/test/</link>
+      <link>/categories/test/</link>
       <pubDate>Thu, 25 Nov 2010 00:00:00 +0000</pubDate>
       
-      <guid>http://fedepaol.github.io/categories/test/</guid>
+      <guid>/categories/test/</guid>
       <description></description>
     </item>
     
     <item>
       <title>me</title>
-      <link>http://fedepaol.github.io/categories/me/</link>
+      <link>/categories/me/</link>
       <pubDate>Tue, 06 Jul 2010 00:00:00 +0000</pubDate>
       
-      <guid>http://fedepaol.github.io/categories/me/</guid>
+      <guid>/categories/me/</guid>
       <description></description>
     </item>
     
     <item>
       <title>python symbian</title>
-      <link>http://fedepaol.github.io/categories/python-symbian/</link>
+      <link>/categories/python-symbian/</link>
       <pubDate>Tue, 10 Jun 2008 00:00:00 +0000</pubDate>
       
-      <guid>http://fedepaol.github.io/categories/python-symbian/</guid>
+      <guid>/categories/python-symbian/</guid>
       <description></description>
     </item>
     
