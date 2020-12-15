@@ -2,21 +2,21 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>android timer kitchen on My little software warehouse</title>
-    <link>/categories/android-timer-kitchen/</link>
+    <link>https://fedepaol.github.io/categories/android-timer-kitchen/</link>
     <description>Recent content in android timer kitchen on My little software warehouse</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Tue, 18 Oct 2011 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="/categories/android-timer-kitchen/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://fedepaol.github.io/categories/android-timer-kitchen/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>A new app - Android Kitchen Timer</title>
-      <link>/blog/2011/10/18/a-new-app-android-kitchen-timer/</link>
+      <link>https://fedepaol.github.io/blog/2011/10/18/a-new-app-android-kitchen-timer/</link>
       <pubDate>Tue, 18 Oct 2011 00:00:00 +0000</pubDate>
       
-      <guid>/blog/2011/10/18/a-new-app-android-kitchen-timer/</guid>
+      <guid>https://fedepaol.github.io/blog/2011/10/18/a-new-app-android-kitchen-timer/</guid>
       <description>Pastimer is my 4th app. It&#39;s a simple (but nice) Android Kitchen Timer based on barcode scanning.
 I learned some things during my journey of android development, but this time I wanted to focus on user interface and ease of use.
 As always, it starts as a simple idea, the you start putting some code in it, it&#39;s &#34;almost&#34; working, and the difference between almost working and finished, is something like two months or more.</description>

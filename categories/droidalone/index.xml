@@ -2,21 +2,21 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>DroidAlone on My little software warehouse</title>
-    <link>/categories/droidalone/</link>
+    <link>https://fedepaol.github.io/categories/droidalone/</link>
     <description>Recent content in DroidAlone on My little software warehouse</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Sun, 25 Nov 2012 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="/categories/droidalone/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://fedepaol.github.io/categories/droidalone/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>DroidAlone - reloaded</title>
-      <link>/blog/2012/11/25/droidalone-reloaded/</link>
+      <link>https://fedepaol.github.io/blog/2012/11/25/droidalone-reloaded/</link>
       <pubDate>Sun, 25 Nov 2012 00:00:00 +0000</pubDate>
       
-      <guid>/blog/2012/11/25/droidalone-reloaded/</guid>
+      <guid>https://fedepaol.github.io/blog/2012/11/25/droidalone-reloaded/</guid>
       <description>Whenever I speak with another android developer, the occasional chat goes to &#34;what did you develop?&#34; question.
 Last time it happened at droidcon uk, and for the first time I felt something wasn&#39;t completely right when I showed my DroidAlone app.
 DroidAlone is a useful app (so they say) that comes into play whenever you forget your phone at home. With a simple sms protected by a password choosen by the user, it can be activated.</description>
@@ -24,10 +24,10 @@ DroidAlone is a useful app (so they say) that comes into play whenever you forge
     
     <item>
       <title>DroidAlone - Opensourced</title>
-      <link>/blog/2010/12/27/droidalone-opensourced/</link>
+      <link>https://fedepaol.github.io/blog/2010/12/27/droidalone-opensourced/</link>
       <pubDate>Mon, 27 Dec 2010 00:00:00 +0000</pubDate>
       
-      <guid>/blog/2010/12/27/droidalone-opensourced/</guid>
+      <guid>https://fedepaol.github.io/blog/2010/12/27/droidalone-opensourced/</guid>
       <description>I released DroidAlone on the market in the early summer. You can find a description at the following url&amp;nbsp;DroidAlone - Missed call for Android
 It is a paid app, and it costs something like 0.99 euros. It has been downloaded something like 150 times since then.
 I also had some issues in choosing its name: at first it was homealone, but I was afraid to Mr Culkin knokin&#39; to my door for royalties, then it was phonealone but there was already one, and then it moved to DroidAlone.</description>

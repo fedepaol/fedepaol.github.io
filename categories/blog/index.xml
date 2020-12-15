@@ -2,21 +2,21 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>blog on My little software warehouse</title>
-    <link>/categories/blog/</link>
+    <link>https://fedepaol.github.io/categories/blog/</link>
     <description>Recent content in blog on My little software warehouse</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Sun, 24 Aug 2014 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="/categories/blog/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://fedepaol.github.io/categories/blog/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>Migrating from blogger to octopress done</title>
-      <link>/blog/2014/08/24/migrating-from-blogger-to-octopress-done/</link>
+      <link>https://fedepaol.github.io/blog/2014/08/24/migrating-from-blogger-to-octopress-done/</link>
       <pubDate>Sun, 24 Aug 2014 00:00:00 +0000</pubDate>
       
-      <guid>/blog/2014/08/24/migrating-from-blogger-to-octopress-done/</guid>
+      <guid>https://fedepaol.github.io/blog/2014/08/24/migrating-from-blogger-to-octopress-done/</guid>
       <description>It feels a bit like this but when I had to write a new blogpost and had to embed some code snippets into my blogger hosted blog, I got so pissed of that I chose to migrate my existing blog to a github hosted instance of octopress.
 Jason Jarrett made a pretty nice tutorial about the whole process here. However, I had to change a couple of things and I thought those might be helpful to anybody who faces the same problems.</description>
     </item>

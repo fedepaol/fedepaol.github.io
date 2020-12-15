@@ -2,21 +2,21 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>android oauth rest on My little software warehouse</title>
-    <link>/categories/android-oauth-rest/</link>
+    <link>https://fedepaol.github.io/categories/android-oauth-rest/</link>
     <description>Recent content in android oauth rest on My little software warehouse</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Wed, 06 Mar 2013 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="/categories/android-oauth-rest/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://fedepaol.github.io/categories/android-oauth-rest/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>PostMan (RingsTwice) Reloaded - Android rest and oauth make easy(er) </title>
-      <link>/blog/2013/03/06/postman-ringstwice-reloaded-android-rest-and-oauth-make-easyer/</link>
+      <link>https://fedepaol.github.io/blog/2013/03/06/postman-ringstwice-reloaded-android-rest-and-oauth-make-easyer/</link>
       <pubDate>Wed, 06 Mar 2013 00:00:00 +0000</pubDate>
       
-      <guid>/blog/2013/03/06/postman-ringstwice-reloaded-android-rest-and-oauth-make-easyer/</guid>
+      <guid>https://fedepaol.github.io/blog/2013/03/06/postman-ringstwice-reloaded-android-rest-and-oauth-make-easyer/</guid>
       <description>Android and RestMy PostManLib android library had a quite troubled genesis. Some infos can be found in this old post&amp;nbsp;, but bear in mind that I only kept the skeleton of what I wrote at that time (which, by the way, was inspired by&amp;nbsp;this&amp;nbsp;talk).
 The api was (to be kind) a bit clunky, and I recently chose to rewrite / finish it. Apart from its clunkyness, one thing was missing:</description>
     </item>

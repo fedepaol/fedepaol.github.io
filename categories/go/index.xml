@@ -2,21 +2,21 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Go on My little software warehouse</title>
-    <link>/categories/go/</link>
+    <link>https://fedepaol.github.io/categories/go/</link>
     <description>Recent content in Go on My little software warehouse</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Mon, 07 Dec 2020 23:01:51 +0100</lastBuildDate>
     
-	<atom:link href="/categories/go/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://fedepaol.github.io/categories/go/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>Writing a Kubernetes Controller: part 1</title>
-      <link>/blog/2020/12/07/writing-a-kubernetes-controller-part-1/</link>
+      <link>https://fedepaol.github.io/blog/2020/12/07/writing-a-kubernetes-controller-part-1/</link>
       <pubDate>Mon, 07 Dec 2020 23:01:51 +0100</pubDate>
       
-      <guid>/blog/2020/12/07/writing-a-kubernetes-controller-part-1/</guid>
+      <guid>https://fedepaol.github.io/blog/2020/12/07/writing-a-kubernetes-controller-part-1/</guid>
       <description>Even when knowing Go, writing a Kubernetes controller is intimidating.
 In this post, I&amp;rsquo;ll introduce the Kubernetes operating model, how objects are mapped and what are the tools provided by the go-client framework to write bullet proof controllers. In a following post I will explain how to put all the pieces together and how to define and consume custom types.
 I will describe the core components like:
@@ -25,10 +25,10 @@ I will describe the core components like:
     
     <item>
       <title>A concurrency experiment</title>
-      <link>/blog/2019/03/30/a-concurrency-experiment/</link>
+      <link>https://fedepaol.github.io/blog/2019/03/30/a-concurrency-experiment/</link>
       <pubDate>Sat, 30 Mar 2019 00:00:00 +0000</pubDate>
       
-      <guid>/blog/2019/03/30/a-concurrency-experiment/</guid>
+      <guid>https://fedepaol.github.io/blog/2019/03/30/a-concurrency-experiment/</guid>
       <description>There are some scenarios where the order matters Let&amp;rsquo;s say that you have an api that can receive &amp;ldquo;actions&amp;rdquo; to be performed on a given endpoint.
 Think about you buying something on Amazon and then changing your mind and revoking your order. You don&amp;rsquo;t want those two actions to be swapped, otherwise the cancellation will be refused (the order you want to cancel do not exists yet) and then the item you don&amp;rsquo;t want anymore will be ordered (since the action of ordering the item receives the backend after the cancelation).</description>
     </item>

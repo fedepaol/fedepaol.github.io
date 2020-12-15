@@ -2,21 +2,21 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Socket on My little software warehouse</title>
-    <link>/categories/socket/</link>
+    <link>https://fedepaol.github.io/categories/socket/</link>
     <description>Recent content in Socket on My little software warehouse</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Tue, 01 May 2012 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="/categories/socket/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://fedepaol.github.io/categories/socket/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>Tcp connections in Android</title>
-      <link>/blog/2012/05/01/tcp-connections-in-android/</link>
+      <link>https://fedepaol.github.io/blog/2012/05/01/tcp-connections-in-android/</link>
       <pubDate>Tue, 01 May 2012 00:00:00 +0000</pubDate>
       
-      <guid>/blog/2012/05/01/tcp-connections-in-android/</guid>
+      <guid>https://fedepaol.github.io/blog/2012/05/01/tcp-connections-in-android/</guid>
       <description>Or how to keep your app connected and stop worrying.&amp;nbsp;
 Disclaimer:
 This is not another place where you can find java code snippet to open a socket and read and write to some server.

@@ -2,21 +2,21 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>ContentProvider on My little software warehouse</title>
-    <link>/categories/contentprovider/</link>
+    <link>https://fedepaol.github.io/categories/contentprovider/</link>
     <description>Recent content in ContentProvider on My little software warehouse</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Sun, 11 Nov 2012 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="/categories/contentprovider/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://fedepaol.github.io/categories/contentprovider/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>Android Content Providers Generator</title>
-      <link>/blog/2012/11/11/android-content-providers-generator/</link>
+      <link>https://fedepaol.github.io/blog/2012/11/11/android-content-providers-generator/</link>
       <pubDate>Sun, 11 Nov 2012 00:00:00 +0000</pubDate>
       
-      <guid>/blog/2012/11/11/android-content-providers-generator/</guid>
+      <guid>https://fedepaol.github.io/blog/2012/11/11/android-content-providers-generator/</guid>
       <description>During the refactoring of my two years old app DroidAlone, I decided to try to access to the storage through a ContentProvider.
 Even if the official documentation warns that there is no need to use content providers if your app does not want to export it&#39;s data against other apps, there are a bunch of advantages in using a content provider in your app.
 The main and more obvious advantage is that you can use a Loader with your data.</description>

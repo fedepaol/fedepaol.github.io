@@ -2,21 +2,21 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>maven on My little software warehouse</title>
-    <link>/categories/maven/</link>
+    <link>https://fedepaol.github.io/categories/maven/</link>
     <description>Recent content in maven on My little software warehouse</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Sat, 15 Sep 2012 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="/categories/maven/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://fedepaol.github.io/categories/maven/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>Gridlayout support library with maven</title>
-      <link>/blog/2012/09/15/gridlayout-support-library-with-maven/</link>
+      <link>https://fedepaol.github.io/blog/2012/09/15/gridlayout-support-library-with-maven/</link>
       <pubDate>Sat, 15 Sep 2012 00:00:00 +0000</pubDate>
       
-      <guid>/blog/2012/09/15/gridlayout-support-library-with-maven/</guid>
+      <guid>https://fedepaol.github.io/blog/2012/09/15/gridlayout-support-library-with-maven/</guid>
       <description>EDIT 17/10/2012:
 Gridlayout support is now working natively with maven android deployer. I strongly suggest to use it instead of my method.
 ---------------------------
@@ -27,10 +27,10 @@ It has also been recently added as part of the android support library, in order
     
     <item>
       <title>Intellij, Robolectric and Android</title>
-      <link>/blog/2012/07/23/intellij-robolectric-and-android/</link>
+      <link>https://fedepaol.github.io/blog/2012/07/23/intellij-robolectric-and-android/</link>
       <pubDate>Mon, 23 Jul 2012 00:00:00 +0000</pubDate>
       
-      <guid>/blog/2012/07/23/intellij-robolectric-and-android/</guid>
+      <guid>https://fedepaol.github.io/blog/2012/07/23/intellij-robolectric-and-android/</guid>
       <description>I have been curious about intellij since droicon uk 2011, where I noticed that some of the speakers were using IntelliJ instead of eclipse.
 A post from Richard Hyndman, who is a developer advocate from Google, was the final straw that pushed me to download IntelliJ and give it a try.
 The first thing an eclipse user will notice in intellij is how slick and fast compares to the behemoth which is eclipse.</description>

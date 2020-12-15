@@ -2,21 +2,21 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>python symbian on My little software warehouse</title>
-    <link>/categories/python-symbian/</link>
+    <link>https://fedepaol.github.io/categories/python-symbian/</link>
     <description>Recent content in python symbian on My little software warehouse</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Tue, 10 Jun 2008 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="/categories/python-symbian/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://fedepaol.github.io/categories/python-symbian/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>Developing python on symbian from a linux box</title>
-      <link>/blog/2008/06/10/developing-python-on-symbian-from-a-linux-box/</link>
+      <link>https://fedepaol.github.io/blog/2008/06/10/developing-python-on-symbian-from-a-linux-box/</link>
       <pubDate>Tue, 10 Jun 2008 00:00:00 +0000</pubDate>
       
-      <guid>/blog/2008/06/10/developing-python-on-symbian-from-a-linux-box/</guid>
+      <guid>https://fedepaol.github.io/blog/2008/06/10/developing-python-on-symbian-from-a-linux-box/</guid>
       <description>Since my mobile device is a s60v3 one (Nokia E61), I found particulary difficult to develop any simple python script on the phone. The hardest thing to do was the write - test cycle.
 On linux you can&#39;t simply send the file to the phone with obex, since it will be stored in your incoming messages.
 From the excellentJürgen Scheible&#39;s tutorial website I discovered the existance of the nice putools for making easier the development cycle here</description>
