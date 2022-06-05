@@ -6,11 +6,7 @@
     <description>Recent content in json on My little software warehouse</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Mon, 30 Jan 2012 00:00:00 +0000</lastBuildDate>
-    
-	<atom:link href="https://fedepaol.github.io/categories/json/index.xml" rel="self" type="application/rss+xml" />
-    
-    
+    <lastBuildDate>Mon, 30 Jan 2012 00:00:00 +0000</lastBuildDate><atom:link href="https://fedepaol.github.io/categories/json/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>PostmanLib - Android and Rest Web Services</title>
       <link>https://fedepaol.github.io/blog/2012/01/30/postmanlib-android-and-rest-web-services/</link>

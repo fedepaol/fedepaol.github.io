@@ -67,6 +67,57 @@ integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbi
   <main class="container">
       
       
+      <h1 class="title is-3">2022</h1>
+      
+      <article class="columns">
+        <div class="column is-2">
+          <h6 class="is-inline" style="white-space: nowrap">Mar 27</h2>
+        </div>
+        <div class="column">
+          <h2 class="subtitle is-inline is-size-4-mobile is-size-3-desktop"><a href="https://fedepaol.github.io/blog/2022/03/27/mixing-cluster-scoped-resources-and-namespaced-resources-with-kubebuilder-and-controller-runtime/">Mixing cluster scoped resources and namespaced resources with kubebuilder and controller runtime</a></h1>
+          <div class="content is-hidden-mobile">
+            Out of the box If we look at the kubebuilder tutorial, it&rsquo;s possible to define a namespace (or a set of namespaces, when using MultiNamespacedCacheBuilder) for our controller to listen on.
+If we don&rsquo;t set the namespace, our controller is meant to be cluster scoped and will listen (and need priviledges) to the resources in all the namespaces.
+The problem While working on MetalLB, we had …
+            
+            <br>
+            <a class="button is-marginless is-paddingless" href="https://fedepaol.github.io/blog/2022/03/27/mixing-cluster-scoped-resources-and-namespaced-resources-with-kubebuilder-and-controller-runtime/">
+            <span class="icon-link is-small" style="line-height: 100%">
+                <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+              </span>
+              <p style="padding:0 5px"></p>more</p>
+            </a>
+            
+          </div>
+      </article>
+      
+      
+      <h1 class="title is-3">2021</h1>
+      
+      <article class="columns">
+        <div class="column is-2">
+          <h6 class="is-inline" style="white-space: nowrap">Jan 7</h2>
+        </div>
+        <div class="column">
+          <h2 class="subtitle is-inline is-size-4-mobile is-size-3-desktop"><a href="https://fedepaol.github.io/blog/2021/01/07/writing-a-kubernetes-controller-part-2/">Writing a Kubernetes Controller: part 2</a></h1>
+          <div class="content is-hidden-mobile">
+            This is the second part of my &ldquo;writing a kubernetes controller&rdquo; blogpost.
+Here, I will explain how to put what was explained int the first part in go code.
+Setting the informer and the workqueue This is the first step, where you listen for events and send them to the consumers via the workqueue:
+	kubeInformerFactory := kubeinformers.NewSharedInformerFactory(kubeClient, time.Second*30) …
+            
+            <br>
+            <a class="button is-marginless is-paddingless" href="https://fedepaol.github.io/blog/2021/01/07/writing-a-kubernetes-controller-part-2/">
+            <span class="icon-link is-small" style="line-height: 100%">
+                <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+              </span>
+              <p style="padding:0 5px"></p>more</p>
+            </a>
+            
+          </div>
+      </article>
+      
+      
       <h1 class="title is-3">2020</h1>
       
       <article class="columns">
@@ -126,7 +177,7 @@ Approaching an open source project may be daunting at first We find a lot of rea
           <div class="content is-hidden-mobile">
             Intro In this post I&rsquo;ll try to write about my experience at GoLab 2019.
 As per the 2018 edition, I had the honor to give a talk during the Italian Go conference GoLab. There are many reasons why I loved the conference:
- The organization was flawless. The people from Develer have been organizing conferences for a long time and it&rsquo;s pretty clear they know how to do them.
+  The organization was flawless. The people from Develer have been organizing conferences for a long time and it&rsquo;s pretty clear they know how to do them.
             
             <br>
             <a class="button is-marginless is-paddingless" href="https://fedepaol.github.io/blog/2019/10/23/golab-2019/">
@@ -193,7 +244,7 @@ Please remember that a nats publisher does not assume the audience.
           <h2 class="subtitle is-inline is-size-4-mobile is-size-3-desktop"><a href="https://fedepaol.github.io/blog/2018/10/27/fast-messaging-with-nats-and-go/">Fast messaging with nats and go</a></h1>
           <div class="content is-hidden-mobile">
             This is the first of follow up serie of the talk Fast messaging with Nats and Go I gave at golab 2018.
-The slides of the talk can be found here:  What is Nats Nats is a messaging system hosted under the CNCF umbrella, which is an open source software foundation dedicated to making cloud native computing universal and sustainable. It&rsquo;s my place-to-go while looking for software related to …
+The slides of the talk can be found here: What is Nats Nats is a messaging system hosted under the CNCF umbrella, which is an open source software foundation dedicated to making cloud native computing universal and sustainable. It&rsquo;s my place-to-go while looking for software related to …
             
             <br>
             <a class="button is-marginless is-paddingless" href="https://fedepaol.github.io/blog/2018/10/27/fast-messaging-with-nats-and-go/">
@@ -218,55 +269,6 @@ My interests moved from Android and mobile in general to Go and distributed syst
             
             <br>
             <a class="button is-marginless is-paddingless" href="https://fedepaol.github.io/blog/2018/10/26/a-new-chapter/">
-            <span class="icon-link is-small" style="line-height: 100%">
-                <i class="fa fa-angle-double-right" aria-hidden="true"></i>
-              </span>
-              <p style="padding:0 5px"></p>more</p>
-            </a>
-            
-          </div>
-      </article>
-      
-      
-      <h1 class="title is-3">2017</h1>
-      
-      <article class="columns">
-        <div class="column is-2">
-          <h6 class="is-inline" style="white-space: nowrap">Apr 30</h2>
-        </div>
-        <div class="column">
-          <h2 class="subtitle is-inline is-size-4-mobile is-size-3-desktop"><a href="https://fedepaol.github.io/blog/2017/04/30/android-okhttp-and-websockets/">Android okhttp and websockets</a></h1>
-          <div class="content is-hidden-mobile">
-            Websockets Rest http calls are the most common interaction between Android apps and remote servers. However, there are some scenarios where the interaction is better handled via a persistent connection: think about a chat, or a multiplayer game where data flows in both directions and the server needs to push data to the clients and to be aware of which client are connected.
-This kind of scenario …
-            
-            <br>
-            <a class="button is-marginless is-paddingless" href="https://fedepaol.github.io/blog/2017/04/30/android-okhttp-and-websockets/">
-            <span class="icon-link is-small" style="line-height: 100%">
-                <i class="fa fa-angle-double-right" aria-hidden="true"></i>
-              </span>
-              <p style="padding:0 5px"></p>more</p>
-            </a>
-            
-          </div>
-      </article>
-      
-      
-      <h1 class="title is-3">2016</h1>
-      
-      <article class="columns">
-        <div class="column is-2">
-          <h6 class="is-inline" style="white-space: nowrap">Aug 27</h2>
-        </div>
-        <div class="column">
-          <h2 class="subtitle is-inline is-size-4-mobile is-size-3-desktop"><a href="https://fedepaol.github.io/blog/2016/08/27/android-mvp-testing/">Android mvp testing</a></h1>
-          <div class="content is-hidden-mobile">
-            MVP is Model View Presenter .. which is a pattern that is very popular among Android developers nowdays.
-I don&rsquo;t intend to write (yet) another guide about MVP in Android, because others have done a better job, for example:
- Antonio Leiva&rsquo;s introduction to MVP Hannes Dorfmann&rsquo;s introduction to Mosby Fernando Cejas&rsquo; post on clean architecture  A lot have been said about MVP …
-            
-            <br>
-            <a class="button is-marginless is-paddingless" href="https://fedepaol.github.io/blog/2016/08/27/android-mvp-testing/">
             <span class="icon-link is-small" style="line-height: 100%">
                 <i class="fa fa-angle-double-right" aria-hidden="true"></i>
               </span>

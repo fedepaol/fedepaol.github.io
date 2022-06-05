@@ -6,11 +6,7 @@
     <description>Recent content in android oauth rest on My little software warehouse</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Wed, 06 Mar 2013 00:00:00 +0000</lastBuildDate>
-    
-	<atom:link href="https://fedepaol.github.io/categories/android-oauth-rest/index.xml" rel="self" type="application/rss+xml" />
-    
-    
+    <lastBuildDate>Wed, 06 Mar 2013 00:00:00 +0000</lastBuildDate><atom:link href="https://fedepaol.github.io/categories/android-oauth-rest/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>PostMan (RingsTwice) Reloaded - Android rest and oauth make easy(er) </title>
       <link>https://fedepaol.github.io/blog/2013/03/06/postman-ringstwice-reloaded-android-rest-and-oauth-make-easyer/</link>

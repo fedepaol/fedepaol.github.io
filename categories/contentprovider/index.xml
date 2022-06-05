@@ -6,11 +6,7 @@
     <description>Recent content in ContentProvider on My little software warehouse</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 11 Nov 2012 00:00:00 +0000</lastBuildDate>
-    
-	<atom:link href="https://fedepaol.github.io/categories/contentprovider/index.xml" rel="self" type="application/rss+xml" />
-    
-    
+    <lastBuildDate>Sun, 11 Nov 2012 00:00:00 +0000</lastBuildDate><atom:link href="https://fedepaol.github.io/categories/contentprovider/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Android Content Providers Generator</title>
       <link>https://fedepaol.github.io/blog/2012/11/11/android-content-providers-generator/</link>

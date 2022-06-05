@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+
+
+<title>Mixing cluster scoped resources and namespaced resources with kubebuilder and controller runtime | My little software warehouse</title>
+
+<link rel="stylesheet" href="https://fedepaol.github.io//css/styles.css">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css" 
+integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbiDQ" crossorigin="anonymous">
+<script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/zenburn.min.css" crossorigin="anonymous" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js" integrity="sha256-/BfiIkHlHoVihZdc6TFuj7MmJ0TWcWsMXkeDFwhi0zw=" crossorigin="anonymous"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+<script src="https://fedepaol.github.io//js/highlight.js"></script>
+
+
+
+
+
+
+<div class="container">
+    <nav class="navbar level">
+      <div class="navbar-brand">
+          <a class="nav-item" href="https://fedepaol.github.io/"><h1 class="title is-3">My little software warehouse</h1></a>
+      </div>           
+      <div class="navbar-menu has-text-centered is-active">
+          <div class="navbar-end is-centered">
+              
+                <a href="https://twitter.com/fedepaol" rel="me">
+                  <span class="icon">
+                    <i class="fab fa-twitter"></i>
+                  </span>
+                </a>
+              
+                <a href="https://fedepaol.github.io/about" rel="me">
+                  <span class="icon">
+                    <i class="fas fa-info"></i>
+                  </span>
+                </a>
+              
+                <a href="https://github.com/fedepaol" rel="me">
+                  <span class="icon">
+                    <i class="fab fa-github"></i>
+                  </span>
+                </a>
+              
+                <a href="https://linkedin.com/in/federico-paolinelli-2374954/" rel="me">
+                  <span class="icon">
+                    <i class="fab fa-linkedin-in"></i>
+                  </span>
+                </a>
+              
+           </div>
+      </div>
+    </nav>
+  </div>
+
+<div class="container">
+  <h2 class="subtitle is-6">March 27, 2022</h2>
+  <h1 class="subtitle is-size-4-mobile is-size-3-desktop">Mixing cluster scoped resources and namespaced resources with kubebuilder and controller runtime</h1>
+  <div class="content">
+    <h1 id="out-of-the-box">Out of the box</h1>
+<p>If we look at the <a href="https://book.kubebuilder.io/cronjob-tutorial/empty-main.html">kubebuilder tutorial</a>, it&rsquo;s possible to define a namespace (or a set of namespaces, when using <a href="https://pkg.go.dev/sigs.k8s.io/controller-runtime/pkg/cache#MultiNamespacedCacheBuilder">MultiNamespacedCacheBuilder</a>) for our controller to listen on.</p>
+<p>If we don&rsquo;t set the namespace, our controller is meant to be cluster scoped and will listen (and need priviledges) to the resources in all the namespaces.</p>
+<h2 id="the-problem">The problem</h2>
+<p>While working on MetalLB, we had to add an alternative password field of type <em>secret reference</em>. In other words, MetalLB has to be still cluster scoped for some resources (the services for example), while having access only to instances living in its namespace for other types of resources (i.e. secrets). This, in order to try to observe the least priviledge principle.</p>
+<h3 id="the-solution">The solution</h3>
+<p>Despite not being documented, a bit of GitHub archeology helped me find <a href="https://github.com/kubernetes-sigs/controller-runtime/pull/1435">this PR</a> where it was introduced a per-object selector to the controller-runtime&rsquo;s manager cache, and <a href="https://github.com/kubernetes-sigs/controller-runtime/pull/1602">this other PR</a> where, by adding a namespace selector on a given object, would have translated all the actions on that particular object as namespaced.</p>
+<p>By mixing the two, and selecting the namespace, it is now possible to have our controller using controller-runtime select both namespaced resources and cluster scoped resources.</p>
+<h3 id="the-code">The code</h3>
+<p>This exempt is taken from MetalLB:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span>	<span style="color:#a6e22e">namespaceSelector</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">cache</span>.<span style="color:#a6e22e">ObjectSelector</span>{
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">Field</span>: <span style="color:#a6e22e">fields</span>.<span style="color:#a6e22e">ParseSelectorOrDie</span>(<span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Sprintf</span>(<span style="color:#e6db74">&#34;metadata.namespace=%s&#34;</span>, <span style="color:#a6e22e">cfg</span>.<span style="color:#a6e22e">Namespace</span>)),
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">mgr</span>, <span style="color:#a6e22e">err</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">ctrl</span>.<span style="color:#a6e22e">NewManager</span>(<span style="color:#a6e22e">ctrl</span>.<span style="color:#a6e22e">GetConfigOrDie</span>(), <span style="color:#a6e22e">ctrl</span>.<span style="color:#a6e22e">Options</span>{
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">Scheme</span>:         <span style="color:#a6e22e">scheme</span>,
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">Port</span>:           <span style="color:#ae81ff">9443</span>,
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">LeaderElection</span>: <span style="color:#66d9ef">false</span>,
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">NewCache</span>: <span style="color:#a6e22e">cache</span>.<span style="color:#a6e22e">BuilderWithOptions</span>(<span style="color:#a6e22e">cache</span>.<span style="color:#a6e22e">Options</span>{
+</span></span><span style="display:flex;"><span>			<span style="color:#a6e22e">SelectorsByObject</span>: <span style="color:#66d9ef">map</span>[<span style="color:#a6e22e">client</span>.<span style="color:#a6e22e">Object</span>]<span style="color:#a6e22e">cache</span>.<span style="color:#a6e22e">ObjectSelector</span>{
+</span></span><span style="display:flex;"><span>				<span style="color:#f92672">&amp;</span><span style="color:#a6e22e">metallbv1alpha1</span>.<span style="color:#a6e22e">AddressPool</span>{}:     <span style="color:#a6e22e">namespaceSelector</span>,
+</span></span><span style="display:flex;"><span>				<span style="color:#f92672">&amp;</span><span style="color:#a6e22e">metallbv1beta1</span>.<span style="color:#a6e22e">AddressPool</span>{}:      <span style="color:#a6e22e">namespaceSelector</span>,
+</span></span><span style="display:flex;"><span>				<span style="color:#f92672">&amp;</span><span style="color:#a6e22e">metallbv1beta1</span>.<span style="color:#a6e22e">BFDProfile</span>{}:       <span style="color:#a6e22e">namespaceSelector</span>,
+</span></span><span style="display:flex;"><span>				<span style="color:#f92672">&amp;</span><span style="color:#a6e22e">metallbv1beta1</span>.<span style="color:#a6e22e">BGPAdvertisement</span>{}: <span style="color:#a6e22e">namespaceSelector</span>,
+</span></span><span style="display:flex;"><span>				<span style="color:#f92672">&amp;</span><span style="color:#a6e22e">metallbv1beta1</span>.<span style="color:#a6e22e">BGPPeer</span>{}:          <span style="color:#a6e22e">namespaceSelector</span>,
+</span></span><span style="display:flex;"><span>				<span style="color:#f92672">&amp;</span><span style="color:#a6e22e">metallbv1beta1</span>.<span style="color:#a6e22e">IPPool</span>{}:           <span style="color:#a6e22e">namespaceSelector</span>,
+</span></span><span style="display:flex;"><span>				<span style="color:#f92672">&amp;</span><span style="color:#a6e22e">metallbv1beta1</span>.<span style="color:#a6e22e">L2Advertisement</span>{}:  <span style="color:#a6e22e">namespaceSelector</span>,
+</span></span><span style="display:flex;"><span>				<span style="color:#f92672">&amp;</span><span style="color:#a6e22e">metallbv1beta2</span>.<span style="color:#a6e22e">BGPPeer</span>{}:          <span style="color:#a6e22e">namespaceSelector</span>,
+</span></span><span style="display:flex;"><span>			},
+</span></span><span style="display:flex;"><span>		}),
+</span></span><span style="display:flex;"><span>	})
+</span></span></code></pre></div><p>By doing this, even if the controller is declared as cluster scoped (no namespace is added when creating the Manager), a selected set of resources will be namespace scoped and it will be possible to give local (<code>Role</code>) permissions to those.</p>
+
+  </div>
+</div>
+<div class="container has-text-centered">
+    
+</div>
+
+<div class="container has-text-centered">
+  
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      (function() {
+          
+          
+          if (window.location.hostname == "localhost")
+              return;
+      
+          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+          var disqus_shortname = 'fedepaolgithubio';
+          dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com/" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+  
+</div>
+<section class="section">
+  <div class="container has-text-centered">
+    <p></p>
+  </div>
+</section>
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-16514009-2', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+

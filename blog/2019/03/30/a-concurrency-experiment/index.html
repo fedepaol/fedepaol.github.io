@@ -66,93 +66,60 @@ integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbi
   <h2 class="subtitle is-6">March 30, 2019</h2>
   <h1 class="subtitle is-size-4-mobile is-size-3-desktop">A concurrency experiment</h1>
   <div class="content">
-    
-
-<h2 id="there-are-some-scenarios-where-the-order-matters">There are some scenarios where the order matters</h2>
-
+    <h2 id="there-are-some-scenarios-where-the-order-matters">There are some scenarios where the order matters</h2>
 <p>Let&rsquo;s say that you have an api that can receive &ldquo;actions&rdquo; to be performed on a given endpoint.</p>
-
 <p>Think about you buying something on Amazon and then changing your mind and revoking your order. You don&rsquo;t want those two actions to be swapped, otherwise the cancellation will be refused (the order you want to cancel do not exists yet) and then the item you don&rsquo;t want anymore will be ordered (since the action of ordering the item receives the backend <strong>after</strong> the cancelation).</p>
-
 <p>Also, in this (not so) hypothetic scenario, processing each message has a cost. For example, the message needs to be validated against some external endpoint, or it needs to be enriched with data that can be found on a database.</p>
-
 <p>So here we have a dilemma: we would like to take advantage of go concurrency system and increase the throughput by processing the messages concurrently, but at the same time the order matters and you can&rsquo;t just pass the events to the goroutines because the order the messages are received won&rsquo;t be respected.</p>
-
 <p>Processing the messages in a concurrent fashion would amortise the processing cost of each message. By processing the messages sequentially, a queued message will have to wait all the messages received before.</p>
-
 <h2 id="so-my-question-is-can-we-take-advantage-of-the-go-powerful-concurrency-support-for-this-inherently-sequential-problem">So my question is, can we take advantage of the Go powerful concurrency support for this inherently sequential problem?</h2>
-
 <p>And is it hard?</p>
-
 <p>All this to say that I wanted to write a simple example that reorders the messages as soon as they are processed concurrently.</p>
-
 <p>The basic idea is to mark each message with a sequence number, handle many messages concurrently, and pass the results to another goroutine that will then reorder the.</p>
-
 <p>The architecture is something like this:</p>
-
-<p><img src="/images/optimization/fast.png" alt="" /></p>
-
+<p><img src="/images/optimization/fast.png" alt=""></p>
 <p>I tried to simulate the <em>time consuming operation</em> with a random interval between 1 - 100 milliseconds:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go">    <span style="color:#a6e22e">howLong</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">rand</span>.<span style="color:#a6e22e">Intn</span>(<span style="color:#ae81ff">100</span>)
-    <span style="color:#a6e22e">time</span>.<span style="color:#a6e22e">Sleep</span>(<span style="color:#a6e22e">time</span>.<span style="color:#a6e22e">Duration</span>(<span style="color:#a6e22e">howLong</span>) <span style="color:#f92672">*</span> <span style="color:#a6e22e">time</span>.<span style="color:#a6e22e">Millisecond</span>)</code></pre></div>
-<p>The <em>consuming</em> part only involves printing the result of the <em>computation</em> on the standard output, in order to be able to check if the re-ordering was done properly.</p>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span>    <span style="color:#a6e22e">howLong</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">rand</span>.<span style="color:#a6e22e">Intn</span>(<span style="color:#ae81ff">100</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">time</span>.<span style="color:#a6e22e">Sleep</span>(<span style="color:#a6e22e">time</span>.<span style="color:#a6e22e">Duration</span>(<span style="color:#a6e22e">howLong</span>) <span style="color:#f92672">*</span> <span style="color:#a6e22e">time</span>.<span style="color:#a6e22e">Millisecond</span>)
+</span></span></code></pre></div><p>The <em>consuming</em> part only involves printing the result of the <em>computation</em> on the standard output, in order to be able to check if the re-ordering was done properly.</p>
 <h3 id="channels-and-goroutines">Channels and goroutines</h3>
-
 <p>The moving parts are:</p>
-
 <ul>
 <li>a <a href="https://github.com/fedepaol/goconcurrencylab/blob/master/fast/main.go#L67"><strong>producer</strong> goroutine</a> that writes on a source channel</li>
 <li>many <a href="https://github.com/fedepaol/goconcurrencylab/blob/master/fast/main.go#L100"><strong>worker</strong> goroutines</a> that process the messages sent on the source channel &amp; write on the same output channel</li>
 <li>a <a href="https://github.com/fedepaol/goconcurrencylab/blob/master/fast/main.go#L48"><strong>result processor</strong> goroutine</a> that reads the results from the output channel, try to reorder them and then print the output</li>
 </ul>
-
 <p><strong>The whole project can be found <a href="https://github.com/fedepaol/goconcurrencylab">here</a></strong></p>
-
 <h3 id="the-results">The results</h3>
-
 <p>Non concurrent:</p>
-
-<pre><code>	go run .  0,37s user 0,31s system 1% cpu 49,069 total
-</code></pre>
-
-<p>Concurrent:</p>
-
-<pre><code>	go run .  0,33s user 0,17s system 66% cpu 0,745 total
-</code></pre>
-
-<h2 id="the-take-home-lesson">The take home lesson</h2>
-
+<pre tabindex="0"><code>	go run .  0,37s user 0,31s system 1% cpu 49,069 total
+</code></pre><p>Concurrent:</p>
+<pre tabindex="0"><code>	go run .  0,33s user 0,17s system 66% cpu 0,745 total
+</code></pre><h2 id="the-take-home-lesson">The take home lesson</h2>
 <p>This working example demonstrates how the communicating paradigm makes it easy to handle and manipulate events concurrently with Go. The fact that we do have requirements of sequentiality does not mean that we can&rsquo;t try to exploit all the cores available in order to take advantage of the multiprocessing powers of Go.</p>
-
 <h3 id="where-to-go-from-here">Where to go from here</h3>
-
 <p>During the first implementation, I kept the &ldquo;reordering part&rdquo; as simple as I could, meaning that the events are just appended to a slice, then the result processor keeps a &ldquo;last processed&rdquo; sequence number and tries to retrieve the next event to be emitted.</p>
-
 <p>The code for the &ldquo;draining part&rdquo; is:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go">    <span style="color:#66d9ef">func</span> <span style="color:#a6e22e">drainParked</span>(<span style="color:#a6e22e">parked</span> <span style="color:#f92672">*</span>[]<span style="color:#a6e22e">result</span>, <span style="color:#a6e22e">next</span> <span style="color:#f92672">*</span><span style="color:#66d9ef">int</span>) {
-    	<span style="color:#66d9ef">for</span> {
-    		<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">found</span> <span style="color:#66d9ef">bool</span>
-    		<span style="color:#66d9ef">for</span> <span style="color:#a6e22e">i</span>, <span style="color:#a6e22e">val</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">range</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">parked</span> {
-    			<span style="color:#66d9ef">if</span> <span style="color:#a6e22e">val</span>.<span style="color:#a6e22e">seqNum</span> <span style="color:#f92672">==</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">next</span> {
-    				<span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Printf</span>(<span style="color:#e6db74">&#34;Processed %d\n&#34;</span>, <span style="color:#a6e22e">val</span>.<span style="color:#a6e22e">seqNum</span>)
-    				<span style="color:#f92672">*</span><span style="color:#a6e22e">next</span><span style="color:#f92672">++</span>
-    				<span style="color:#f92672">*</span><span style="color:#a6e22e">parked</span> = append((<span style="color:#f92672">*</span><span style="color:#a6e22e">parked</span>)[:<span style="color:#a6e22e">i</span>], (<span style="color:#f92672">*</span><span style="color:#a6e22e">parked</span>)[<span style="color:#a6e22e">i</span><span style="color:#f92672">+</span><span style="color:#ae81ff">1</span>:]<span style="color:#f92672">...</span>)
-    				<span style="color:#a6e22e">found</span> = <span style="color:#66d9ef">true</span>
-    				<span style="color:#66d9ef">break</span>
-    			}
-    		}
-    		<span style="color:#66d9ef">if</span> !<span style="color:#a6e22e">found</span> {
-    			<span style="color:#66d9ef">return</span>
-    		}
-    	}
-}</code></pre></div>
-<p>This code is definitely not optimized, we could leverage the profiling tools provided by Go in order to see how to optimize it.</p>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span>    <span style="color:#66d9ef">func</span> <span style="color:#a6e22e">drainParked</span>(<span style="color:#a6e22e">parked</span> <span style="color:#f92672">*</span>[]<span style="color:#a6e22e">result</span>, <span style="color:#a6e22e">next</span> <span style="color:#f92672">*</span><span style="color:#66d9ef">int</span>) {
+</span></span><span style="display:flex;"><span>    	<span style="color:#66d9ef">for</span> {
+</span></span><span style="display:flex;"><span>    		<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">found</span> <span style="color:#66d9ef">bool</span>
+</span></span><span style="display:flex;"><span>    		<span style="color:#66d9ef">for</span> <span style="color:#a6e22e">i</span>, <span style="color:#a6e22e">val</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">range</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">parked</span> {
+</span></span><span style="display:flex;"><span>    			<span style="color:#66d9ef">if</span> <span style="color:#a6e22e">val</span>.<span style="color:#a6e22e">seqNum</span> <span style="color:#f92672">==</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">next</span> {
+</span></span><span style="display:flex;"><span>    				<span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Printf</span>(<span style="color:#e6db74">&#34;Processed %d\n&#34;</span>, <span style="color:#a6e22e">val</span>.<span style="color:#a6e22e">seqNum</span>)
+</span></span><span style="display:flex;"><span>    				<span style="color:#f92672">*</span><span style="color:#a6e22e">next</span><span style="color:#f92672">++</span>
+</span></span><span style="display:flex;"><span>    				<span style="color:#f92672">*</span><span style="color:#a6e22e">parked</span> = append((<span style="color:#f92672">*</span><span style="color:#a6e22e">parked</span>)[:<span style="color:#a6e22e">i</span>], (<span style="color:#f92672">*</span><span style="color:#a6e22e">parked</span>)[<span style="color:#a6e22e">i</span><span style="color:#f92672">+</span><span style="color:#ae81ff">1</span>:]<span style="color:#f92672">...</span>)
+</span></span><span style="display:flex;"><span>    				<span style="color:#a6e22e">found</span> = <span style="color:#66d9ef">true</span>
+</span></span><span style="display:flex;"><span>    				<span style="color:#66d9ef">break</span>
+</span></span><span style="display:flex;"><span>    			}
+</span></span><span style="display:flex;"><span>    		}
+</span></span><span style="display:flex;"><span>    		<span style="color:#66d9ef">if</span> !<span style="color:#a6e22e">found</span> {
+</span></span><span style="display:flex;"><span>    			<span style="color:#66d9ef">return</span>
+</span></span><span style="display:flex;"><span>    		}
+</span></span><span style="display:flex;"><span>    	}
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>This code is definitely not optimized, we could leverage the profiling tools provided by Go in order to see how to optimize it.</p>
 <h3 id="fallacies">Fallacies</h3>
-
 <p>The alignement assumes that the concurrent calls will take (almost) the same amount of time and that they will eventually end.</p>
-
 <p>A non terminating goroutine would result in blocking the entire flow: a smarter (and production ready) implementation should take timeouts into account.</p>
 
   </div>

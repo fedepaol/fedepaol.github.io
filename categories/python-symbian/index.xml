@@ -6,11 +6,7 @@
     <description>Recent content in python symbian on My little software warehouse</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Tue, 10 Jun 2008 00:00:00 +0000</lastBuildDate>
-    
-	<atom:link href="https://fedepaol.github.io/categories/python-symbian/index.xml" rel="self" type="application/rss+xml" />
-    
-    
+    <lastBuildDate>Tue, 10 Jun 2008 00:00:00 +0000</lastBuildDate><atom:link href="https://fedepaol.github.io/categories/python-symbian/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Developing python on symbian from a linux box</title>
       <link>https://fedepaol.github.io/blog/2008/06/10/developing-python-on-symbian-from-a-linux-box/</link>

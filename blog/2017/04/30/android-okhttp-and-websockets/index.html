@@ -66,88 +66,56 @@ integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbi
   <h2 class="subtitle is-6">April 30, 2017</h2>
   <h1 class="subtitle is-size-4-mobile is-size-3-desktop">Android okhttp and websockets</h1>
   <div class="content">
-    
-
-<h2 id="websockets">Websockets</h2>
-
+    <h2 id="websockets">Websockets</h2>
 <p>Rest http calls are the most common interaction between Android apps and remote servers. However, there are some scenarios where the interaction is better handled via a persistent connection: think about a chat, or a multiplayer game where data flows in both directions and the server needs to push data to the clients and to be aware of which client are connected.</p>
-
 <p>This kind of scenario can be implemented through Websockets.</p>
-
 <h3 id="okhttp-and-websockets">OkHttp and Websockets</h3>
-
 <p>Given the quality of the libraries offered by Square, OkHttp was the first library I checked when I recently had to deal with websockets. Luckily, <a href="https://medium.com/square-corner-blog/web-sockets-now-shipping-in-okhttp-3-5-463a9eec82d1">WebSocket support was introduced in December, 2016</a>. In this post I will try to describe how to use it, and to show how it is different from using it with regular http calls.</p>
-
 <h3 id="establishing-the-connection">Establishing the connection</h3>
-
 <p>Establishing the connection is pretty straightforward. You declare the OkHttp client as always:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">	client <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> OkHttpClient.<span style="color:#a6e22e">Builder</span>()
-                .<span style="color:#a6e22e">readTimeout</span>(3,  TimeUnit.<span style="color:#a6e22e">SECONDS</span>)
-                .<span style="color:#a6e22e">build</span>();</code></pre></div>
-<p>and then take a websocket object out of it:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">	Request <span style="color:#a6e22e">request</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Request.<span style="color:#a6e22e">Builder</span>()
-                .<span style="color:#a6e22e">url</span>(serverUrl)
-                .<span style="color:#a6e22e">build</span>();
-        webSocket <span style="color:#f92672">=</span> client.<span style="color:#a6e22e">newWebSocket</span>(request, <span style="color:#66d9ef">new</span> WebSocketListener() {
-							...
-						});</code></pre></div>
-<p>Please note that by creating the websocket, OkHttp will try to establish the connection with the server. The second parameter of the <code>newWebSocket</code> factory method needs to implement the <code>WebSocketListener</code> interface, in order to get asynchronously notified of the various events occurred to the socket (such as an incoming message, or the disconnection of the socket, or a failure).</p>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	client <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> OkHttpClient<span style="color:#f92672">.</span><span style="color:#a6e22e">Builder</span><span style="color:#f92672">()</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#f92672">.</span><span style="color:#a6e22e">readTimeout</span><span style="color:#f92672">(</span>3<span style="color:#f92672">,</span>  TimeUnit<span style="color:#f92672">.</span><span style="color:#a6e22e">SECONDS</span><span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#f92672">.</span><span style="color:#a6e22e">build</span><span style="color:#f92672">();</span>
+</span></span></code></pre></div><p>and then take a websocket object out of it:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span>	Request request <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Request<span style="color:#f92672">.</span><span style="color:#a6e22e">Builder</span><span style="color:#f92672">()</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#f92672">.</span><span style="color:#a6e22e">url</span><span style="color:#f92672">(</span>serverUrl<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#f92672">.</span><span style="color:#a6e22e">build</span><span style="color:#f92672">();</span>
+</span></span><span style="display:flex;"><span>        webSocket <span style="color:#f92672">=</span> client<span style="color:#f92672">.</span><span style="color:#a6e22e">newWebSocket</span><span style="color:#f92672">(</span>request<span style="color:#f92672">,</span> <span style="color:#66d9ef">new</span> WebSocketListener<span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>							<span style="color:#f92672">...</span>
+</span></span><span style="display:flex;"><span>						<span style="color:#f92672">});</span>
+</span></span></code></pre></div><p>Please note that by creating the websocket, OkHttp will try to establish the connection with the server. The second parameter of the <code>newWebSocket</code> factory method needs to implement the <code>WebSocketListener</code> interface, in order to get asynchronously notified of the various events occurred to the socket (such as an incoming message, or the disconnection of the socket, or a failure).</p>
 <h3 id="sending-a-message">Sending a message</h3>
-
 <p>Sending a message is easy. Just call <code>send</code> with a <em>String</em> or a <em>ByteString</em> as an argument. Since OkHttp will send the data using its own background thread, <code>send</code> can be called from any thread without worrying of blocking the current thread (and risking to get a NetworkOnMainThreadException).</p>
-
 <p>The only caveat here is that a positive result only indicates that the message was enqueued, but it does not reflect the result of the trasmission. From my understanding, the user of the library is notified only in case of failure via the <code>onFailure</code> callback, so an optimistic approach must be taken in place.</p>
-
 <h3 id="the-callbacks">The callbacks</h3>
-
 <p>The <a href="https://github.com/square/okhttp/blob/master/okhttp/src/main/java/okhttp3/WebSocketListener.java">WebSocketListener</a> interface provides callbacks to handle the asynchronous events related to the socket. Those includes the fact that the socket was opened (or closed), or that a new message was received.</p>
-
 <p>Unlike the trasmission of the data, the interaction between the callbacks and the main Android thread needs to be implemented carefully, since <code>WebSocketListener</code>&rsquo;s method will be executed inside a background thread. Using a <code>handler</code> is the &ldquo;vanilla Android&rdquo; approach to let a background thread interact with a thread associated to a looper (such as Android&rsquo;s main thread).</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">    <span style="color:#a6e22e">@Override</span>
-    <span style="color:#66d9ef">public</span> <span style="color:#a6e22e">void</span> onMessage(WebSocket <span style="color:#a6e22e">webSocket</span>, String <span style="color:#a6e22e">text</span>) {
-	...
-        handler.<span style="color:#a6e22e">sendMessage</span>(..);
-    }</code></pre></div>
-<p>Another way to achieve the same result would be to go reactive and expose observables to publish this events.</p>
-
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span>    <span style="color:#a6e22e">@Override</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">onMessage</span><span style="color:#f92672">(</span>WebSocket webSocket<span style="color:#f92672">,</span> String text<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#f92672">...</span>
+</span></span><span style="display:flex;"><span>        handler<span style="color:#f92672">.</span><span style="color:#a6e22e">sendMessage</span><span style="color:#f92672">(..);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">}</span>
+</span></span></code></pre></div><p>Another way to achieve the same result would be to go reactive and expose observables to publish this events.</p>
 <h3 id="closing-the-connection">Closing the connection</h3>
-
 <p>OkHttp provides two methods to close the connection:</p>
-
 <h2 id="close">Close</h2>
-
 <p><code>webSocket.close(0, &quot;Bye&quot;);</code> asks the server to gracefully close the connection and waits for confirmation.
 All the queued messages are trasmitted <strong>before</strong> closing the connection.</p>
-
 <p>Since some interaction is involved, the socket might not be immediately closed. If the initialization and the closure of the connection are bound to the lifecycle of the activity (i.e. in onPause / onResume), what could happen is that some messages are received <strong>after</strong> close was invoked, so this needs to be handled carefully.</p>
-
 <h2 id="cancel">Cancel</h2>
-
 <p>Cancel is more brutal: it just discards all the queued messages and brutally closes the socket. This has the advantage of not having to wait for the housekeeping and the trasmission of enqueued messages. However, choosing <code>cancel</code> over <code>close</code> really depends on the use case.</p>
-
 <h1 id="talk-is-cheap-show-me-the-code">Talk is cheap, show me the code</h1>
-
 <p><a href="https://github.com/fedepaol/websocket-sample">Here</a> I pushed a simple example that allows an app to open the websocket when the app goes in foreground and shuts the websocket down when the app goes on background. This is the suggested approach for persistent connections. Using a service to hold the persisten connection is considered a misbehaviour and doze mode will make your app&rsquo;s life really hard.</p>
-
 <p>The example has some weak point that could be improved:</p>
-
 <h4 id="cancel-is-invoked-when-the-app-goes-in-background">Cancel is invoked when the app goes in background.</h4>
-
 <p>This means that some messages could eventually get discarded. A better approach would be to invoke close and wait the connection to be gracefully closed and all the messages sent. Since in <code>onPause</code> the activity disposes the subscriptions, no leaking is happening. We can just hope that the application process will live long enough to let OkHttp thread to do what it needs to do in order to gracefully close the connection. A more complex approach could involve a Service or using the JobScheduler.</p>
-
 <h4 id="no-failure-of-trasmission-is-taken-into-account">No failure of trasmission is taken into account</h4>
-
 <p>onFailure should listen for failures and notify the user of the failure (or even retry to send failed messages) while in the sample it just forces the disconnection.</p>
-
 <h4 id="no-rxjava">No RxJava!</h4>
-
 <p>I wanted to keep the app simple and to avoid to introduce extra complexity, but handlers are so 2013. A better solution would have used RxJava (and probably there are many cool libraries that support that out of the box). Using RxJava would make super easy to use and transform the incoming messages and / or implement smart reconnection policies such as exponential backoff.</p>
-
 <h1 id="conclusion">Conclusion</h1>
-
 <p>Using websockets is a completely different beast from getting / posting to http endpoints where you fetch (or post) and forget about the call, however the OkHttp implementation is really easy to use.</p>
-
 <p>On your side, you&rsquo;ll have not only to handle the trasmission / reception of the messages, but you will also need to monitor the state of the connection and behave accordingly.</p>
 
   </div>

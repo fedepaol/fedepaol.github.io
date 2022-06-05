@@ -66,118 +66,71 @@ integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbi
   <h2 class="subtitle is-6">October 23, 2019</h2>
   <h1 class="subtitle is-size-4-mobile is-size-3-desktop">GoLab 2019</h1>
   <div class="content">
-    
-
-<h3 id="intro">Intro</h3>
-
+    <h3 id="intro">Intro</h3>
 <p>In this post I&rsquo;ll try to write about my experience at GoLab 2019.</p>
-
 <p>As per the 2018 edition, I had the honor to give a talk during the Italian Go conference <a href="https://golab.io/">GoLab</a>.
 There are many reasons why I loved the conference:</p>
-
 <ul>
-<li><p>The organization was flawless. The people from <a href="https://www.develer.com/">Develer</a> have been organizing conferences for a long time and it&rsquo;s pretty clear they know how to do them.</p></li>
-
-<li><p>It was my first conference with a Red Hat (well, not literally, but as a Red Hatter)</p></li>
-
-<li><p>The size of the conference was quite big. More than 500 attendees, three tracks for two days, several workshops. A lot of them were from abroad. I bet it&rsquo;s a good excuse to visit a nice city like Florence and to taste some good food (the food was the best one I ever had at a conference).</p></li>
+<li>
+<p>The organization was flawless. The people from <a href="https://www.develer.com/">Develer</a> have been organizing conferences for a long time and it&rsquo;s pretty clear they know how to do them.</p>
+</li>
+<li>
+<p>It was my first conference with a Red Hat (well, not literally, but as a Red Hatter)</p>
+</li>
+<li>
+<p>The size of the conference was quite big. More than 500 attendees, three tracks for two days, several workshops. A lot of them were from abroad. I bet it&rsquo;s a good excuse to visit a nice city like Florence and to taste some good food (the food was the best one I ever had at a conference).</p>
+</li>
 </ul>
-
-<p><img src="/images/golab/florence.jpg" alt="" /></p>
-
+<p><img src="/images/golab/florence.jpg" alt=""></p>
 <h1 id="my-talk">My talk</h1>
-
 <p>I spoke about some of the advanced but less known features of grpc in my Rpc with steroids with Go and Grpc (<a href="https://speakerdeck.com/fedepaol/rpc-on-steroids-with-go-and-grpc">slides here</a>), in what a colleague of mine describe as &ldquo;conference driven development&rdquo;, meaning that when I submitted the abstract of the talk I barely knew about the existence of those features. I think it&rsquo;s a good but daunting way to force yourself learn new stuff :-).</p>
-
 <p>I won&rsquo;t provide more details about the talk here because I plan to write a series of posts about the topic.</p>
-
 <p>My experience was pleasant, despite being a bit nervous during the preparation. Hope I provided some good time and some food for thought to the attendees.</p>
-
 <h1 id="the-talks">The talks</h1>
-
 <p>The level of the talks was actually really good. A lot of well know speakers combined together with a good selection of new comers (including yours truly) made the conference really interesting.</p>
-
-<h3 id="eleanor-mchugh-intro-to-functional-programming-in-go">Eleanor McHugh - Intro to functional programming in Go</h3>
-
+<h3 id="eleanor-mchugh---intro-to-functional-programming-in-go">Eleanor McHugh - Intro to functional programming in Go</h3>
 <p>Despite the fact that hearing a talk about pure functions and monads in the morning not the easiest thing to follow, Eleanor made a good intro on what functional programming is and how to approach it in Go.</p>
-
 <p>She spoke about how to give functions a state (sort of), and the aha moment prize goes to discovering that in Go we can add methods to any type, including functions.</p>
-
 <p>I feel like Go has good support in regard of the functional approach (hello closures) which is probably something to stop and think about when programming imperatively. I also had reminiscence of when I was tinkering with RxJava in the Android world (not that I miss java).</p>
-
-<h3 id="aaron-schlesinger-the-athens-project-a-proxy-server-for-go-modules">Aaron Schlesinger - The Athens Project: A proxy server for Go modules</h3>
-
+<h3 id="aaron-schlesinger---the-athens-project-a-proxy-server-for-go-modules">Aaron Schlesinger - The Athens Project: A proxy server for Go modules</h3>
 <p>This is a talk I was especially fond of, not because I did not know the subject but because Athens was the first Go open source project I contributed to (I even gave a light talk about it at <a href="https://youtu.be/yH3XPAQJTA8?t=553">Golab 2018</a>).</p>
-
 <p>Aaron made an excellent job in explaining how the proxy works, why we need immutability and all the technical nuances around it (including a live demo).</p>
-
 <p>But the part I liked the most was the one about being in control of your dependencies:</p>
-
 <ul>
 <li>not relying on the vcs</li>
 <li>not relying on a registry maintained by some company (more or less notable)</li>
 <li>why we need an independent mean to distribute our dependencies</li>
 </ul>
-
 <p>And also, the fact that by using a Go proxy and leveraging the Go modules protocol, we can enforce the decentralization of ownership of the dependencies (think of eMule but for Go dependencies :-) ).</p>
-
-<p><img src="/images/golab/athens.jpg" alt="" /></p>
-
-<h3 id="fabio-falzoi-an-insight-into-the-go-garbage-collector">Fabio Falzoi - An insight into the Go garbage collector</h3>
-
+<p><img src="/images/golab/athens.jpg" alt=""></p>
+<h3 id="fabio-falzoi---an-insight-into-the-go-garbage-collector">Fabio Falzoi - An insight into the Go garbage collector</h3>
 <p>Fabio did an awesome job in describing how the Go garbage collector works and how and why it has an impact to the performance of our applications.</p>
-
 <p>He described thoroughly how the mark &amp; sweep algorithm work, why the mark phase is expensive and the iterations that were done to mitigate this impact.</p>
-
 <p>If there is one takeway from this talk is, in order to avoid performance impacts try to keep the variables on the stack as much as you can (but do this only after <em>measuring</em> the impact on the performances given by the gc). Having the variables on the heap has a big impact, not because of the allocation costs but because of the costs induced by the gc.</p>
-
-<h3 id="roberto-clapis-it-starts-with-a-problem">Roberto Clapis - It starts with a problem</h3>
-
+<h3 id="roberto-clapis---it-starts-with-a-problem">Roberto Clapis - It starts with a problem</h3>
 <p>Another really really inspiring talk on how to grow and nurture a personal project, mixing advices on how to maintain and keep an opensource project, together with super useful hints on how to write and grow your codebase from simple idea to full fledged project.</p>
-
 <h1 id="the-gophers-dinner">The gophers dinner</h1>
-
 <p>A fantastic dinner in a fancy location in the heart of Florence. Despite being really tired, I also greatly enjoyed the walk from the venue to the restaurant.</p>
-
-<p><img src="/images/golab/dinner.jpg" alt="" /></p>
-
-<h3 id="bill-kennedy-you-want-to-build-a-service">Bill Kennedy - You want to build a service?</h3>
-
+<p><img src="/images/golab/dinner.jpg" alt=""></p>
+<h3 id="bill-kennedy---you-want-to-build-a-service">Bill Kennedy - You want to build a service?</h3>
 <p>I would keep listening to Bill&rsquo;s talk for hours. Each time I attend one I feel like I am a better Go developer, and this one makes no exception. In this talk Bill lives code his way through setting up a service. A lot of useful informations on how to develop a service and still keep your health.</p>
-
 <p>Honorable mention to the expvar package together with pprof. A neat way to have metrics right out of your application&rsquo;s box, I did not know about that.</p>
-
-<h3 id="hadas-yaakobovitch-migrating-a-mission-critical-service-in-go">Hadas Yaakobovitch - Migrating a mission critical service in Go</h3>
-
+<h3 id="hadas-yaakobovitch---migrating-a-mission-critical-service-in-go">Hadas Yaakobovitch - Migrating a mission critical service in Go</h3>
 <p>A real life story of how AppsFlyer migrated one of their most critical services from Clojure to Go. It was really interesting to hear how the the transition was handled team wise.</p>
-
-<h3 id="alan-braithwite-advanced-testing-tecniques-in-go">Alan Braithwite - Advanced Testing tecniques in Go</h3>
-
+<h3 id="alan-braithwite---advanced-testing-tecniques-in-go">Alan Braithwite - Advanced Testing tecniques in Go</h3>
 <p>A full lenght talk about testing in Go and some tips on how to handle it properly. I liked how he promote the use of dependency injection and how to use reasonable abstractions to perform your tests. This includes the usage of the <a href="https://golang.org/pkg/net/http/httptest/">httptest package</a>.</p>
-
-<h3 id="gabriele-vaccari-building-an-event-driven-notification-system-with-go-rabbitmq">Gabriele Vaccari - Building an event driven notification system with Go &amp; RabbitMQ</h3>
-
+<h3 id="gabriele-vaccari---building-an-event-driven-notification-system-with-go--rabbitmq">Gabriele Vaccari - Building an event driven notification system with Go &amp; RabbitMQ</h3>
 <p>The &ldquo;how we did it&rdquo; type of talk is one of my favourite and here Gabriele told another real life story on how Nulab split their monolith in microservices using Go, grpc and rabbitmq.
 The first part of the talk focused on the evolution of the architecture, what types of messages and interactions their system has. The second part was a nice (and soft) introduction to the Amqp protocol and how to avoid common pitfalls while using the amqp Go client.</p>
-
-<h3 id="antony-seure-developing-a-go-client-do-s-and-don-t">Antony Seure - Developing a Go client, do&rsquo;s and Don&rsquo;t</h3>
-
+<h3 id="antony-seure---developing-a-go-client-dos-and-dont">Antony Seure - Developing a Go client, do&rsquo;s and Don&rsquo;t</h3>
 <p>A talk about how hard is the life of the maintainer of a Go client library compared to the other languages, and some valuable tips &amp; tricks on how to mitigate this problem.</p>
-
-<h3 id="francesco-romani-kubevirt-bringing-virtual-machines-in-a-kubernetes-world">Francesco Romani - KubeVirt: bringing virtual machines in a Kubernetes world</h3>
-
+<h3 id="francesco-romani---kubevirt-bringing-virtual-machines-in-a-kubernetes-world">Francesco Romani - KubeVirt: bringing virtual machines in a Kubernetes world</h3>
 <p>This is another talk I am fond of, not only because Francesco is an old friend of mine, but also because KubeVirt is the project I am currently working on at Red Hat. In his talk, Francesco described the why and the how KubeVirt allows us to run virtual machines on kubernetes clusters, and in the second part described a couple of examples of how Go made this task possible.</p>
-
-<p><img src="/images/golab/fromani.jpg" alt="" /></p>
-
-<h3 id="steve-francia-the-legacy-of-go">Steve Francia - The Legacy of Go</h3>
-
+<p><img src="/images/golab/fromani.jpg" alt=""></p>
+<h3 id="steve-francia---the-legacy-of-go">Steve Francia - The Legacy of Go</h3>
 <p>I really liked Steve&rsquo;s history lesson on how the evolution of different &ldquo;language branches&rdquo; contributed to the origins of Go and why it is the way it is (and why we love it!).</p>
-
 <h1 id="wrap-up">Wrap up</h1>
-
 <p>A really recommended conference. The talks were good, the organization was spotless and October is the perfect season for visiting Florence (given the presence of so many people from abroad, I think this is well known).</p>
-
 <p>Despite being so near my hometown it felt like a real international environment, and the Go community confirms itself to be as pleasant as always. Can&rsquo;t wait to be here again next year!</p>
 
   </div>

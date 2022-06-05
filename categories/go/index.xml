@@ -6,10 +6,18 @@
     <description>Recent content in Go on My little software warehouse</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Mon, 07 Dec 2020 23:01:51 +0100</lastBuildDate>
-    
-	<atom:link href="https://fedepaol.github.io/categories/go/index.xml" rel="self" type="application/rss+xml" />
-    
+    <lastBuildDate>Thu, 07 Jan 2021 23:01:51 +0100</lastBuildDate><atom:link href="https://fedepaol.github.io/categories/go/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Writing a Kubernetes Controller: part 2</title>
+      <link>https://fedepaol.github.io/blog/2021/01/07/writing-a-kubernetes-controller-part-2/</link>
+      <pubDate>Thu, 07 Jan 2021 23:01:51 +0100</pubDate>
+      
+      <guid>https://fedepaol.github.io/blog/2021/01/07/writing-a-kubernetes-controller-part-2/</guid>
+      <description>This is the second part of my &amp;ldquo;writing a kubernetes controller&amp;rdquo; blogpost.
+Here, I will explain how to put what was explained int the first part in go code.
+Setting the informer and the workqueue This is the first step, where you listen for events and send them to the consumers via the workqueue:
+	kubeInformerFactory := kubeinformers.NewSharedInformerFactory(kubeClient, time.Second*30) 	informer := kubeInformerFactory.Core().V1().Pods()  	informer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{ 	AddFunc: func(obj interface{}) { 	pod := obj.</description>
+    </item>
     
     <item>
       <title>Writing a Kubernetes Controller: part 1</title>

@@ -6,11 +6,7 @@
     <description>Recent content in android sqlite on My little software warehouse</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Tue, 08 Apr 2014 00:00:00 +0000</lastBuildDate>
-    
-	<atom:link href="https://fedepaol.github.io/categories/android-sqlite/index.xml" rel="self" type="application/rss+xml" />
-    
-    
+    <lastBuildDate>Tue, 08 Apr 2014 00:00:00 +0000</lastBuildDate><atom:link href="https://fedepaol.github.io/categories/android-sqlite/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Generating preloaded sqlite data</title>
       <link>https://fedepaol.github.io/blog/2014/04/08/generating-preloaded-sqlite-data/</link>

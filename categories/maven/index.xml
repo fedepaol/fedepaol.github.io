@@ -6,11 +6,7 @@
     <description>Recent content in maven on My little software warehouse</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sat, 15 Sep 2012 00:00:00 +0000</lastBuildDate>
-    
-	<atom:link href="https://fedepaol.github.io/categories/maven/index.xml" rel="self" type="application/rss+xml" />
-    
-    
+    <lastBuildDate>Sat, 15 Sep 2012 00:00:00 +0000</lastBuildDate><atom:link href="https://fedepaol.github.io/categories/maven/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Gridlayout support library with maven</title>
       <link>https://fedepaol.github.io/blog/2012/09/15/gridlayout-support-library-with-maven/</link>

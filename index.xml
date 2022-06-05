@@ -6,10 +6,29 @@
     <description>Recent content on My little software warehouse</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Mon, 07 Dec 2020 23:01:51 +0100</lastBuildDate>
+    <lastBuildDate>Sun, 27 Mar 2022 14:22:36 +0200</lastBuildDate><atom:link href="https://fedepaol.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Mixing cluster scoped resources and namespaced resources with kubebuilder and controller runtime</title>
+      <link>https://fedepaol.github.io/blog/2022/03/27/mixing-cluster-scoped-resources-and-namespaced-resources-with-kubebuilder-and-controller-runtime/</link>
+      <pubDate>Sun, 27 Mar 2022 14:22:36 +0200</pubDate>
+      
+      <guid>https://fedepaol.github.io/blog/2022/03/27/mixing-cluster-scoped-resources-and-namespaced-resources-with-kubebuilder-and-controller-runtime/</guid>
+      <description>Out of the box If we look at the kubebuilder tutorial, it&amp;rsquo;s possible to define a namespace (or a set of namespaces, when using MultiNamespacedCacheBuilder) for our controller to listen on.
+If we don&amp;rsquo;t set the namespace, our controller is meant to be cluster scoped and will listen (and need priviledges) to the resources in all the namespaces.
+The problem While working on MetalLB, we had to add an alternative password field of type secret reference.</description>
+    </item>
     
-	<atom:link href="https://fedepaol.github.io/index.xml" rel="self" type="application/rss+xml" />
-    
+    <item>
+      <title>Writing a Kubernetes Controller: part 2</title>
+      <link>https://fedepaol.github.io/blog/2021/01/07/writing-a-kubernetes-controller-part-2/</link>
+      <pubDate>Thu, 07 Jan 2021 23:01:51 +0100</pubDate>
+      
+      <guid>https://fedepaol.github.io/blog/2021/01/07/writing-a-kubernetes-controller-part-2/</guid>
+      <description>This is the second part of my &amp;ldquo;writing a kubernetes controller&amp;rdquo; blogpost.
+Here, I will explain how to put what was explained int the first part in go code.
+Setting the informer and the workqueue This is the first step, where you listen for events and send them to the consumers via the workqueue:
+	kubeInformerFactory := kubeinformers.NewSharedInformerFactory(kubeClient, time.Second*30) 	informer := kubeInformerFactory.Core().V1().Pods()  	informer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{ 	AddFunc: func(obj interface{}) { 	pod := obj.</description>
+    </item>
     
     <item>
       <title>Writing a Kubernetes Controller: part 1</title>
@@ -43,7 +62,7 @@ Approaching an open source project may be daunting at first We find a lot of rea
       <guid>https://fedepaol.github.io/blog/2019/10/23/golab-2019/</guid>
       <description>Intro In this post I&amp;rsquo;ll try to write about my experience at GoLab 2019.
 As per the 2018 edition, I had the honor to give a talk during the Italian Go conference GoLab. There are many reasons why I loved the conference:
- The organization was flawless. The people from Develer have been organizing conferences for a long time and it&amp;rsquo;s pretty clear they know how to do them.</description>
+  The organization was flawless. The people from Develer have been organizing conferences for a long time and it&amp;rsquo;s pretty clear they know how to do them.</description>
     </item>
     
     <item>
@@ -84,7 +103,7 @@ Please remember that a nats publisher does not assume the audience.</description
       
       <guid>https://fedepaol.github.io/blog/2018/10/27/fast-messaging-with-nats-and-go/</guid>
       <description>This is the first of follow up serie of the talk Fast messaging with Nats and Go I gave at golab 2018.
-The slides of the talk can be found here:  What is Nats Nats is a messaging system hosted under the CNCF umbrella, which is an open source software foundation dedicated to making cloud native computing universal and sustainable. It&amp;rsquo;s my place-to-go while looking for software related to distributed systems.</description>
+The slides of the talk can be found here: What is Nats Nats is a messaging system hosted under the CNCF umbrella, which is an open source software foundation dedicated to making cloud native computing universal and sustainable. It&amp;rsquo;s my place-to-go while looking for software related to distributed systems.</description>
     </item>
     
     <item>
@@ -115,7 +134,8 @@ This kind of scenario can be implemented through Websockets.</description>
       <guid>https://fedepaol.github.io/blog/2016/08/27/android-mvp-testing/</guid>
       <description>MVP is Model View Presenter .. which is a pattern that is very popular among Android developers nowdays.
 I don&amp;rsquo;t intend to write (yet) another guide about MVP in Android, because others have done a better job, for example:
- Antonio Leiva&amp;rsquo;s introduction to MVP Hannes Dorfmann&amp;rsquo;s introduction to Mosby Fernando Cejas&amp;rsquo; post on clean architecture  A lot have been said about MVP (and other similar patterns), like:</description>
+ Antonio Leiva&amp;rsquo;s introduction to MVP Hannes Dorfmann&amp;rsquo;s introduction to Mosby Fernando Cejas&amp;rsquo; post on clean architecture  A lot have been said about MVP (and other similar patterns), like:
+ it isolates the business logic from the UI it makes faster and easier to unit test the business logic it avoids having a god Fragment or Activity class that manages everything it makes it easier to maintain the app  However, the first thing you notice while switching into &amp;ldquo;MVP mode&amp;rdquo;, is a great sense of order.</description>
     </item>
     
     <item>
@@ -125,7 +145,8 @@ I don&amp;rsquo;t intend to write (yet) another guide about MVP in Android, beca
       
       <guid>https://fedepaol.github.io/blog/2016/06/20/how-to-a-timer/</guid>
       <description>Ok, I must confess the title is built to draw people&amp;rsquo;s attention, because you know, nowdays everything is done in a reactive fashion. RxJava is superhelpful, but if we forget the ecosystem our apps are running into, we risk to forget the proper way to implement certain tasks in Android.
-Why do we need a whole post about timers? Recently, I had to implement a countdown timer in Android.</description>
+Why do we need a whole post about timers? Recently, I had to implement a countdown timer in Android.
+If you google for code to cut and paste inspiration, you&amp;rsquo;ll get a lot of results like:</description>
     </item>
     
     <item>
