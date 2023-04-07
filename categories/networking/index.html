@@ -1,0 +1,338 @@
+
+<div class="container">
+  <!DOCTYPE html>
+<html lang="en-us">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+
+
+<title>networking | My little software warehouse</title>
+
+<link rel="stylesheet" href="https://fedepaol.github.io//css/styles.css">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css" 
+integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbiDQ" crossorigin="anonymous">
+<script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/zenburn.min.css" crossorigin="anonymous" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js" integrity="sha256-/BfiIkHlHoVihZdc6TFuj7MmJ0TWcWsMXkeDFwhi0zw=" crossorigin="anonymous"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+<script src="https://fedepaol.github.io//js/highlight.js"></script>
+
+
+
+
+
+
+  <div class="container">
+    <nav class="navbar level">
+      <div class="navbar-brand">
+          <a class="nav-item" href="https://fedepaol.github.io/"><h1 class="title is-3">My little software warehouse</h1></a>
+      </div>           
+      <div class="navbar-menu has-text-centered is-active">
+          <div class="navbar-end is-centered">
+              
+                <a href="https://twitter.com/fedepaol" rel="me">
+                  <span class="icon">
+                    <i class="fab fa-twitter"></i>
+                  </span>
+                </a>
+              
+                <a href="https://fedepaol.github.io/about" rel="me">
+                  <span class="icon">
+                    <i class="fas fa-info"></i>
+                  </span>
+                </a>
+              
+                <a href="https://github.com/fedepaol" rel="me">
+                  <span class="icon">
+                    <i class="fab fa-github"></i>
+                  </span>
+                </a>
+              
+                <a href="https://linkedin.com/in/federico-paolinelli-2374954/" rel="me">
+                  <span class="icon">
+                    <i class="fab fa-linkedin-in"></i>
+                  </span>
+                </a>
+              
+           </div>
+      </div>
+    </nav>
+  </div>
+
+  <main class="container">
+      
+      
+      <h1 class="title is-3">2023</h1>
+      
+      <article class="columns">
+        <div class="column is-2">
+          <h6 class="is-inline" style="white-space: nowrap">Apr 6</h2>
+        </div>
+        <div class="column">
+          <h2 class="subtitle is-inline is-size-4-mobile is-size-3-desktop"><a href="https://fedepaol.github.io/blog/2023/04/06/ebpf-tc-filters-for-egress-traffic/">EBPF TC filters for egress traffic</a></h1>
+          <div class="content is-hidden-mobile">
+            Network filters with EBPF and TC EBPF has been on my radar for a while, and given my involvement with MetalLB, starting from a network hook felt natural.
+So, I started with a very simple idea in mind: writing a hook that drives the egress traffic to a different next hop, based on some criteria. This comes from a real problem that a few MetalLB users raised: we have an asymmetric return path when …
+            
+            <br>
+            <a class="button is-marginless is-paddingless" href="https://fedepaol.github.io/blog/2023/04/06/ebpf-tc-filters-for-egress-traffic/">
+            <span class="icon-link is-small" style="line-height: 100%">
+                <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+              </span>
+              <p style="padding:0 5px"></p>more</p>
+            </a>
+            
+          </div>
+      </article>
+      
+      
+      <h1 class="title is-3">2022</h1>
+      
+      <article class="columns">
+        <div class="column is-2">
+          <h6 class="is-inline" style="white-space: nowrap">Mar 27</h2>
+        </div>
+        <div class="column">
+          <h2 class="subtitle is-inline is-size-4-mobile is-size-3-desktop"><a href="https://fedepaol.github.io/blog/2022/03/27/mixing-cluster-scoped-resources-and-namespaced-resources-with-kubebuilder-and-controller-runtime/">Mixing cluster scoped resources and namespaced resources with kubebuilder and controller runtime</a></h1>
+          <div class="content is-hidden-mobile">
+            Out of the box If we look at the kubebuilder tutorial, it&rsquo;s possible to define a namespace (or a set of namespaces, when using MultiNamespacedCacheBuilder) for our controller to listen on.
+If we don&rsquo;t set the namespace, our controller is meant to be cluster scoped and will listen (and need priviledges) to the resources in all the namespaces.
+The problem While working on MetalLB, we had …
+            
+            <br>
+            <a class="button is-marginless is-paddingless" href="https://fedepaol.github.io/blog/2022/03/27/mixing-cluster-scoped-resources-and-namespaced-resources-with-kubebuilder-and-controller-runtime/">
+            <span class="icon-link is-small" style="line-height: 100%">
+                <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+              </span>
+              <p style="padding:0 5px"></p>more</p>
+            </a>
+            
+          </div>
+      </article>
+      
+      
+      <h1 class="title is-3">2021</h1>
+      
+      <article class="columns">
+        <div class="column is-2">
+          <h6 class="is-inline" style="white-space: nowrap">Jan 7</h2>
+        </div>
+        <div class="column">
+          <h2 class="subtitle is-inline is-size-4-mobile is-size-3-desktop"><a href="https://fedepaol.github.io/blog/2021/01/07/writing-a-kubernetes-controller-part-2/">Writing a Kubernetes Controller: part 2</a></h1>
+          <div class="content is-hidden-mobile">
+            This is the second part of my &ldquo;writing a kubernetes controller&rdquo; blogpost.
+Here, I will explain how to put what was explained int the first part in go code.
+Setting the informer and the workqueue This is the first step, where you listen for events and send them to the consumers via the workqueue:
+	kubeInformerFactory := kubeinformers.NewSharedInformerFactory(kubeClient, time.Second*30) …
+            
+            <br>
+            <a class="button is-marginless is-paddingless" href="https://fedepaol.github.io/blog/2021/01/07/writing-a-kubernetes-controller-part-2/">
+            <span class="icon-link is-small" style="line-height: 100%">
+                <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+              </span>
+              <p style="padding:0 5px"></p>more</p>
+            </a>
+            
+          </div>
+      </article>
+      
+      
+      <h1 class="title is-3">2020</h1>
+      
+      <article class="columns">
+        <div class="column is-2">
+          <h6 class="is-inline" style="white-space: nowrap">Dec 7</h2>
+        </div>
+        <div class="column">
+          <h2 class="subtitle is-inline is-size-4-mobile is-size-3-desktop"><a href="https://fedepaol.github.io/blog/2020/12/07/writing-a-kubernetes-controller-part-1/">Writing a Kubernetes Controller: part 1</a></h1>
+          <div class="content is-hidden-mobile">
+            Even when knowing Go, writing a Kubernetes controller is intimidating.
+In this post, I&rsquo;ll introduce the Kubernetes operating model, how objects are mapped and what are the tools provided by the go-client framework to write bullet proof controllers. In a following post I will explain how to put all the pieces together and how to define and consume custom types.
+I will describe the core …
+            
+            <br>
+            <a class="button is-marginless is-paddingless" href="https://fedepaol.github.io/blog/2020/12/07/writing-a-kubernetes-controller-part-1/">
+            <span class="icon-link is-small" style="line-height: 100%">
+                <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+              </span>
+              <p style="padding:0 5px"></p>more</p>
+            </a>
+            
+          </div>
+      </article>
+      
+      <article class="columns">
+        <div class="column is-2">
+          <h6 class="is-inline" style="white-space: nowrap">Feb 13</h2>
+        </div>
+        <div class="column">
+          <h2 class="subtitle is-inline is-size-4-mobile is-size-3-desktop"><a href="https://fedepaol.github.io/blog/2020/02/13/how-and-why-to-contribute-to-open-source/">How and why to contribute to Open Source</a></h1>
+          <div class="content is-hidden-mobile">
+            Today I am writing about contributing to open source, an argoment that I particularly care about.
+Contributing to opensource is giving something to get something back You give away your time and your expertise and you&rsquo;ll eventually get something back.
+Approaching an open source project may be daunting at first We find a lot of reasons for that:
+ We don&rsquo;t feel good enough We think the …
+            
+            <br>
+            <a class="button is-marginless is-paddingless" href="https://fedepaol.github.io/blog/2020/02/13/how-and-why-to-contribute-to-open-source/">
+            <span class="icon-link is-small" style="line-height: 100%">
+                <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+              </span>
+              <p style="padding:0 5px"></p>more</p>
+            </a>
+            
+          </div>
+      </article>
+      
+      
+      <h1 class="title is-3">2019</h1>
+      
+      <article class="columns">
+        <div class="column is-2">
+          <h6 class="is-inline" style="white-space: nowrap">Oct 23</h2>
+        </div>
+        <div class="column">
+          <h2 class="subtitle is-inline is-size-4-mobile is-size-3-desktop"><a href="https://fedepaol.github.io/blog/2019/10/23/golab-2019/">GoLab 2019</a></h1>
+          <div class="content is-hidden-mobile">
+            Intro In this post I&rsquo;ll try to write about my experience at GoLab 2019.
+As per the 2018 edition, I had the honor to give a talk during the Italian Go conference GoLab. There are many reasons why I loved the conference:
+  The organization was flawless. The people from Develer have been organizing conferences for a long time and it&rsquo;s pretty clear they know how to do them.
+            
+            <br>
+            <a class="button is-marginless is-paddingless" href="https://fedepaol.github.io/blog/2019/10/23/golab-2019/">
+            <span class="icon-link is-small" style="line-height: 100%">
+                <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+              </span>
+              <p style="padding:0 5px"></p>more</p>
+            </a>
+            
+          </div>
+      </article>
+      
+      <article class="columns">
+        <div class="column is-2">
+          <h6 class="is-inline" style="white-space: nowrap">Mar 30</h2>
+        </div>
+        <div class="column">
+          <h2 class="subtitle is-inline is-size-4-mobile is-size-3-desktop"><a href="https://fedepaol.github.io/blog/2019/03/30/a-concurrency-experiment/">A concurrency experiment</a></h1>
+          <div class="content is-hidden-mobile">
+            There are some scenarios where the order matters Let&rsquo;s say that you have an api that can receive &ldquo;actions&rdquo; to be performed on a given endpoint.
+Think about you buying something on Amazon and then changing your mind and revoking your order. You don&rsquo;t want those two actions to be swapped, otherwise the cancellation will be refused (the order you want to cancel do not exists …
+            
+            <br>
+            <a class="button is-marginless is-paddingless" href="https://fedepaol.github.io/blog/2019/03/30/a-concurrency-experiment/">
+            <span class="icon-link is-small" style="line-height: 100%">
+                <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+              </span>
+              <p style="padding:0 5px"></p>more</p>
+            </a>
+            
+          </div>
+      </article>
+      
+      
+      <h1 class="title is-3">2018</h1>
+      
+      <article class="columns">
+        <div class="column is-2">
+          <h6 class="is-inline" style="white-space: nowrap">Dec 11</h2>
+        </div>
+        <div class="column">
+          <h2 class="subtitle is-inline is-size-4-mobile is-size-3-desktop"><a href="https://fedepaol.github.io/blog/2018/12/11/fast-messaging-with-nats-and-go-part-2/">Fast messaging with nats and go part 2</a></h1>
+          <div class="content is-hidden-mobile">
+            This is the second of a follow up serie of the talk Fast messaging with Nats and Go I gave at golab 2018. The first part can be found here
+What can we do with nats? Pub sub As you can probably guess, given that Nats is a pure pub / sub system, we can easily implement pub / sub.
+Please remember that a nats publisher does not assume the audience.
+            
+            <br>
+            <a class="button is-marginless is-paddingless" href="https://fedepaol.github.io/blog/2018/12/11/fast-messaging-with-nats-and-go-part-2/">
+            <span class="icon-link is-small" style="line-height: 100%">
+                <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+              </span>
+              <p style="padding:0 5px"></p>more</p>
+            </a>
+            
+          </div>
+      </article>
+      
+      <article class="columns">
+        <div class="column is-2">
+          <h6 class="is-inline" style="white-space: nowrap">Oct 27</h2>
+        </div>
+        <div class="column">
+          <h2 class="subtitle is-inline is-size-4-mobile is-size-3-desktop"><a href="https://fedepaol.github.io/blog/2018/10/27/fast-messaging-with-nats-and-go/">Fast messaging with nats and go</a></h1>
+          <div class="content is-hidden-mobile">
+            This is the first of follow up serie of the talk Fast messaging with Nats and Go I gave at golab 2018.
+The slides of the talk can be found here: What is Nats Nats is a messaging system hosted under the CNCF umbrella, which is an open source software foundation dedicated to making cloud native computing universal and sustainable. It&rsquo;s my place-to-go while looking for software related to …
+            
+            <br>
+            <a class="button is-marginless is-paddingless" href="https://fedepaol.github.io/blog/2018/10/27/fast-messaging-with-nats-and-go/">
+            <span class="icon-link is-small" style="line-height: 100%">
+                <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+              </span>
+              <p style="padding:0 5px"></p>more</p>
+            </a>
+            
+          </div>
+      </article>
+      
+      
+      
+  </main>
+  <section class="section">
+  <div class="container">
+    <nav class="level is-mobile">
+      <div class="level-left">
+        <div class="level-item">
+          
+          <a class="button is-rounded" disabled>
+            <span class="icon is-small is-marginless">
+              <i class="fa fa-angle-left"></i>
+            </span>
+            Newer
+          </a>
+          
+        </div>
+      </div>
+      <div class="level-right is-marginless">
+        <div class="level-item">
+          
+          <a class="button is-rounded" href="/categories/networking/page/2/">
+            Older
+            <span class="icon is-small is-marginless">
+              <i class="fa fa-angle-right"></i>
+            </span>
+          </a>
+          
+        </div>
+      </div>
+    </nav>
+  </div>
+</section>
+
+  <section class="section">
+  <div class="container has-text-centered">
+    <p></p>
+  </div>
+</section>
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-16514009-2', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+
+</div>

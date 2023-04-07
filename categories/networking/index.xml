@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>networking on My little software warehouse</title>
+    <link>https://fedepaol.github.io/categories/networking/</link>
+    <description>Recent content in networking on My little software warehouse</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Thu, 06 Apr 2023 15:01:51 +0100</lastBuildDate><atom:link href="https://fedepaol.github.io/categories/networking/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>EBPF TC filters for egress traffic</title>
+      <link>https://fedepaol.github.io/blog/2023/04/06/ebpf-tc-filters-for-egress-traffic/</link>
+      <pubDate>Thu, 06 Apr 2023 15:01:51 +0100</pubDate>
+      
+      <guid>https://fedepaol.github.io/blog/2023/04/06/ebpf-tc-filters-for-egress-traffic/</guid>
+      <description>Network filters with EBPF and TC EBPF has been on my radar for a while, and given my involvement with MetalLB, starting from a network hook felt natural.
+So, I started with a very simple idea in mind: writing a hook that drives the egress traffic to a different next hop, based on some criteria. This comes from a real problem that a few MetalLB users raised: we have an asymmetric return path when the traffic comes to the node via a secondary (i.</description>
+    </item>
+    
+  </channel>
+</rss>

@@ -6,7 +6,17 @@
     <description>Recent content in Go on My little software warehouse</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Thu, 07 Jan 2021 23:01:51 +0100</lastBuildDate><atom:link href="https://fedepaol.github.io/categories/go/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Thu, 06 Apr 2023 15:01:51 +0100</lastBuildDate><atom:link href="https://fedepaol.github.io/categories/go/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>EBPF TC filters for egress traffic</title>
+      <link>https://fedepaol.github.io/blog/2023/04/06/ebpf-tc-filters-for-egress-traffic/</link>
+      <pubDate>Thu, 06 Apr 2023 15:01:51 +0100</pubDate>
+      
+      <guid>https://fedepaol.github.io/blog/2023/04/06/ebpf-tc-filters-for-egress-traffic/</guid>
+      <description>Network filters with EBPF and TC EBPF has been on my radar for a while, and given my involvement with MetalLB, starting from a network hook felt natural.
+So, I started with a very simple idea in mind: writing a hook that drives the egress traffic to a different next hop, based on some criteria. This comes from a real problem that a few MetalLB users raised: we have an asymmetric return path when the traffic comes to the node via a secondary (i.</description>
+    </item>
+    
     <item>
       <title>Writing a Kubernetes Controller: part 2</title>
       <link>https://fedepaol.github.io/blog/2021/01/07/writing-a-kubernetes-controller-part-2/</link>
