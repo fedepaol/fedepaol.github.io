@@ -8,6 +8,17 @@
     <language>en</language>
     <lastBuildDate>Thu, 06 Apr 2023 15:01:51 +0100</lastBuildDate><atom:link href="https://fedepaol.github.io/index.xml" rel="self" type="application/rss+xml" />
     <item>
+      <title>eBPF journey by examples: eBPF tracepoints with Falco</title>
+      <link>https://fedepaol.github.io/blog/2023/04/06/ebpf-journey-by-examples-ebpf-tracepoints-with-falco/</link>
+      <pubDate>Thu, 06 Apr 2023 15:01:51 +0100</pubDate>
+      
+      <guid>https://fedepaol.github.io/blog/2023/04/06/ebpf-journey-by-examples-ebpf-tracepoints-with-falco/</guid>
+      <description>Learning from existing projects Link to heading This is the first post of my journey into learning eBPF by samples. My idea here is to dig into how popular projects use eBPF to solve various problems, in order to benefit from real implementations and leverage existing scenarios rather than simple tutorials.
+I will proceed as follows:
+I will dig into the source code of each project I am examining, trying to understand both the logic of the project itself but most importantly the ebpf bits I will try to list the relevant code and review it I will implement a simplified version of the relevant logic using go for the user space logic In the spirit of covering the Pareto&amp;rsquo;s 80%, I won&amp;rsquo;t:</description>
+    </item>
+    
+    <item>
       <title>EBPF TC filters for egress traffic</title>
       <link>https://fedepaol.github.io/blog/2023/04/06/ebpf-tc-filters-for-egress-traffic/</link>
       <pubDate>Thu, 06 Apr 2023 15:01:51 +0100</pubDate>
