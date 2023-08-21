@@ -1,78 +1,175 @@
 <!DOCTYPE html>
-<html lang="en-us">
-<meta charset="UTF-8">
+<html lang="en">
+
+<head>
+  <title>
+  Android mvp testing · My little software warehouse
+</title>
+  <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
 
 
 
 
-<title>Android mvp testing | My little software warehouse</title>
+<meta name="author" content="Federico Paolinelli">
+<meta name="description" content="MVP is Model View Presenter Link to heading .. which is a pattern that is very popular among Android developers nowdays.
+I don&rsquo;t intend to write (yet) another guide about MVP in Android, because others have done a better job, for example:
+Antonio Leiva&rsquo;s introduction to MVP Hannes Dorfmann&rsquo;s introduction to Mosby Fernando Cejas&rsquo; post on clean architecture A lot have been said about MVP (and other similar patterns), like:">
+<meta name="keywords" content="">
 
-<link rel="stylesheet" href="https://fedepaol.github.io//css/styles.css">
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Android mvp testing"/>
+<meta name="twitter:description" content="MVP is Model View Presenter Link to heading .. which is a pattern that is very popular among Android developers nowdays.
+I don&rsquo;t intend to write (yet) another guide about MVP in Android, because others have done a better job, for example:
+Antonio Leiva&rsquo;s introduction to MVP Hannes Dorfmann&rsquo;s introduction to Mosby Fernando Cejas&rsquo; post on clean architecture A lot have been said about MVP (and other similar patterns), like:"/>
 
-<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css" 
-integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbiDQ" crossorigin="anonymous">
-<script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
-
-
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/zenburn.min.css" crossorigin="anonymous" />
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js" integrity="sha256-/BfiIkHlHoVihZdc6TFuj7MmJ0TWcWsMXkeDFwhi0zw=" crossorigin="anonymous"></script>
-<script>hljs.initHighlightingOnLoad();</script>
-<script src="https://fedepaol.github.io//js/highlight.js"></script>
-
-
+<meta property="og:title" content="Android mvp testing" />
+<meta property="og:description" content="MVP is Model View Presenter Link to heading .. which is a pattern that is very popular among Android developers nowdays.
+I don&rsquo;t intend to write (yet) another guide about MVP in Android, because others have done a better job, for example:
+Antonio Leiva&rsquo;s introduction to MVP Hannes Dorfmann&rsquo;s introduction to Mosby Fernando Cejas&rsquo; post on clean architecture A lot have been said about MVP (and other similar patterns), like:" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://fedepaol.github.io/blog/2016/08/27/android-mvp-testing/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2016-08-27T00:00:00+00:00" />
+<meta property="article:modified_time" content="2016-08-27T00:00:00+00:00" />
 
 
 
 
-<div class="container">
-    <nav class="navbar level">
-      <div class="navbar-brand">
-          <a class="nav-item" href="https://fedepaol.github.io/"><h1 class="title is-3">My little software warehouse</h1></a>
-      </div>           
-      <div class="navbar-menu has-text-centered is-active">
-          <div class="navbar-end is-centered">
-              
-                <a href="https://twitter.com/fedepaol" rel="me">
-                  <span class="icon">
-                    <i class="fab fa-twitter"></i>
-                  </span>
-                </a>
-              
-                <a href="https://fedepaol.github.io/about" rel="me">
-                  <span class="icon">
-                    <i class="fas fa-info"></i>
-                  </span>
-                </a>
-              
-                <a href="https://github.com/fedepaol" rel="me">
-                  <span class="icon">
-                    <i class="fab fa-github"></i>
-                  </span>
-                </a>
-              
-                <a href="https://linkedin.com/in/federico-paolinelli-2374954/" rel="me">
-                  <span class="icon">
-                    <i class="fab fa-linkedin-in"></i>
-                  </span>
-                </a>
-              
-           </div>
-      </div>
-    </nav>
-  </div>
+<link rel="canonical" href="https://fedepaol.github.io/blog/2016/08/27/android-mvp-testing/">
 
-<div class="container">
-  <h2 class="subtitle is-6">August 27, 2016</h2>
-  <h1 class="subtitle is-size-4-mobile is-size-3-desktop">Android mvp testing</h1>
-  <div class="content">
-    <h3 id="mvp-is-model-view-presenter">MVP is Model View Presenter</h3>
+
+<link rel="preload" href="/fonts/forkawesome-webfont.woff2?v=1.2.0" as="font" type="font/woff2" crossorigin>
+
+
+  
+  
+  <link rel="stylesheet" href="/css/coder.min.4218e9a82fcc372a4835bc96c50c77e11ac52ebe04361b7efd80f5f332ec3e89.css" integrity="sha256-QhjpqC/MNypINbyWxQx34RrFLr4ENht&#43;/YD18zLsPok=" crossorigin="anonymous" media="screen" />
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+<link rel="icon" type="image/svg+xml" href="/images/favicon.svg" sizes="any">
+<link rel="icon" type="image/png" href="/images/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="/images/favicon-16x16.png" sizes="16x16">
+
+<link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+<link rel="manifest" href="/site.webmanifest">
+<link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+
+
+
+
+
+
+</head>
+
+
+
+
+<body class="preload-transitions colorscheme-light">
+  
+<div class="float-container">
+    <a id="dark-mode-toggle" class="colorscheme-toggle">
+        <i class="fa fa-adjust fa-fw" aria-hidden="true"></i>
+    </a>
+</div>
+
+
+  <main class="wrapper">
+    <nav class="navigation">
+  <section class="container">
+    <a class="navigation-title" href="/">
+      My little software warehouse
+    </a>
+    
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/posts/">Blog</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/about/">About</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="mailto:fedepaol@gmail.com">Contact</a>
+            </li>
+          
+        
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+    <div class="content">
+      
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">
+            <a class="title-link" href="https://fedepaol.github.io/blog/2016/08/27/android-mvp-testing/">
+              Android mvp testing
+            </a>
+          </h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa fa-calendar" aria-hidden="true"></i>
+              <time datetime="2016-08-27T00:00:00Z">
+                August 27, 2016
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa fa-clock-o" aria-hidden="true"></i>
+              7-minute read
+            </span>
+          </div>
+          
+          
+          
+        </div>
+      </header>
+
+      <div class="post-content">
+        
+        <h3 id="mvp-is-model-view-presenter">
+  MVP is Model View Presenter
+  <a class="heading-link" href="#mvp-is-model-view-presenter">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
 <p>.. which is a pattern that is very popular among Android developers nowdays.</p>
 <p>I don&rsquo;t intend to write (yet) another guide about MVP in Android, because others have done a better job, for example:</p>
 <ul>
-<li><a href="http://antonioleiva.com/MVP-android/">Antonio Leiva&rsquo;s introduction to MVP</a></li>
-<li><a href="http://hannesdorfmann.com/mosby/MVP/">Hannes Dorfmann&rsquo;s introduction to Mosby</a></li>
-<li><a href="http://fernandocejas.com/2014/09/03/architecting-android-the-clean-way/">Fernando Cejas&rsquo; post on clean architecture</a></li>
+<li><a href="http://antonioleiva.com/MVP-android/"  class="external-link" target="_blank" rel="noopener">Antonio Leiva&rsquo;s introduction to MVP</a></li>
+<li><a href="http://hannesdorfmann.com/mosby/MVP/"  class="external-link" target="_blank" rel="noopener">Hannes Dorfmann&rsquo;s introduction to Mosby</a></li>
+<li><a href="http://fernandocejas.com/2014/09/03/architecting-android-the-clean-way/"  class="external-link" target="_blank" rel="noopener">Fernando Cejas&rsquo; post on clean architecture</a></li>
 </ul>
 <p>A lot have been said about MVP (and other similar patterns), like:</p>
 <ul>
@@ -85,175 +182,289 @@ integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbi
 <p>In all the (few) apps I wrote before, I ended up with the well known hodgepodgey fragment or activity that contained both the UI logic and the business logic.</p>
 <p>By defining the responsabilities of the view and of the presenter with MVP, you implicitly define the interfaces between those two components (and the model), <strong>and everything fits its place</strong>.</p>
 <p>Every touch, drag, and eventyally lifecycle events are just events that are reported back to the presenter, which then chooses what to do with them. This is powerful.</p>
-<h2 id="this-post-is-about-my-experience-with-the-mvp-pattern-dagger-2-and-testing">This post is about my experience with the MVP pattern, Dagger (2) and testing.</h2>
+<h2 id="this-post-is-about-my-experience-with-the-mvp-pattern-dagger-2-and-testing">
+  This post is about my experience with the MVP pattern, Dagger (2) and testing.
+  <a class="heading-link" href="#this-post-is-about-my-experience-with-the-mvp-pattern-dagger-2-and-testing">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
 <p>Given the definition of the interface between the view and the presenter, <strong>I ingenuosly expected that testing of both (using unit tests and Espresso tests) would have been super smooth</strong>. As it often happens, the reality is quite different from what one expects and reads from blogs. In this post I will try to sum up all the issues I had during that process and the solutions I tried to put in place.</p>
-<p>In order to better illustrate the concepts, I wrote a little example that can be found on my <a href="https://github.com/fedepaol/MVPtesting">github repo</a></p>
-<p>The structure of the app is the same one the can be found googling for Dagger / MVP , for example <a href="https://github.com/antoniolg/androidMVP">here</a>.</p>
+<p>In order to better illustrate the concepts, I wrote a little example that can be found on my <a href="https://github.com/fedepaol/MVPtesting"  class="external-link" target="_blank" rel="noopener">github repo</a></p>
+<p>The structure of the app is the same one the can be found googling for Dagger / MVP , for example <a href="https://github.com/antoniolg/androidMVP"  class="external-link" target="_blank" rel="noopener">here</a>.</p>
 <p>The only thing I added is a local component / module that I use in order to inject the stuff needed only by that particular set of classes.</p>
 <p>This means that in addition to the global Component / Module classes, used to inject stuff like the storage, there will be a <em>local</em> Component / Module used, for example, to inject the presenter into the View.</p>
-<h3 id="the-easy-part-testing-the-presenter">The easy part: testing the presenter</h3>
+<h3 id="the-easy-part-testing-the-presenter">
+  The easy part: testing the presenter
+  <a class="heading-link" href="#the-easy-part-testing-the-presenter">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
 <p>The dependencies are resolved by passing what it needs as constructor parameters:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span>    <span style="color:#a6e22e">@Before</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">setup</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
-</span></span><span style="display:flex;"><span>        mMockView <span style="color:#f92672">=</span> mock<span style="color:#f92672">(</span>MainView<span style="color:#f92672">.</span><span style="color:#a6e22e">class</span><span style="color:#f92672">);</span>
-</span></span><span style="display:flex;"><span>        mMockStorage <span style="color:#f92672">=</span> mock<span style="color:#f92672">(</span>KeyValueStorage<span style="color:#f92672">.</span><span style="color:#a6e22e">class</span><span style="color:#f92672">);</span>
-</span></span><span style="display:flex;"><span>        mToTest <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> MainPresenterImpl<span style="color:#f92672">(</span>mMockView<span style="color:#f92672">,</span> mMockStorage<span style="color:#f92672">);</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#f92672">}</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl">    <span class="nd">@Before</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setup</span><span class="o">()</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">mMockView</span> <span class="o">=</span> <span class="n">mock</span><span class="o">(</span><span class="n">MainView</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">mMockStorage</span> <span class="o">=</span> <span class="n">mock</span><span class="o">(</span><span class="n">KeyValueStorage</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">mToTest</span> <span class="o">=</span> <span class="k">new</span> <span class="n">MainPresenterImpl</span><span class="o">(</span><span class="n">mMockView</span><span class="o">,</span> <span class="n">mMockStorage</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
 </span></span></code></pre></div><p>Since no injection magic is involved here, we can just mock the view and all the other stuff the presenter needs and easily write unit tests for a Presenter instance.</p>
 <p>Moreover, all the dependencies with external models / sources of data like retrofit can be tested by testing the behaviour of the presenter.</p>
-<h3 id="the-i-expected-it-to-be-easier-part-testing-the-view">The &ldquo;I expected it to be easier part&rdquo;: testing the view</h3>
+<h3 id="the-i-expected-it-to-be-easier-part-testing-the-view">
+  The &ldquo;I expected it to be easier part&rdquo;: testing the view
+  <a class="heading-link" href="#the-i-expected-it-to-be-easier-part-testing-the-view">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
 <p>A common approach I heard around is to test the view not against a mock presenter, but against a presenter injected with mocked &ldquo;external components&rdquo;, such as api client and storage.</p>
 <p>What I wanted to achieve here on the other hand, is to test the view driving the behaviour of the presenter it interacts with.</p>
 <p>With this strong separation of roles, I expected it to be easy to mock the presenter and test the view with Espresso.</p>
-<h4 id="injecting-a-mock-presenter">Injecting a mock presenter</h4>
+<h4 id="injecting-a-mock-presenter">
+  Injecting a mock presenter
+  <a class="heading-link" href="#injecting-a-mock-presenter">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h4>
 <p>Since the presenter is provided by the local module and injected into the view by Dagger, I had to find a way to override the Module in order to provide the mock presenter that could drive the tests.</p>
 <p>By using the common method to inject the view</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span>	DaggerMainComponent<span style="color:#f92672">.</span><span style="color:#a6e22e">builder</span><span style="color:#f92672">()</span>
-</span></span><span style="display:flex;"><span>                <span style="color:#f92672">.</span><span style="color:#a6e22e">applicationComponent</span><span style="color:#f92672">(</span>app<span style="color:#f92672">.</span><span style="color:#a6e22e">getComponent</span><span style="color:#f92672">())</span>
-</span></span><span style="display:flex;"><span>                <span style="color:#f92672">.</span><span style="color:#a6e22e">mainModule</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> MainModule<span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">))</span>
-</span></span><span style="display:flex;"><span>                <span style="color:#f92672">.</span><span style="color:#a6e22e">build</span><span style="color:#f92672">().</span><span style="color:#a6e22e">inject</span><span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">);</span>
-</span></span></code></pre></div><p>the only way to override the presenter since it is provided by the &ldquo;real&rdquo; MainModule is to use build flavours, as shown in <a href="https://codelabs.developers.google.com/codelabs/android-testing/#0">Android testing codelab</a>.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl">	<span class="n">DaggerMainComponent</span><span class="o">.</span><span class="na">builder</span><span class="o">()</span>
+</span></span><span class="line"><span class="cl">                <span class="o">.</span><span class="na">applicationComponent</span><span class="o">(</span><span class="n">app</span><span class="o">.</span><span class="na">getComponent</span><span class="o">())</span>
+</span></span><span class="line"><span class="cl">                <span class="o">.</span><span class="na">mainModule</span><span class="o">(</span><span class="k">new</span> <span class="n">MainModule</span><span class="o">(</span><span class="k">this</span><span class="o">))</span>
+</span></span><span class="line"><span class="cl">                <span class="o">.</span><span class="na">build</span><span class="o">().</span><span class="na">inject</span><span class="o">(</span><span class="k">this</span><span class="o">);</span>
+</span></span></code></pre></div><p>the only way to override the presenter since it is provided by the &ldquo;real&rdquo; MainModule is to use build flavours, as shown in <a href="https://codelabs.developers.google.com/codelabs/android-testing/#0"  class="external-link" target="_blank" rel="noopener">Android testing codelab</a>.</p>
 <p><strong>However, I wanted to take advantage of Dagger 2 injecting a mock presenter.</strong></p>
-<h3 id="the-key-of-replacing-a-dependency-is-by-overriding-the-application-object">The key of replacing a dependency is by overriding the Application object</h3>
+<h3 id="the-key-of-replacing-a-dependency-is-by-overriding-the-application-object">
+  The key of replacing a dependency is by overriding the Application object
+  <a class="heading-link" href="#the-key-of-replacing-a-dependency-is-by-overriding-the-application-object">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
 <p>By adding a factory method that returns an istance of the module in the Application class</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span>DaggerMainComponent<span style="color:#f92672">.</span><span style="color:#a6e22e">builder</span><span style="color:#f92672">()</span>
-</span></span><span style="display:flex;"><span>                <span style="color:#f92672">.</span><span style="color:#a6e22e">applicationComponent</span><span style="color:#f92672">(</span>app<span style="color:#f92672">.</span><span style="color:#a6e22e">getComponent</span><span style="color:#f92672">())</span>
-</span></span><span style="display:flex;"><span>                <span style="color:#f92672">.</span><span style="color:#a6e22e">mainModule</span><span style="color:#f92672">(</span>app<span style="color:#f92672">.</span><span style="color:#a6e22e">getMainModule</span><span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">))</span>
-</span></span><span style="display:flex;"><span>                <span style="color:#f92672">.</span><span style="color:#a6e22e">build</span><span style="color:#f92672">().</span><span style="color:#a6e22e">inject</span><span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">);</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">DaggerMainComponent</span><span class="o">.</span><span class="na">builder</span><span class="o">()</span>
+</span></span><span class="line"><span class="cl">                <span class="o">.</span><span class="na">applicationComponent</span><span class="o">(</span><span class="n">app</span><span class="o">.</span><span class="na">getComponent</span><span class="o">())</span>
+</span></span><span class="line"><span class="cl">                <span class="o">.</span><span class="na">mainModule</span><span class="o">(</span><span class="n">app</span><span class="o">.</span><span class="na">getMainModule</span><span class="o">(</span><span class="k">this</span><span class="o">))</span>
+</span></span><span class="line"><span class="cl">                <span class="o">.</span><span class="na">build</span><span class="o">().</span><span class="na">inject</span><span class="o">(</span><span class="k">this</span><span class="o">);</span>
 </span></span></code></pre></div><p>Then we can be use a custom test runner that provides a subclass of that application object declared in the Manifest.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">EspressoTestRunner</span> <span style="color:#66d9ef">extends</span> AndroidJUnitRunner <span style="color:#f92672">{</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">@Override</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> Application <span style="color:#a6e22e">newApplication</span><span style="color:#f92672">(</span>ClassLoader cl<span style="color:#f92672">,</span> String className<span style="color:#f92672">,</span> Context context<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span>
-</span></span><span style="display:flex;"><span>            IllegalAccessException<span style="color:#f92672">,</span> ClassNotFoundException<span style="color:#f92672">,</span> InstantiationException <span style="color:#f92672">{</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">super</span><span style="color:#f92672">.</span><span style="color:#a6e22e">newApplication</span><span style="color:#f92672">(</span>cl<span style="color:#f92672">,</span> TestMvpApplication<span style="color:#f92672">.</span><span style="color:#a6e22e">class</span><span style="color:#f92672">.</span><span style="color:#a6e22e">getName</span><span style="color:#f92672">(),</span> context<span style="color:#f92672">);</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#f92672">}</span>
-</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">EspressoTestRunner</span> <span class="kd">extends</span> <span class="n">AndroidJUnitRunner</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nd">@Override</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="n">Application</span> <span class="nf">newApplication</span><span class="o">(</span><span class="n">ClassLoader</span> <span class="n">cl</span><span class="o">,</span> <span class="n">String</span> <span class="n">className</span><span class="o">,</span> <span class="n">Context</span> <span class="n">context</span><span class="o">)</span> <span class="kd">throws</span>
+</span></span><span class="line"><span class="cl">            <span class="n">IllegalAccessException</span><span class="o">,</span> <span class="n">ClassNotFoundException</span><span class="o">,</span> <span class="n">InstantiationException</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="kd">super</span><span class="o">.</span><span class="na">newApplication</span><span class="o">(</span><span class="n">cl</span><span class="o">,</span> <span class="n">TestMvpApplication</span><span class="o">.</span><span class="na">class</span><span class="o">.</span><span class="na">getName</span><span class="o">(),</span> <span class="n">context</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
 </span></span></code></pre></div><p>and declare it in our gradle file</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-groovy" data-lang="groovy"><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>android <span style="color:#f92672">{</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#f92672">...</span> 
-</span></span><span style="display:flex;"><span>    defaultConfig <span style="color:#f92672">{</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#f92672">...</span>
-</span></span><span style="display:flex;"><span>        testInstrumentationRunner <span style="color:#e6db74">&#39;com.whiterabbit.windlocator.EspressoTestRunner&#39;</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#f92672">...</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#f92672">}</span>
-</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-groovy" data-lang="groovy"><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">android</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="o">...</span> 
+</span></span><span class="line"><span class="cl">    <span class="n">defaultConfig</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">	<span class="o">...</span>
+</span></span><span class="line"><span class="cl">        <span class="n">testInstrumentationRunner</span> <span class="s1">&#39;com.whiterabbit.windlocator.EspressoTestRunner&#39;</span>
+</span></span><span class="line"><span class="cl">	<span class="o">...</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
 </span></span></code></pre></div><p>The Application object (and its test variant) is the one responsible of providing all the modules, so by subclassing it we can drive what is provided to be injected:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">TestMvpApplication</span> <span style="color:#66d9ef">extends</span> MvpApplication <span style="color:#f92672">{</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">private</span> MainModule mMainModule<span style="color:#f92672">;</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// By usint this two method we can drive whatever module we want during the tests
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#75715e">// (and with that, drive what classes inject)
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#a6e22e">@Override</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> MainModule <span style="color:#a6e22e">getMainModule</span><span style="color:#f92672">(</span>MainView view<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> mMainModule<span style="color:#f92672">;</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#f92672">}</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">setMainModule</span><span style="color:#f92672">(</span>MainModule m<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
-</span></span><span style="display:flex;"><span>        mMainModule <span style="color:#f92672">=</span> m<span style="color:#f92672">;</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#f92672">}</span>
-</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestMvpApplication</span> <span class="kd">extends</span> <span class="n">MvpApplication</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">private</span> <span class="n">MainModule</span> <span class="n">mMainModule</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// By usint this two method we can drive whatever module we want during the tests
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">// (and with that, drive what classes inject)
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nd">@Override</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="n">MainModule</span> <span class="nf">getMainModule</span><span class="o">(</span><span class="n">MainView</span> <span class="n">view</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">mMainModule</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setMainModule</span><span class="o">(</span><span class="n">MainModule</span> <span class="n">m</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">mMainModule</span> <span class="o">=</span> <span class="n">m</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
 </span></span></code></pre></div><p>This is what the setup method would look like:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#a6e22e">@Before</span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">setUp</span><span style="color:#f92672">()</span> <span style="color:#66d9ef">throws</span> Exception <span style="color:#f92672">{</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// a mock module with the mock presenter to be injected..
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    MainModule m <span style="color:#f92672">=</span> mock<span style="color:#f92672">(</span>MainModule<span style="color:#f92672">.</span><span style="color:#a6e22e">class</span><span style="color:#f92672">);</span>
-</span></span><span style="display:flex;"><span>    mMockPresenter <span style="color:#f92672">=</span> mock<span style="color:#f92672">(</span>MainPresenter<span style="color:#f92672">.</span><span style="color:#a6e22e">class</span><span style="color:#f92672">);</span>
-</span></span><span style="display:flex;"><span>    
-</span></span><span style="display:flex;"><span>    when<span style="color:#f92672">(</span>m<span style="color:#f92672">.</span><span style="color:#a6e22e">provideMainView</span><span style="color:#f92672">()).</span><span style="color:#a6e22e">thenReturn</span><span style="color:#f92672">(</span>mock<span style="color:#f92672">(</span>MainView<span style="color:#f92672">.</span><span style="color:#a6e22e">class</span><span style="color:#f92672">));</span> <span style="color:#75715e">// this is needed to fool dagger
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    when<span style="color:#f92672">(</span>m<span style="color:#f92672">.</span><span style="color:#a6e22e">provideMainPresenter</span><span style="color:#f92672">(</span>any<span style="color:#f92672">(</span>MainView<span style="color:#f92672">.</span><span style="color:#a6e22e">class</span><span style="color:#f92672">),</span> any<span style="color:#f92672">(</span>KeyValueStorage<span style="color:#f92672">.</span><span style="color:#a6e22e">class</span><span style="color:#f92672">)))</span>
-</span></span><span style="display:flex;"><span>    	<span style="color:#f92672">.</span><span style="color:#a6e22e">thenReturn</span><span style="color:#f92672">(</span>mMockPresenter<span style="color:#f92672">);</span>
-</span></span><span style="display:flex;"><span>    
-</span></span><span style="display:flex;"><span>    Instrumentation instrumentation <span style="color:#f92672">=</span> InstrumentationRegistry<span style="color:#f92672">.</span><span style="color:#a6e22e">getInstrumentation</span><span style="color:#f92672">();</span>
-</span></span><span style="display:flex;"><span>    TestMvpApplication app
-</span></span><span style="display:flex;"><span>    	<span style="color:#f92672">=</span> <span style="color:#f92672">(</span>TestMvpApplication<span style="color:#f92672">)</span> instrumentation<span style="color:#f92672">.</span><span style="color:#a6e22e">getTargetContext</span><span style="color:#f92672">().</span><span style="color:#a6e22e">getApplicationContext</span><span style="color:#f92672">();</span>
-</span></span><span style="display:flex;"><span>    
-</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// forced to the application object
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    app<span style="color:#f92672">.</span><span style="color:#a6e22e">setMainModule</span><span style="color:#f92672">(</span>m<span style="color:#f92672">);</span>
-</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="nd">@Before</span>
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="kt">void</span> <span class="nf">setUp</span><span class="o">()</span> <span class="kd">throws</span> <span class="n">Exception</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// a mock module with the mock presenter to be injected..
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">MainModule</span> <span class="n">m</span> <span class="o">=</span> <span class="n">mock</span><span class="o">(</span><span class="n">MainModule</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">mMockPresenter</span> <span class="o">=</span> <span class="n">mock</span><span class="o">(</span><span class="n">MainPresenter</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">    <span class="n">when</span><span class="o">(</span><span class="n">m</span><span class="o">.</span><span class="na">provideMainView</span><span class="o">()).</span><span class="na">thenReturn</span><span class="o">(</span><span class="n">mock</span><span class="o">(</span><span class="n">MainView</span><span class="o">.</span><span class="na">class</span><span class="o">));</span> <span class="c1">// this is needed to fool dagger
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">when</span><span class="o">(</span><span class="n">m</span><span class="o">.</span><span class="na">provideMainPresenter</span><span class="o">(</span><span class="n">any</span><span class="o">(</span><span class="n">MainView</span><span class="o">.</span><span class="na">class</span><span class="o">),</span> <span class="n">any</span><span class="o">(</span><span class="n">KeyValueStorage</span><span class="o">.</span><span class="na">class</span><span class="o">)))</span>
+</span></span><span class="line"><span class="cl">    	<span class="o">.</span><span class="na">thenReturn</span><span class="o">(</span><span class="n">mMockPresenter</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">    <span class="n">Instrumentation</span> <span class="n">instrumentation</span> <span class="o">=</span> <span class="n">InstrumentationRegistry</span><span class="o">.</span><span class="na">getInstrumentation</span><span class="o">();</span>
+</span></span><span class="line"><span class="cl">    <span class="n">TestMvpApplication</span> <span class="n">app</span>
+</span></span><span class="line"><span class="cl">    	<span class="o">=</span> <span class="o">(</span><span class="n">TestMvpApplication</span><span class="o">)</span> <span class="n">instrumentation</span><span class="o">.</span><span class="na">getTargetContext</span><span class="o">().</span><span class="na">getApplicationContext</span><span class="o">();</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">    <span class="c1">// forced to the application object
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">app</span><span class="o">.</span><span class="na">setMainModule</span><span class="o">(</span><span class="n">m</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
 </span></span></code></pre></div><p>A mock module is needed to provide a mock presenter. Then the mock module is passed to the application object.
 Please note that in order to have Dagger 2 working, the mock module needs to provide a view instance (even a mock one) that will never be used.</p>
 <p>Now we can finally write a test method:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span>    <span style="color:#a6e22e">@Test</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">testButtonClick</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
-</span></span><span style="display:flex;"><span>        activity<span style="color:#f92672">.</span><span style="color:#a6e22e">launchActivity</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> Intent<span style="color:#f92672">());</span>
-</span></span><span style="display:flex;"><span>        onView<span style="color:#f92672">(</span>withId<span style="color:#f92672">(</span>R<span style="color:#f92672">.</span><span style="color:#a6e22e">id</span><span style="color:#f92672">.</span><span style="color:#a6e22e">main_button</span><span style="color:#f92672">)).</span><span style="color:#a6e22e">perform</span><span style="color:#f92672">(</span>click<span style="color:#f92672">());</span>
-</span></span><span style="display:flex;"><span>        verify<span style="color:#f92672">(</span>mMockPresenter<span style="color:#f92672">).</span><span style="color:#a6e22e">onButtonClicked</span><span style="color:#f92672">();</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#f92672">}</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl">    <span class="nd">@Test</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testButtonClick</span><span class="o">()</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">activity</span><span class="o">.</span><span class="na">launchActivity</span><span class="o">(</span><span class="k">new</span> <span class="n">Intent</span><span class="o">());</span>
+</span></span><span class="line"><span class="cl">        <span class="n">onView</span><span class="o">(</span><span class="n">withId</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">id</span><span class="o">.</span><span class="na">main_button</span><span class="o">)).</span><span class="na">perform</span><span class="o">(</span><span class="n">click</span><span class="o">());</span>
+</span></span><span class="line"><span class="cl">        <span class="n">verify</span><span class="o">(</span><span class="n">mMockPresenter</span><span class="o">).</span><span class="na">onButtonClicked</span><span class="o">();</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
 </span></span></code></pre></div><p>After all this struggling, we can &ldquo;just test the view&rdquo;, meaning that we do not need to test if the mocked rest end point was called, nor if the storage was asked to write something.
 <strong>We just test the view against the presenter interface</strong></p>
 <p>One piece is still missing: what if we want to test the behaviour of the view when one of its methods gets called by the presenter? In the example, the view interface offers a method to set the text displayed.</p>
 <p>Again, one could naively think that it would be sufficient to call the method with something like</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span>activity<span style="color:#f92672">.</span><span style="color:#a6e22e">getActivity</span><span style="color:#f92672">().</span><span style="color:#a6e22e">showValue</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;23&#34;</span><span style="color:#f92672">);</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">activity</span><span class="o">.</span><span class="na">getActivity</span><span class="o">().</span><span class="na">showValue</span><span class="o">(</span><span class="s">&#34;23&#34;</span><span class="o">);</span>
 </span></span></code></pre></div><p>The truth is, espresso tests run in a thread different from the UI thread. By doing that, it would result in</p>
 <pre><code>Only the original thread that created a view hierarchy can touch its views
 </code></pre>
 <p>One way to overcome this, is to call the methods in the ui thread</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span>activity<span style="color:#f92672">.</span><span style="color:#a6e22e">getActivity</span><span style="color:#f92672">().</span><span style="color:#a6e22e">runOnUiThread</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> Runnable<span style="color:#f92672">()</span> <span style="color:#f92672">{</span> <span style="color:#75715e">// fancy using a lambda here?
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>                                                 <span style="color:#a6e22e">@Override</span>
-</span></span><span style="display:flex;"><span>                                                 <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">run</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
-</span></span><span style="display:flex;"><span>                                                     activity<span style="color:#f92672">.</span><span style="color:#a6e22e">getActivity</span><span style="color:#f92672">().</span><span style="color:#a6e22e">showValue</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;23&#34;</span><span style="color:#f92672">);</span>
-</span></span><span style="display:flex;"><span>                                                 <span style="color:#f92672">}</span>
-</span></span><span style="display:flex;"><span>                                             <span style="color:#f92672">});</span>
-</span></span></code></pre></div><h4 id="why-i-did-not-use-the-uithreadtest-annotation">Why I did not use the <code>@UiThreadTest</code> annotation?</h4>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">activity</span><span class="o">.</span><span class="na">getActivity</span><span class="o">().</span><span class="na">runOnUiThread</span><span class="o">(</span><span class="k">new</span> <span class="n">Runnable</span><span class="o">()</span> <span class="o">{</span> <span class="c1">// fancy using a lambda here?
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>                                                 <span class="nd">@Override</span>
+</span></span><span class="line"><span class="cl">                                                 <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">()</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">                                                     <span class="n">activity</span><span class="o">.</span><span class="na">getActivity</span><span class="o">().</span><span class="na">showValue</span><span class="o">(</span><span class="s">&#34;23&#34;</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">                                                 <span class="o">}</span>
+</span></span><span class="line"><span class="cl">                                             <span class="o">});</span>
+</span></span></code></pre></div><h4 id="why-i-did-not-use-the-uithreadtest-annotation">
+  Why I did not use the <code>@UiThreadTest</code> annotation?
+  <a class="heading-link" href="#why-i-did-not-use-the-uithreadtest-annotation">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h4>
 <p>Simply because it would have ended with another exception since startactivity cannot be called directly from the ui thread.</p>
-<h3 id="to-sum-up">To sum up</h3>
+<h3 id="to-sum-up">
+  To sum up
+  <a class="heading-link" href="#to-sum-up">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
 <ul>
 <li>Make the application provide the Module that provides the presenter(s)</li>
 <li>Change the testrunner in order to provide a different application</li>
 <li>Let the &ldquo;test&rdquo; application provide a mock module that provides a mock presenter</li>
 <li>Test!</li>
 </ul>
-<h2 id="conclusion">Conclusion</h2>
+<h2 id="conclusion">
+  Conclusion
+  <a class="heading-link" href="#conclusion">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
 <p>The Mvp pattern isolates the view (which needs to be as dumb as it can) from the presenter.
 By instrumenting the view with a mocked presenter, you will drain those tests from any kind of logic we expect to be in the presenter. You just test that the interface between the presenter and the view is working as expected.</p>
 <p>By doing this, you can focus on testing the business logic inside the presenter with vanilla unit tests. Your tdd loop will definetely be faster.</p>
 <p><em>A big thank as always to my proofreaders Fabio Collini &amp; Riccardo Ciovati</em></p>
 
-  </div>
-</div>
-<div class="container has-text-centered">
+      </div>
+
+
+      <footer>
+        
+
+
+        <div id="disqus_thread"></div>
+<script>
+  window.disqus_config = function () {
     
-</div>
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "fedepaolgithubio" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+    
+    document.addEventListener('themeChanged', function (e) { 
+        if (document.readyState == 'complete') {
+          DISQUS.reset({ reload: true, config: disqus_config });
+        }
+    });
+</script>
+        
+        
+        
+        
+      </footer>
+    </article>
 
-<div class="container has-text-centered">
+    
+  </section>
+
+    </div>
+
+    <footer class="footer">
+  <section class="container">
+    ©
+    
+    2023
+     Federico Paolinelli 
+    ·
+    
+    Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/" target="_blank" rel="noopener">Coder</a>.
+    
+  </section>
+</footer>
+
+  </main>
+
   
-    <div id="disqus_thread"></div>
-    <script type="text/javascript">
-      (function() {
-          
-          
-          if (window.location.hostname == "localhost")
-              return;
-      
-          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-          var disqus_shortname = 'fedepaolgithubio';
-          dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
-          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-      })();
-    </script>
-    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-    <a href="http://disqus.com/" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
   
-</div>
-<section class="section">
-  <div class="container has-text-centered">
-    <p></p>
-  </div>
-</section>
+  
+  <script src="/js/coder.min.6ae284be93d2d19dad1f02b0039508d9aab3180a12a06dcc71b0b0ef7825a317.js" integrity="sha256-auKEvpPS0Z2tHwKwA5UI2aqzGAoSoG3McbCw73gloxc="></script>
+  
+
+  
+
+  
 
 
+  
 <script type="application/javascript">
 var doNotTrack = false;
 if (!doNotTrack) {
-	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
 	ga('create', 'UA-16514009-2', 'auto');
 	
 	ga('send', 'pageview');
 }
 </script>
-<script async src='https://www.google-analytics.com/analytics.js'></script>
 
+  
 
+  
 
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+
+</html>

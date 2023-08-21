@@ -1,166 +1,398 @@
 <!DOCTYPE html>
-<html lang="en-us">
-<meta charset="UTF-8">
+<html lang="en">
+
+<head>
+  <title>
+  Android okhttp and websockets · My little software warehouse
+</title>
+  <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
 
 
 
 
-<title>Android okhttp and websockets | My little software warehouse</title>
+<meta name="author" content="Federico Paolinelli">
+<meta name="description" content="Websockets Link to heading Rest http calls are the most common interaction between Android apps and remote servers. However, there are some scenarios where the interaction is better handled via a persistent connection: think about a chat, or a multiplayer game where data flows in both directions and the server needs to push data to the clients and to be aware of which client are connected.
+This kind of scenario can be implemented through Websockets.">
+<meta name="keywords" content="">
 
-<link rel="stylesheet" href="https://fedepaol.github.io//css/styles.css">
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Android okhttp and websockets"/>
+<meta name="twitter:description" content="Websockets Link to heading Rest http calls are the most common interaction between Android apps and remote servers. However, there are some scenarios where the interaction is better handled via a persistent connection: think about a chat, or a multiplayer game where data flows in both directions and the server needs to push data to the clients and to be aware of which client are connected.
+This kind of scenario can be implemented through Websockets."/>
 
-<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css" 
-integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbiDQ" crossorigin="anonymous">
-<script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
-
-
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/zenburn.min.css" crossorigin="anonymous" />
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js" integrity="sha256-/BfiIkHlHoVihZdc6TFuj7MmJ0TWcWsMXkeDFwhi0zw=" crossorigin="anonymous"></script>
-<script>hljs.initHighlightingOnLoad();</script>
-<script src="https://fedepaol.github.io//js/highlight.js"></script>
-
-
-
+<meta property="og:title" content="Android okhttp and websockets" />
+<meta property="og:description" content="Websockets Link to heading Rest http calls are the most common interaction between Android apps and remote servers. However, there are some scenarios where the interaction is better handled via a persistent connection: think about a chat, or a multiplayer game where data flows in both directions and the server needs to push data to the clients and to be aware of which client are connected.
+This kind of scenario can be implemented through Websockets." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://fedepaol.github.io/blog/2017/04/30/android-okhttp-and-websockets/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2017-04-30T00:00:00+00:00" />
+<meta property="article:modified_time" content="2017-04-30T00:00:00+00:00" />
 
 
 
-<div class="container">
-    <nav class="navbar level">
-      <div class="navbar-brand">
-          <a class="nav-item" href="https://fedepaol.github.io/"><h1 class="title is-3">My little software warehouse</h1></a>
-      </div>           
-      <div class="navbar-menu has-text-centered is-active">
-          <div class="navbar-end is-centered">
-              
-                <a href="https://twitter.com/fedepaol" rel="me">
-                  <span class="icon">
-                    <i class="fab fa-twitter"></i>
-                  </span>
-                </a>
-              
-                <a href="https://fedepaol.github.io/about" rel="me">
-                  <span class="icon">
-                    <i class="fas fa-info"></i>
-                  </span>
-                </a>
-              
-                <a href="https://github.com/fedepaol" rel="me">
-                  <span class="icon">
-                    <i class="fab fa-github"></i>
-                  </span>
-                </a>
-              
-                <a href="https://linkedin.com/in/federico-paolinelli-2374954/" rel="me">
-                  <span class="icon">
-                    <i class="fab fa-linkedin-in"></i>
-                  </span>
-                </a>
-              
-           </div>
-      </div>
-    </nav>
-  </div>
 
-<div class="container">
-  <h2 class="subtitle is-6">April 30, 2017</h2>
-  <h1 class="subtitle is-size-4-mobile is-size-3-desktop">Android okhttp and websockets</h1>
-  <div class="content">
-    <h2 id="websockets">Websockets</h2>
+<link rel="canonical" href="https://fedepaol.github.io/blog/2017/04/30/android-okhttp-and-websockets/">
+
+
+<link rel="preload" href="/fonts/forkawesome-webfont.woff2?v=1.2.0" as="font" type="font/woff2" crossorigin>
+
+
+  
+  
+  <link rel="stylesheet" href="/css/coder.min.4218e9a82fcc372a4835bc96c50c77e11ac52ebe04361b7efd80f5f332ec3e89.css" integrity="sha256-QhjpqC/MNypINbyWxQx34RrFLr4ENht&#43;/YD18zLsPok=" crossorigin="anonymous" media="screen" />
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+<link rel="icon" type="image/svg+xml" href="/images/favicon.svg" sizes="any">
+<link rel="icon" type="image/png" href="/images/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="/images/favicon-16x16.png" sizes="16x16">
+
+<link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+<link rel="manifest" href="/site.webmanifest">
+<link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+
+
+
+
+
+
+</head>
+
+
+
+
+<body class="preload-transitions colorscheme-light">
+  
+<div class="float-container">
+    <a id="dark-mode-toggle" class="colorscheme-toggle">
+        <i class="fa fa-adjust fa-fw" aria-hidden="true"></i>
+    </a>
+</div>
+
+
+  <main class="wrapper">
+    <nav class="navigation">
+  <section class="container">
+    <a class="navigation-title" href="/">
+      My little software warehouse
+    </a>
+    
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/posts/">Blog</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/about/">About</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="mailto:fedepaol@gmail.com">Contact</a>
+            </li>
+          
+        
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+    <div class="content">
+      
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">
+            <a class="title-link" href="https://fedepaol.github.io/blog/2017/04/30/android-okhttp-and-websockets/">
+              Android okhttp and websockets
+            </a>
+          </h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa fa-calendar" aria-hidden="true"></i>
+              <time datetime="2017-04-30T00:00:00Z">
+                April 30, 2017
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa fa-clock-o" aria-hidden="true"></i>
+              5-minute read
+            </span>
+          </div>
+          
+          
+          
+        </div>
+      </header>
+
+      <div class="post-content">
+        
+        <h2 id="websockets">
+  Websockets
+  <a class="heading-link" href="#websockets">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
 <p>Rest http calls are the most common interaction between Android apps and remote servers. However, there are some scenarios where the interaction is better handled via a persistent connection: think about a chat, or a multiplayer game where data flows in both directions and the server needs to push data to the clients and to be aware of which client are connected.</p>
 <p>This kind of scenario can be implemented through Websockets.</p>
-<h3 id="okhttp-and-websockets">OkHttp and Websockets</h3>
-<p>Given the quality of the libraries offered by Square, OkHttp was the first library I checked when I recently had to deal with websockets. Luckily, <a href="https://medium.com/square-corner-blog/web-sockets-now-shipping-in-okhttp-3-5-463a9eec82d1">WebSocket support was introduced in December, 2016</a>. In this post I will try to describe how to use it, and to show how it is different from using it with regular http calls.</p>
-<h3 id="establishing-the-connection">Establishing the connection</h3>
+<h3 id="okhttp-and-websockets">
+  OkHttp and Websockets
+  <a class="heading-link" href="#okhttp-and-websockets">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>Given the quality of the libraries offered by Square, OkHttp was the first library I checked when I recently had to deal with websockets. Luckily, <a href="https://medium.com/square-corner-blog/web-sockets-now-shipping-in-okhttp-3-5-463a9eec82d1"  class="external-link" target="_blank" rel="noopener">WebSocket support was introduced in December, 2016</a>. In this post I will try to describe how to use it, and to show how it is different from using it with regular http calls.</p>
+<h3 id="establishing-the-connection">
+  Establishing the connection
+  <a class="heading-link" href="#establishing-the-connection">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
 <p>Establishing the connection is pretty straightforward. You declare the OkHttp client as always:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	client <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> OkHttpClient<span style="color:#f92672">.</span><span style="color:#a6e22e">Builder</span><span style="color:#f92672">()</span>
-</span></span><span style="display:flex;"><span>                <span style="color:#f92672">.</span><span style="color:#a6e22e">readTimeout</span><span style="color:#f92672">(</span>3<span style="color:#f92672">,</span>  TimeUnit<span style="color:#f92672">.</span><span style="color:#a6e22e">SECONDS</span><span style="color:#f92672">)</span>
-</span></span><span style="display:flex;"><span>                <span style="color:#f92672">.</span><span style="color:#a6e22e">build</span><span style="color:#f92672">();</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="n">client</span> <span class="o">=</span> <span class="k">new</span> <span class="n">OkHttpClient</span><span class="o">.</span><span class="na">Builder</span><span class="o">()</span>
+</span></span><span class="line"><span class="cl">                <span class="o">.</span><span class="na">readTimeout</span><span class="o">(</span><span class="n">3</span><span class="o">,</span>  <span class="n">TimeUnit</span><span class="o">.</span><span class="na">SECONDS</span><span class="o">)</span>
+</span></span><span class="line"><span class="cl">                <span class="o">.</span><span class="na">build</span><span class="o">();</span>
 </span></span></code></pre></div><p>and then take a websocket object out of it:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span>	Request request <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Request<span style="color:#f92672">.</span><span style="color:#a6e22e">Builder</span><span style="color:#f92672">()</span>
-</span></span><span style="display:flex;"><span>                <span style="color:#f92672">.</span><span style="color:#a6e22e">url</span><span style="color:#f92672">(</span>serverUrl<span style="color:#f92672">)</span>
-</span></span><span style="display:flex;"><span>                <span style="color:#f92672">.</span><span style="color:#a6e22e">build</span><span style="color:#f92672">();</span>
-</span></span><span style="display:flex;"><span>        webSocket <span style="color:#f92672">=</span> client<span style="color:#f92672">.</span><span style="color:#a6e22e">newWebSocket</span><span style="color:#f92672">(</span>request<span style="color:#f92672">,</span> <span style="color:#66d9ef">new</span> WebSocketListener<span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
-</span></span><span style="display:flex;"><span>							<span style="color:#f92672">...</span>
-</span></span><span style="display:flex;"><span>						<span style="color:#f92672">});</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl">	<span class="n">Request</span> <span class="n">request</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Request</span><span class="o">.</span><span class="na">Builder</span><span class="o">()</span>
+</span></span><span class="line"><span class="cl">                <span class="o">.</span><span class="na">url</span><span class="o">(</span><span class="n">serverUrl</span><span class="o">)</span>
+</span></span><span class="line"><span class="cl">                <span class="o">.</span><span class="na">build</span><span class="o">();</span>
+</span></span><span class="line"><span class="cl">        <span class="n">webSocket</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="na">newWebSocket</span><span class="o">(</span><span class="n">request</span><span class="o">,</span> <span class="k">new</span> <span class="n">WebSocketListener</span><span class="o">()</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">							<span class="o">...</span>
+</span></span><span class="line"><span class="cl">						<span class="o">});</span>
 </span></span></code></pre></div><p>Please note that by creating the websocket, OkHttp will try to establish the connection with the server. The second parameter of the <code>newWebSocket</code> factory method needs to implement the <code>WebSocketListener</code> interface, in order to get asynchronously notified of the various events occurred to the socket (such as an incoming message, or the disconnection of the socket, or a failure).</p>
-<h3 id="sending-a-message">Sending a message</h3>
+<h3 id="sending-a-message">
+  Sending a message
+  <a class="heading-link" href="#sending-a-message">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
 <p>Sending a message is easy. Just call <code>send</code> with a <em>String</em> or a <em>ByteString</em> as an argument. Since OkHttp will send the data using its own background thread, <code>send</code> can be called from any thread without worrying of blocking the current thread (and risking to get a NetworkOnMainThreadException).</p>
 <p>The only caveat here is that a positive result only indicates that the message was enqueued, but it does not reflect the result of the trasmission. From my understanding, the user of the library is notified only in case of failure via the <code>onFailure</code> callback, so an optimistic approach must be taken in place.</p>
-<h3 id="the-callbacks">The callbacks</h3>
-<p>The <a href="https://github.com/square/okhttp/blob/master/okhttp/src/main/java/okhttp3/WebSocketListener.java">WebSocketListener</a> interface provides callbacks to handle the asynchronous events related to the socket. Those includes the fact that the socket was opened (or closed), or that a new message was received.</p>
+<h3 id="the-callbacks">
+  The callbacks
+  <a class="heading-link" href="#the-callbacks">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>The <a href="https://github.com/square/okhttp/blob/master/okhttp/src/main/java/okhttp3/WebSocketListener.java"  class="external-link" target="_blank" rel="noopener">WebSocketListener</a> interface provides callbacks to handle the asynchronous events related to the socket. Those includes the fact that the socket was opened (or closed), or that a new message was received.</p>
 <p>Unlike the trasmission of the data, the interaction between the callbacks and the main Android thread needs to be implemented carefully, since <code>WebSocketListener</code>&rsquo;s method will be executed inside a background thread. Using a <code>handler</code> is the &ldquo;vanilla Android&rdquo; approach to let a background thread interact with a thread associated to a looper (such as Android&rsquo;s main thread).</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span>    <span style="color:#a6e22e">@Override</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">onMessage</span><span style="color:#f92672">(</span>WebSocket webSocket<span style="color:#f92672">,</span> String text<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#f92672">...</span>
-</span></span><span style="display:flex;"><span>        handler<span style="color:#f92672">.</span><span style="color:#a6e22e">sendMessage</span><span style="color:#f92672">(..);</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#f92672">}</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl">    <span class="nd">@Override</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onMessage</span><span class="o">(</span><span class="n">WebSocket</span> <span class="n">webSocket</span><span class="o">,</span> <span class="n">String</span> <span class="n">text</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">	<span class="o">...</span>
+</span></span><span class="line"><span class="cl">        <span class="n">handler</span><span class="o">.</span><span class="na">sendMessage</span><span class="o">(..);</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
 </span></span></code></pre></div><p>Another way to achieve the same result would be to go reactive and expose observables to publish this events.</p>
-<h3 id="closing-the-connection">Closing the connection</h3>
+<h3 id="closing-the-connection">
+  Closing the connection
+  <a class="heading-link" href="#closing-the-connection">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
 <p>OkHttp provides two methods to close the connection:</p>
-<h2 id="close">Close</h2>
+<h2 id="close">
+  Close
+  <a class="heading-link" href="#close">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
 <p><code>webSocket.close(0, &quot;Bye&quot;);</code> asks the server to gracefully close the connection and waits for confirmation.
 All the queued messages are trasmitted <strong>before</strong> closing the connection.</p>
 <p>Since some interaction is involved, the socket might not be immediately closed. If the initialization and the closure of the connection are bound to the lifecycle of the activity (i.e. in onPause / onResume), what could happen is that some messages are received <strong>after</strong> close was invoked, so this needs to be handled carefully.</p>
-<h2 id="cancel">Cancel</h2>
+<h2 id="cancel">
+  Cancel
+  <a class="heading-link" href="#cancel">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
 <p>Cancel is more brutal: it just discards all the queued messages and brutally closes the socket. This has the advantage of not having to wait for the housekeeping and the trasmission of enqueued messages. However, choosing <code>cancel</code> over <code>close</code> really depends on the use case.</p>
-<h1 id="talk-is-cheap-show-me-the-code">Talk is cheap, show me the code</h1>
-<p><a href="https://github.com/fedepaol/websocket-sample">Here</a> I pushed a simple example that allows an app to open the websocket when the app goes in foreground and shuts the websocket down when the app goes on background. This is the suggested approach for persistent connections. Using a service to hold the persisten connection is considered a misbehaviour and doze mode will make your app&rsquo;s life really hard.</p>
+<h1 id="talk-is-cheap-show-me-the-code">
+  Talk is cheap, show me the code
+  <a class="heading-link" href="#talk-is-cheap-show-me-the-code">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h1>
+<p><a href="https://github.com/fedepaol/websocket-sample"  class="external-link" target="_blank" rel="noopener">Here</a> I pushed a simple example that allows an app to open the websocket when the app goes in foreground and shuts the websocket down when the app goes on background. This is the suggested approach for persistent connections. Using a service to hold the persisten connection is considered a misbehaviour and doze mode will make your app&rsquo;s life really hard.</p>
 <p>The example has some weak point that could be improved:</p>
-<h4 id="cancel-is-invoked-when-the-app-goes-in-background">Cancel is invoked when the app goes in background.</h4>
+<h4 id="cancel-is-invoked-when-the-app-goes-in-background">
+  Cancel is invoked when the app goes in background.
+  <a class="heading-link" href="#cancel-is-invoked-when-the-app-goes-in-background">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h4>
 <p>This means that some messages could eventually get discarded. A better approach would be to invoke close and wait the connection to be gracefully closed and all the messages sent. Since in <code>onPause</code> the activity disposes the subscriptions, no leaking is happening. We can just hope that the application process will live long enough to let OkHttp thread to do what it needs to do in order to gracefully close the connection. A more complex approach could involve a Service or using the JobScheduler.</p>
-<h4 id="no-failure-of-trasmission-is-taken-into-account">No failure of trasmission is taken into account</h4>
+<h4 id="no-failure-of-trasmission-is-taken-into-account">
+  No failure of trasmission is taken into account
+  <a class="heading-link" href="#no-failure-of-trasmission-is-taken-into-account">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h4>
 <p>onFailure should listen for failures and notify the user of the failure (or even retry to send failed messages) while in the sample it just forces the disconnection.</p>
-<h4 id="no-rxjava">No RxJava!</h4>
+<h4 id="no-rxjava">
+  No RxJava!
+  <a class="heading-link" href="#no-rxjava">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h4>
 <p>I wanted to keep the app simple and to avoid to introduce extra complexity, but handlers are so 2013. A better solution would have used RxJava (and probably there are many cool libraries that support that out of the box). Using RxJava would make super easy to use and transform the incoming messages and / or implement smart reconnection policies such as exponential backoff.</p>
-<h1 id="conclusion">Conclusion</h1>
+<h1 id="conclusion">
+  Conclusion
+  <a class="heading-link" href="#conclusion">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h1>
 <p>Using websockets is a completely different beast from getting / posting to http endpoints where you fetch (or post) and forget about the call, however the OkHttp implementation is really easy to use.</p>
 <p>On your side, you&rsquo;ll have not only to handle the trasmission / reception of the messages, but you will also need to monitor the state of the connection and behave accordingly.</p>
 
-  </div>
-</div>
-<div class="container has-text-centered">
+      </div>
+
+
+      <footer>
+        
+
+
+        <div id="disqus_thread"></div>
+<script>
+  window.disqus_config = function () {
     
-</div>
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "fedepaolgithubio" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+    
+    document.addEventListener('themeChanged', function (e) { 
+        if (document.readyState == 'complete') {
+          DISQUS.reset({ reload: true, config: disqus_config });
+        }
+    });
+</script>
+        
+        
+        
+        
+      </footer>
+    </article>
 
-<div class="container has-text-centered">
+    
+  </section>
+
+    </div>
+
+    <footer class="footer">
+  <section class="container">
+    ©
+    
+    2023
+     Federico Paolinelli 
+    ·
+    
+    Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/" target="_blank" rel="noopener">Coder</a>.
+    
+  </section>
+</footer>
+
+  </main>
+
   
-    <div id="disqus_thread"></div>
-    <script type="text/javascript">
-      (function() {
-          
-          
-          if (window.location.hostname == "localhost")
-              return;
-      
-          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-          var disqus_shortname = 'fedepaolgithubio';
-          dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
-          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-      })();
-    </script>
-    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-    <a href="http://disqus.com/" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
   
-</div>
-<section class="section">
-  <div class="container has-text-centered">
-    <p></p>
-  </div>
-</section>
+  
+  <script src="/js/coder.min.6ae284be93d2d19dad1f02b0039508d9aab3180a12a06dcc71b0b0ef7825a317.js" integrity="sha256-auKEvpPS0Z2tHwKwA5UI2aqzGAoSoG3McbCw73gloxc="></script>
+  
+
+  
+
+  
 
 
+  
 <script type="application/javascript">
 var doNotTrack = false;
 if (!doNotTrack) {
-	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
 	ga('create', 'UA-16514009-2', 'auto');
 	
 	ga('send', 'pageview');
 }
 </script>
-<script async src='https://www.google-analytics.com/analytics.js'></script>
 
+  
 
+  
 
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+
+</html>

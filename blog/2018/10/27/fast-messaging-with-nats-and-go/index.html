@@ -1,85 +1,203 @@
 <!DOCTYPE html>
-<html lang="en-us">
-<meta charset="UTF-8">
+<html lang="en">
+
+<head>
+  <title>
+  Fast messaging with nats and go · My little software warehouse
+</title>
+  <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
 
 
 
 
-<title>Fast messaging with nats and go | My little software warehouse</title>
+<meta name="author" content="Federico Paolinelli">
+<meta name="description" content="This is the first of follow up serie of the talk Fast messaging with Nats and Go I gave at golab 2018.
+The slides of the talk can be found here: Link to heading What is Nats Link to heading Nats is a messaging system hosted under the CNCF umbrella, which is an open source software foundation dedicated to making cloud native computing universal and sustainable. It&rsquo;s my place-to-go while looking for software related to distributed systems.">
+<meta name="keywords" content="">
 
-<link rel="stylesheet" href="https://fedepaol.github.io//css/styles.css">
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Fast messaging with nats and go"/>
+<meta name="twitter:description" content="This is the first of follow up serie of the talk Fast messaging with Nats and Go I gave at golab 2018.
+The slides of the talk can be found here: Link to heading What is Nats Link to heading Nats is a messaging system hosted under the CNCF umbrella, which is an open source software foundation dedicated to making cloud native computing universal and sustainable. It&rsquo;s my place-to-go while looking for software related to distributed systems."/>
 
-<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css" 
-integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbiDQ" crossorigin="anonymous">
-<script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
-
-
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/zenburn.min.css" crossorigin="anonymous" />
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js" integrity="sha256-/BfiIkHlHoVihZdc6TFuj7MmJ0TWcWsMXkeDFwhi0zw=" crossorigin="anonymous"></script>
-<script>hljs.initHighlightingOnLoad();</script>
-<script src="https://fedepaol.github.io//js/highlight.js"></script>
-
-
-
+<meta property="og:title" content="Fast messaging with nats and go" />
+<meta property="og:description" content="This is the first of follow up serie of the talk Fast messaging with Nats and Go I gave at golab 2018.
+The slides of the talk can be found here: Link to heading What is Nats Link to heading Nats is a messaging system hosted under the CNCF umbrella, which is an open source software foundation dedicated to making cloud native computing universal and sustainable. It&rsquo;s my place-to-go while looking for software related to distributed systems." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://fedepaol.github.io/blog/2018/10/27/fast-messaging-with-nats-and-go/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2018-10-27T00:00:00+00:00" />
+<meta property="article:modified_time" content="2018-10-27T00:00:00+00:00" />
 
 
 
-<div class="container">
-    <nav class="navbar level">
-      <div class="navbar-brand">
-          <a class="nav-item" href="https://fedepaol.github.io/"><h1 class="title is-3">My little software warehouse</h1></a>
-      </div>           
-      <div class="navbar-menu has-text-centered is-active">
-          <div class="navbar-end is-centered">
-              
-                <a href="https://twitter.com/fedepaol" rel="me">
-                  <span class="icon">
-                    <i class="fab fa-twitter"></i>
-                  </span>
-                </a>
-              
-                <a href="https://fedepaol.github.io/about" rel="me">
-                  <span class="icon">
-                    <i class="fas fa-info"></i>
-                  </span>
-                </a>
-              
-                <a href="https://github.com/fedepaol" rel="me">
-                  <span class="icon">
-                    <i class="fab fa-github"></i>
-                  </span>
-                </a>
-              
-                <a href="https://linkedin.com/in/federico-paolinelli-2374954/" rel="me">
-                  <span class="icon">
-                    <i class="fab fa-linkedin-in"></i>
-                  </span>
-                </a>
-              
-           </div>
-      </div>
-    </nav>
-  </div>
 
-<div class="container">
-  <h2 class="subtitle is-6">October 27, 2018</h2>
-  <h1 class="subtitle is-size-4-mobile is-size-3-desktop">Fast messaging with nats and go</h1>
-  <div class="content">
-    <p>This is the first of follow up serie of the talk <em>Fast messaging with Nats and Go</em> I gave at <a href="golab.io">golab 2018</a>.</p>
-<h3 id="the-slides-of-the-talk-can-be-found-here">The slides of the talk can be found here:</h3>
+<link rel="canonical" href="https://fedepaol.github.io/blog/2018/10/27/fast-messaging-with-nats-and-go/">
+
+
+<link rel="preload" href="/fonts/forkawesome-webfont.woff2?v=1.2.0" as="font" type="font/woff2" crossorigin>
+
+
+  
+  
+  <link rel="stylesheet" href="/css/coder.min.4218e9a82fcc372a4835bc96c50c77e11ac52ebe04361b7efd80f5f332ec3e89.css" integrity="sha256-QhjpqC/MNypINbyWxQx34RrFLr4ENht&#43;/YD18zLsPok=" crossorigin="anonymous" media="screen" />
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+<link rel="icon" type="image/svg+xml" href="/images/favicon.svg" sizes="any">
+<link rel="icon" type="image/png" href="/images/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="/images/favicon-16x16.png" sizes="16x16">
+
+<link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+<link rel="manifest" href="/site.webmanifest">
+<link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+
+
+
+
+
+
+</head>
+
+
+
+
+<body class="preload-transitions colorscheme-light">
+  
+<div class="float-container">
+    <a id="dark-mode-toggle" class="colorscheme-toggle">
+        <i class="fa fa-adjust fa-fw" aria-hidden="true"></i>
+    </a>
+</div>
+
+
+  <main class="wrapper">
+    <nav class="navigation">
+  <section class="container">
+    <a class="navigation-title" href="/">
+      My little software warehouse
+    </a>
+    
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/posts/">Blog</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/about/">About</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="mailto:fedepaol@gmail.com">Contact</a>
+            </li>
+          
+        
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+    <div class="content">
+      
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">
+            <a class="title-link" href="https://fedepaol.github.io/blog/2018/10/27/fast-messaging-with-nats-and-go/">
+              Fast messaging with nats and go
+            </a>
+          </h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa fa-calendar" aria-hidden="true"></i>
+              <time datetime="2018-10-27T00:00:00Z">
+                October 27, 2018
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa fa-clock-o" aria-hidden="true"></i>
+              6-minute read
+            </span>
+          </div>
+          
+          
+          
+        </div>
+      </header>
+
+      <div class="post-content">
+        
+        <p>This is the first of follow up serie of the talk <em>Fast messaging with Nats and Go</em> I gave at <a href="golab.io" >golab 2018</a>.</p>
+<h3 id="the-slides-of-the-talk-can-be-found-here">
+  The slides of the talk can be found here:
+  <a class="heading-link" href="#the-slides-of-the-talk-can-be-found-here">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
 <!-- raw HTML omitted -->
-<h3 id="what-is-nats">What is Nats</h3>
-<p><a href="nats.io">Nats</a> is a messaging system hosted under the <a href="www.cncf.io">CNCF</a> umbrella, which is an <em>open source software foundation dedicated to making cloud native computing universal and sustainable</em>. It&rsquo;s my place-to-go while looking for software related to distributed systems. I am just a user of Nats reporting my experience and my understanding of how it works. What follows might be inaccurate or wrong :-)</p>
-<h3 id="why-messaging">Why messaging</h3>
+<h3 id="what-is-nats">
+  What is Nats
+  <a class="heading-link" href="#what-is-nats">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p><a href="nats.io" >Nats</a> is a messaging system hosted under the <a href="www.cncf.io" >CNCF</a> umbrella, which is an <em>open source software foundation dedicated to making cloud native computing universal and sustainable</em>. It&rsquo;s my place-to-go while looking for software related to distributed systems. I am just a user of Nats reporting my experience and my understanding of how it works. What follows might be inaccurate or wrong :-)</p>
+<h3 id="why-messaging">
+  Why messaging
+  <a class="heading-link" href="#why-messaging">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
 <p>The way we architect and build our applications changed in the past few years, moving from monolithic apps to distributed and therefore interacting (micro) services. Together with that, some communication patterns emerged.</p>
-<p>Even if the most popular one is to use rest and there are popular libraries for synchronous interaction such as <a href="https://grpc.io/">grpc</a> or <a href="https://thrift.apache.org/">thrift</a>, some interactions are better represented using events and messaging.</p>
-<h3 id="good-points-of-messaging">Good points of messaging</h3>
+<p>Even if the most popular one is to use rest and there are popular libraries for synchronous interaction such as <a href="https://grpc.io/"  class="external-link" target="_blank" rel="noopener">grpc</a> or <a href="https://thrift.apache.org/"  class="external-link" target="_blank" rel="noopener">thrift</a>, some interactions are better represented using events and messaging.</p>
+<h3 id="good-points-of-messaging">
+  Good points of messaging
+  <a class="heading-link" href="#good-points-of-messaging">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
 <p>Messaging is a natural way to decouple producers of messages from consumers of those messages. The producer does not know who (if any) is going to consume the message, the consumer does not know where that message is coming from.</p>
 <p><strong>This makes scalability easier:</strong> you can throw in / remove producers (or consumers) and your application will scale accordingly without having to change anything.</p>
-<p>Messaging <strong>enables different kinds of interaction</strong>, for example <a href="https://martinfowler.com/eaaDev/EventSourcing.html">event sourcing</a>, where the state of a service is emitted as a sequence of updates which are collected in order to reconstruct the current state in another service.</p>
+<p>Messaging <strong>enables different kinds of interaction</strong>, for example <a href="https://martinfowler.com/eaaDev/EventSourcing.html"  class="external-link" target="_blank" rel="noopener">event sourcing</a>, where the state of a service is emitted as a sequence of updates which are collected in order to reconstruct the current state in another service.</p>
 <p>Messaging makes it easier to implement all the kinds of <em>reactive</em> paradigms, where the evolution of our system is driven by the emission and the reaction to messages sent and received by our services.</p>
-<h3 id="there-are-a-lot-of-messaging-systems-what-do-i-need-to-look-for-in-one-of-them">There are a lot of messaging systems, what do I need to look for in one of them?</h3>
+<h3 id="there-are-a-lot-of-messaging-systems-what-do-i-need-to-look-for-in-one-of-them">
+  There are a lot of messaging systems, what do I need to look for in one of them?
+  <a class="heading-link" href="#there-are-a-lot-of-messaging-systems-what-do-i-need-to-look-for-in-one-of-them">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
 <p>Some aspects that we need to take in consideration are:</p>
 <p><strong>Messaging patterns:</strong> Does the messaging system support pub/sub? Request/reply? Fan-in? Any other kind of exotic messaging pattern?</p>
 <p><strong>Durability of the messages:</strong> How long will the messages last? Will be there forever(ish)? Will they expire after a short timeout? Will they be thrown away if they are not consumed immediately?</p>
@@ -88,34 +206,88 @@ integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbi
 <p><strong>Dev / Ops experience:</strong> This is often underestimated: how easy it is to interact with the system? How much boilerplate code is required? And also, how easy is to configure and to maintain the system? Does it require a lot of knobs to be turned in order to configure it properly?</p>
 <p><strong>Performance:</strong> Is it fast? How does it behaves under load?</p>
 <p><strong>Auth / Authz:</strong> Does it support authentication / authorization? How?</p>
-<h3 id="what-makes-a-good-communication-system">What makes a good communication system?</h3>
+<h3 id="what-makes-a-good-communication-system">
+  What makes a good communication system?
+  <a class="heading-link" href="#what-makes-a-good-communication-system">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
 <p>The two extremes of the spectrum are</p>
-<h4 id="the-enterprise-service-bus">The Enterprise Service Bus:</h4>
+<h4 id="the-enterprise-service-bus">
+  The Enterprise Service Bus:
+  <a class="heading-link" href="#the-enterprise-service-bus">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h4>
 <p>Popular during the SOA movement, the bus held a lot of logic itself. Transformation, routing rules, manipulation and filtering of the messages. The result was that the logic was split between the endpoints and the bus itself, making really difficult to understand the big picture.</p>
-<h4 id="what-martin-fowler-says">What Martin Fowler says:</h4>
-<p>In <a href="https://martinfowler.com/articles/microservices.html">his really popular article about microservices</a>: <em>&ldquo;The microservice community favours an alternative approach: smart endpoints and dumb pipes&rdquo;</em>.</p>
+<h4 id="what-martin-fowler-says">
+  What Martin Fowler says:
+  <a class="heading-link" href="#what-martin-fowler-says">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h4>
+<p>In <a href="https://martinfowler.com/articles/microservices.html"  class="external-link" target="_blank" rel="noopener">his really popular article about microservices</a>: <em>&ldquo;The microservice community favours an alternative approach: smart endpoints and dumb pipes&rdquo;</em>.</p>
 <p><strong>Nats is on the dumb side</strong>, but it&rsquo;s just dumb enough to be useful.</p>
-<h2 id="the-protocol">The protocol</h2>
+<h2 id="the-protocol">
+  The protocol
+  <a class="heading-link" href="#the-protocol">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
 <p>The nats protocol is text based, which means that you can even telnet them to a Nats server. The messages are delimited by CR - LF .</p>
 <p>The main messages are:</p>
 <!-- raw HTML omitted -->
 <p>There are also other messages used to establish and keep the connection up, such as <em>CONNECT</em>, <em>PING</em>, <em>INFO</em> .</p>
-<h4 id="the-protocol-supports-wildcards">The protocol supports wildcards</h4>
+<h4 id="the-protocol-supports-wildcards">
+  The protocol supports wildcards
+  <a class="heading-link" href="#the-protocol-supports-wildcards">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h4>
 <p>Nats subjects support wildcards. The subject are tokens separated by a dot, such as <strong>foo.bar</strong> or <strong>foo.bar.baz</strong>.</p>
 <p>There are two types of wildcards: by using <strong>*</strong> a wildcard matches the token (foo.* matches foo.bar but not foo.bar.baz). If you want to match any foo.something you need to use <strong>&gt;</strong> (as in <strong>foo.&gt;</strong>).</p>
-<h2 id="the-server-or-the-ops-point-of-view">The server (or, the ops point of view)</h2>
+<h2 id="the-server-or-the-ops-point-of-view">
+  The server (or, the ops point of view)
+  <a class="heading-link" href="#the-server-or-the-ops-point-of-view">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
 <p>The nats server is a (small) single Go executable. In order to run it, you just start it with</p>
 <pre tabindex="0"><code>gnatsd -p 4222
 </code></pre><p>and you are done.</p>
-<h4 id="autodiscovery">Autodiscovery</h4>
+<h4 id="autodiscovery">
+  Autodiscovery
+  <a class="heading-link" href="#autodiscovery">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h4>
 <p>The nats server provides also a gossip based autodiscovery mechanism. By using it, you can seamlessly add and remove new nodes to the cluster to scale up / down. A new server addition is propagated to all its peers and to all the clients.</p>
 <p>The auto discovery is enabled by setting one or more servers as <em>seed server</em> and by pointing them from the peers:</p>
 <pre tabindex="0"><code>gnatsd -p 4222 -cluster nats://localhost:4248
 gnatsd -p 5222 -routes nats://localhost:4248
-</code></pre><h4 id="all-the-servers-form-a-full-mesh">All the servers form a full mesh:</h4>
+</code></pre><h4 id="all-the-servers-form-a-full-mesh">
+  All the servers form a full mesh:
+  <a class="heading-link" href="#all-the-servers-form-a-full-mesh">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h4>
 <p><img src="/images/nats/fullmesh.png" alt=""></p>
 <p>Each server is connected to each other, meaning that two clients will always be one hop distant <strong>at most</strong>. Once a client subscribes a subject, its interest will be propagated through all the servers of the mesh.</p>
-<h2 id="delivery-guarantees">Delivery guarantees</h2>
+<h2 id="delivery-guarantees">
+  Delivery guarantees
+  <a class="heading-link" href="#delivery-guarantees">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
 <p>Nats provides very few guarantees:</p>
 <ul>
 <li>
@@ -126,56 +298,134 @@ gnatsd -p 5222 -routes nats://localhost:4248
 </li>
 </ul>
 <p>It&rsquo;s kind of like the tree falling in the forest while nobody is hearing.</p>
-<h2 id="availability">Availability</h2>
+<h2 id="availability">
+  Availability
+  <a class="heading-link" href="#availability">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
 <p>The <em>at most once delivery guarantee</em> allows Nats to be <strong>fast and reliable</strong>. (Almost) no state is kept on the server.
 <strong>A slow client</strong> is a client that is not able to consume the messages the server is sending to it for more than 1 second (the timeout is configurable).</p>
 <p><strong>The nats server behaves in a very selfish manner cutting the connection of the slow clients</strong>, and not having to do the extra work of trying to help slow clients it achieves high levels of consistency and availability,</p>
-<h2 id="thats-it-for-now">That&rsquo;s it for now</h2>
+<h2 id="thats-it-for-now">
+  That&rsquo;s it for now
+  <a class="heading-link" href="#thats-it-for-now">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
 <p>I&rsquo;ll publish the second part soon, where I&rsquo;ll continue continue analyzing Nats following the outline of the talk.</p>
 
-  </div>
-</div>
-<div class="container has-text-centered">
+      </div>
+
+
+      <footer>
+        
+
+
+        <div id="disqus_thread"></div>
+<script>
+  window.disqus_config = function () {
     
-</div>
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "fedepaolgithubio" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+    
+    document.addEventListener('themeChanged', function (e) { 
+        if (document.readyState == 'complete') {
+          DISQUS.reset({ reload: true, config: disqus_config });
+        }
+    });
+</script>
+        
+        
+        
+        
+      </footer>
+    </article>
 
-<div class="container has-text-centered">
+    
+  </section>
+
+    </div>
+
+    <footer class="footer">
+  <section class="container">
+    ©
+    
+    2023
+     Federico Paolinelli 
+    ·
+    
+    Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/" target="_blank" rel="noopener">Coder</a>.
+    
+  </section>
+</footer>
+
+  </main>
+
   
-    <div id="disqus_thread"></div>
-    <script type="text/javascript">
-      (function() {
-          
-          
-          if (window.location.hostname == "localhost")
-              return;
-      
-          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-          var disqus_shortname = 'fedepaolgithubio';
-          dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
-          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-      })();
-    </script>
-    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-    <a href="http://disqus.com/" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
   
-</div>
-<section class="section">
-  <div class="container has-text-centered">
-    <p></p>
-  </div>
-</section>
+  
+  <script src="/js/coder.min.6ae284be93d2d19dad1f02b0039508d9aab3180a12a06dcc71b0b0ef7825a317.js" integrity="sha256-auKEvpPS0Z2tHwKwA5UI2aqzGAoSoG3McbCw73gloxc="></script>
+  
+
+  
+
+  
 
 
+  
 <script type="application/javascript">
 var doNotTrack = false;
 if (!doNotTrack) {
-	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
 	ga('create', 'UA-16514009-2', 'auto');
 	
 	ga('send', 'pageview');
 }
 </script>
-<script async src='https://www.google-analytics.com/analytics.js'></script>
 
+  
 
+  
 
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+
+</html>

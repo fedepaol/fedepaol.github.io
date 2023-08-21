@@ -1,118 +1,275 @@
 <!DOCTYPE html>
-<html lang="en-us">
-<meta charset="UTF-8">
+<html lang="en">
+
+<head>
+  <title>
+  Generating preloaded sqlite data · My little software warehouse
+</title>
+  <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
 
 
 
 
-<title>Generating preloaded sqlite data | My little software warehouse</title>
+<meta name="author" content="Federico Paolinelli">
+<meta name="description" content="Preloading data in Sqlite is a common problem during android development.
+The most common solutions are:
+hardcode the insert statements and execute them (possibly inside a transaction) the first time the db is openedplace the data inside a csv file, load it the first time the db gets opened, parse the rows and populate the dbprepare a pre-built sqlite file, ship it along with your app and load it the first time the db is opened">
+<meta name="keywords" content="">
 
-<link rel="stylesheet" href="https://fedepaol.github.io//css/styles.css">
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Generating preloaded sqlite data"/>
+<meta name="twitter:description" content="Preloading data in Sqlite is a common problem during android development.
+The most common solutions are:
+hardcode the insert statements and execute them (possibly inside a transaction) the first time the db is openedplace the data inside a csv file, load it the first time the db gets opened, parse the rows and populate the dbprepare a pre-built sqlite file, ship it along with your app and load it the first time the db is opened"/>
 
-<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css" 
-integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbiDQ" crossorigin="anonymous">
-<script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
-
-
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/zenburn.min.css" crossorigin="anonymous" />
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js" integrity="sha256-/BfiIkHlHoVihZdc6TFuj7MmJ0TWcWsMXkeDFwhi0zw=" crossorigin="anonymous"></script>
-<script>hljs.initHighlightingOnLoad();</script>
-<script src="https://fedepaol.github.io//js/highlight.js"></script>
-
-
+<meta property="og:title" content="Generating preloaded sqlite data" />
+<meta property="og:description" content="Preloading data in Sqlite is a common problem during android development.
+The most common solutions are:
+hardcode the insert statements and execute them (possibly inside a transaction) the first time the db is openedplace the data inside a csv file, load it the first time the db gets opened, parse the rows and populate the dbprepare a pre-built sqlite file, ship it along with your app and load it the first time the db is opened" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://fedepaol.github.io/blog/2014/04/08/generating-preloaded-sqlite-data/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2014-04-08T00:00:00+00:00" />
+<meta property="article:modified_time" content="2014-04-08T00:00:00+00:00" />
 
 
 
 
-<div class="container">
-    <nav class="navbar level">
-      <div class="navbar-brand">
-          <a class="nav-item" href="https://fedepaol.github.io/"><h1 class="title is-3">My little software warehouse</h1></a>
-      </div>           
-      <div class="navbar-menu has-text-centered is-active">
-          <div class="navbar-end is-centered">
-              
-                <a href="https://twitter.com/fedepaol" rel="me">
-                  <span class="icon">
-                    <i class="fab fa-twitter"></i>
-                  </span>
-                </a>
-              
-                <a href="https://fedepaol.github.io/about" rel="me">
-                  <span class="icon">
-                    <i class="fas fa-info"></i>
-                  </span>
-                </a>
-              
-                <a href="https://github.com/fedepaol" rel="me">
-                  <span class="icon">
-                    <i class="fab fa-github"></i>
-                  </span>
-                </a>
-              
-                <a href="https://linkedin.com/in/federico-paolinelli-2374954/" rel="me">
-                  <span class="icon">
-                    <i class="fab fa-linkedin-in"></i>
-                  </span>
-                </a>
-              
-           </div>
-      </div>
-    </nav>
-  </div>
+<link rel="canonical" href="https://fedepaol.github.io/blog/2014/04/08/generating-preloaded-sqlite-data/">
 
-<div class="container">
-  <h2 class="subtitle is-6">April 8, 2014</h2>
-  <h1 class="subtitle is-size-4-mobile is-size-3-desktop">Generating preloaded sqlite data</h1>
-  <div class="content">
+
+<link rel="preload" href="/fonts/forkawesome-webfont.woff2?v=1.2.0" as="font" type="font/woff2" crossorigin>
+
+
+  
+  
+  <link rel="stylesheet" href="/css/coder.min.4218e9a82fcc372a4835bc96c50c77e11ac52ebe04361b7efd80f5f332ec3e89.css" integrity="sha256-QhjpqC/MNypINbyWxQx34RrFLr4ENht&#43;/YD18zLsPok=" crossorigin="anonymous" media="screen" />
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+<link rel="icon" type="image/svg+xml" href="/images/favicon.svg" sizes="any">
+<link rel="icon" type="image/png" href="/images/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="/images/favicon-16x16.png" sizes="16x16">
+
+<link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+<link rel="manifest" href="/site.webmanifest">
+<link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+
+
+
+
+
+
+</head>
+
+
+
+
+<body class="preload-transitions colorscheme-light">
+  
+<div class="float-container">
+    <a id="dark-mode-toggle" class="colorscheme-toggle">
+        <i class="fa fa-adjust fa-fw" aria-hidden="true"></i>
+    </a>
+</div>
+
+
+  <main class="wrapper">
+    <nav class="navigation">
+  <section class="container">
+    <a class="navigation-title" href="/">
+      My little software warehouse
+    </a>
     
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/posts/">Blog</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/about/">About</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="mailto:fedepaol@gmail.com">Contact</a>
+            </li>
+          
+        
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+    <div class="content">
+      
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">
+            <a class="title-link" href="https://fedepaol.github.io/blog/2014/04/08/generating-preloaded-sqlite-data/">
+              Generating preloaded sqlite data
+            </a>
+          </h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa fa-calendar" aria-hidden="true"></i>
+              <time datetime="2014-04-08T00:00:00Z">
+                April 8, 2014
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa fa-clock-o" aria-hidden="true"></i>
+              4-minute read
+            </span>
+          </div>
+          
+          
+          
+        </div>
+      </header>
+
+      <div class="post-content">
+        
+        
 <div class='post'>
 Preloading data in Sqlite is a common problem during android development.<br />The most common solutions are:<br /><ul><li>hardcode the insert statements and execute them (possibly inside a transaction) the first time the db is opened</li><li>place the data inside a csv file, load it the first time the db gets opened, parse the rows and populate the db</li><li>prepare a pre-built sqlite file, ship it along with your app and load it the first time the db is opened</li></ul><br /><div class="separator" style="clear: both; text-align: center;"><a href="http://i.imgur.com/CmGdiFU.jpg" imageanchor="1" style="margin-left: 1em; margin-right: 1em;"><img border="0" src="http://i.imgur.com/CmGdiFU.jpg" height="320" width="320" /></a></div><br /><ul></ul>I'll focus on the third approach, because it allows us to check our db outside the app without extracting it from our device, and because it allows us to prepare the data in a more "human friendly way".<br /><br />It's worth to mention the excellent <a href="https://github.com/jgilfelt/android-sqlite-asset-helper">sqlite asset helper</a> library by Jeff Gifelt, that allows us to embed a prebuilt (compressed) sqlite file without having to reinvent the wheel. For this reason, this post will be about how to handle data entry process (and something more), and you won't find a (yet another) way to preload a sqlite file.<br /><br />Let's start with a problem: you want to build a pretty simple <a href="https://play.google.com/store/apps/details?id=com.whiterabbit.freshfruitveg">Seasonal Fruit and Vegetables</a> app, and the amount of data you have to deal with is big enough to discourage you to prepare the inserts manually.<br />You'll have:<br /><ul><li>the list of products</li><li>the description of each product (possibly localized in different languages)</li><li>the data related to the seasonality of each product</li></ul>So, here's the approach:<br /><h3>Step 1: data entry </h3>Use a spreadsheet to fill the data in a human friendly way, export it as csv (or tsv, so you won't have to deal with any random comma inside the descriptions), parse it and produce the sqlite file together with localized string res files to be embedded inside the application.<br />In my case I had a file&nbsp; having the genre (fruit or veg), the calories count, the name and the description in italian and in english:<br /><br /><pre style="background-image: URL(http://2.bp.blogspot.com/_z5ltvMQPaa8/SjJXr_U2YBI/AAAAAAAAAAM/46OqEP32CJ8/s320/codebg.gif); background: #f0f0f0; border: 1px dashed #CCCCCC; color: black; font-family: arial; font-size: 12px; height: auto; line-height: 20px; overflow: auto; padding: 0px; text-align: left; width: 99%;"><code style="color: black; word-wrap: normal;"> asparagus     0     25     Asparagi     Descrizione asparagi in italiano.      Asparagus     English asparagus description  <br /> chard          0     12     Bietola          Descrizione bietola in italiano.      Chard          English chard description  <br /></code></pre><br /><br />I also have files that describe the seasonality of each products in different areas, but I will not describe them since they are not relevant to the approach I am describing here.<br /><br /><h3>Step 2: Parse!</h3>Choose your favorite scripting language. I went for python since it's super slick and it comes with batteries included, such as xml writing and sqllite support.<br /><br />Creating the db is straightforward:<br /><pre style="background-image: URL(http://2.bp.blogspot.com/_z5ltvMQPaa8/SjJXr_U2YBI/AAAAAAAAAAM/46OqEP32CJ8/s320/codebg.gif); background: #f0f0f0; border: 1px dashed #CCCCCC; color: black; font-family: arial; font-size: 12px; height: auto; line-height: 20px; overflow: auto; padding: 0px; text-align: left; width: 99%;"><code style="color: black; word-wrap: normal;"> CREATE_ITEMS = 'create table Item (_id integer primary key, Name text, kind integer, calories integer);'  <br /> CREATE_ITEM_PER_MONTHS = 'create table ItemPerMonth (ItemId integer, Month integer, Freshness integer, Area integer);'  <br /> CREATE_ITEM_PREFERRED = 'create table PreferredItem (PreferredItemId integer);'  <br /> conn = sqlite3.connect('fruit')  <br /> c = conn.cursor()  <br /> c.execute(CREATE_ITEM_PER_MONTHS)  <br /> c.execute(CREATE_ITEM_PREFERRED)  <br /></code></pre><br /><br />Then we need to use the data we have to fullfill two purpouses:<br /><ul><li>fill the database</li><li>fill the localized string resources&nbsp;</li></ul>Again, filling the database consists of parsing each line of the csv file and calling the appropriate insert.<br /><br />In python is as easy as calling<br /><br /><pre style="background-image: URL(http://2.bp.blogspot.com/_z5ltvMQPaa8/SjJXr_U2YBI/AAAAAAAAAAM/46OqEP32CJ8/s320/codebg.gif); background: #f0f0f0; border: 1px dashed #CCCCCC; color: black; font-family: arial; font-size: 12px; height: auto; line-height: 20px; overflow: auto; padding: 0px; text-align: left; width: 99%;"><code style="color: black; word-wrap: normal;">   cursor.execute(statement)  <br /></code></pre><br />on a cursor object, where statement is the insert statement.<br /><br />Together with that, we do have a lot of data that needs to be rendered in the proper language.<br />In order to take advantage of the resource framework, I chose to generate the resource files instead of relying on a "locale" field in the db to filter in my queries.<br />Again, filling an xml node is pretty straightforward in python:<br /><br /><pre style="background-image: URL(http://2.bp.blogspot.com/_z5ltvMQPaa8/SjJXr_U2YBI/AAAAAAAAAAM/46OqEP32CJ8/s320/codebg.gif); background: #f0f0f0; border: 1px dashed #CCCCCC; color: black; font-family: arial; font-size: 12px; height: auto; line-height: 20px; overflow: auto; padding: 0px; text-align: left; width: 99%;"><code style="color: black; word-wrap: normal;">   name = ET.SubElement(root, "string")  <br />   name.set("name", item_name)  <br />   if lang_name.find('%') != -1:  <br />     name.set("formatted", "false")  <br />   name.text = lang_name  <br /></code></pre><br /><br />At this point, we can generate an it_descriptions.xml file and an eng_descriptions.xml file (and even let our script place them in the proper folders).<br /><br />When we want to use our descriptions in Android (i.e. in&nbsp; our cursor adapter's bindView), we&nbsp; need to bind the product name (i.e. "asparagus") with the corresponding resource. That's easy and it can be done in this way:<br /><br /><pre style="background-image: URL(http://2.bp.blogspot.com/_z5ltvMQPaa8/SjJXr_U2YBI/AAAAAAAAAAM/46OqEP32CJ8/s320/codebg.gif); background: #f0f0f0; border: 1px dashed #CCCCCC; color: black; font-family: arial; font-size: 12px; height: auto; line-height: 20px; overflow: auto; padding: 0px; text-align: left; width: 99%;"><code style="color: black; word-wrap: normal;">  int nameResID = context.getResources().getIdentifier(name,   <br />                     "string", context.getPackageName());  <br /></code></pre><br />By doing that, we can retrieve the resource id of the string related to the name that was generated by our script. If we are worried about the cost of the lookup, we can even add a lru cache to absorb that cost.<br /><br /><br />TL;DR:<br /><ul><li>Write your data in a human readable format</li><li>Parse that data with your favourite language</li><li>Write the data that does not depends on the language in sqllite</li><li>Write the language-dependent data in resource files</li><li>Use getIdentifier for retrieving the resource id of the strings automatically generated</li></ul>Bonus point: again, you can use this convention for pictures as well, so you can throw an "asparagus.png" image in your assets to be loaded afterwards.<br /><br />The biggest advantage of this approach is that you have only one master source of your data (the spreadsheet) that you can modify and rerun the generator over every time you modify it. <br /><br />If you are interested in the whole loader python script you can <a href="https://gist.github.com/fedepaol/10193052">check it here</a><br /><br /><br /><br /><br /></div>
 
-  </div>
-</div>
-<div class="container has-text-centered">
+      </div>
+
+
+      <footer>
+        
+
+
+        <div id="disqus_thread"></div>
+<script>
+  window.disqus_config = function () {
     
-</div>
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "fedepaolgithubio" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+    
+    document.addEventListener('themeChanged', function (e) { 
+        if (document.readyState == 'complete') {
+          DISQUS.reset({ reload: true, config: disqus_config });
+        }
+    });
+</script>
+        
+        
+        
+        
+      </footer>
+    </article>
 
-<div class="container has-text-centered">
+    
+  </section>
+
+    </div>
+
+    <footer class="footer">
+  <section class="container">
+    ©
+    
+    2023
+     Federico Paolinelli 
+    ·
+    
+    Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/" target="_blank" rel="noopener">Coder</a>.
+    
+  </section>
+</footer>
+
+  </main>
+
   
-    <div id="disqus_thread"></div>
-    <script type="text/javascript">
-      (function() {
-          
-          
-          if (window.location.hostname == "localhost")
-              return;
-      
-          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-          var disqus_shortname = 'fedepaolgithubio';
-          dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
-          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-      })();
-    </script>
-    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-    <a href="http://disqus.com/" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
   
-</div>
-<section class="section">
-  <div class="container has-text-centered">
-    <p></p>
-  </div>
-</section>
+  
+  <script src="/js/coder.min.6ae284be93d2d19dad1f02b0039508d9aab3180a12a06dcc71b0b0ef7825a317.js" integrity="sha256-auKEvpPS0Z2tHwKwA5UI2aqzGAoSoG3McbCw73gloxc="></script>
+  
+
+  
+
+  
 
 
+  
 <script type="application/javascript">
 var doNotTrack = false;
 if (!doNotTrack) {
-	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
 	ga('create', 'UA-16514009-2', 'auto');
 	
 	ga('send', 'pageview');
 }
 </script>
-<script async src='https://www.google-analytics.com/analytics.js'></script>
 
+  
 
+  
 
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+
+</html>

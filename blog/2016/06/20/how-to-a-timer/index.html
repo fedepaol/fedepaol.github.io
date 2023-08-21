@@ -1,207 +1,421 @@
 <!DOCTYPE html>
-<html lang="en-us">
-<meta charset="UTF-8">
+<html lang="en">
+
+<head>
+  <title>
+  How to a timer · My little software warehouse
+</title>
+  <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
 
 
 
 
-<title>How to a timer | My little software warehouse</title>
+<meta name="author" content="Federico Paolinelli">
+<meta name="description" content="Ok, I must confess Link to heading the title is built to draw people&rsquo;s attention, because you know, nowdays everything is done in a reactive fashion. RxJava is superhelpful, but if we forget the ecosystem our apps are running into, we risk to forget the proper way to implement certain tasks in Android.
+Why do we need a whole post about timers? Link to heading Recently, I had to implement a countdown timer in Android.">
+<meta name="keywords" content="">
 
-<link rel="stylesheet" href="https://fedepaol.github.io//css/styles.css">
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="How to a timer"/>
+<meta name="twitter:description" content="Ok, I must confess Link to heading the title is built to draw people&rsquo;s attention, because you know, nowdays everything is done in a reactive fashion. RxJava is superhelpful, but if we forget the ecosystem our apps are running into, we risk to forget the proper way to implement certain tasks in Android.
+Why do we need a whole post about timers? Link to heading Recently, I had to implement a countdown timer in Android."/>
 
-<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css" 
-integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbiDQ" crossorigin="anonymous">
-<script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
-
-
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/zenburn.min.css" crossorigin="anonymous" />
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js" integrity="sha256-/BfiIkHlHoVihZdc6TFuj7MmJ0TWcWsMXkeDFwhi0zw=" crossorigin="anonymous"></script>
-<script>hljs.initHighlightingOnLoad();</script>
-<script src="https://fedepaol.github.io//js/highlight.js"></script>
-
-
-
+<meta property="og:title" content="How to a timer" />
+<meta property="og:description" content="Ok, I must confess Link to heading the title is built to draw people&rsquo;s attention, because you know, nowdays everything is done in a reactive fashion. RxJava is superhelpful, but if we forget the ecosystem our apps are running into, we risk to forget the proper way to implement certain tasks in Android.
+Why do we need a whole post about timers? Link to heading Recently, I had to implement a countdown timer in Android." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://fedepaol.github.io/blog/2016/06/20/how-to-a-timer/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2016-06-20T00:00:00+00:00" />
+<meta property="article:modified_time" content="2016-06-20T00:00:00+00:00" />
 
 
 
-<div class="container">
-    <nav class="navbar level">
-      <div class="navbar-brand">
-          <a class="nav-item" href="https://fedepaol.github.io/"><h1 class="title is-3">My little software warehouse</h1></a>
-      </div>           
-      <div class="navbar-menu has-text-centered is-active">
-          <div class="navbar-end is-centered">
-              
-                <a href="https://twitter.com/fedepaol" rel="me">
-                  <span class="icon">
-                    <i class="fab fa-twitter"></i>
-                  </span>
-                </a>
-              
-                <a href="https://fedepaol.github.io/about" rel="me">
-                  <span class="icon">
-                    <i class="fas fa-info"></i>
-                  </span>
-                </a>
-              
-                <a href="https://github.com/fedepaol" rel="me">
-                  <span class="icon">
-                    <i class="fab fa-github"></i>
-                  </span>
-                </a>
-              
-                <a href="https://linkedin.com/in/federico-paolinelli-2374954/" rel="me">
-                  <span class="icon">
-                    <i class="fab fa-linkedin-in"></i>
-                  </span>
-                </a>
-              
-           </div>
-      </div>
-    </nav>
-  </div>
 
-<div class="container">
-  <h2 class="subtitle is-6">June 20, 2016</h2>
-  <h1 class="subtitle is-size-4-mobile is-size-3-desktop">How to a timer</h1>
-  <div class="content">
-    <h4 id="ok-i-must-confess">Ok, I must confess</h4>
+<link rel="canonical" href="https://fedepaol.github.io/blog/2016/06/20/how-to-a-timer/">
+
+
+<link rel="preload" href="/fonts/forkawesome-webfont.woff2?v=1.2.0" as="font" type="font/woff2" crossorigin>
+
+
+  
+  
+  <link rel="stylesheet" href="/css/coder.min.4218e9a82fcc372a4835bc96c50c77e11ac52ebe04361b7efd80f5f332ec3e89.css" integrity="sha256-QhjpqC/MNypINbyWxQx34RrFLr4ENht&#43;/YD18zLsPok=" crossorigin="anonymous" media="screen" />
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+<link rel="icon" type="image/svg+xml" href="/images/favicon.svg" sizes="any">
+<link rel="icon" type="image/png" href="/images/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="/images/favicon-16x16.png" sizes="16x16">
+
+<link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+<link rel="manifest" href="/site.webmanifest">
+<link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+
+
+
+
+
+
+</head>
+
+
+
+
+<body class="preload-transitions colorscheme-light">
+  
+<div class="float-container">
+    <a id="dark-mode-toggle" class="colorscheme-toggle">
+        <i class="fa fa-adjust fa-fw" aria-hidden="true"></i>
+    </a>
+</div>
+
+
+  <main class="wrapper">
+    <nav class="navigation">
+  <section class="container">
+    <a class="navigation-title" href="/">
+      My little software warehouse
+    </a>
+    
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/posts/">Blog</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/about/">About</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="mailto:fedepaol@gmail.com">Contact</a>
+            </li>
+          
+        
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+    <div class="content">
+      
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">
+            <a class="title-link" href="https://fedepaol.github.io/blog/2016/06/20/how-to-a-timer/">
+              How to a timer
+            </a>
+          </h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa fa-calendar" aria-hidden="true"></i>
+              <time datetime="2016-06-20T00:00:00Z">
+                June 20, 2016
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa fa-clock-o" aria-hidden="true"></i>
+              6-minute read
+            </span>
+          </div>
+          
+          
+          
+        </div>
+      </header>
+
+      <div class="post-content">
+        
+        <h4 id="ok-i-must-confess">
+  Ok, I must confess
+  <a class="heading-link" href="#ok-i-must-confess">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h4>
 <p>the title is built to draw people&rsquo;s attention, because you know, nowdays everything is done in a reactive fashion. RxJava is superhelpful, but <strong>if we forget the ecosystem our apps are running into</strong>, we risk to forget the <em>proper</em> way to implement certain tasks in Android.</p>
-<h4 id="why-do-we-need-a-whole-post-about-timers">Why do we need a whole post about timers?</h4>
+<h4 id="why-do-we-need-a-whole-post-about-timers">
+  Why do we need a whole post about timers?
+  <a class="heading-link" href="#why-do-we-need-a-whole-post-about-timers">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h4>
 <p>Recently, I had to implement a countdown timer in Android.</p>
 <p>If you google for <del>code to cut and paste</del> <em>inspiration</em>, you&rsquo;ll get a lot of results like:</p>
 <ul>
-<li>use a <a href="https://developer.android.com/reference/android/os/CountDownTimer.html">countdown timer</a></li>
+<li>use a <a href="https://developer.android.com/reference/android/os/CountDownTimer.html"  class="external-link" target="_blank" rel="noopener">countdown timer</a></li>
 <li>use a dyi implementation using handlers</li>
-<li>be <em>a la mode</em> and use <a href="http://reactivex.io/documentation/operators/timer.html">RxJava&rsquo;s timer</a></li>
+<li>be <em>a la mode</em> and use <a href="http://reactivex.io/documentation/operators/timer.html"  class="external-link" target="_blank" rel="noopener">RxJava&rsquo;s timer</a></li>
 </ul>
-<p>There is even a <a href="https://androidcookbook.com/Recipe.seam;jsessionid=DF53064E03C7505C4EBF727E56E0728E?recipeId=1205">cookbook recipe</a> that shows how to implement it.</p>
-<p>That might work if you had to measure the cooking time of a <a href="http://www.bettycrocker.com/how-to/tipslibrary/charts-timetables-measuring/timetable-cooking-pasta">portion of capellini</a> (the fastest cooking pasta I could think of).</p>
-<h3 id="but-wait-what-if-i-had-to-bake-a-plum-cake">But wait, what if I had to bake a plum cake?</h3>
+<p>There is even a <a href="https://androidcookbook.com/Recipe.seam;jsessionid=DF53064E03C7505C4EBF727E56E0728E?recipeId=1205"  class="external-link" target="_blank" rel="noopener">cookbook recipe</a> that shows how to implement it.</p>
+<p>That might work if you had to measure the cooking time of a <a href="http://www.bettycrocker.com/how-to/tipslibrary/charts-timetables-measuring/timetable-cooking-pasta"  class="external-link" target="_blank" rel="noopener">portion of capellini</a> (the fastest cooking pasta I could think of).</p>
+<h3 id="but-wait-what-if-i-had-to-bake-a-plum-cake">
+  But wait, what if I had to bake a plum cake?
+  <a class="heading-link" href="#but-wait-what-if-i-had-to-bake-a-plum-cake">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
 <p>Baking a plum cake takes longer than an hour. All the solutions I just mentioned rely on the fact that your application is running <strong>for the whole lenght of the timer</strong>.</p>
-<p>This could be acceptable in the desktop / server world, but it&rsquo;s far from acceptable in the Android context: if the app goes in background because the user wants to check his email, answer to a phone call or play a game, <strong>the operating system is likely to reclaim the resources and shutdown the app itself</strong>. In any case, the device will turn off after a short time. If you think that using a <a href="https://developer.android.com/training/scheduling/wakelock.html">wakelock</a> will solve the problem&hellip; it will, but the user won&rsquo;t be happy of all the battery wasted by the screen.</p>
-<h3 id="i-can-use-a-foreground-service">I can use a foreground service!</h3>
-<p>So one can start looking for a way to keep the app running in background. A <a href="https://developer.android.com/guide/components/services.html">Service</a> is an Android component made specifically for this purpose.</p>
-<p>By using a Service with the <a href="https://developer.android.com/guide/components/services.html#Foreground">startForeground</a> option, your app will stay alive through the whole lenght of the timer. When the timer is finished, it just has to throw a notification and a broadcast so the user will know that the timer expired.</p>
-<p><a href="/images/soareyoutelling_timer.jpg"></a></p>
+<p>This could be acceptable in the desktop / server world, but it&rsquo;s far from acceptable in the Android context: if the app goes in background because the user wants to check his email, answer to a phone call or play a game, <strong>the operating system is likely to reclaim the resources and shutdown the app itself</strong>. In any case, the device will turn off after a short time. If you think that using a <a href="https://developer.android.com/training/scheduling/wakelock.html"  class="external-link" target="_blank" rel="noopener">wakelock</a> will solve the problem&hellip; it will, but the user won&rsquo;t be happy of all the battery wasted by the screen.</p>
+<h3 id="i-can-use-a-foreground-service">
+  I can use a foreground service!
+  <a class="heading-link" href="#i-can-use-a-foreground-service">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>So one can start looking for a way to keep the app running in background. A <a href="https://developer.android.com/guide/components/services.html"  class="external-link" target="_blank" rel="noopener">Service</a> is an Android component made specifically for this purpose.</p>
+<p>By using a Service with the <a href="https://developer.android.com/guide/components/services.html#Foreground"  class="external-link" target="_blank" rel="noopener">startForeground</a> option, your app will stay alive through the whole lenght of the timer. When the timer is finished, it just has to throw a notification and a broadcast so the user will know that the timer expired.</p>
+<p><a href="/images/soareyoutelling_timer.jpg" ></a></p>
 <p>This approach will work, but it has a drawback. Your app (or let&rsquo;s say at least the service) needs to be running for the whole length of the timer. This is a waste of memory and cpu.</p>
-<h3 id="the-right-way">The right way</h3>
+<h3 id="the-right-way">
+  The right way
+  <a class="heading-link" href="#the-right-way">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
 <p>The right way is to take advantage of what the OS offers. The idea here is to run the countdown timer as long as the app is foregrounded, showing the progress to the user <em>one second at the time</em>, but set a system alarm whenever the app goes in background. Whenever the user gets back to the app, you&rsquo;ll cancel the system alarm and restart the timer from where it is supposed to start.</p>
 <p>Here what it would look like when the user gets back to the app before the timer is expired (on the left) and when the timer expires while the app is in background (on the right):</p>
 <p><img src="/images/timer_resume.png" alt=""></p>
 <p>From the user&rsquo;s perspective, the timer is running even if the app is in background, because whenever he returns to the app he sees what he is expecting to see (the time passed). On the other hand, if the timer expires when the app is in background, a friendly notification will remind him that he has to take the plum cake out of the oven.</p>
 <p>Inside the app however, the timer will run <strong>only when the app is in foreground</strong> and has all the rights to consume cpu because the user is using the app.</p>
-<h3 id="some-code">Some code</h3>
-<p>A simplified version of what I am describing can be found in my <a href="https://github.com/fedepaol/AndroidTimerSample">github repo</a></p>
+<h3 id="some-code">
+  Some code
+  <a class="heading-link" href="#some-code">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>A simplified version of what I am describing can be found in my <a href="https://github.com/fedepaol/AndroidTimerSample"  class="external-link" target="_blank" rel="noopener">github repo</a></p>
 <p>There are three things you have to take into account:</p>
-<h2 id="running-the-timer-in-the-app">Running the timer in the app</h2>
+<h2 id="running-the-timer-in-the-app">
+  Running the timer in the app
+  <a class="heading-link" href="#running-the-timer-in-the-app">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
 <p>This is the easiest part: you can use a countdown timer, a handler, rxjava or whatever you want to <del>copy and paste</del> take inspiration from.
 In my example I&rsquo;ll use a countdown timer since it&rsquo;s simple to use and serves the purpouse.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">startTimer</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
-</span></span><span style="display:flex;"><span>        mCountDownTimer <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> CountDownTimer<span style="color:#f92672">(</span>mTimeToGo <span style="color:#f92672">*</span> 1000<span style="color:#f92672">,</span> 1000<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
-</span></span><span style="display:flex;"><span>	    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">onTick</span><span style="color:#f92672">(</span><span style="color:#66d9ef">long</span> millisUntilFinished<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
-</span></span><span style="display:flex;"><span>		mTimeToGo <span style="color:#f92672">-=</span> 1000<span style="color:#f92672">;</span>
-</span></span><span style="display:flex;"><span>		updateTimeUi<span style="color:#f92672">();</span>
-</span></span><span style="display:flex;"><span>	    <span style="color:#f92672">}</span>
-</span></span><span style="display:flex;"><span>	    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">onFinish</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
-</span></span><span style="display:flex;"><span>		mState <span style="color:#f92672">=</span> TimerState<span style="color:#f92672">.</span><span style="color:#a6e22e">STOPPED</span><span style="color:#f92672">;</span>
-</span></span><span style="display:flex;"><span>		onTimerFinish<span style="color:#f92672">();</span>
-</span></span><span style="display:flex;"><span>		updateTimeUi<span style="color:#f92672">();</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#f92672">}</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#f92672">}.</span><span style="color:#a6e22e">start</span><span style="color:#f92672">();</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#f92672">}</span>
-</span></span></code></pre></div><h2 id="remembering-when-the-timer-was-started--how-long-it-was-supposed-to-run">Remembering when the timer was started / how long it was supposed to run</h2>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl">    <span class="kd">private</span> <span class="kt">void</span> <span class="nf">startTimer</span><span class="o">()</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">mCountDownTimer</span> <span class="o">=</span> <span class="k">new</span> <span class="n">CountDownTimer</span><span class="o">(</span><span class="n">mTimeToGo</span> <span class="o">*</span> <span class="n">1000</span><span class="o">,</span> <span class="n">1000</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">	    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onTick</span><span class="o">(</span><span class="kt">long</span> <span class="n">millisUntilFinished</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">		<span class="n">mTimeToGo</span> <span class="o">-=</span> <span class="n">1000</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">		<span class="n">updateTimeUi</span><span class="o">();</span>
+</span></span><span class="line"><span class="cl">	    <span class="o">}</span>
+</span></span><span class="line"><span class="cl">	    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onFinish</span><span class="o">()</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">		<span class="n">mState</span> <span class="o">=</span> <span class="n">TimerState</span><span class="o">.</span><span class="na">STOPPED</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">		<span class="n">onTimerFinish</span><span class="o">();</span>
+</span></span><span class="line"><span class="cl">		<span class="n">updateTimeUi</span><span class="o">();</span>
+</span></span><span class="line"><span class="cl">	<span class="o">}</span>
+</span></span><span class="line"><span class="cl">        <span class="o">}.</span><span class="na">start</span><span class="o">();</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span></code></pre></div><h2 id="remembering-when-the-timer-was-started--how-long-it-was-supposed-to-run">
+  Remembering when the timer was started / how long it was supposed to run
+  <a class="heading-link" href="#remembering-when-the-timer-was-started--how-long-it-was-supposed-to-run">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
 <p>This is the trickiest part.
 In the example I store the starting time inside the shared preferences storage. It will persist even if the app is killed.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span>    mPreferences<span style="color:#f92672">.</span><span style="color:#a6e22e">setStartedTime</span><span style="color:#f92672">(</span>getNow<span style="color:#f92672">());</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl">    <span class="n">mPreferences</span><span class="o">.</span><span class="na">setStartedTime</span><span class="o">(</span><span class="n">getNow</span><span class="o">());</span>
 </span></span></code></pre></div><p>That value is used when resuming the app in order to check how long the timer has to run (or if the time did expire):</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">initTimer</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">long</span> startTime <span style="color:#f92672">=</span> mPreferences<span style="color:#f92672">.</span><span style="color:#a6e22e">getStartedTime</span><span style="color:#f92672">();</span>
-</span></span><span style="display:flex;"><span>        mTimeToGo <span style="color:#f92672">=</span> <span style="color:#f92672">(</span>TIMER_LENGHT <span style="color:#f92672">-</span> <span style="color:#f92672">(</span>getNow<span style="color:#f92672">()</span> <span style="color:#f92672">-</span> startTime<span style="color:#f92672">));</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>mTimeToGo <span style="color:#f92672">&lt;=</span> 0<span style="color:#f92672">)</span> <span style="color:#f92672">{</span> <span style="color:#75715e">// TIMER EXPIRED
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>            mTimeToGo <span style="color:#f92672">=</span> TIMER_LENGHT<span style="color:#f92672">;</span>
-</span></span><span style="display:flex;"><span>            onTimerFinish<span style="color:#f92672">();</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#f92672">}</span> <span style="color:#66d9ef">else</span> <span style="color:#f92672">{</span>
-</span></span><span style="display:flex;"><span>            startTimer<span style="color:#f92672">();</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#f92672">}</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#f92672">}</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl">    <span class="kd">private</span> <span class="kt">void</span> <span class="nf">initTimer</span><span class="o">()</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">long</span> <span class="n">startTime</span> <span class="o">=</span> <span class="n">mPreferences</span><span class="o">.</span><span class="na">getStartedTime</span><span class="o">();</span>
+</span></span><span class="line"><span class="cl">        <span class="n">mTimeToGo</span> <span class="o">=</span> <span class="o">(</span><span class="n">TIMER_LENGHT</span> <span class="o">-</span> <span class="o">(</span><span class="n">getNow</span><span class="o">()</span> <span class="o">-</span> <span class="n">startTime</span><span class="o">));</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="o">(</span><span class="n">mTimeToGo</span> <span class="o">&lt;=</span> <span class="n">0</span><span class="o">)</span> <span class="o">{</span> <span class="c1">// TIMER EXPIRED
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>            <span class="n">mTimeToGo</span> <span class="o">=</span> <span class="n">TIMER_LENGHT</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">            <span class="n">onTimerFinish</span><span class="o">();</span>
+</span></span><span class="line"><span class="cl">        <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">startTimer</span><span class="o">();</span>
+</span></span><span class="line"><span class="cl">        <span class="o">}</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
 </span></span></code></pre></div><p>The app tries to retrieve the start time value. If there still is  some time to run, the countdown restarts for the remaining length of time. Otherwise the timer is reset and the user is notified of the timer expiration.</p>
-<p>Please note that this is a ultra simplified version that assumes that <em>the timer is running</em>. The <a href="https://github.com/fedepaol/AndroidTimerSample">github sample</a> checks also if the timer was started or not.</p>
-<h2 id="handling-the-alarm">Handling the alarm</h2>
+<p>Please note that this is a ultra simplified version that assumes that <em>the timer is running</em>. The <a href="https://github.com/fedepaol/AndroidTimerSample"  class="external-link" target="_blank" rel="noopener">github sample</a> checks also if the timer was started or not.</p>
+<h2 id="handling-the-alarm">
+  Handling the alarm
+  <a class="heading-link" href="#handling-the-alarm">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
 <p>This is simple. You should set the alarm that triggers a broadcast receiver through the alarm manager:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span>    <span style="color:#a6e22e">@Override</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">protected</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">onPause</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">super</span><span style="color:#f92672">.</span><span style="color:#a6e22e">onPause</span><span style="color:#f92672">();</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">long</span> wakeUpTime <span style="color:#f92672">=</span> <span style="color:#f92672">(</span>mPreferences<span style="color:#f92672">.</span><span style="color:#a6e22e">getStartedTime</span><span style="color:#f92672">()</span> <span style="color:#f92672">+</span> TIMER_LENGHT<span style="color:#f92672">)</span> <span style="color:#f92672">*</span> 1000<span style="color:#f92672">;</span>
-</span></span><span style="display:flex;"><span>        AlarmManager am <span style="color:#f92672">=</span> <span style="color:#f92672">(</span>AlarmManager<span style="color:#f92672">)</span> getSystemService<span style="color:#f92672">(</span>Context<span style="color:#f92672">.</span><span style="color:#a6e22e">ALARM_SERVICE</span><span style="color:#f92672">);</span>
-</span></span><span style="display:flex;"><span>        Intent intent <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Intent<span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">,</span> TimerExpiredReceiver<span style="color:#f92672">.</span><span style="color:#a6e22e">class</span><span style="color:#f92672">);</span>
-</span></span><span style="display:flex;"><span>        PendingIntent sender <span style="color:#f92672">=</span> PendingIntent<span style="color:#f92672">.</span><span style="color:#a6e22e">getBroadcast</span><span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">,</span> 0<span style="color:#f92672">,</span> intent<span style="color:#f92672">,</span> PendingIntent<span style="color:#f92672">.</span><span style="color:#a6e22e">FLAG_CANCEL_CURRENT</span><span style="color:#f92672">);</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>Build<span style="color:#f92672">.</span><span style="color:#a6e22e">VERSION</span><span style="color:#f92672">.</span><span style="color:#a6e22e">SDK_INT</span> <span style="color:#f92672">&gt;=</span> Build<span style="color:#f92672">.</span><span style="color:#a6e22e">VERSION_CODES</span><span style="color:#f92672">.</span><span style="color:#a6e22e">LOLLIPOP</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
-</span></span><span style="display:flex;"><span>            am<span style="color:#f92672">.</span><span style="color:#a6e22e">setAlarmClock</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> AlarmManager<span style="color:#f92672">.</span><span style="color:#a6e22e">AlarmClockInfo</span><span style="color:#f92672">(</span>wakeUpTime<span style="color:#f92672">,</span> sender<span style="color:#f92672">),</span> sender<span style="color:#f92672">);</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#f92672">}</span> <span style="color:#66d9ef">else</span> <span style="color:#f92672">{</span>
-</span></span><span style="display:flex;"><span>            am<span style="color:#f92672">.</span><span style="color:#a6e22e">set</span><span style="color:#f92672">(</span>AlarmManager<span style="color:#f92672">.</span><span style="color:#a6e22e">RTC_WAKEUP</span><span style="color:#f92672">,</span> wakeUpTime<span style="color:#f92672">,</span> sender<span style="color:#f92672">);</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#f92672">}</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#f92672">}</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl">    <span class="nd">@Override</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">onPause</span><span class="o">()</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="kd">super</span><span class="o">.</span><span class="na">onPause</span><span class="o">();</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">long</span> <span class="n">wakeUpTime</span> <span class="o">=</span> <span class="o">(</span><span class="n">mPreferences</span><span class="o">.</span><span class="na">getStartedTime</span><span class="o">()</span> <span class="o">+</span> <span class="n">TIMER_LENGHT</span><span class="o">)</span> <span class="o">*</span> <span class="n">1000</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">AlarmManager</span> <span class="n">am</span> <span class="o">=</span> <span class="o">(</span><span class="n">AlarmManager</span><span class="o">)</span> <span class="n">getSystemService</span><span class="o">(</span><span class="n">Context</span><span class="o">.</span><span class="na">ALARM_SERVICE</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">Intent</span> <span class="n">intent</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Intent</span><span class="o">(</span><span class="k">this</span><span class="o">,</span> <span class="n">TimerExpiredReceiver</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">PendingIntent</span> <span class="n">sender</span> <span class="o">=</span> <span class="n">PendingIntent</span><span class="o">.</span><span class="na">getBroadcast</span><span class="o">(</span><span class="k">this</span><span class="o">,</span> <span class="n">0</span><span class="o">,</span> <span class="n">intent</span><span class="o">,</span> <span class="n">PendingIntent</span><span class="o">.</span><span class="na">FLAG_CANCEL_CURRENT</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="o">(</span><span class="n">Build</span><span class="o">.</span><span class="na">VERSION</span><span class="o">.</span><span class="na">SDK_INT</span> <span class="o">&gt;=</span> <span class="n">Build</span><span class="o">.</span><span class="na">VERSION_CODES</span><span class="o">.</span><span class="na">LOLLIPOP</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">am</span><span class="o">.</span><span class="na">setAlarmClock</span><span class="o">(</span><span class="k">new</span> <span class="n">AlarmManager</span><span class="o">.</span><span class="na">AlarmClockInfo</span><span class="o">(</span><span class="n">wakeUpTime</span><span class="o">,</span> <span class="n">sender</span><span class="o">),</span> <span class="n">sender</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">        <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">am</span><span class="o">.</span><span class="na">set</span><span class="o">(</span><span class="n">AlarmManager</span><span class="o">.</span><span class="na">RTC_WAKEUP</span><span class="o">,</span> <span class="n">wakeUpTime</span><span class="o">,</span> <span class="n">sender</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">        <span class="o">}</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
 </span></span></code></pre></div><p>and cancel it in onResume:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span>    <span style="color:#a6e22e">@Override</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">protected</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">onResume</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">super</span><span style="color:#f92672">.</span><span style="color:#a6e22e">onResume</span><span style="color:#f92672">();</span>
-</span></span><span style="display:flex;"><span>        Intent intent <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Intent<span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">,</span> TimerExpiredReceiver<span style="color:#f92672">.</span><span style="color:#a6e22e">class</span><span style="color:#f92672">);</span>
-</span></span><span style="display:flex;"><span>        PendingIntent sender <span style="color:#f92672">=</span> PendingIntent<span style="color:#f92672">.</span><span style="color:#a6e22e">getBroadcast</span><span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">,</span> 0<span style="color:#f92672">,</span> intent<span style="color:#f92672">,</span> PendingIntent<span style="color:#f92672">.</span><span style="color:#a6e22e">FLAG_CANCEL_CURRENT</span><span style="color:#f92672">);</span>
-</span></span><span style="display:flex;"><span>        AlarmManager am <span style="color:#f92672">=</span> <span style="color:#f92672">(</span>AlarmManager<span style="color:#f92672">)</span> getSystemService<span style="color:#f92672">(</span>Context<span style="color:#f92672">.</span><span style="color:#a6e22e">ALARM_SERVICE</span><span style="color:#f92672">);</span>
-</span></span><span style="display:flex;"><span>        am<span style="color:#f92672">.</span><span style="color:#a6e22e">cancel</span><span style="color:#f92672">(</span>sender<span style="color:#f92672">);</span>
-</span></span><span style="display:flex;"><span>   <span style="color:#f92672">}</span>
-</span></span></code></pre></div><p>Launching a system notification that brings the user back to the app when clicked is trivial. You can check the <a href="https://github.com/fedepaol/AndroidTimerSample">sample on github</a>.</p>
-<h2 id="conclusion">Conclusion</h2>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl">    <span class="nd">@Override</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">onResume</span><span class="o">()</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="kd">super</span><span class="o">.</span><span class="na">onResume</span><span class="o">();</span>
+</span></span><span class="line"><span class="cl">        <span class="n">Intent</span> <span class="n">intent</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Intent</span><span class="o">(</span><span class="k">this</span><span class="o">,</span> <span class="n">TimerExpiredReceiver</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">PendingIntent</span> <span class="n">sender</span> <span class="o">=</span> <span class="n">PendingIntent</span><span class="o">.</span><span class="na">getBroadcast</span><span class="o">(</span><span class="k">this</span><span class="o">,</span> <span class="n">0</span><span class="o">,</span> <span class="n">intent</span><span class="o">,</span> <span class="n">PendingIntent</span><span class="o">.</span><span class="na">FLAG_CANCEL_CURRENT</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">AlarmManager</span> <span class="n">am</span> <span class="o">=</span> <span class="o">(</span><span class="n">AlarmManager</span><span class="o">)</span> <span class="n">getSystemService</span><span class="o">(</span><span class="n">Context</span><span class="o">.</span><span class="na">ALARM_SERVICE</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">am</span><span class="o">.</span><span class="na">cancel</span><span class="o">(</span><span class="n">sender</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">   <span class="o">}</span>
+</span></span></code></pre></div><p>Launching a system notification that brings the user back to the app when clicked is trivial. You can check the <a href="https://github.com/fedepaol/AndroidTimerSample"  class="external-link" target="_blank" rel="noopener">sample on github</a>.</p>
+<h2 id="conclusion">
+  Conclusion
+  <a class="heading-link" href="#conclusion">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
 <p>What I wrote today may sound obvious to a lot of experienced developers.</p>
 <p>However, I thought it was a post worth writing since it&rsquo;s a good example of how you should always remember the ecosystem your app is being run into.
 If you forget this and think that <strong>your app is the most important app the user has in his phone</strong>, you&rsquo;ll face some unexpected behaviours (the app gets killed) or you will piss the user off (the app needs to be active for the whole length of the timer).</p>
 <p>Thanks as always to Fabio Collini and Riccardo Ciovati for proofreading.</p>
 
-  </div>
-</div>
-<div class="container has-text-centered">
+      </div>
+
+
+      <footer>
+        
+
+
+        <div id="disqus_thread"></div>
+<script>
+  window.disqus_config = function () {
     
-</div>
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "fedepaolgithubio" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+    
+    document.addEventListener('themeChanged', function (e) { 
+        if (document.readyState == 'complete') {
+          DISQUS.reset({ reload: true, config: disqus_config });
+        }
+    });
+</script>
+        
+        
+        
+        
+      </footer>
+    </article>
 
-<div class="container has-text-centered">
+    
+  </section>
+
+    </div>
+
+    <footer class="footer">
+  <section class="container">
+    ©
+    
+    2023
+     Federico Paolinelli 
+    ·
+    
+    Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/" target="_blank" rel="noopener">Coder</a>.
+    
+  </section>
+</footer>
+
+  </main>
+
   
-    <div id="disqus_thread"></div>
-    <script type="text/javascript">
-      (function() {
-          
-          
-          if (window.location.hostname == "localhost")
-              return;
-      
-          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-          var disqus_shortname = 'fedepaolgithubio';
-          dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
-          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-      })();
-    </script>
-    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-    <a href="http://disqus.com/" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
   
-</div>
-<section class="section">
-  <div class="container has-text-centered">
-    <p></p>
-  </div>
-</section>
+  
+  <script src="/js/coder.min.6ae284be93d2d19dad1f02b0039508d9aab3180a12a06dcc71b0b0ef7825a317.js" integrity="sha256-auKEvpPS0Z2tHwKwA5UI2aqzGAoSoG3McbCw73gloxc="></script>
+  
+
+  
+
+  
 
 
+  
 <script type="application/javascript">
 var doNotTrack = false;
 if (!doNotTrack) {
-	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
 	ga('create', 'UA-16514009-2', 'auto');
 	
 	ga('send', 'pageview');
 }
 </script>
-<script async src='https://www.google-analytics.com/analytics.js'></script>
 
+  
 
+  
 
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+
+</html>

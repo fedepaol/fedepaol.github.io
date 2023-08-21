@@ -1,118 +1,278 @@
 <!DOCTYPE html>
-<html lang="en-us">
-<meta charset="UTF-8">
+<html lang="en">
+
+<head>
+  <title>
+  My sqllite helper builder · My little software warehouse
+</title>
+  <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
 
 
 
 
-<title>My sqllite helper builder | My little software warehouse</title>
+<meta name="author" content="Federico Paolinelli">
+<meta name="description" content="EDIT 11/11/2012: as described in this new blog post, I modified the script to generate a content provider as well
+This is my first post about something related to android.
+Just to break the ice, I would like to introduce a simple helper script I developed this summer.
+Android ships with a very nice local storage, which is sqllite. It&#39;s said almost everywhere that, in order to make your life easier, you should develop an helper class.">
+<meta name="keywords" content="">
 
-<link rel="stylesheet" href="https://fedepaol.github.io//css/styles.css">
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="My sqllite helper builder"/>
+<meta name="twitter:description" content="EDIT 11/11/2012: as described in this new blog post, I modified the script to generate a content provider as well
+This is my first post about something related to android.
+Just to break the ice, I would like to introduce a simple helper script I developed this summer.
+Android ships with a very nice local storage, which is sqllite. It&#39;s said almost everywhere that, in order to make your life easier, you should develop an helper class."/>
 
-<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css" 
-integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbiDQ" crossorigin="anonymous">
-<script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
-
-
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/zenburn.min.css" crossorigin="anonymous" />
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js" integrity="sha256-/BfiIkHlHoVihZdc6TFuj7MmJ0TWcWsMXkeDFwhi0zw=" crossorigin="anonymous"></script>
-<script>hljs.initHighlightingOnLoad();</script>
-<script src="https://fedepaol.github.io//js/highlight.js"></script>
-
-
+<meta property="og:title" content="My sqllite helper builder" />
+<meta property="og:description" content="EDIT 11/11/2012: as described in this new blog post, I modified the script to generate a content provider as well
+This is my first post about something related to android.
+Just to break the ice, I would like to introduce a simple helper script I developed this summer.
+Android ships with a very nice local storage, which is sqllite. It&#39;s said almost everywhere that, in order to make your life easier, you should develop an helper class." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://fedepaol.github.io/blog/2010/11/18/my-sqllite-helper-builder/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2010-11-18T00:00:00+00:00" />
+<meta property="article:modified_time" content="2010-11-18T00:00:00+00:00" />
 
 
 
 
-<div class="container">
-    <nav class="navbar level">
-      <div class="navbar-brand">
-          <a class="nav-item" href="https://fedepaol.github.io/"><h1 class="title is-3">My little software warehouse</h1></a>
-      </div>           
-      <div class="navbar-menu has-text-centered is-active">
-          <div class="navbar-end is-centered">
-              
-                <a href="https://twitter.com/fedepaol" rel="me">
-                  <span class="icon">
-                    <i class="fab fa-twitter"></i>
-                  </span>
-                </a>
-              
-                <a href="https://fedepaol.github.io/about" rel="me">
-                  <span class="icon">
-                    <i class="fas fa-info"></i>
-                  </span>
-                </a>
-              
-                <a href="https://github.com/fedepaol" rel="me">
-                  <span class="icon">
-                    <i class="fab fa-github"></i>
-                  </span>
-                </a>
-              
-                <a href="https://linkedin.com/in/federico-paolinelli-2374954/" rel="me">
-                  <span class="icon">
-                    <i class="fab fa-linkedin-in"></i>
-                  </span>
-                </a>
-              
-           </div>
-      </div>
-    </nav>
-  </div>
+<link rel="canonical" href="https://fedepaol.github.io/blog/2010/11/18/my-sqllite-helper-builder/">
 
-<div class="container">
-  <h2 class="subtitle is-6">November 18, 2010</h2>
-  <h1 class="subtitle is-size-4-mobile is-size-3-desktop">My sqllite helper builder</h1>
-  <div class="content">
+
+<link rel="preload" href="/fonts/forkawesome-webfont.woff2?v=1.2.0" as="font" type="font/woff2" crossorigin>
+
+
+  
+  
+  <link rel="stylesheet" href="/css/coder.min.4218e9a82fcc372a4835bc96c50c77e11ac52ebe04361b7efd80f5f332ec3e89.css" integrity="sha256-QhjpqC/MNypINbyWxQx34RrFLr4ENht&#43;/YD18zLsPok=" crossorigin="anonymous" media="screen" />
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+<link rel="icon" type="image/svg+xml" href="/images/favicon.svg" sizes="any">
+<link rel="icon" type="image/png" href="/images/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="/images/favicon-16x16.png" sizes="16x16">
+
+<link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+<link rel="manifest" href="/site.webmanifest">
+<link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+
+
+
+
+
+
+</head>
+
+
+
+
+<body class="preload-transitions colorscheme-light">
+  
+<div class="float-container">
+    <a id="dark-mode-toggle" class="colorscheme-toggle">
+        <i class="fa fa-adjust fa-fw" aria-hidden="true"></i>
+    </a>
+</div>
+
+
+  <main class="wrapper">
+    <nav class="navigation">
+  <section class="container">
+    <a class="navigation-title" href="/">
+      My little software warehouse
+    </a>
     
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/posts/">Blog</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/about/">About</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="mailto:fedepaol@gmail.com">Contact</a>
+            </li>
+          
+        
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+    <div class="content">
+      
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">
+            <a class="title-link" href="https://fedepaol.github.io/blog/2010/11/18/my-sqllite-helper-builder/">
+              My sqllite helper builder
+            </a>
+          </h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa fa-calendar" aria-hidden="true"></i>
+              <time datetime="2010-11-18T00:00:00Z">
+                November 18, 2010
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa fa-clock-o" aria-hidden="true"></i>
+              2-minute read
+            </span>
+          </div>
+          
+          
+          
+        </div>
+      </header>
+
+      <div class="post-content">
+        
+        
 <div class='post'>
 EDIT 11/11/2012: as described in <a href="/blog/2012/11/11/android-content-providers-generator">this new blog post</a>, I modified the script to generate a content provider as well<br /><br />This is my first post about something related to android.<br />Just to break the ice, I would like to introduce a simple helper script I developed this summer.<br /><br />Android ships with a very nice local storage, which is sqllite. It's said almost everywhere that, in order to make your life easier, you should develop an helper class.<br />It will take care of open / close the sqllite db, of the version control and of any other kind of interaction you may have with it.<br /><br />A nice example can be found in the official android documentation <a href="http://developer.android.com/guide/topics/data/data-storage.html#db">here</a><br />or <a href="http://developer.android.com/resources/samples/NotePad/index.html">here</a>.<br />Reto Meier in his excellent "Professional Android Development" explains the same, and I am pretty sure its the same for other manuals.<br /><br />Well, building a sqllite helper is BOOORING. You always have to do the same things, write the same functions of every table you want to store in it.<br />And here is where my script comes in your help.<br />You just provide it a configuration file with the description of the tables you want to store in it, and it will give you the dbhelper java file.<br /><br /><br />A configuration file looks like this:<br /><br /><pre style="background-color: #eeeeee; border: 1px dashed rgb(153, 153, 153); color: black; font-family: Andale Mono,Lucida Console,Monaco,fixed,monospace; font-size: 12px; line-height: 14px; overflow: auto; padding: 5px; width: 100%;"><code><br />CLASS Employee<br />String Name<br />Date Birthday<br />Double weigth<br />ENDCLASS<br /><br />CLASS Call<br />String Number<br />Date Time<br />ENDCLASS</code></pre><br /><br />The available types are<br />String, Double, Long, Integer and Date<br /><br />The available script commands are:<br /><br /><pre style="background-color: #eeeeee; border: 1px dashed rgb(153, 153, 153); color: black; font-family: Andale Mono,Lucida Console,Monaco,fixed,monospace; font-size: 12px; line-height: 14px; overflow: auto; padding: 5px; width: 100%;"><code> -h, --help            show this help message and exit<br />-i INFILE, --infile=INFILE<br />                     file that contains classes definition<br />-n NAME, --name=NAME  name of the dbhelper class<br />-p PACKAGE, --package=PACKAGE<br />                     name of the package</code></pre><br /><br /><br /><br />So, instead of spending an entire afternoon writing the same add / remove / getAll methods, all you have to do is to compile the configuration file, launch something like<br /><br /><pre style="background-color: #eeeeee; border: 1px dashed rgb(153, 153, 153); color: black; font-family: Andale Mono,Lucida Console,Monaco,fixed,monospace; font-size: 12px; line-height: 14px; overflow: auto; padding: 5px; width: 100%;"><code>python sql_lite_helper.py -i sample.txt -n MyDbAdapter -p com.my.package</code></pre><br /><br />and you'll have your brand new sqllite helper class. Of course you can extend it, for example if you want to have some insert / get methods that accept and return java classes instead of fields, but in any case it will save you a lot of time.<br /><br />An example of the output file can be found <a href="http://dl.dropbox.com/u/3092639/Archive.zip">here</a>.<br /><br />The script is available on github <a href="https://github.com/fedepaol/Android-sql-lite-helper">here</a>.<br /><br />I really hope it can help somebody. If you have any issues / requests, feel free to contact me at fedepaol[AT]gmail[DOT]com .</div>
 
-  </div>
-</div>
-<div class="container has-text-centered">
+      </div>
+
+
+      <footer>
+        
+
+
+        <div id="disqus_thread"></div>
+<script>
+  window.disqus_config = function () {
     
-</div>
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "fedepaolgithubio" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+    
+    document.addEventListener('themeChanged', function (e) { 
+        if (document.readyState == 'complete') {
+          DISQUS.reset({ reload: true, config: disqus_config });
+        }
+    });
+</script>
+        
+        
+        
+        
+      </footer>
+    </article>
 
-<div class="container has-text-centered">
+    
+  </section>
+
+    </div>
+
+    <footer class="footer">
+  <section class="container">
+    ©
+    
+    2023
+     Federico Paolinelli 
+    ·
+    
+    Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/" target="_blank" rel="noopener">Coder</a>.
+    
+  </section>
+</footer>
+
+  </main>
+
   
-    <div id="disqus_thread"></div>
-    <script type="text/javascript">
-      (function() {
-          
-          
-          if (window.location.hostname == "localhost")
-              return;
-      
-          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-          var disqus_shortname = 'fedepaolgithubio';
-          dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
-          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-      })();
-    </script>
-    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-    <a href="http://disqus.com/" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
   
-</div>
-<section class="section">
-  <div class="container has-text-centered">
-    <p></p>
-  </div>
-</section>
+  
+  <script src="/js/coder.min.6ae284be93d2d19dad1f02b0039508d9aab3180a12a06dcc71b0b0ef7825a317.js" integrity="sha256-auKEvpPS0Z2tHwKwA5UI2aqzGAoSoG3McbCw73gloxc="></script>
+  
+
+  
+
+  
 
 
+  
 <script type="application/javascript">
 var doNotTrack = false;
 if (!doNotTrack) {
-	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
 	ga('create', 'UA-16514009-2', 'auto');
 	
 	ga('send', 'pageview');
 }
 </script>
-<script async src='https://www.google-analytics.com/analytics.js'></script>
 
+  
 
+  
 
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+
+</html>
