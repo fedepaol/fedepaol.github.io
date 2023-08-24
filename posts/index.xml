@@ -6,7 +6,18 @@
     <description>Recent content in Posts on My little software warehouse</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Mon, 21 Aug 2023 15:01:51 +0100</lastBuildDate><atom:link href="https://fedepaol.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Thu, 24 Aug 2023 21:45:30 +0200</lastBuildDate><atom:link href="https://fedepaol.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Managing Kubernetes Resources with Controller Runtime&#39;s Field Manager</title>
+      <link>https://fedepaol.github.io/blog/2023/08/24/managing-kubernetes-resources-with-controller-runtimes-field-manager/</link>
+      <pubDate>Thu, 24 Aug 2023 21:45:30 +0200</pubDate>
+      
+      <guid>https://fedepaol.github.io/blog/2023/08/24/managing-kubernetes-resources-with-controller-runtimes-field-manager/</guid>
+      <description>The problem with mutated fields Link to heading Having kubernetes resources that do not sync is a common problem when dealing with a continuos delivery system such as ArgoCD and external components that change those resources.
+What happens is:
+the CD system applies a change based on some configuration the change is overridden by some controller the CD system sees a difference between the observed state and the desired state (the mutation from the step above) and this goes on forever, unless the CD system is instructed to ignore the differences.</description>
+    </item>
+    
     <item>
       <title>eBPF journey by examples: eBPF tracepoints with Falco</title>
       <link>https://fedepaol.github.io/blog/2023/08/21/ebpf-journey-by-examples-ebpf-tracepoints-with-falco/</link>

@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>
+  Managing Kubernetes Resources with Controller Runtime&#39;s Field Manager · My little software warehouse
+</title>
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+
+
+
+
+<meta name="author" content="Federico Paolinelli">
+<meta name="description" content="Explore the nuances of managing Kubernetes resources using the powerful &#39;controller-runtime&#39; framework. Learn how to leverage the field manager concept to streamline updates and avoid synchronization issues.">
+<meta name="keywords" content="">
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Managing Kubernetes Resources with Controller Runtime&#39;s Field Manager"/>
+<meta name="twitter:description" content="Explore the nuances of managing Kubernetes resources using the powerful &#39;controller-runtime&#39; framework. Learn how to leverage the field manager concept to streamline updates and avoid synchronization issues."/>
+
+<meta property="og:title" content="Managing Kubernetes Resources with Controller Runtime&#39;s Field Manager" />
+<meta property="og:description" content="Explore the nuances of managing Kubernetes resources using the powerful &#39;controller-runtime&#39; framework. Learn how to leverage the field manager concept to streamline updates and avoid synchronization issues." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://fedepaol.github.io/blog/2023/08/24/managing-kubernetes-resources-with-controller-runtimes-field-manager/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2023-08-24T21:45:30+02:00" />
+<meta property="article:modified_time" content="2023-08-24T21:45:30+02:00" />
+
+
+
+
+<link rel="canonical" href="https://fedepaol.github.io/blog/2023/08/24/managing-kubernetes-resources-with-controller-runtimes-field-manager/">
+
+
+<link rel="preload" href="/fonts/forkawesome-webfont.woff2?v=1.2.0" as="font" type="font/woff2" crossorigin>
+
+
+  
+  
+  <link rel="stylesheet" href="/css/coder.min.4218e9a82fcc372a4835bc96c50c77e11ac52ebe04361b7efd80f5f332ec3e89.css" integrity="sha256-QhjpqC/MNypINbyWxQx34RrFLr4ENht&#43;/YD18zLsPok=" crossorigin="anonymous" media="screen" />
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+<link rel="icon" type="image/svg+xml" href="/images/favicon.svg" sizes="any">
+<link rel="icon" type="image/png" href="/images/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="/images/favicon-16x16.png" sizes="16x16">
+
+<link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+<link rel="manifest" href="/site.webmanifest">
+<link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+
+
+
+
+
+
+</head>
+
+
+
+
+<body class="preload-transitions colorscheme-light">
+  
+<div class="float-container">
+    <a id="dark-mode-toggle" class="colorscheme-toggle">
+        <i class="fa fa-adjust fa-fw" aria-hidden="true"></i>
+    </a>
+</div>
+
+
+  <main class="wrapper">
+    <nav class="navigation">
+  <section class="container">
+    <a class="navigation-title" href="/">
+      My little software warehouse
+    </a>
+    
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/posts/">Blog</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/about/">About</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="mailto:fedepaol@gmail.com">Contact</a>
+            </li>
+          
+        
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+    <div class="content">
+      
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">
+            <a class="title-link" href="https://fedepaol.github.io/blog/2023/08/24/managing-kubernetes-resources-with-controller-runtimes-field-manager/">
+              Managing Kubernetes Resources with Controller Runtime&#39;s Field Manager
+            </a>
+          </h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa fa-calendar" aria-hidden="true"></i>
+              <time datetime="2023-08-24T21:45:30&#43;02:00">
+                August 24, 2023
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa fa-clock-o" aria-hidden="true"></i>
+              2-minute read
+            </span>
+          </div>
+          
+          
+          
+        </div>
+      </header>
+
+      <div class="post-content">
+        
+        <h1 id="the-problem-with-mutated-fields">
+  The problem with mutated fields
+  <a class="heading-link" href="#the-problem-with-mutated-fields">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h1>
+<p>Having kubernetes resources that do not sync is a common problem when dealing with a continuos delivery system such as <a href="https://argoproj.github.io/cd/"  class="external-link" target="_blank" rel="noopener">ArgoCD</a> and external components that change those resources.</p>
+<p>What happens is:</p>
+<ul>
+<li>the CD system applies a change based on some configuration</li>
+<li>the change is overridden by some controller</li>
+<li>the CD system sees a difference between the observed state and the desired state (the mutation from the step above)</li>
+</ul>
+<p>and this goes on forever, unless the CD system is instructed to <a href="https://argo-cd.readthedocs.io/en/stable/user-guide/diffing/#application-level-configuration"  class="external-link" target="_blank" rel="noopener">ignore the differences</a>.</p>
+<p>We hit this <a href="https://github.com/metallb/metallb/issues/1681"  class="external-link" target="_blank" rel="noopener">issue</a> in MetalLB, where we inject the caBundle in the CRDs to make the conversion webhooks work.</p>
+<h2 id="setting-the-field-manager">
+  Setting the field manager
+  <a class="heading-link" href="#setting-the-field-manager">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>By declaring the manager of a given field, we can instruct the CD system that it shouldn&rsquo;t care about some fields
+because they are handled by something else (see <a href="https://kubernetes.io/docs/reference/using-api/server-side-apply/#field-management"  class="external-link" target="_blank" rel="noopener">the official docs</a>).</p>
+<h2 id="understanding-the-field-manager-in-controller-runtime">
+  Understanding the Field Manager in Controller Runtime
+  <a class="heading-link" href="#understanding-the-field-manager-in-controller-runtime">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>The <a href="https://github.com/kubernetes-sigs/controller-runtime"  class="external-link" target="_blank" rel="noopener">controller runtime</a> is my go to framework when I need to write a kubernetes controller. It offers a very convenient way to
+set the field manager when updating an object:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl">    <span class="nx">cli</span><span class="p">.</span><span class="nf">Update</span><span class="p">(</span><span class="nx">context</span><span class="p">.</span><span class="nf">TODO</span><span class="p">(),</span> <span class="nx">toUpdate</span><span class="p">,</span> <span class="nx">client</span><span class="p">.</span><span class="nf">FieldOwner</span><span class="p">(</span><span class="s">&#34;foo&#34;</span><span class="p">))</span>
+</span></span></code></pre></div><p>By doing this, the server side will set the field owner and the CD system will be able to understand the change has to
+be ignored.</p>
+<h2 id="verifying-everything-works">
+  Verifying everything works
+  <a class="heading-link" href="#verifying-everything-works">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>This is the major reason why I am writing this post, and the cause making this work took so much of my time (and I almost gave up).</p>
+<p>Turns out that <code>kubectl</code> has a <code>--show-managed-fields</code> flag to set when checking a given resource. Without that, those fields will be hidden in the output to avoid bloating the yaml!</p>
+<h3 id="wrapping-up">
+  Wrapping up
+  <a class="heading-link" href="#wrapping-up">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>I hope this post may help whoever is looking to set the fieldmanager of a given resource using the controller-runtime, because
+it took a considerable amount of my time (compared to the final, one liner solution).</p>
+
+      </div>
+
+
+      <footer>
+        
+
+
+        <div id="disqus_thread"></div>
+<script>
+  window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "fedepaolgithubio" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+    
+    document.addEventListener('themeChanged', function (e) { 
+        if (document.readyState == 'complete') {
+          DISQUS.reset({ reload: true, config: disqus_config });
+        }
+    });
+</script>
+        
+        
+        
+        
+      </footer>
+    </article>
+
+    
+  </section>
+
+    </div>
+
+    <footer class="footer">
+  <section class="container">
+    ©
+    
+    2023
+     Federico Paolinelli 
+    ·
+    
+    Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/" target="_blank" rel="noopener">Coder</a>.
+    
+  </section>
+</footer>
+
+  </main>
+
+  
+
+  
+  
+  <script src="/js/coder.min.6ae284be93d2d19dad1f02b0039508d9aab3180a12a06dcc71b0b0ef7825a317.js" integrity="sha256-auKEvpPS0Z2tHwKwA5UI2aqzGAoSoG3McbCw73gloxc="></script>
+  
+
+  
+
+  
+
+
+  
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-16514009-2', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+
+</html>
