@@ -6,16 +6,16 @@
     <description>Recent content on My little software warehouse</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Thu, 24 Aug 2023 21:45:30 +0200</lastBuildDate><atom:link href="https://fedepaol.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Wed, 06 Sep 2023 15:01:51 +0100</lastBuildDate><atom:link href="https://fedepaol.github.io/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>Managing Kubernetes Resources with Controller Runtime&#39;s Field Manager</title>
-      <link>https://fedepaol.github.io/blog/2023/08/24/managing-kubernetes-resources-with-controller-runtimes-field-manager/</link>
-      <pubDate>Thu, 24 Aug 2023 21:45:30 +0200</pubDate>
+      <title>eBPF journey by examples: L4 load balancing with XDP and Katran</title>
+      <link>https://fedepaol.github.io/blog/2023/09/06/ebpf-journey-by-examples-l4-load-balancing-with-xdp-and-katran/</link>
+      <pubDate>Wed, 06 Sep 2023 15:01:51 +0100</pubDate>
       
-      <guid>https://fedepaol.github.io/blog/2023/08/24/managing-kubernetes-resources-with-controller-runtimes-field-manager/</guid>
-      <description>The problem with mutated fields Link to heading Having kubernetes resources that do not sync is a common problem when dealing with a continuos delivery system such as ArgoCD and external components that change those resources.
-What happens is:
-the CD system applies a change based on some configuration the change is overridden by some controller the CD system sees a difference between the observed state and the desired state (the mutation from the step above) and this goes on forever, unless the CD system is instructed to ignore the differences.</description>
+      <guid>https://fedepaol.github.io/blog/2023/09/06/ebpf-journey-by-examples-l4-load-balancing-with-xdp-and-katran/</guid>
+      <description>Katran  Link to heading   This is my second post about digging into popular eBPF projects. You can see the first post about Falco and tracepoints here.
+This time I am looking at katran, an xdp based loadbalancer opensourced by Meta.
+A loadbalancer works in a very simple way: it translates network packets directed towards a single virtual IP (VIP) toward a serie of endpoints (reals, in katran&amp;rsquo;s lingo), while maintaining session consistency (meaning, all the packets belonging to a given tcp session are sent to the same real).</description>
     </item>
     
     <item>
@@ -24,9 +24,9 @@ the CD system applies a change based on some configuration the change is overrid
       <pubDate>Mon, 21 Aug 2023 15:01:51 +0100</pubDate>
       
       <guid>https://fedepaol.github.io/blog/2023/08/21/ebpf-journey-by-examples-ebpf-tracepoints-with-falco/</guid>
-      <description>Learning from existing projects Link to heading This is the first post of my journey into learning eBPF by samples. My idea here is to dig into how popular projects use eBPF to solve various problems, in order to benefit from real implementations and leverage existing scenarios rather than simple tutorials.
+      <description>Learning from existing projects  Link to heading   This is the first post of my journey into learning eBPF by samples. My idea here is to dig into how popular projects use eBPF to solve various problems, in order to benefit from real implementations and leverage existing scenarios rather than simple tutorials.
 I will proceed as follows:
-I will dig into the source code of each project I am examining, trying to understand both the logic of the project itself but most importantly the ebpf bits I will try to list the relevant code and review it I will implement a simplified version of the relevant logic using go for the user space logic In the spirit of covering the Pareto&amp;rsquo;s 80%, I won&amp;rsquo;t:</description>
+ I will dig into the source code of each project I am examining, trying to understand both the logic of the project itself but most importantly the ebpf bits I will try to list the relevant code and review it I will implement a simplified version of the relevant logic using go for the user space logic  In the spirit of covering the Pareto&amp;rsquo;s 80%, I won&amp;rsquo;t:</description>
     </item>
     
     <item>
@@ -35,7 +35,7 @@ I will dig into the source code of each project I am examining, trying to unders
       <pubDate>Thu, 06 Apr 2023 15:01:51 +0100</pubDate>
       
       <guid>https://fedepaol.github.io/blog/2023/04/06/ebpf-tc-filters-for-egress-traffic/</guid>
-      <description>Network filters with EBPF and TC Link to heading EBPF has been on my radar for a while, and given my involvement with MetalLB, starting from a network hook felt natural.
+      <description>Network filters with EBPF and TC  Link to heading   EBPF has been on my radar for a while, and given my involvement with MetalLB, starting from a network hook felt natural.
 So, I started with a very simple idea in mind: writing a hook that drives the egress traffic to a different next hop, based on some criteria. This comes from a real problem that a few MetalLB users raised: we have an asymmetric return path when the traffic comes to the node via a secondary (i.</description>
     </item>
     
@@ -45,9 +45,9 @@ So, I started with a very simple idea in mind: writing a hook that drives the eg
       <pubDate>Sun, 27 Mar 2022 14:22:36 +0200</pubDate>
       
       <guid>https://fedepaol.github.io/blog/2022/03/27/mixing-cluster-scoped-resources-and-namespaced-resources-with-kubebuilder-and-controller-runtime/</guid>
-      <description>Out of the box Link to heading If we look at the kubebuilder tutorial, it&amp;rsquo;s possible to define a namespace (or a set of namespaces, when using MultiNamespacedCacheBuilder) for our controller to listen on.
+      <description>Out of the box  Link to heading   If we look at the kubebuilder tutorial, it&amp;rsquo;s possible to define a namespace (or a set of namespaces, when using MultiNamespacedCacheBuilder) for our controller to listen on.
 If we don&amp;rsquo;t set the namespace, our controller is meant to be cluster scoped and will listen (and need priviledges) to the resources in all the namespaces.
-The problem Link to heading While working on MetalLB, we had to add an alternative password field of type secret reference.</description>
+The problem  Link to heading   While working on MetalLB, we had to add an alternative password field of type secret reference.</description>
     </item>
     
     <item>
@@ -58,7 +58,7 @@ The problem Link to heading While working on MetalLB, we had to add an alternati
       <guid>https://fedepaol.github.io/blog/2021/01/07/writing-a-kubernetes-controller-part-2/</guid>
       <description>This is the second part of my &amp;ldquo;writing a kubernetes controller&amp;rdquo; blogpost.
 Here, I will explain how to put what was explained int the first part in go code.
-Setting the informer and the workqueue Link to heading This is the first step, where you listen for events and send them to the consumers via the workqueue:
+Setting the informer and the workqueue  Link to heading   This is the first step, where you listen for events and send them to the consumers via the workqueue:
 kubeInformerFactory := kubeinformers.NewSharedInformerFactory(kubeClient, time.Second*30) informer := kubeInformerFactory.Core().V1().Pods() informer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{ AddFunc: func(obj interface{}) { pod := obj.</description>
     </item>
     
@@ -71,7 +71,7 @@ kubeInformerFactory := kubeinformers.NewSharedInformerFactory(kubeClient, time.S
       <description>Even when knowing Go, writing a Kubernetes controller is intimidating.
 In this post, I&amp;rsquo;ll introduce the Kubernetes operating model, how objects are mapped and what are the tools provided by the go-client framework to write bullet proof controllers. In a following post I will explain how to put all the pieces together and how to define and consume custom types.
 I will describe the core components like:
-ClientSets Informers Work Queues (and RateLimiting Work Queues) and how they fit together in writing a Kubernetes controller.</description>
+ ClientSets Informers Work Queues (and RateLimiting Work Queues)  and how they fit together in writing a Kubernetes controller.</description>
     </item>
     
     <item>
@@ -81,9 +81,8 @@ ClientSets Informers Work Queues (and RateLimiting Work Queues) and how they fit
       
       <guid>https://fedepaol.github.io/blog/2020/02/13/how-and-why-to-contribute-to-open-source/</guid>
       <description>Today I am writing about contributing to open source, an argoment that I particularly care about.
-Contributing to opensource is giving something to get something back Link to heading You give away your time and your expertise and you&amp;rsquo;ll eventually get something back.
-Approaching an open source project may be daunting at first Link to heading We find a lot of reasons for that:
-We don&amp;rsquo;t feel good enough We think the project is too complex We are afraid of rejections The truth is, everyone can find a project to add value to, starting from small things to more complex ones.</description>
+Contributing to opensource is giving something to get something back  Link to heading   You give away your time and your expertise and you&amp;rsquo;ll eventually get something back.
+Approaching an open source project may be daunting at first  Link to heading   We find a lot of reasons for that:</description>
     </item>
     
     <item>
@@ -92,9 +91,9 @@ We don&amp;rsquo;t feel good enough We think the project is too complex We are a
       <pubDate>Wed, 23 Oct 2019 22:23:55 +0200</pubDate>
       
       <guid>https://fedepaol.github.io/blog/2019/10/23/golab-2019/</guid>
-      <description>Intro Link to heading In this post I&amp;rsquo;ll try to write about my experience at GoLab 2019.
+      <description>Intro  Link to heading   In this post I&amp;rsquo;ll try to write about my experience at GoLab 2019.
 As per the 2018 edition, I had the honor to give a talk during the Italian Go conference GoLab. There are many reasons why I loved the conference:
-The organization was flawless. The people from Develer have been organizing conferences for a long time and it&amp;rsquo;s pretty clear they know how to do them.</description>
+  The organization was flawless. The people from Develer have been organizing conferences for a long time and it&amp;rsquo;s pretty clear they know how to do them.</description>
     </item>
     
     <item>
@@ -103,7 +102,7 @@ The organization was flawless. The people from Develer have been organizing conf
       <pubDate>Sat, 30 Mar 2019 00:00:00 +0000</pubDate>
       
       <guid>https://fedepaol.github.io/blog/2019/03/30/a-concurrency-experiment/</guid>
-      <description>There are some scenarios where the order matters Link to heading Let&amp;rsquo;s say that you have an api that can receive &amp;ldquo;actions&amp;rdquo; to be performed on a given endpoint.
+      <description>There are some scenarios where the order matters  Link to heading   Let&amp;rsquo;s say that you have an api that can receive &amp;ldquo;actions&amp;rdquo; to be performed on a given endpoint.
 Think about you buying something on Amazon and then changing your mind and revoking your order. You don&amp;rsquo;t want those two actions to be swapped, otherwise the cancellation will be refused (the order you want to cancel do not exists yet) and then the item you don&amp;rsquo;t want anymore will be ordered (since the action of ordering the item receives the backend after the cancelation).</description>
     </item>
     
@@ -124,8 +123,7 @@ Before that, I was working for List implementing mission critical distributed sy
       
       <guid>https://fedepaol.github.io/blog/2018/12/11/fast-messaging-with-nats-and-go-part-2/</guid>
       <description>This is the second of a follow up serie of the talk Fast messaging with Nats and Go I gave at golab 2018. The first part can be found here
-What can we do with nats? Link to heading Pub sub Link to heading As you can probably guess, given that Nats is a pure pub / sub system, we can easily implement pub / sub.
-Please remember that a nats publisher does not assume the audience.</description>
+What can we do with nats?  Link to heading   Pub sub  Link to heading   As you can probably guess, given that Nats is a pure pub / sub system, we can easily implement pub / sub.</description>
     </item>
     
     <item>
@@ -135,7 +133,7 @@ Please remember that a nats publisher does not assume the audience.</description
       
       <guid>https://fedepaol.github.io/blog/2018/10/27/fast-messaging-with-nats-and-go/</guid>
       <description>This is the first of follow up serie of the talk Fast messaging with Nats and Go I gave at golab 2018.
-The slides of the talk can be found here: Link to heading What is Nats Link to heading Nats is a messaging system hosted under the CNCF umbrella, which is an open source software foundation dedicated to making cloud native computing universal and sustainable. It&amp;rsquo;s my place-to-go while looking for software related to distributed systems.</description>
+The slides of the talk can be found here:  Link to heading   What is Nats  Link to heading   Nats is a messaging system hosted under the CNCF umbrella, which is an open source software foundation dedicated to making cloud native computing universal and sustainable.</description>
     </item>
     
     <item>
@@ -144,7 +142,7 @@ The slides of the talk can be found here: Link to heading What is Nats Link to h
       <pubDate>Fri, 26 Oct 2018 00:00:00 +0000</pubDate>
       
       <guid>https://fedepaol.github.io/blog/2018/10/26/a-new-chapter/</guid>
-      <description>It&amp;rsquo;s been a while Link to heading It&amp;rsquo;s more than a year since my last blogpost which incidentally (or not) it happened right a month before the birth of my second child. In the past year I lost a lot of sleep, and now I am kind of getting back to normality (which means new side gigs :-)).
+      <description>It&amp;rsquo;s been a while  Link to heading   It&amp;rsquo;s more than a year since my last blogpost which incidentally (or not) it happened right a month before the birth of my second child. In the past year I lost a lot of sleep, and now I am kind of getting back to normality (which means new side gigs :-)).
 My interests moved from Android and mobile in general to Go and distributed systems, which is what I am probably going to write about in the next blogpost.</description>
     </item>
     
@@ -154,7 +152,7 @@ My interests moved from Android and mobile in general to Go and distributed syst
       <pubDate>Sun, 30 Apr 2017 00:00:00 +0000</pubDate>
       
       <guid>https://fedepaol.github.io/blog/2017/04/30/android-okhttp-and-websockets/</guid>
-      <description>Websockets Link to heading Rest http calls are the most common interaction between Android apps and remote servers. However, there are some scenarios where the interaction is better handled via a persistent connection: think about a chat, or a multiplayer game where data flows in both directions and the server needs to push data to the clients and to be aware of which client are connected.
+      <description>Websockets  Link to heading   Rest http calls are the most common interaction between Android apps and remote servers. However, there are some scenarios where the interaction is better handled via a persistent connection: think about a chat, or a multiplayer game where data flows in both directions and the server needs to push data to the clients and to be aware of which client are connected.
 This kind of scenario can be implemented through Websockets.</description>
     </item>
     
@@ -164,9 +162,9 @@ This kind of scenario can be implemented through Websockets.</description>
       <pubDate>Sat, 27 Aug 2016 00:00:00 +0000</pubDate>
       
       <guid>https://fedepaol.github.io/blog/2016/08/27/android-mvp-testing/</guid>
-      <description>MVP is Model View Presenter Link to heading .. which is a pattern that is very popular among Android developers nowdays.
+      <description>MVP is Model View Presenter  Link to heading   .. which is a pattern that is very popular among Android developers nowdays.
 I don&amp;rsquo;t intend to write (yet) another guide about MVP in Android, because others have done a better job, for example:
-Antonio Leiva&amp;rsquo;s introduction to MVP Hannes Dorfmann&amp;rsquo;s introduction to Mosby Fernando Cejas&amp;rsquo; post on clean architecture A lot have been said about MVP (and other similar patterns), like:</description>
+ Antonio Leiva&amp;rsquo;s introduction to MVP Hannes Dorfmann&amp;rsquo;s introduction to Mosby Fernando Cejas&amp;rsquo; post on clean architecture  A lot have been said about MVP (and other similar patterns), like:</description>
     </item>
     
     <item>
@@ -175,8 +173,8 @@ Antonio Leiva&amp;rsquo;s introduction to MVP Hannes Dorfmann&amp;rsquo;s introd
       <pubDate>Mon, 20 Jun 2016 00:00:00 +0000</pubDate>
       
       <guid>https://fedepaol.github.io/blog/2016/06/20/how-to-a-timer/</guid>
-      <description>Ok, I must confess Link to heading the title is built to draw people&amp;rsquo;s attention, because you know, nowdays everything is done in a reactive fashion. RxJava is superhelpful, but if we forget the ecosystem our apps are running into, we risk to forget the proper way to implement certain tasks in Android.
-Why do we need a whole post about timers? Link to heading Recently, I had to implement a countdown timer in Android.</description>
+      <description>Ok, I must confess  Link to heading   the title is built to draw people&amp;rsquo;s attention, because you know, nowdays everything is done in a reactive fashion. RxJava is superhelpful, but if we forget the ecosystem our apps are running into, we risk to forget the proper way to implement certain tasks in Android.
+Why do we need a whole post about timers?  Link to heading   Recently, I had to implement a countdown timer in Android.</description>
     </item>
     
     <item>
@@ -185,7 +183,7 @@ Why do we need a whole post about timers? Link to heading Recently, I had to imp
       <pubDate>Wed, 20 Apr 2016 00:00:00 +0000</pubDate>
       
       <guid>https://fedepaol.github.io/blog/2016/04/20/happines-is-relative/</guid>
-      <description>Using relative layout is bad Link to heading .. or at least they say so. The truth is, it is relatively easy to build complex layouts using RelativeLayouts, but this ease of use comes with a cost: in order to provide that kind of flexibility, RelativeLayout does two measurement passes.
+      <description>Using relative layout is bad  Link to heading   .. or at least they say so. The truth is, it is relatively easy to build complex layouts using RelativeLayouts, but this ease of use comes with a cost: in order to provide that kind of flexibility, RelativeLayout does two measurement passes.
 There are a lot of talks and posts explaining that if you have nested relative layouts, you&amp;rsquo;ll end up with many measurement passes that will consume your cpu and will contribute to miss the dreaded 16 ms threshold.</description>
     </item>
     
@@ -195,8 +193,8 @@ There are a lot of talks and posts explaining that if you have nested relative l
       <pubDate>Fri, 01 Jan 2016 00:00:00 +0000</pubDate>
       
       <guid>https://fedepaol.github.io/blog/2016/01/01/cached-rest-requests-with-rxjava/</guid>
-      <description>Disclaimer: Link to heading In this post I am trying to cover a proper approach to a common problem. I am still in the process of wrapping my head around RxJava so what I write here might not be the best way to solve the problem.
-Cached requests with RxJava Link to heading Lately I&amp;rsquo;ve been trying to develop a rest backed app using RxJava. I must admit that once you get in the proper mental mood, RxJava almost feels like cheating.</description>
+      <description>Disclaimer:  Link to heading   In this post I am trying to cover a proper approach to a common problem. I am still in the process of wrapping my head around RxJava so what I write here might not be the best way to solve the problem.
+Cached requests with RxJava  Link to heading   Lately I&amp;rsquo;ve been trying to develop a rest backed app using RxJava.</description>
     </item>
     
     <item>
@@ -205,7 +203,7 @@ Cached requests with RxJava Link to heading Lately I&amp;rsquo;ve been trying to
       <pubDate>Sun, 13 Sep 2015 00:00:00 +0000</pubDate>
       
       <guid>https://fedepaol.github.io/blog/2015/09/13/testing-rxjava-observables-subscriptions/</guid>
-      <description>Testing RxJava Link to heading While catching up with the latest Android novelties I could not ignore RxJava, which seems to grow in popularity between android developers.
+      <description>Testing RxJava  Link to heading   While catching up with the latest Android novelties I could not ignore RxJava, which seems to grow in popularity between android developers.
 If you just heard about it, and you want to get your feet wet, I really recommend Dan Lew&amp;rsquo;s Grokking with RxJava series as a starting point.
 RxJava is asynchronous by nature, so unit testing it might seem a daunting at first, especially if you use that asynchronous interaction to test stuff.</description>
     </item>
@@ -216,7 +214,7 @@ RxJava is asynchronous by nature, so unit testing it might seem a daunting at fi
       <pubDate>Sat, 05 Sep 2015 00:00:00 +0000</pubDate>
       
       <guid>https://fedepaol.github.io/blog/2015/09/05/mocking-with-robolectric-and-dagger-2/</guid>
-      <description>Why robolectric Link to heading I&amp;rsquo;ve been a fan of robolectric since the old days, since when Android Studio was not an option and few developers embraced IntelliJ. I left it a bit behind after the introduction of Android Studio, since its support was far from optimal.
+      <description>Why robolectric  Link to heading   I&amp;rsquo;ve been a fan of robolectric since the old days, since when Android Studio was not an option and few developers embraced IntelliJ. I left it a bit behind after the introduction of Android Studio, since its support was far from optimal.
 Things have changed, and after listening Corey Latislaw advocating its usage during this fragmented podcast episode I wanted to give it a spin.</description>
     </item>
     
@@ -226,7 +224,7 @@ Things have changed, and after listening Corey Latislaw advocating its usage dur
       <pubDate>Fri, 04 Sep 2015 00:00:00 +0000</pubDate>
       
       <guid>https://fedepaol.github.io/blog/2015/09/04/its-been-a-while/</guid>
-      <description>.. since my last blogpost. Link to heading I&amp;rsquo;ve done a few things in the meanwhile, I wrote a game with LibGdx, I tinkered with various frameworks, but on top of all these things I&amp;rsquo;ve been taking care of my one (and a half) year old daughter.
+      <description>.. since my last blogpost.  Link to heading   I&amp;rsquo;ve done a few things in the meanwhile, I wrote a game with LibGdx, I tinkered with various frameworks, but on top of all these things I&amp;rsquo;ve been taking care of my one (and a half) year old daughter.
 I do certainly have less time to devote to side projects, but I still like to learn new things and Android is exciting from that point of view.</description>
     </item>
     
@@ -238,7 +236,7 @@ I do certainly have less time to devote to side projects, but I still like to le
       <guid>https://fedepaol.github.io/blog/2014/09/01/dragging-with-viewdraghelper/</guid>
       <description>While working on my last side gig, a patch to Firefox for Android to allow the urlbar to be dragged in order to show content hidden behind the main view, I had to deal with ViewDragHelper and understand how it works.
 The final result (please note that the patch is still under review) is something like this:
-It caused me more than one headache, and for this reason I am writing this post hoping it might be helpful to anybody wanting to tinker with it.</description>
+  It caused me more than one headache, and for this reason I am writing this post hoping it might be helpful to anybody wanting to tinker with it.</description>
     </item>
     
     <item>
@@ -269,7 +267,7 @@ hardcode the insert statements and execute them (possibly inside a transaction) 
       
       <guid>https://fedepaol.github.io/blog/2014/02/20/rest-interaction-in-android/</guid>
       <description>In last December (&#39;13) I was asked to submit a talk proposal for the first Italian Droidcon, which I did. It got accepted, so in Febraury I gave my first public speech speaking of &#34;(O)Authenticated Rest Interaction in Android&#34; in front of real people. This post is meant to be a follow up with the information that can&#39;t be found in the slides
-I hoped to sum all the talk up in a post, but it got too long so I am going to split it in several pieces.</description>
+ I hoped to sum all the talk up in a post, but it got too long so I am going to split it in several pieces.</description>
     </item>
     
     <item>
@@ -289,8 +287,7 @@ Recently I thought that joining some big android related open source project cou
       <pubDate>Wed, 06 Mar 2013 00:00:00 +0000</pubDate>
       
       <guid>https://fedepaol.github.io/blog/2013/03/06/postman-ringstwice-reloaded-android-rest-and-oauth-make-easyer/</guid>
-      <description>Android and Rest
-My PostManLib android library had a quite troubled genesis. Some infos can be found in this old post&amp;nbsp;, but bear in mind that I only kept the skeleton of what I wrote at that time (which, by the way, was inspired by&amp;nbsp;this&amp;nbsp;talk).
+      <description>Android and RestMy PostManLib android library had a quite troubled genesis. Some infos can be found in this old post&amp;nbsp;, but bear in mind that I only kept the skeleton of what I wrote at that time (which, by the way, was inspired by&amp;nbsp;this&amp;nbsp;talk).
 The api was (to be kind) a bit clunky, and I recently chose to rewrite / finish it. Apart from its clunkyness, one thing was missing:</description>
     </item>
     
@@ -323,6 +320,7 @@ The main and more obvious advantage is that you can use a Loader with your data.
       
       <guid>https://fedepaol.github.io/blog/2012/10/29/droidconuk-2012/</guid>
       <description>Here I am, back again from my third DroidconUk experience.
+
 I can still remember explaining to my non tech friends what Android was the evening of the 1st droidcon, and since then it became a sort of ritual, a couple of days when I can take some rest from my day time job and take part to the community of some of the best android developers coming from all over the Europe.</description>
     </item>
     
@@ -335,6 +333,7 @@ I can still remember explaining to my non tech friends what Android was the even
       <description>EDIT 17/10/2012:
 Gridlayout support is now working natively with maven android deployer. I strongly suggest to use it instead of my method.
 ---------------------------
+
 Gridlayout has been introduced since api level 14, and is being suggested layout as a more efficient alternative over nested linear layouts and relative layout.
 It has also been recently added as part of the android support library, in order to have it available on older devices.</description>
     </item>
@@ -381,6 +380,7 @@ The development of the interaction between android and the rest web service was 
       <guid>https://fedepaol.github.io/blog/2012/01/22/pastimer-android-kitchen-timer-released/</guid>
       <description> Pastimer, my barcode based kitchen timer is now on the market.
 The basic idea is to scan the barcode on the box to set the time.
+
 The url to download it from the market is
 https://market.android.com/details?id=com.whiterabbit.pastimer
 or this for the lite version
@@ -550,7 +550,7 @@ Why I am back here? Because I am trying to understand and develop some applicati
       <guid>https://fedepaol.github.io/blog/2008/06/10/developing-python-on-symbian-from-a-linux-box/</guid>
       <description>Since my mobile device is a s60v3 one (Nokia E61), I found particulary difficult to develop any simple python script on the phone. The hardest thing to do was the write - test cycle.
 On linux you can&#39;t simply send the file to the phone with obex, since it will be stored in your incoming messages.
-From the excellent Jürgen Scheible&#39;s tutorial website I discovered the existance of the nice putools for making easier the development cycle here</description>
+From the excellentJürgen Scheible&#39;s tutorial website I discovered the existance of the nice putools for making easier the development cycle here</description>
     </item>
     
     <item>
