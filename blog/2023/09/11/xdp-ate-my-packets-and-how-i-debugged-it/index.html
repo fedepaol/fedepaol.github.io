@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>
+  XDP ate my packets, and how I debugged it · My little software warehouse
+</title>
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+
+
+
+
+<meta name="author" content="Federico Paolinelli">
+<meta name="description" content="This guide explores essential steps for debugging XDP (Express Data Path) issues. It covers strategies like using tcpdump for packet inspection, leveraging bpf_printk for parameter analysis, and employing tools like &#34;xdpdump&#34; and ethtool to diagnose and resolve common XDP problems. The guide emphasizes the importance of thorough debugging to uncover the root causes of XDP-related challenges.">
+<meta name="keywords" content="">
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="XDP ate my packets, and how I debugged it"/>
+<meta name="twitter:description" content="This guide explores essential steps for debugging XDP (Express Data Path) issues. It covers strategies like using tcpdump for packet inspection, leveraging bpf_printk for parameter analysis, and employing tools like &#34;xdpdump&#34; and ethtool to diagnose and resolve common XDP problems. The guide emphasizes the importance of thorough debugging to uncover the root causes of XDP-related challenges."/>
+
+<meta property="og:title" content="XDP ate my packets, and how I debugged it" />
+<meta property="og:description" content="This guide explores essential steps for debugging XDP (Express Data Path) issues. It covers strategies like using tcpdump for packet inspection, leveraging bpf_printk for parameter analysis, and employing tools like &#34;xdpdump&#34; and ethtool to diagnose and resolve common XDP problems. The guide emphasizes the importance of thorough debugging to uncover the root causes of XDP-related challenges." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://fedepaol.github.io/blog/2023/09/11/xdp-ate-my-packets-and-how-i-debugged-it/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2023-09-11T23:26:17+02:00" />
+<meta property="article:modified_time" content="2023-09-11T23:26:17+02:00" />
+
+
+
+
+
+<link rel="canonical" href="https://fedepaol.github.io/blog/2023/09/11/xdp-ate-my-packets-and-how-i-debugged-it/">
+
+
+<link rel="preload" href="/fonts/forkawesome-webfont.woff2?v=1.2.0" as="font" type="font/woff2" crossorigin>
+
+
+  
+  
+  <link rel="stylesheet" href="/css/coder.min.135e22c97ff685fe983fc60048e309ced8f00d8d38f536aa67dba8a13a03dfa4.css" integrity="sha256-E14iyX/2hf6YP8YASOMJztjwDY049TaqZ9uooToD36Q=" crossorigin="anonymous" media="screen" />
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+<link rel="icon" type="image/svg+xml" href="/images/favicon.svg" sizes="any">
+<link rel="icon" type="image/png" href="/images/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="/images/favicon-16x16.png" sizes="16x16">
+
+<link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+<link rel="manifest" href="/site.webmanifest">
+<link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+
+
+
+
+
+
+</head>
+
+
+
+
+<body class="preload-transitions colorscheme-light">
+  
+<div class="float-container">
+    <a id="dark-mode-toggle" class="colorscheme-toggle">
+        <i class="fa fa-adjust fa-fw" aria-hidden="true"></i>
+    </a>
+</div>
+
+
+  <main class="wrapper">
+    <nav class="navigation">
+  <section class="container">
+    <a class="navigation-title" href="/">
+      My little software warehouse
+    </a>
+    
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/posts/">Blog</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/about/">About</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/mailto:fedepaol@gmail.com">Contact</a>
+            </li>
+          
+        
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+    <div class="content">
+      
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">
+            <a class="title-link" href="https://fedepaol.github.io/blog/2023/09/11/xdp-ate-my-packets-and-how-i-debugged-it/">
+              XDP ate my packets, and how I debugged it
+            </a>
+          </h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa fa-calendar" aria-hidden="true"></i>
+              <time datetime="2023-09-11T23:26:17&#43;02:00">
+                September 11, 2023
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa fa-clock-o" aria-hidden="true"></i>
+              8-minute read
+            </span>
+          </div>
+          
+          
+          
+        </div>
+      </header>
+
+      <div class="post-content">
+        
+        <h1 id="debugging-xdp">
+  Debugging XDP
+  <a class="heading-link" href="#debugging-xdp">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h1>
+<p>This is a side post from my &ldquo;learning eBPF from popular projects&rdquo; initiative. Here I am going how I debugged my XDP related issues while trying to replicate
+locally an XDP based loadbalancer (see my <a href="https://fedepaol.github.io/blog/2023/09/06/ebpf-journey-by-examples-l4-load-balancing-with-xdp-and-katran/" >previous post</a>).</p>
+<h2 id="it-doesnt-work">
+  It doesn&rsquo;t work!
+  <a class="heading-link" href="#it-doesnt-work">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>I strongly believe that the only thing that takes little to be done is something
+that already works and does not require any action. Even the most simple-looking thing might expand to take weeks because of
+unforeseen hurdles. And this was clearly one of those cases.</p>
+<p>Right after making the verifier gods happy, I began setting up an environment for testing.</p>
+<p>The setup was docker-compose based, and was <em>composed</em> by multiple containers and docker networks tied together:</p>
+<pre tabindex="0"><code class="language-raw" data-lang="raw">              10.111.220.0/24                 10.111.222.0/24
+
+┌──────────────────┐       ┌───────────────────┐        ┌───────────────────┐
+│                  │       │                   │        │                   │
+│                  │ ◄─────┼───────────────────┼────────┤                   │
+│                  │       │                   │        │                   │
+│    Client        ├──────►│  Gateway          │        │    Real           │
+│                  │       │             ┌─────┼───────►│                   │
+│                  │       │             │     │        │                   │
+│                  │       │             │     │        │                   │
+└──────────────────┘       └──────┬──────┴─────┘        └───────────────────┘
+                                  │      ▲
+                                  │      │
+                                  │      │  10.111.221.0/24
+                                  ▼      │
+                            ┌────────────┴─────┐
+                            │                  │
+                            │                  │
+                            │                  │
+                            │     Katran       │
+                            │                  │
+                            │                  │
+                            └──────────────────┘
+</code></pre><p>So things were smooth, I was able to ping, the routes were in place, and I was ready to try the full
+workflow, using netcat on the client to reach the endpoint via the virtual IP.</p>
+<p>I then ran netcat on both sides, tried to send a string, and&hellip; nothing. Which was kind of expected.
+After all, the program messes up with the raw packets, dealing with a lot of offset and low level fields.</p>
+<p>The chance of getting it right in first instance were pretty low, so I took my old <code>tcpdump</code>
+friend out of my pocket and started debugging.</p>
+<h3 id="the-gateway-was-routing-the-syn-packet-to-katran">
+  The gateway was routing the syn packet to katran
+  <a class="heading-link" href="#the-gateway-was-routing-the-syn-packet-to-katran">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">21:30:45.998533 eth1  Out IP 10.111.220.11.35562 &gt; 192.168.10.1.50002: Flags <span class="o">[</span>S<span class="o">]</span>, seq 33054345, win 64240, options <span class="o">[</span>mss 1460,sackOK,TS val <span class="m">2254957155</span> ecr 0,nop,wscale 7<span class="o">]</span>, length <span class="m">0</span>
+</span></span><span class="line"><span class="cl">21:30:47.015935 eth0  In  IP 10.111.220.11.35562 &gt; 192.168.10.1.50002: Flags <span class="o">[</span>S<span class="o">]</span>, seq 33054345, win 64240, options <span class="o">[</span>mss 1460,sackOK,TS val <span class="m">2254958173</span> ecr 0,nop,wscale 7<span class="o">]</span>, length <span class="m">0</span>
+</span></span><span class="line"><span class="cl">21:30:47.015953 eth1  Out IP 10.111.220.11.35562 &gt; 192.168.10.1.50002: Flags <span class="o">[</span>S<span class="o">]</span>, seq 33054345, win 64240, options <span class="o">[</span>mss 1460,sackOK,TS val <span class="m">2254958173</span> ecr 0,nop,wscale 7<span class="o">]</span>, length <span class="m">0</span>
+</span></span><span class="line"><span class="cl">21:30:49.063738 eth0  In  IP 10.111.220.11.35562 &gt; 192.168.10.1.50002: Flags <span class="o">[</span>S<span class="o">]</span>, seq 33054345, win 64240, options <span class="o">[</span>mss 1460,sackOK,TS val <span class="m">2254960221</span> ecr 0,nop,wscale 7<span class="o">]</span>, length <span class="m">0</span>
+</span></span><span class="line"><span class="cl">21:30:49.063756 eth1  Out IP 10.111.220.11.35562 &gt; 192.168.10.1.50002: Flags <span class="o">[</span>S<span class="o">]</span>, seq 33054345, win 64240, options <span class="o">[</span>mss 1460,sackOK,TS val <span class="m">2254960221</span> ecr 0,nop,wscale 7<span class="o">]</span>, length <span class="m">0</span>
+</span></span></code></pre></div><p>I could see the packet coming from the client and going out to eth1 (the interface with the loadbalancer).</p>
+<h2 id="running-tcpdump-on-the-loadbalancer-container-does-not-show-anything">
+  Running tcpdump on the loadbalancer container does not show anything
+  <a class="heading-link" href="#running-tcpdump-on-the-loadbalancer-container-does-not-show-anything">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>Nothing, <strong>dead silence</strong>. This is odd, because the gateway <code>tcpdump</code> clearly show packets going through. Who stole my packets?</p>
+<h2 id="logging-logging-logging">
+  Logging logging logging
+  <a class="heading-link" href="#logging-logging-logging">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>The first thing I did was start with the basics, and use <code>printf</code> (or the eBPF equivalent) to make sure my program was receiving the right parameters.</p>
+<p><code>bpf_printk</code> is the more convenient way to print something you can inspect from <code>/sys/kernel/debug/tracing/trace_pipe</code>.
+That allowed me to undersand in first instance that the VIP I was reading from eBPF was empty.</p>
+<h2 id="checking-the-content-of-the-map">
+  Checking the content of the map
+  <a class="heading-link" href="#checking-the-content-of-the-map">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p><code>bpftool</code> is the swiss knife here.</p>
+<p>Accessing the map is as easy as running</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">-&gt; bpftool map list 
+</span></span><span class="line"><span class="cl">...
+</span></span><span class="line"><span class="cl">86: array  name xdp_params_arra  flags 0x0
+</span></span><span class="line"><span class="cl">        key 4B  value 20B  max_entries <span class="m">1</span>  memlock 344B
+</span></span><span class="line"><span class="cl">        btf_id <span class="m">236</span>
+</span></span><span class="line"><span class="cl">        pids xdplb<span class="o">(</span>10671<span class="o">)</span>
+</span></span><span class="line"><span class="cl">...
+</span></span></code></pre></div><p>And then</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">bpftool map dump id <span class="m">86</span> 
+</span></span><span class="line"><span class="cl"><span class="o">[{</span>
+</span></span><span class="line"><span class="cl">        <span class="s2">&#34;key&#34;</span>: 0,
+</span></span><span class="line"><span class="cl">        <span class="s2">&#34;value&#34;</span>: <span class="o">{</span>
+</span></span><span class="line"><span class="cl">            <span class="s2">&#34;dst_mac&#34;</span>: <span class="o">[</span>2,66,10,111,221,12
+</span></span><span class="line"><span class="cl">            <span class="o">]</span>,
+</span></span><span class="line"><span class="cl">            <span class="s2">&#34;daddr&#34;</span>: 0,
+</span></span><span class="line"><span class="cl">            <span class="s2">&#34;saddr&#34;</span>: 175103243,
+</span></span><span class="line"><span class="cl">            <span class="s2">&#34;vip&#34;</span>: <span class="m">0</span>
+</span></span><span class="line"><span class="cl">        <span class="o">}</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl"><span class="o">]</span>
+</span></span></code></pre></div><p>it was clear that some parameters were not going through properly, I hammered the Go code a bit and made them work. And, as always,
+I was confident this would have made things work. But it did not.</p>
+<h3 id="xdpdump-to-the-rescue">
+  XDPDump to the rescue
+  <a class="heading-link" href="#xdpdump-to-the-rescue">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>My Google fu brought me to <a href="https://github.com/xdp-project/xdp-tools/tree/master/xdp-dump"  class="external-link" target="_blank" rel="noopener">xdpdump</a>. XDP dump is a bit like TCPDump, but it
+is able to inspect the packets going through (ingressing and egressing) an XDP program. There is a nice blogpost about it <a href="https://www.redhat.com/en/blog/capturing-network-traffic-express-data-path-xdp-environment"  class="external-link" target="_blank" rel="noopener">on the Red Hat blog</a>.</p>
+<p>So, by running</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">xdpdump --rx-capture entry,exit --i eth0
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">1694209748.510390618: xdp_prog_func<span class="o">()</span>@entry: packet size <span class="m">74</span> bytes on if_index 15, rx queue 0, id <span class="m">1</span>
+</span></span><span class="line"><span class="cl">1694209748.510401404: xdp_prog_func<span class="o">()</span>@exit<span class="o">[</span>TX<span class="o">]</span>: packet size <span class="m">94</span> bytes on if_index 15, rx queue 0, id <span class="m">1</span>
+</span></span><span class="line"><span class="cl">1694209749.530575406: xdp_prog_func<span class="o">()</span>@entry: packet size <span class="m">74</span> bytes on if_index 15, rx queue 0, id <span class="m">2</span>
+</span></span><span class="line"><span class="cl">1694209749.530604456: xdp_prog_func<span class="o">()</span>@exit<span class="o">[</span>TX<span class="o">]</span>: packet size <span class="m">94</span> bytes on if_index 15, rx queue 0, id <span class="m">2</span>
+</span></span></code></pre></div><p>I could see that something was actually happening. In particular, packets were coming to the program (<code>xdp_prog_func</code>), and getting the <code>TX</code>
+verdict. At least my program was getting invoked. This was also confirmed by many of the logs I put in place. Still, no packet :-(</p>
+<p>XDPDump allows us to extract the pcap (and eventually consume it with wireshark) which is what I did:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">xdpdump --rx-capture entry,exit --i eth0 -w /data/capture.pcap
+</span></span><span class="line"><span class="cl">listening on eth0, ingress XDP program ID <span class="m">180</span> func xdp_prog_func, capture mode entry/exit, capture size <span class="m">262144</span> bytes
+</span></span><span class="line"><span class="cl">^C
+</span></span><span class="line"><span class="cl"><span class="m">6</span> packets captured
+</span></span><span class="line"><span class="cl"><span class="m">0</span> packets dropped by perf rin
+</span></span></code></pre></div><p>Then I opened wireshark, saw a malformed packet (I messed up with the lenght of the IP Header), I fixed it and full of hope I did
+the test again. And it did not work.</p>
+<p>This is when I really started to sweat, because the packet looked fine, my program was <code>XDP_TX</code> but the packet was nowhere ¯_(ツ)_/¯.</p>
+<h2 id="down-the-rabbit-hole">
+  Down the rabbit hole
+  <a class="heading-link" href="#down-the-rabbit-hole">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>After looking at the code upside down, staring at wireshark hoping to spot a mistake
+in the packet and eventually realizing the packet was fine, I I stopped and tried a fresh start: how to debug XDP?</p>
+<p>Googling around, I found that <code>ethtool</code> is able to show some statistics about XDP, and that is what I did:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="o">[</span>root@3e7cf3b3e84c /<span class="o">]</span><span class="c1"># ethtool -S eth0</span>
+</span></span><span class="line"><span class="cl">NIC statistics:
+</span></span><span class="line"><span class="cl">     peer_ifindex: <span class="m">15</span>
+</span></span><span class="line"><span class="cl">     rx_queue_0_xdp_packets: <span class="m">64</span>
+</span></span><span class="line"><span class="cl">     rx_queue_0_xdp_bytes: <span class="m">7944</span>
+</span></span><span class="line"><span class="cl">     rx_queue_0_drops: <span class="m">0</span>
+</span></span><span class="line"><span class="cl">     rx_queue_0_xdp_redirect: <span class="m">0</span>
+</span></span><span class="line"><span class="cl">     rx_queue_0_xdp_drops: <span class="m">0</span>
+</span></span><span class="line"><span class="cl">     rx_queue_0_xdp_tx: <span class="m">0</span>
+</span></span><span class="line"><span class="cl">     rx_queue_0_xdp_tx_errors: <span class="m">4</span>
+</span></span></code></pre></div><p>The statistics are showing tx_errors, but where can I find those errors?</p>
+<p>A bit more googling lead me to learn how to check XDP tracepoints</p>
+<h3 id="xdp-tracepoints">
+  XDP Tracepoints
+  <a class="heading-link" href="#xdp-tracepoints">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>The <a href="https://github.com/xdp-project/xdp-tutorial/blob/master/tracing02-xdp-monitor/README.org#tutorial-tracing02---monitor-xdp-tracepoints"  class="external-link" target="_blank" rel="noopener">xdp tutorial</a> contains a convenient way to monitor all the tracepoints.</p>
+<p><a href="https://github.com/xdp-project/xdp-tutorial/blob/master/tracing02-xdp-monitor/README.org#bpftrace"  class="external-link" target="_blank" rel="noopener">bpftrace</a> seems
+the easiest way to monitor the tracepoints: it allows to monitor all the xdp* tracepoints and see the outcome:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">sudo bpftrace -e <span class="s1">&#39;tracepoint:xdp:* { @cnt[probe] = count(); }&#39;</span>
+</span></span><span class="line"><span class="cl">Attaching <span class="m">12</span> probes...
+</span></span><span class="line"><span class="cl">^C
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">@cnt<span class="o">[</span>tracepoint:xdp:xdp_bulk_tx<span class="o">]</span>: 
+</span></span></code></pre></div><p>There is only one tracepoint, xdp_bulk_tx so it must be it. As per the tutorial linked above, we can also
+check for eventual errors:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">bpftrace -e <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span> <span class="s1">&#39;tracepoint:xdp:xdp_bulk_tx{@redir_errno[-args-&gt;err] = count();}&#39;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Attaching <span class="m">1</span> probe...
+</span></span><span class="line"><span class="cl">^C
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">@redir_errno<span class="o">[</span>6<span class="o">]</span>: <span class="m">2</span>
+</span></span></code></pre></div><p>So, now we know <strong>the error code&rsquo;s valie: -6</strong>! Brilliant! But&hellip; where that -6 comes from?</p>
+<p><strong>Now it&rsquo;s time to look under the hood</strong>: the tracepoint name is <code>xdp_bulk_tx, which means that [somewhere in the kernel](https://github.com/torvalds/linux/blob/0bb80ecc33a8fb5a682236443c1e740d5c917d1d/drivers/net/veth.c#L567) there is a </code>trace_xdp_bulk_tx(rq-&gt;dev, sent, drops, err);` invocation that reports the error.</p>
+<p>In my case it was clear that the <code>-6</code> I was getting was related to <code>-ENXIO</code> (here)[https://github.com/torvalds/linux/blob/0bb80ecc33a8fb5a682236443c1e740d5c917d1d/drivers/net/veth.c#L486], which is doc-commented as <code>/* No such device or address */</code>.</p>
+<p>I lack a lot of context in order to understand the particular scenario in which that error was returned, but <a href="https://github.com/torvalds/linux/blob/0bb80ecc33a8fb5a682236443c1e740d5c917d1d/drivers/net/veth.c#L501"  class="external-link" target="_blank" rel="noopener">this comment</a> revealed itself to be another breadcrumb to the truth:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl">	<span class="cm">/* The napi pointer is set if NAPI is enabled, which ensures that
+</span></span></span><span class="line"><span class="cl"><span class="cm">	 * xdp_ring is initialized on receive side and the peer device is up.
+</span></span></span><span class="line"><span class="cl"><span class="cm">	 */</span>
+</span></span><span class="line"><span class="cl">	<span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rcu_access_pointer</span><span class="p">(</span><span class="n">rq</span><span class="o">-&gt;</span><span class="n">napi</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">		<span class="k">goto</span> <span class="n">out</span><span class="p">;</span>
+</span></span></code></pre></div><p>This got me think that in case of veth, the other side must be XDP aware. I started googling and fell on this
+<strong>Veth pair swallow packets for XDP_TX operation</strong> <a href="https://www.spinics.net/lists/netdev/msg625217.html"  class="external-link" target="_blank" rel="noopener">thread</a>!</p>
+<blockquote>
+<p>You need to load a dummy program to receive packets from peer XDP_TX when using native veth XDP.</p>
+</blockquote>
+<p>So my &ldquo;No such device or address&rdquo; was related to the fact that there was no XDP program registered to the other side
+of the veth pair, and I did not have any way to set that because the other end was handled by Docker itself.</p>
+<h2 id="how-i-made-it-work">
+  How I made it work
+  <a class="heading-link" href="#how-i-made-it-work">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>After spending so much time after this issue, being near to giving up multiple times, I wanted to see it work. So the quick
+and easy solution was to replace the veth based bridge network with Macvlan based one, and it worked!</p>
+<h2 id="wrapping-up">
+  Wrapping Up
+  <a class="heading-link" href="#wrapping-up">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>I hope this will serve as an example of what tools are available to triage the obscure errors we can incur into when dealing with eBPF,
+which sometimes are different from the workflow we (as regular kernel users) are used to follow.</p>
+<p>This time I had to use eBPF to debug eBPF (via some tools like <code>bpftrace</code> and <code>xdpdump</code>) and eventually roll up my sleeves and dig into
+the kernel sources to understand what that mysterious error code I was getting was about.</p>
+
+      </div>
+
+
+      <footer>
+        
+
+
+        <div id="disqus_thread"></div>
+<script>
+  window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "fedepaolgithubio" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+    
+    document.addEventListener('themeChanged', function (e) { 
+        if (document.readyState == 'complete') {
+          DISQUS.reset({ reload: true, config: disqus_config });
+        }
+    });
+</script>
+        
+        
+        
+        
+      </footer>
+    </article>
+
+    
+  </section>
+
+    </div>
+
+    <footer class="footer">
+  <section class="container">
+    ©
+    
+    2023
+     Federico Paolinelli 
+    ·
+    
+    Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/" target="_blank" rel="noopener">Coder</a>.
+    
+  </section>
+</footer>
+
+  </main>
+
+  
+
+  
+  
+  <script src="/js/coder.min.11a2ab6a9f5cbfb6a82a26c53cbebd0841bac33124bc9e6268689de2df2875ec.js" integrity="sha256-EaKrap9cv7aoKibFPL69CEG6wzEkvJ5iaGid4t8odew="></script>
+  
+
+  
+
+  
+
+
+  
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-16514009-2', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+
+</html>
