@@ -30,7 +30,6 @@
 
 
 
-
 <link rel="canonical" href="https://fedepaol.github.io/blog/2023/08/21/ebpf-journey-by-examples-ebpf-tracepoints-with-falco/">
 
 
@@ -108,7 +107,7 @@
             </li>
           
             <li class="navigation-item">
-              <a class="navigation-link" href="/mailto:fedepaol@gmail.com">Contact</a>
+              <a class="navigation-link" href="mailto:fedepaol@gmail.com">Contact</a>
             </li>
           
         
@@ -199,15 +198,15 @@ consumed by the external engine.</p>
 </h3>
 <p>Leaving corner cases aside, Falco uses the <code>sys_enter</code> / <code>sys_exit</code> ebpf tracepoint listeners that are invoked whenever a program enters / leaves a syscall.</p>
 <p>There are two ebpf programs, one for <a href="https://github.com/falcosecurity/libs/blob/f1b614ff4d7ba8d1fb5fa3f0d9bcc5b59b1436e1/driver/modern_bpf/programs/attached/dispatchers/syscall_enter.bpf.c#L14"  class="external-link" target="_blank" rel="noopener">sys_enter</a> and the other for <a href="https://github.com/falcosecurity/libs/blob/f1b614ff4d7ba8d1fb5fa3f0d9bcc5b59b1436e1/driver/modern_bpf/programs/attached/dispatchers/syscall_exit.bpf.c#L14"  class="external-link" target="_blank" rel="noopener">sys_exit</a>:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl"><span class="n">SEC</span><span class="p">(</span><span class="s">&#34;tp_btf/sys_enter&#34;</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">BPF_PROG</span><span class="p">(</span><span class="n">sys_enter</span><span class="p">,</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl"><span class="nf">SEC</span><span class="p">(</span><span class="s">&#34;tp_btf/sys_enter&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">BPF_PROG</span><span class="p">(</span><span class="n">sys_enter</span><span class="p">,</span>
 </span></span><span class="line"><span class="cl">         <span class="k">struct</span> <span class="n">pt_regs</span> <span class="o">*</span><span class="n">regs</span><span class="p">,</span>
 </span></span><span class="line"><span class="cl">         <span class="kt">long</span> <span class="n">syscall_id</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl"><span class="p">{</span>
 </span></span><span class="line"><span class="cl">    <span class="p">...</span>
 </span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl"><span class="n">SEC</span><span class="p">(</span><span class="s">&#34;tp_btf/sys_exit&#34;</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">BPF_PROG</span><span class="p">(</span><span class="n">sys_exit</span><span class="p">,</span>
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl"><span class="nf">SEC</span><span class="p">(</span><span class="s">&#34;tp_btf/sys_exit&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">BPF_PROG</span><span class="p">(</span><span class="n">sys_exit</span><span class="p">,</span>
 </span></span><span class="line"><span class="cl">         <span class="k">struct</span> <span class="n">pt_regs</span> <span class="o">*</span><span class="n">regs</span><span class="p">,</span>
 </span></span><span class="line"><span class="cl">         <span class="kt">long</span> <span class="n">syscall_id</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl"><span class="p">{</span>
@@ -217,7 +216,7 @@ consumed by the external engine.</p>
 structure. The arguments are the ones the tracepoint <a href="https://github.com/torvalds/linux/blob/v4.18/include/trace/events/syscalls.h#L20"  class="external-link" target="_blank" rel="noopener">is defined with</a>. Finally, the sysdig blog has an excellent article on how to translate the pt_regs values into the real arguments passed to the <a href="https://sysdig.com/blog/the-art-of-writing-ebpf-programs-a-primer/"  class="external-link" target="_blank" rel="noopener">syscall here</a>.</p>
 <p>What each entry point does, is to use the <code>syscall_id</code> parameter, which is the id of the syscall being invoked, in
 conjunction with a table binding the id and the corresponding ebpf program:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl"><span class="n">bpf_tail_call</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">syscall_enter_tail_table</span><span class="p">,</span> <span class="n">syscall_id</span><span class="p">);</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl"><span class="nf">bpf_tail_call</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">syscall_enter_tail_table</span><span class="p">,</span> <span class="n">syscall_id</span><span class="p">);</span>
 </span></span></code></pre></div><p><code>bpf_tail_call</code> is a bpf helper function that takes a map of type <code>BPF_MAP_TYPE_PROG_ARRAY</code> (map id -&gt; bpf program) and performs a <a href="https://en.wikipedia.org/wiki/Tail_call"  class="external-link" target="_blank" rel="noopener">tail call</a> invoking the program referenced by the third parameter.</p>
 <p>The logic to fill the table is quite complex, but what we eventually get is an id - ebpf program mapping to be used by the tail call. For example, if we focus on the <code>open</code> syscall, the corresponding <a href="https://github.com/falcosecurity/libs/blob/8e73fe3adc1a0a9547ebc7416142b04e71a37ec6/driver/event_table.c#L52"  class="external-link" target="_blank" rel="noopener">original entry</a> is:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl">    <span class="p">[</span><span class="n">PPME_SYSCALL_OPEN_E</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#34;open&#34;</span><span class="p">,</span> <span class="n">EC_FILE</span> <span class="o">|</span> <span class="n">EC_SYSCALL</span><span class="p">,</span> <span class="n">EF_CREATES_FD</span> <span class="o">|</span> <span class="n">EF_MODIFIES_STATE</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="p">{{</span><span class="s">&#34;name&#34;</span><span class="p">,</span> <span class="n">PT_FSPATH</span><span class="p">,</span> <span class="n">PF_NA</span><span class="p">},</span> <span class="p">{</span><span class="s">&#34;flags&#34;</span><span class="p">,</span> <span class="n">PT_FLAGS32</span><span class="p">,</span> <span class="n">PF_HEX</span><span class="p">,</span> <span class="n">file_flags</span><span class="p">},</span> <span class="p">{</span><span class="s">&#34;mode&#34;</span><span class="p">,</span> <span class="n">PT_UINT32</span><span class="p">,</span> <span class="n">PF_OCT</span><span class="p">}</span> <span class="p">}</span> <span class="p">},</span>
@@ -231,38 +230,38 @@ conjunction with a table binding the id and the corresponding ebpf program:</p>
 </h3>
 <p>The full code can be found <a href="https://github.com/falcosecurity/libs/blob/40fa507d612b09c483b7f662141b2e2fb32d723c/driver/modern_bpf/programs/tail_called/events/syscall_dispatched_events/open.bpf.c#L12"  class="external-link" target="_blank" rel="noopener">here</a>.</p>
 <p>This is the <code>sys_enter</code> bit, the <code>sys_exit</code> is quite similar and contains the return value too.</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl"><span class="n">SEC</span><span class="p">(</span><span class="s">&#34;tp_btf/sys_enter&#34;</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">BPF_PROG</span><span class="p">(</span><span class="n">open_e</span><span class="p">,</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl"><span class="nf">SEC</span><span class="p">(</span><span class="s">&#34;tp_btf/sys_enter&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">BPF_PROG</span><span class="p">(</span><span class="n">open_e</span><span class="p">,</span>
 </span></span><span class="line"><span class="cl">         <span class="k">struct</span> <span class="n">pt_regs</span> <span class="o">*</span><span class="n">regs</span><span class="p">,</span>
 </span></span><span class="line"><span class="cl">         <span class="kt">long</span> <span class="n">id</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl"><span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="k">struct</span> <span class="n">auxiliary_map</span> <span class="o">*</span><span class="n">auxmap</span> <span class="o">=</span> <span class="n">auxmap__get</span><span class="p">();</span> <span class="c1">// (1)
+</span></span><span class="line"><span class="cl">    <span class="k">struct</span> <span class="n">auxiliary_map</span> <span class="o">*</span><span class="n">auxmap</span> <span class="o">=</span> <span class="nf">auxmap__get</span><span class="p">();</span> <span class="c1">// (1)
 </span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">auxmap</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl">    <span class="p">{</span>
 </span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">    <span class="p">}</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="n">auxmap__preload_event_header</span><span class="p">(</span><span class="n">auxmap</span><span class="p">,</span> <span class="n">PPME_SYSCALL_OPEN_E</span><span class="p">);</span> <span class="c1">// (2)
+</span></span><span class="line"><span class="cl">    <span class="nf">auxmap__preload_event_header</span><span class="p">(</span><span class="n">auxmap</span><span class="p">,</span> <span class="n">PPME_SYSCALL_OPEN_E</span><span class="p">);</span> <span class="c1">// (2)
 </span></span></span><span class="line"><span class="cl"><span class="c1"></span>
 </span></span><span class="line"><span class="cl">    <span class="cm">/*=============================== COLLECT PARAMETERS  ===========================*/</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">    <span class="cm">/* Parameter 1: name (type: PT_FSPATH) */</span>
-</span></span><span class="line"><span class="cl">    <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">name_pointer</span> <span class="o">=</span> <span class="n">extract__syscall_argument</span><span class="p">(</span><span class="n">regs</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">    <span class="n">auxmap__store_charbuf_param</span><span class="p">(</span><span class="n">auxmap</span><span class="p">,</span> <span class="n">name_pointer</span><span class="p">,</span> <span class="n">MAX_PATH</span><span class="p">,</span> <span class="n">USER</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">name_pointer</span> <span class="o">=</span> <span class="nf">extract__syscall_argument</span><span class="p">(</span><span class="n">regs</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">auxmap__store_charbuf_param</span><span class="p">(</span><span class="n">auxmap</span><span class="p">,</span> <span class="n">name_pointer</span><span class="p">,</span> <span class="n">MAX_PATH</span><span class="p">,</span> <span class="n">USER</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">    <span class="cm">/* Parameter 2: flags (type: PT_FLAGS32) */</span>
-</span></span><span class="line"><span class="cl">    <span class="n">u32</span> <span class="n">flags</span> <span class="o">=</span> <span class="p">(</span><span class="n">u32</span><span class="p">)</span><span class="n">extract__syscall_argument</span><span class="p">(</span><span class="n">regs</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">    <span class="n">auxmap__store_u32_param</span><span class="p">(</span><span class="n">auxmap</span><span class="p">,</span> <span class="n">open_flags_to_scap</span><span class="p">(</span><span class="n">flags</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">    <span class="n">u32</span> <span class="n">flags</span> <span class="o">=</span> <span class="p">(</span><span class="n">u32</span><span class="p">)</span><span class="nf">extract__syscall_argument</span><span class="p">(</span><span class="n">regs</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">auxmap__store_u32_param</span><span class="p">(</span><span class="n">auxmap</span><span class="p">,</span> <span class="nf">open_flags_to_scap</span><span class="p">(</span><span class="n">flags</span><span class="p">));</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">    <span class="cm">/* Parameter 3: mode (type: PT_UINT32) */</span>
-</span></span><span class="line"><span class="cl">    <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">mode</span> <span class="o">=</span> <span class="n">extract__syscall_argument</span><span class="p">(</span><span class="n">regs</span><span class="p">,</span> <span class="mi">2</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">    <span class="n">auxmap__store_u32_param</span><span class="p">(</span><span class="n">auxmap</span><span class="p">,</span> <span class="n">open_modes_to_scap</span><span class="p">(</span><span class="n">flags</span><span class="p">,</span> <span class="n">mode</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">mode</span> <span class="o">=</span> <span class="nf">extract__syscall_argument</span><span class="p">(</span><span class="n">regs</span><span class="p">,</span> <span class="mi">2</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">auxmap__store_u32_param</span><span class="p">(</span><span class="n">auxmap</span><span class="p">,</span> <span class="nf">open_modes_to_scap</span><span class="p">(</span><span class="n">flags</span><span class="p">,</span> <span class="n">mode</span><span class="p">));</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">    <span class="cm">/*=============================== COLLECT PARAMETERS  ===========================*/</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="n">auxmap__finalize_event_header</span><span class="p">(</span><span class="n">auxmap</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">auxmap__finalize_event_header</span><span class="p">(</span><span class="n">auxmap</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="n">auxmap__submit_event</span><span class="p">(</span><span class="n">auxmap</span><span class="p">,</span> <span class="n">ctx</span><span class="p">);</span> <span class="c1">// (3)
+</span></span><span class="line"><span class="cl">    <span class="nf">auxmap__submit_event</span><span class="p">(</span><span class="n">auxmap</span><span class="p">,</span> <span class="n">ctx</span><span class="p">);</span> <span class="c1">// (3)
 </span></span></span><span class="line"><span class="cl"><span class="c1"></span>
 </span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl"><span class="p">}</span>
@@ -307,21 +306,21 @@ and sends an event to the userspace with the path, the command and the process t
 </span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">dfd</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">    <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span> <span class="n">filename</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">flags</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">umode_t</span> <span class="n">mode</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">umode_t</span> <span class="n">mode</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl"><span class="p">};</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="n">SEC</span><span class="p">(</span><span class="s">&#34;tp/syscalls/sys_enter_openat&#34;</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">handle_openat</span><span class="p">(</span><span class="k">const</span> <span class="k">struct</span> <span class="n">openat_ctx</span> <span class="o">*</span><span class="n">ctx</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="nf">SEC</span><span class="p">(</span><span class="s">&#34;tp/syscalls/sys_enter_openat&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">handle_openat</span><span class="p">(</span><span class="k">const</span> <span class="k">struct</span> <span class="n">openat_ctx</span> <span class="o">*</span><span class="n">ctx</span><span class="p">)</span> <span class="p">{</span>
 </span></span><span class="line"><span class="cl">    <span class="k">struct</span> <span class="n">event</span> <span class="o">*</span><span class="n">event</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">event</span> <span class="o">=</span> <span class="n">bpf_ringbuf_reserve</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ring_buffer</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="k">struct</span> <span class="n">event</span><span class="p">),</span> <span class="mi">0</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">event</span> <span class="o">=</span> <span class="nf">bpf_ringbuf_reserve</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ring_buffer</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="k">struct</span> <span class="n">event</span><span class="p">),</span> <span class="mi">0</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">event</span><span class="p">)</span> <span class="p">{</span>
 </span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">    <span class="p">}</span>
-</span></span><span class="line"><span class="cl">    <span class="n">bpf_probe_read_str</span><span class="p">(</span><span class="o">&amp;</span><span class="n">event</span><span class="o">-&gt;</span><span class="n">path</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">event</span><span class="o">-&gt;</span><span class="n">path</span><span class="p">),</span> <span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="p">)</span> <span class="n">ctx</span><span class="o">-&gt;</span><span class="n">filename</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">bpf_probe_read_str</span><span class="p">(</span><span class="o">&amp;</span><span class="n">event</span><span class="o">-&gt;</span><span class="n">path</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">event</span><span class="o">-&gt;</span><span class="n">path</span><span class="p">),</span> <span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="p">)</span> <span class="n">ctx</span><span class="o">-&gt;</span><span class="n">filename</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="n">event</span><span class="o">-&gt;</span><span class="n">pid</span> <span class="o">=</span> <span class="n">bpf_get_current_pid_tgid</span><span class="p">()</span> <span class="o">&gt;&gt;</span> <span class="mi">32</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">bpf_get_current_comm</span><span class="p">(</span><span class="o">&amp;</span><span class="n">event</span><span class="o">-&gt;</span><span class="n">command</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">event</span><span class="o">-&gt;</span><span class="n">command</span><span class="p">));</span>
-</span></span><span class="line"><span class="cl">    <span class="n">bpf_ringbuf_submit</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">event</span><span class="o">-&gt;</span><span class="n">pid</span> <span class="o">=</span> <span class="nf">bpf_get_current_pid_tgid</span><span class="p">()</span> <span class="o">&gt;&gt;</span> <span class="mi">32</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">bpf_get_current_comm</span><span class="p">(</span><span class="o">&amp;</span><span class="n">event</span><span class="o">-&gt;</span><span class="n">command</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">event</span><span class="o">-&gt;</span><span class="n">command</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">bpf_ringbuf_submit</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl"><span class="p">}</span>
 </span></span></code></pre></div><p>Using the <code>syscalls/sys_enter_openat</code> tracepoint allows us to take the struct parameter described at
@@ -340,20 +339,20 @@ collect the data that might be digested by some more complex system.</p>
 <p>The kprobe implementation is quite similar. The kprobe handler is architecture dependant so I had to specify the target to build the
 objects for. Additionally, the context in this case is <code>struct pt_regs*</code> and I had to use the <code>PT_REGS_PARM2_CORE</code>
 to read the <code>openat</code> second parameter (the filename):</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl"><span class="n">SEC</span><span class="p">(</span><span class="s">&#34;kprobe/sys_openat&#34;</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">BPF_KPROBE</span><span class="p">(</span><span class="n">kprobe_openat</span><span class="p">,</span> <span class="k">struct</span> <span class="n">pt_regs</span> <span class="o">*</span><span class="n">regs</span><span class="p">)</span> <span class="p">{</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl"><span class="nf">SEC</span><span class="p">(</span><span class="s">&#34;kprobe/sys_openat&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">BPF_KPROBE</span><span class="p">(</span><span class="n">kprobe_openat</span><span class="p">,</span> <span class="k">struct</span> <span class="n">pt_regs</span> <span class="o">*</span><span class="n">regs</span><span class="p">)</span> <span class="p">{</span>
 </span></span><span class="line"><span class="cl">    <span class="k">struct</span> <span class="n">event</span> <span class="o">*</span><span class="n">event</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">event</span> <span class="o">=</span> <span class="n">bpf_ringbuf_reserve</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ring_buffer</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="k">struct</span> <span class="n">event</span><span class="p">),</span> <span class="mi">0</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">event</span> <span class="o">=</span> <span class="nf">bpf_ringbuf_reserve</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ring_buffer</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="k">struct</span> <span class="n">event</span><span class="p">),</span> <span class="mi">0</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">event</span><span class="p">)</span> <span class="p">{</span>
 </span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">    <span class="p">}</span>
 </span></span><span class="line"><span class="cl">    <span class="kt">char</span> <span class="o">*</span><span class="n">pathname</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">pathname</span> <span class="o">=</span> <span class="p">(</span><span class="kt">char</span><span class="o">*</span><span class="p">)</span> <span class="n">PT_REGS_PARM2_CORE</span><span class="p">(</span><span class="n">regs</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">    <span class="n">bpf_probe_read_str</span><span class="p">(</span><span class="o">&amp;</span><span class="n">event</span><span class="o">-&gt;</span><span class="n">path</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">event</span><span class="o">-&gt;</span><span class="n">path</span><span class="p">),</span> <span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="p">)</span> <span class="n">pathname</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">pathname</span> <span class="o">=</span> <span class="p">(</span><span class="kt">char</span><span class="o">*</span><span class="p">)</span> <span class="nf">PT_REGS_PARM2_CORE</span><span class="p">(</span><span class="n">regs</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">bpf_probe_read_str</span><span class="p">(</span><span class="o">&amp;</span><span class="n">event</span><span class="o">-&gt;</span><span class="n">path</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">event</span><span class="o">-&gt;</span><span class="n">path</span><span class="p">),</span> <span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="p">)</span> <span class="n">pathname</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="n">event</span><span class="o">-&gt;</span><span class="n">pid</span> <span class="o">=</span> <span class="n">bpf_get_current_pid_tgid</span><span class="p">()</span> <span class="o">&gt;&gt;</span> <span class="mi">32</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">bpf_get_current_comm</span><span class="p">(</span><span class="o">&amp;</span><span class="n">event</span><span class="o">-&gt;</span><span class="n">command</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">event</span><span class="o">-&gt;</span><span class="n">command</span><span class="p">));</span>
-</span></span><span class="line"><span class="cl">    <span class="n">bpf_ringbuf_submit</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">event</span><span class="o">-&gt;</span><span class="n">pid</span> <span class="o">=</span> <span class="nf">bpf_get_current_pid_tgid</span><span class="p">()</span> <span class="o">&gt;&gt;</span> <span class="mi">32</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">bpf_get_current_comm</span><span class="p">(</span><span class="o">&amp;</span><span class="n">event</span><span class="o">-&gt;</span><span class="n">command</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">event</span><span class="o">-&gt;</span><span class="n">command</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">bpf_ringbuf_submit</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl"><span class="p">}</span>
 </span></span></code></pre></div><h2 id="wrapping-up">
@@ -429,7 +428,7 @@ to read the <code>openat</code> second parameter (the filename):</p>
 
   
   
-  <script src="/js/coder.min.11a2ab6a9f5cbfb6a82a26c53cbebd0841bac33124bc9e6268689de2df2875ec.js" integrity="sha256-EaKrap9cv7aoKibFPL69CEG6wzEkvJ5iaGid4t8odew="></script>
+  <script src="/js/coder.min.6ae284be93d2d19dad1f02b0039508d9aab3180a12a06dcc71b0b0ef7825a317.js" integrity="sha256-auKEvpPS0Z2tHwKwA5UI2aqzGAoSoG3McbCw73gloxc="></script>
   
 
   

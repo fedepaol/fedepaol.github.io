@@ -13,20 +13,19 @@
 
 
 <meta name="author" content="Federico Paolinelli">
-<meta name="description" content="This guide explores essential steps for debugging XDP (Express Data Path) issues. It covers strategies like using tcpdump for packet inspection, leveraging bpf_printk for parameter analysis, and employing tools like &#34;xdpdump&#34; and ethtool to diagnose and resolve common XDP problems. The guide emphasizes the importance of thorough debugging to uncover the root causes of XDP-related challenges.">
+<meta name="description" content="This guide explores essential steps for debugging XDP (Express Data Path) issues. It covers strategies like using tcpdump for packet inspection, leveraging bpf_printk for parameter analysis, and employing tools like &amp;#34;xdpdump&amp;#34; and ethtool to diagnose and resolve common XDP problems. The guide emphasizes the importance of thorough debugging to uncover the root causes of XDP-related challenges.">
 <meta name="keywords" content="">
 
 <meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="XDP ate my packets, and how I debugged it"/>
-<meta name="twitter:description" content="This guide explores essential steps for debugging XDP (Express Data Path) issues. It covers strategies like using tcpdump for packet inspection, leveraging bpf_printk for parameter analysis, and employing tools like &#34;xdpdump&#34; and ethtool to diagnose and resolve common XDP problems. The guide emphasizes the importance of thorough debugging to uncover the root causes of XDP-related challenges."/>
+<meta name="twitter:description" content="This guide explores essential steps for debugging XDP (Express Data Path) issues. It covers strategies like using tcpdump for packet inspection, leveraging bpf_printk for parameter analysis, and employing tools like &amp;#34;xdpdump&amp;#34; and ethtool to diagnose and resolve common XDP problems. The guide emphasizes the importance of thorough debugging to uncover the root causes of XDP-related challenges."/>
 
 <meta property="og:title" content="XDP ate my packets, and how I debugged it" />
-<meta property="og:description" content="This guide explores essential steps for debugging XDP (Express Data Path) issues. It covers strategies like using tcpdump for packet inspection, leveraging bpf_printk for parameter analysis, and employing tools like &#34;xdpdump&#34; and ethtool to diagnose and resolve common XDP problems. The guide emphasizes the importance of thorough debugging to uncover the root causes of XDP-related challenges." />
+<meta property="og:description" content="This guide explores essential steps for debugging XDP (Express Data Path) issues. It covers strategies like using tcpdump for packet inspection, leveraging bpf_printk for parameter analysis, and employing tools like &amp;#34;xdpdump&amp;#34; and ethtool to diagnose and resolve common XDP problems. The guide emphasizes the importance of thorough debugging to uncover the root causes of XDP-related challenges." />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://fedepaol.github.io/blog/2023/09/11/xdp-ate-my-packets-and-how-i-debugged-it/" /><meta property="article:section" content="posts" />
 <meta property="article:published_time" content="2023-09-11T23:26:17+02:00" />
 <meta property="article:modified_time" content="2023-09-11T23:26:17+02:00" />
-
 
 
 
@@ -108,7 +107,7 @@
             </li>
           
             <li class="navigation-item">
-              <a class="navigation-link" href="/mailto:fedepaol@gmail.com">Contact</a>
+              <a class="navigation-link" href="mailto:fedepaol@gmail.com">Contact</a>
             </li>
           
         
@@ -159,7 +158,7 @@
     <span class="sr-only">Link to heading</span>
   </a>
 </h1>
-<p>This is a side post from my &ldquo;learning eBPF from popular projects&rdquo; initiative. Here I am going how I debugged my XDP related issues while trying to replicate
+<p>This is a side post from my &ldquo;learning eBPF from popular projects&rdquo; initiative. Here I am going to describe the issues I had while trying to replicate
 locally an XDP based loadbalancer (see my <a href="https://fedepaol.github.io/blog/2023/09/06/ebpf-journey-by-examples-l4-load-balancing-with-xdp-and-katran/" >previous post</a>).</p>
 <h2 id="it-doesnt-work">
   It doesn&rsquo;t work!
@@ -168,10 +167,8 @@ locally an XDP based loadbalancer (see my <a href="https://fedepaol.github.io/bl
     <span class="sr-only">Link to heading</span>
   </a>
 </h2>
-<p>I strongly believe that the only thing that takes little to be done is something
-that already works and does not require any action. Even the most simple-looking thing might expand to take weeks because of
-unforeseen hurdles. And this was clearly one of those cases.</p>
-<p>Right after making the verifier gods happy, I began setting up an environment for testing.</p>
+<p>I strongly believe that the only thing that takes little to be done is something that already works and does not require any action. Even the most simple-looking thing might expand to take weeks because of unforeseen hurdles. And this was clearly one of those cases.</p>
+<p>Right after making the verifier gods happy, I started trying to replicate an environment I could test it in.</p>
 <p>The setup was docker-compose based, and was <em>composed</em> by multiple containers and docker networks tied together:</p>
 <pre tabindex="0"><code class="language-raw" data-lang="raw">              10.111.220.0/24                 10.111.222.0/24
 
@@ -198,10 +195,8 @@ unforeseen hurdles. And this was clearly one of those cases.</p>
                             └──────────────────┘
 </code></pre><p>So things were smooth, I was able to ping, the routes were in place, and I was ready to try the full
 workflow, using netcat on the client to reach the endpoint via the virtual IP.</p>
-<p>I then ran netcat on both sides, tried to send a string, and&hellip; nothing. Which was kind of expected.
-After all, the program messes up with the raw packets, dealing with a lot of offset and low level fields.</p>
-<p>The chance of getting it right in first instance were pretty low, so I took my old <code>tcpdump</code>
-friend out of my pocket and started debugging.</p>
+<p>I then ran netcat on both sides, tried to send a string, and… nothing. Which was kind of expected. After all, the program messes up with the raw packets, dealing with a lot of offset and low level fields.</p>
+<p>The chance of getting it right in first instance were pretty low, so I took my old <code>tcpdump</code> friend out of my pocket and started debugging.</p>
 <h3 id="the-gateway-was-routing-the-syn-packet-to-katran">
   The gateway was routing the syn packet to katran
   <a class="heading-link" href="#the-gateway-was-routing-the-syn-packet-to-katran">
@@ -222,15 +217,15 @@ friend out of my pocket and started debugging.</p>
     <span class="sr-only">Link to heading</span>
   </a>
 </h2>
-<p>Nothing, <strong>dead silence</strong>. This is odd, because the gateway <code>tcpdump</code> clearly show packets going through. Who stole my packets?</p>
+<p>Nothing, <strong>dead silence</strong>. This is odd, because the gateway tcpdump clearly show packets going through. Who stole my packets?</p>
 <h2 id="logging-logging-logging">
-  Logging logging logging
+  Logging logging logging!
   <a class="heading-link" href="#logging-logging-logging">
     <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
     <span class="sr-only">Link to heading</span>
   </a>
 </h2>
-<p>The first thing I did was start with the basics, and use <code>printf</code> (or the eBPF equivalent) to make sure my program was receiving the right parameters.</p>
+<p>The first thing I did was start with the basics, and use printf (or the eBPF equivalent) to make sure my program was receiving the right parameters.</p>
 <p><code>bpf_printk</code> is the more convenient way to print something you can inspect from <code>/sys/kernel/debug/tracing/trace_pipe</code>.
 That allowed me to undersand in first instance that the VIP I was reading from eBPF was empty.</p>
 <h2 id="checking-the-content-of-the-map">
@@ -290,7 +285,7 @@ verdict. At least my program was getting invoked. This was also confirmed by man
 </span></span><span class="line"><span class="cl"><span class="m">0</span> packets dropped by perf rin
 </span></span></code></pre></div><p>Then I opened wireshark, saw a malformed packet (I messed up with the lenght of the IP Header), I fixed it and full of hope I did
 the test again. And it did not work.</p>
-<p>This is when I really started to sweat, because the packet looked fine, my program was <code>XDP_TX</code> but the packet was nowhere ¯_(ツ)_/¯.</p>
+<p>This is when I started to sweat, because the packet looked fine, my program was <code>XDP_TX</code> but the packet was nowhere ¯_(ツ)_/¯.</p>
 <h2 id="down-the-rabbit-hole">
   Down the rabbit hole
   <a class="heading-link" href="#down-the-rabbit-hole">
@@ -298,9 +293,8 @@ the test again. And it did not work.</p>
     <span class="sr-only">Link to heading</span>
   </a>
 </h2>
-<p>After looking at the code upside down, staring at wireshark hoping to spot a mistake
-in the packet and eventually realizing the packet was fine, I I stopped and tried a fresh start: how to debug XDP?</p>
-<p>Googling around, I found that <code>ethtool</code> is able to show some statistics about XDP, and that is what I did:</p>
+<p>After looking at the code upside down, staring at wireshark hoping to spot a mistake in the packet and eventually realizing the packet was fine, I I stopped and tried a fresh start: how to debug XDP?</p>
+<p>Googling around, I found that ethtool is able to show some statistics about XDP, and that is what I did:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="o">[</span>root@3e7cf3b3e84c /<span class="o">]</span><span class="c1"># ethtool -S eth0</span>
 </span></span><span class="line"><span class="cl">NIC statistics:
 </span></span><span class="line"><span class="cl">     peer_ifindex: <span class="m">15</span>
@@ -322,7 +316,7 @@ in the packet and eventually realizing the packet was fine, I I stopped and trie
 </h3>
 <p>The <a href="https://github.com/xdp-project/xdp-tutorial/blob/master/tracing02-xdp-monitor/README.org#tutorial-tracing02---monitor-xdp-tracepoints"  class="external-link" target="_blank" rel="noopener">xdp tutorial</a> contains a convenient way to monitor all the tracepoints.</p>
 <p><a href="https://github.com/xdp-project/xdp-tutorial/blob/master/tracing02-xdp-monitor/README.org#bpftrace"  class="external-link" target="_blank" rel="noopener">bpftrace</a> seems
-the easiest way to monitor the tracepoints: it allows to monitor all the xdp* tracepoints and see the outcome:</p>
+the more convenient way to monitor the tracepoints: it allows to monitor all the xdp* tracepoints and see the outcome:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">sudo bpftrace -e <span class="s1">&#39;tracepoint:xdp:* { @cnt[probe] = count(); }&#39;</span>
 </span></span><span class="line"><span class="cl">Attaching <span class="m">12</span> probes...
 </span></span><span class="line"><span class="cl">^C
@@ -337,14 +331,16 @@ check for eventual errors:</p>
 </span></span><span class="line"><span class="cl">^C
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">@redir_errno<span class="o">[</span>6<span class="o">]</span>: <span class="m">2</span>
-</span></span></code></pre></div><p>So, now we know <strong>the error code&rsquo;s valie: -6</strong>! Brilliant! But&hellip; where that -6 comes from?</p>
-<p><strong>Now it&rsquo;s time to look under the hood</strong>: the tracepoint name is <code>xdp_bulk_tx, which means that [somewhere in the kernel](https://github.com/torvalds/linux/blob/0bb80ecc33a8fb5a682236443c1e740d5c917d1d/drivers/net/veth.c#L567) there is a </code>trace_xdp_bulk_tx(rq-&gt;dev, sent, drops, err);` invocation that reports the error.</p>
+</span></span></code></pre></div><p>So, now we know <strong>the error code value is -6</strong>! Brilliant! But&hellip; where that -6 comes from?</p>
+<p><strong>It&rsquo;s time to look under the hood</strong>: the tracepoint name is <code>xdp_bulk_tx</code>, which means that <a href="https://github.com/torvalds/linux/blob/0bb80ecc33a8fb5a682236443c1e740d5c917d1d/drivers/net/veth.c#L567"  class="external-link" target="_blank" rel="noopener">somewhere in
+the kernel</a> there is a
+<code>trace_xdp_bulk_tx(rq-&gt;dev, sent, drops, err);</code> invocation that reports the error.</p>
 <p>In my case it was clear that the <code>-6</code> I was getting was related to <code>-ENXIO</code> (here)[https://github.com/torvalds/linux/blob/0bb80ecc33a8fb5a682236443c1e740d5c917d1d/drivers/net/veth.c#L486], which is doc-commented as <code>/* No such device or address */</code>.</p>
 <p>I lack a lot of context in order to understand the particular scenario in which that error was returned, but <a href="https://github.com/torvalds/linux/blob/0bb80ecc33a8fb5a682236443c1e740d5c917d1d/drivers/net/veth.c#L501"  class="external-link" target="_blank" rel="noopener">this comment</a> revealed itself to be another breadcrumb to the truth:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl">	<span class="cm">/* The napi pointer is set if NAPI is enabled, which ensures that
 </span></span></span><span class="line"><span class="cl"><span class="cm">	 * xdp_ring is initialized on receive side and the peer device is up.
 </span></span></span><span class="line"><span class="cl"><span class="cm">	 */</span>
-</span></span><span class="line"><span class="cl">	<span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rcu_access_pointer</span><span class="p">(</span><span class="n">rq</span><span class="o">-&gt;</span><span class="n">napi</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">	<span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nf">rcu_access_pointer</span><span class="p">(</span><span class="n">rq</span><span class="o">-&gt;</span><span class="n">napi</span><span class="p">))</span>
 </span></span><span class="line"><span class="cl">		<span class="k">goto</span> <span class="n">out</span><span class="p">;</span>
 </span></span></code></pre></div><p>This got me think that in case of veth, the other side must be XDP aware. I started googling and fell on this
 <strong>Veth pair swallow packets for XDP_TX operation</strong> <a href="https://www.spinics.net/lists/netdev/msg625217.html"  class="external-link" target="_blank" rel="noopener">thread</a>!</p>
@@ -360,8 +356,7 @@ of the veth pair, and I did not have any way to set that because the other end w
     <span class="sr-only">Link to heading</span>
   </a>
 </h2>
-<p>After spending so much time after this issue, being near to giving up multiple times, I wanted to see it work. So the quick
-and easy solution was to replace the veth based bridge network with Macvlan based one, and it worked!</p>
+<p>After spending so much time after this issue, being near to giving up multiple times, I wanted to see it work. So the quick and easy solution was to replace the veth based bridge network with Macvlan based one, and it worked!</p>
 <h2 id="wrapping-up">
   Wrapping Up
   <a class="heading-link" href="#wrapping-up">
@@ -371,8 +366,8 @@ and easy solution was to replace the veth based bridge network with Macvlan base
 </h2>
 <p>I hope this will serve as an example of what tools are available to triage the obscure errors we can incur into when dealing with eBPF,
 which sometimes are different from the workflow we (as regular kernel users) are used to follow.</p>
-<p>This time I had to use eBPF to debug eBPF (via some tools like <code>bpftrace</code> and <code>xdpdump</code>) and eventually roll up my sleeves and dig into
-the kernel sources to understand what that mysterious error code I was getting was about.</p>
+<p>This I had to use eBPF to debug eBPF (via some tools like <code>bpftrace</code> and <code>xdpdump</code>) and eventually roll up my sleeves and dig into
+the kernel sources to understand what that misterious error code I was getting was about.</p>
 
       </div>
 
@@ -436,7 +431,7 @@ the kernel sources to understand what that mysterious error code I was getting w
 
   
   
-  <script src="/js/coder.min.11a2ab6a9f5cbfb6a82a26c53cbebd0841bac33124bc9e6268689de2df2875ec.js" integrity="sha256-EaKrap9cv7aoKibFPL69CEG6wzEkvJ5iaGid4t8odew="></script>
+  <script src="/js/coder.min.6ae284be93d2d19dad1f02b0039508d9aab3180a12a06dcc71b0b0ef7825a317.js" integrity="sha256-auKEvpPS0Z2tHwKwA5UI2aqzGAoSoG3McbCw73gloxc="></script>
   
 
   

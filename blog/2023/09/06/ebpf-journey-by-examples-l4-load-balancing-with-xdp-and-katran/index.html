@@ -30,7 +30,6 @@
 
 
 
-
 <link rel="canonical" href="https://fedepaol.github.io/blog/2023/09/06/ebpf-journey-by-examples-l4-load-balancing-with-xdp-and-katran/">
 
 
@@ -108,7 +107,7 @@
             </li>
           
             <li class="navigation-item">
-              <a class="navigation-link" href="/mailto:fedepaol@gmail.com">Contact</a>
+              <a class="navigation-link" href="mailto:fedepaol@gmail.com">Contact</a>
             </li>
           
         
@@ -227,12 +226,12 @@ and sending back, either via the same interface or another.</p>
 </h3>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">dst</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="p">(</span><span class="n">pckt</span><span class="p">.</span><span class="n">flags</span> <span class="o">&amp;</span> <span class="n">F_SYN_SET</span><span class="p">)</span> <span class="o">&amp;&amp;</span>
 </span></span><span class="line"><span class="cl">        <span class="o">!</span><span class="p">(</span><span class="n">vip_info</span><span class="o">-&gt;</span><span class="n">flags</span> <span class="o">&amp;</span> <span class="n">F_LRU_BYPASS</span><span class="p">))</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">      <span class="n">connection_table_lookup</span><span class="p">(</span><span class="o">&amp;</span><span class="n">dst</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">pckt</span><span class="p">,</span> <span class="n">lru_map</span><span class="p">,</span> <span class="cm">/*isGlobalLru=*/</span><span class="nb">false</span><span class="p">);</span> <span class="c1">// 1
+</span></span><span class="line"><span class="cl">      <span class="nf">connection_table_lookup</span><span class="p">(</span><span class="o">&amp;</span><span class="n">dst</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">pckt</span><span class="p">,</span> <span class="n">lru_map</span><span class="p">,</span> <span class="cm">/*isGlobalLru=*/</span><span class="nb">false</span><span class="p">);</span> <span class="c1">// 1
 </span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="p">}</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">dst</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="p">(</span><span class="n">pckt</span><span class="p">.</span><span class="n">flags</span> <span class="o">&amp;</span> <span class="n">F_SYN_SET</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="n">vip_info</span><span class="o">-&gt;</span><span class="n">flags</span> <span class="o">&amp;</span> <span class="n">F_GLOBAL_LRU</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// 2
 </span></span></span><span class="line"><span class="cl"><span class="c1"></span>      <span class="kt">int</span> <span class="n">global_lru_lookup_result</span> <span class="o">=</span>
-</span></span><span class="line"><span class="cl">          <span class="n">perform_global_lru_lookup</span><span class="p">(</span><span class="o">&amp;</span><span class="n">dst</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">pckt</span><span class="p">,</span> <span class="n">cpu_num</span><span class="p">,</span> <span class="n">vip_info</span><span class="p">,</span> <span class="n">is_ipv6</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">          <span class="nf">perform_global_lru_lookup</span><span class="p">(</span><span class="o">&amp;</span><span class="n">dst</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">pckt</span><span class="p">,</span> <span class="n">cpu_num</span><span class="p">,</span> <span class="n">vip_info</span><span class="p">,</span> <span class="n">is_ipv6</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">      <span class="k">if</span> <span class="p">(</span><span class="n">global_lru_lookup_result</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
 </span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">global_lru_lookup_result</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">      <span class="p">}</span>
@@ -241,7 +240,7 @@ and sending back, either via the same interface or another.</p>
 </span></span><span class="line"><span class="cl">    <span class="c1">// if dst is not found, route via consistent-hashing of the flow.
 </span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">dst</span><span class="p">)</span> <span class="p">{</span>
 </span></span><span class="line"><span class="cl">      <span class="cm">/* ... stats handling ... */</span>
-</span></span><span class="line"><span class="cl">      <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">get_packet_dst</span><span class="p">(</span><span class="o">&amp;</span><span class="n">dst</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">pckt</span><span class="p">,</span> <span class="n">vip_info</span><span class="p">,</span> <span class="n">is_ipv6</span><span class="p">,</span> <span class="n">lru_map</span><span class="p">))</span> <span class="p">{</span> <span class="c1">// 3
+</span></span><span class="line"><span class="cl">      <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nf">get_packet_dst</span><span class="p">(</span><span class="o">&amp;</span><span class="n">dst</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">pckt</span><span class="p">,</span> <span class="n">vip_info</span><span class="p">,</span> <span class="n">is_ipv6</span><span class="p">,</span> <span class="n">lru_map</span><span class="p">))</span> <span class="p">{</span> <span class="c1">// 3
 </span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="k">return</span> <span class="n">XDP_DROP</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">      <span class="p">}</span>
 </span></span><span class="line"><span class="cl">
@@ -263,17 +262,17 @@ for example (the rationale behind this is to avoid filling up the memory).</p>
   </a>
 </h3>
 <p>The computation performed by <code>get_packet_dst</code> is stateless and depends on the packet. The gist of the way it (more or less) works is:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl">    <span class="n">hash</span> <span class="o">=</span> <span class="n">get_packet_hash</span><span class="p">(</span><span class="n">pckt</span><span class="p">,</span> <span class="n">hash_16bytes</span><span class="p">)</span> <span class="o">%</span> <span class="n">RING_SIZE</span><span class="p">;</span> <span class="c1">// 1
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl">    <span class="n">hash</span> <span class="o">=</span> <span class="nf">get_packet_hash</span><span class="p">(</span><span class="n">pckt</span><span class="p">,</span> <span class="n">hash_16bytes</span><span class="p">)</span> <span class="o">%</span> <span class="n">RING_SIZE</span><span class="p">;</span> <span class="c1">// 1
 </span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">key</span> <span class="o">=</span> <span class="n">RING_SIZE</span> <span class="o">*</span> <span class="p">(</span><span class="n">vip_info</span><span class="o">-&gt;</span><span class="n">vip_num</span><span class="p">)</span> <span class="o">+</span> <span class="n">hash</span><span class="p">;</span> <span class="c1">// 2
 </span></span></span><span class="line"><span class="cl"><span class="c1"></span>
-</span></span><span class="line"><span class="cl">    <span class="n">real_pos</span> <span class="o">=</span> <span class="n">bpf_map_lookup_elem</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ch_rings</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">key</span><span class="p">);</span> <span class="c1">// 3 
+</span></span><span class="line"><span class="cl">    <span class="n">real_pos</span> <span class="o">=</span> <span class="nf">bpf_map_lookup_elem</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ch_rings</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">key</span><span class="p">);</span> <span class="c1">// 3 
 </span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">real_pos</span><span class="p">)</span> <span class="p">{</span>
 </span></span><span class="line"><span class="cl">      <span class="k">return</span> <span class="nb">false</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">    <span class="p">}</span>
 </span></span><span class="line"><span class="cl">    <span class="n">key</span> <span class="o">=</span> <span class="o">*</span><span class="n">real_pos</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">    <span class="n">pckt</span><span class="o">-&gt;</span><span class="n">real_index</span> <span class="o">=</span> <span class="n">key</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="o">*</span><span class="n">real</span> <span class="o">=</span> <span class="n">bpf_map_lookup_elem</span><span class="p">(</span><span class="o">&amp;</span><span class="n">reals</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">key</span><span class="p">);</span> <span class="c1">// 4
+</span></span><span class="line"><span class="cl">    <span class="o">*</span><span class="n">real</span> <span class="o">=</span> <span class="nf">bpf_map_lookup_elem</span><span class="p">(</span><span class="o">&amp;</span><span class="n">reals</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">key</span><span class="p">);</span> <span class="c1">// 4
 </span></span></span></code></pre></div><ul>
 <li>the hash of the packet is calculated and modulized RING_SIZE</li>
 <li>the key is RING_SIZE (an array containing all the <code>real</code> indexes for all the vips, ordered in chunks). The i-th VIP chunk is between
@@ -289,7 +288,7 @@ of reals (3)</li>
   </a>
 </h3>
 <p>Once the dst is found, the redirection takes place:</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl">  <span class="n">cval</span> <span class="o">=</span> <span class="n">bpf_map_lookup_elem</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ctl_array</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">mac_addr_pos</span><span class="p">);</span> <span class="c1">// 1
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl">  <span class="n">cval</span> <span class="o">=</span> <span class="nf">bpf_map_lookup_elem</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ctl_array</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">mac_addr_pos</span><span class="p">);</span> <span class="c1">// 1
 </span></span></span><span class="line"><span class="cl"><span class="c1"></span>
 </span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">cval</span><span class="p">)</span> <span class="p">{</span>
 </span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">XDP_DROP</span><span class="p">;</span>
@@ -297,11 +296,11 @@ of reals (3)</li>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">  <span class="cm">/* ... stats .. */</span>
 </span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="n">dst</span><span class="o">-&gt;</span><span class="n">flags</span> <span class="o">&amp;</span> <span class="n">F_IPV6</span><span class="p">)</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">PCKT_ENCAP_V6</span><span class="p">(</span><span class="n">xdp</span><span class="p">,</span> <span class="n">cval</span><span class="p">,</span> <span class="n">is_ipv6</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">pckt</span><span class="p">,</span> <span class="n">dst</span><span class="p">,</span> <span class="n">pkt_bytes</span><span class="p">))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nf">PCKT_ENCAP_V6</span><span class="p">(</span><span class="n">xdp</span><span class="p">,</span> <span class="n">cval</span><span class="p">,</span> <span class="n">is_ipv6</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">pckt</span><span class="p">,</span> <span class="n">dst</span><span class="p">,</span> <span class="n">pkt_bytes</span><span class="p">))</span> <span class="p">{</span>
 </span></span><span class="line"><span class="cl">      <span class="k">return</span> <span class="n">XDP_DROP</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">    <span class="p">}</span>
 </span></span><span class="line"><span class="cl">  <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">PCKT_ENCAP_V4</span><span class="p">(</span><span class="n">xdp</span><span class="p">,</span> <span class="n">cval</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">pckt</span><span class="p">,</span> <span class="n">dst</span><span class="p">,</span> <span class="n">pkt_bytes</span><span class="p">))</span> <span class="p">{</span> <span class="c1">// 2
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nf">PCKT_ENCAP_V4</span><span class="p">(</span><span class="n">xdp</span><span class="p">,</span> <span class="n">cval</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">pckt</span><span class="p">,</span> <span class="n">dst</span><span class="p">,</span> <span class="n">pkt_bytes</span><span class="p">))</span> <span class="p">{</span> <span class="c1">// 2
 </span></span></span><span class="line"><span class="cl"><span class="c1"></span>      <span class="k">return</span> <span class="n">XDP_DROP</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">    <span class="p">}</span>
 </span></span><span class="line"><span class="cl">  <span class="p">}</span>
@@ -327,7 +326,7 @@ Also, the tos flags are preserved.</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl">    <span class="k">case</span> <span class="nl">BPF_SOCK_OPS_WRITE_HDR_OPT_CB</span><span class="p">:</span>
 </span></span><span class="line"><span class="cl">      <span class="cm">/* Write the server-id as hdr-opt */</span>
 </span></span><span class="line"><span class="cl">      <span class="k">if</span> <span class="p">((</span><span class="n">skops</span><span class="o">-&gt;</span><span class="n">skb_tcp_flags</span> <span class="o">&amp;</span> <span class="n">TCPHDR_SYNACK</span><span class="p">)</span> <span class="o">==</span> <span class="n">TCPHDR_SYNACK</span><span class="p">)</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">handle_passive_write_hdr_opt</span><span class="p">(</span><span class="n">skops</span><span class="p">,</span> <span class="n">stat</span><span class="p">,</span> <span class="n">s_info</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="nf">handle_passive_write_hdr_opt</span><span class="p">(</span><span class="n">skops</span><span class="p">,</span> <span class="n">stat</span><span class="p">,</span> <span class="n">s_info</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">      <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
 </span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">SUCCESS</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">      <span class="p">}</span>
@@ -337,12 +336,12 @@ Also, the tos flags are preserved.</p>
 </span></span><span class="line"><span class="cl">    <span class="n">hdr_opt</span><span class="p">.</span><span class="n">kind</span> <span class="o">=</span> <span class="n">TCP_HDR_OPT_KIND</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">    <span class="n">hdr_opt</span><span class="p">.</span><span class="n">len</span> <span class="o">=</span> <span class="n">TCP_HDR_OPT_LEN</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">    <span class="n">hdr_opt</span><span class="p">.</span><span class="n">server_id</span> <span class="o">=</span> <span class="n">s_info</span><span class="o">-&gt;</span><span class="n">server_id</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">err</span> <span class="o">=</span> <span class="n">bpf_store_hdr_opt</span><span class="p">(</span><span class="n">skops</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">hdr_opt</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">hdr_opt</span><span class="p">),</span> <span class="n">NO_FLAGS</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">err</span> <span class="o">=</span> <span class="nf">bpf_store_hdr_opt</span><span class="p">(</span><span class="n">skops</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">hdr_opt</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">hdr_opt</span><span class="p">),</span> <span class="n">NO_FLAGS</span><span class="p">);</span>
 </span></span></code></pre></div><p>On the client side on the other hand, parses the serverid coming from the syn/ack message :</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl">      <span class="cm">/* Read hdr-opt sent by the passive side
 </span></span></span><span class="line"><span class="cl"><span class="cm">       * Only parse the SYNACK because server TPR only sends OPT with SYNACK */</span>
 </span></span><span class="line"><span class="cl">      <span class="k">if</span> <span class="p">((</span><span class="n">skops</span><span class="o">-&gt;</span><span class="n">skb_tcp_flags</span> <span class="o">&amp;</span> <span class="n">TCPHDR_SYNACK</span><span class="p">)</span> <span class="o">==</span> <span class="n">TCPHDR_SYNACK</span><span class="p">)</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">handle_active_parse_hdr</span><span class="p">(</span><span class="n">skops</span><span class="p">,</span> <span class="n">stat</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="nf">handle_active_parse_hdr</span><span class="p">(</span><span class="n">skops</span><span class="p">,</span> <span class="n">stat</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">      <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
 </span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">SUCCESS</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">      <span class="p">}</span>
@@ -352,7 +351,7 @@ Also, the tos flags are preserved.</p>
 </span></span></span><span class="line"><span class="cl"><span class="cm">       * Don&#39;t attempt to do this for the SYN packet because we only
 </span></span></span><span class="line"><span class="cl"><span class="cm">       * get the OPT in the SYNACK */</span>
 </span></span><span class="line"><span class="cl">      <span class="k">if</span> <span class="p">((</span><span class="n">skops</span><span class="o">-&gt;</span><span class="n">skb_tcp_flags</span> <span class="o">&amp;</span> <span class="n">TCPHDR_SYN</span><span class="p">)</span> <span class="o">!=</span> <span class="n">TCPHDR_SYN</span><span class="p">)</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">handle_active_write_hdr_opt</span><span class="p">(</span><span class="n">skops</span><span class="p">,</span> <span class="n">stat</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="nf">handle_active_write_hdr_opt</span><span class="p">(</span><span class="n">skops</span><span class="p">,</span> <span class="n">stat</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">      <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
 </span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">SUCCESS</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">      <span class="p">}</span>
@@ -364,16 +363,16 @@ is already contained in the tcp header, in the <a href="https://github.com/faceb
 </span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="n">pckt</span><span class="p">.</span><span class="n">flow</span><span class="p">.</span><span class="n">proto</span> <span class="o">==</span> <span class="n">IPPROTO_TCP</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="p">(</span><span class="n">pckt</span><span class="p">.</span><span class="n">flags</span> <span class="o">&amp;</span> <span class="n">F_SYN_SET</span><span class="p">))</span> <span class="p">{</span>
 </span></span><span class="line"><span class="cl">      <span class="n">__u32</span> <span class="n">routing_stats_key</span> <span class="o">=</span> <span class="n">MAX_VIPS</span> <span class="o">+</span> <span class="n">TCP_SERVER_ID_ROUTE_STATS</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">      <span class="k">struct</span> <span class="n">lb_stats</span><span class="o">*</span> <span class="n">routing_stats</span> <span class="o">=</span>
-</span></span><span class="line"><span class="cl">          <span class="n">bpf_map_lookup_elem</span><span class="p">(</span><span class="o">&amp;</span><span class="n">stats</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">routing_stats_key</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">          <span class="nf">bpf_map_lookup_elem</span><span class="p">(</span><span class="o">&amp;</span><span class="n">stats</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">routing_stats_key</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">      <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">routing_stats</span><span class="p">)</span> <span class="p">{</span>
 </span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">XDP_DROP</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">      <span class="p">}</span>
-</span></span><span class="line"><span class="cl">      <span class="k">if</span> <span class="p">(</span><span class="n">tcp_hdr_opt_lookup</span><span class="p">(</span><span class="n">xdp</span><span class="p">,</span> <span class="n">is_ipv6</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">dst</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">pckt</span><span class="p">)</span> <span class="o">==</span> <span class="n">FURTHER_PROCESSING</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="k">if</span> <span class="p">(</span><span class="nf">tcp_hdr_opt_lookup</span><span class="p">(</span><span class="n">xdp</span><span class="p">,</span> <span class="n">is_ipv6</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">dst</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">pckt</span><span class="p">)</span> <span class="o">==</span> <span class="n">FURTHER_PROCESSING</span><span class="p">)</span> <span class="p">{</span>
 </span></span><span class="line"><span class="cl">        <span class="n">routing_stats</span><span class="o">-&gt;</span><span class="n">v1</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">      <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
 </span></span><span class="line"><span class="cl">        <span class="c1">// update this routing decision in the lru_map as well
 </span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="k">if</span> <span class="p">(</span><span class="n">lru_map</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="p">(</span><span class="n">vip_info</span><span class="o">-&gt;</span><span class="n">flags</span> <span class="o">&amp;</span> <span class="n">F_LRU_BYPASS</span><span class="p">))</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">          <span class="n">check_and_update_real_index_in_lru</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">          <span class="nf">check_and_update_real_index_in_lru</span><span class="p">(</span>
 </span></span><span class="line"><span class="cl">              <span class="o">&amp;</span><span class="n">pckt</span><span class="p">,</span> <span class="n">lru_map</span><span class="p">,</span> <span class="cm">/* update_lru */</span> <span class="nb">true</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">        <span class="p">}</span>
 </span></span><span class="line"><span class="cl">        <span class="n">routing_stats</span><span class="o">-&gt;</span><span class="n">v2</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
@@ -398,27 +397,27 @@ the encapsulation logic <strong>stolen</strong> inspired from Katran.</p>
 the encapsulated packet to be sent back to the interface:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl">  <span class="k">struct</span> <span class="n">arguments</span> <span class="o">*</span><span class="n">args</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">  <span class="n">__u32</span> <span class="n">key</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">  <span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="k">struct</span> <span class="n">arguments</span> <span class="o">*</span><span class="p">)</span><span class="n">bpf_map_lookup_elem</span><span class="p">(</span><span class="o">&amp;</span><span class="n">xdp_params_array</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">key</span><span class="p">);</span> <span class="c1">// 1
+</span></span><span class="line"><span class="cl">  <span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="k">struct</span> <span class="n">arguments</span> <span class="o">*</span><span class="p">)</span><span class="nf">bpf_map_lookup_elem</span><span class="p">(</span><span class="o">&amp;</span><span class="n">xdp_params_array</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">key</span><span class="p">);</span> <span class="c1">// 1
 </span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">args</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl">  <span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="n">bpf_printk</span><span class="p">(</span><span class="s">&#34;no args&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">bpf_printk</span><span class="p">(</span><span class="s">&#34;no args&#34;</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">XDP_PASS</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">  <span class="p">}</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="n">bpf_xdp_adjust_head</span><span class="p">(</span><span class="n">xdp</span><span class="p">,</span> <span class="mi">0</span> <span class="o">-</span> <span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="k">sizeof</span><span class="p">(</span><span class="k">struct</span> <span class="n">iphdr</span><span class="p">)))</span> <span class="c1">// 2
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="nf">bpf_xdp_adjust_head</span><span class="p">(</span><span class="n">xdp</span><span class="p">,</span> <span class="mi">0</span> <span class="o">-</span> <span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="k">sizeof</span><span class="p">(</span><span class="k">struct</span> <span class="n">iphdr</span><span class="p">)))</span> <span class="c1">// 2
 </span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="p">{</span>
 </span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="nb">false</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">  <span class="p">}</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">  <span class="n">memcpy</span><span class="p">(</span><span class="n">new_eth</span><span class="o">-&gt;</span><span class="n">h_dest</span><span class="p">,</span> <span class="n">dst_mac</span><span class="p">,</span> <span class="mi">6</span><span class="p">);</span> <span class="c1">// 3
+</span></span><span class="line"><span class="cl">  <span class="nf">memcpy</span><span class="p">(</span><span class="n">new_eth</span><span class="o">-&gt;</span><span class="n">h_dest</span><span class="p">,</span> <span class="n">dst_mac</span><span class="p">,</span> <span class="mi">6</span><span class="p">);</span> <span class="c1">// 3
 </span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="k">if</span> <span class="p">(</span><span class="n">old_eth</span><span class="o">-&gt;</span><span class="n">h_dest</span> <span class="o">+</span> <span class="mi">6</span> <span class="o">&gt;</span> <span class="n">data_end</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl">  <span class="p">{</span>
 </span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="nb">false</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">  <span class="p">}</span>
-</span></span><span class="line"><span class="cl">  <span class="n">memcpy</span><span class="p">(</span><span class="n">new_eth</span><span class="o">-&gt;</span><span class="n">h_source</span><span class="p">,</span> <span class="n">old_eth</span><span class="o">-&gt;</span><span class="n">h_dest</span><span class="p">,</span> <span class="mi">6</span><span class="p">);</span> <span class="c1">// 4 
+</span></span><span class="line"><span class="cl">  <span class="nf">memcpy</span><span class="p">(</span><span class="n">new_eth</span><span class="o">-&gt;</span><span class="n">h_source</span><span class="p">,</span> <span class="n">old_eth</span><span class="o">-&gt;</span><span class="n">h_dest</span><span class="p">,</span> <span class="mi">6</span><span class="p">);</span> <span class="c1">// 4 
 </span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">new_eth</span><span class="o">-&gt;</span><span class="n">h_proto</span> <span class="o">=</span> <span class="n">BE_ETH_P_IP</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">  <span class="n">create_v4_hdr</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">create_v4_hdr</span><span class="p">(</span>
 </span></span><span class="line"><span class="cl">    <span class="n">iph</span><span class="p">,</span>
 </span></span><span class="line"><span class="cl">    <span class="n">saddr</span><span class="p">,</span>
 </span></span><span class="line"><span class="cl">    <span class="n">daddr</span><span class="p">,</span>
@@ -564,7 +563,7 @@ is not accurate please reach out!</p>
 
   
   
-  <script src="/js/coder.min.11a2ab6a9f5cbfb6a82a26c53cbebd0841bac33124bc9e6268689de2df2875ec.js" integrity="sha256-EaKrap9cv7aoKibFPL69CEG6wzEkvJ5iaGid4t8odew="></script>
+  <script src="/js/coder.min.6ae284be93d2d19dad1f02b0039508d9aab3180a12a06dcc71b0b0ef7825a317.js" integrity="sha256-auKEvpPS0Z2tHwKwA5UI2aqzGAoSoG3McbCw73gloxc="></script>
   
 
   
