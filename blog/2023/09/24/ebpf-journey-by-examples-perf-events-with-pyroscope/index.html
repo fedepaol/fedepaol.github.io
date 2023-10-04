@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>
+  eBPF journey by examples: perf events with Pyroscope · My little software warehouse
+</title>
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+
+
+
+
+<meta name="author" content="Federico Paolinelli">
+<meta name="description" content="Here we dig into pyroscope to understand how eBPF can fetch perf events and build indicators of how the application is behaving, providing a nice backend for flamegraphs.">
+<meta name="keywords" content="">
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="eBPF journey by examples: perf events with Pyroscope"/>
+<meta name="twitter:description" content="Here we dig into pyroscope to understand how eBPF can fetch perf events and build indicators of how the application is behaving, providing a nice backend for flamegraphs."/>
+
+<meta property="og:title" content="eBPF journey by examples: perf events with Pyroscope" />
+<meta property="og:description" content="Here we dig into pyroscope to understand how eBPF can fetch perf events and build indicators of how the application is behaving, providing a nice backend for flamegraphs." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://fedepaol.github.io/blog/2023/09/24/ebpf-journey-by-examples-perf-events-with-pyroscope/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2023-09-24T14:59:22+02:00" />
+<meta property="article:modified_time" content="2023-09-24T14:59:22+02:00" />
+
+
+
+
+<link rel="canonical" href="https://fedepaol.github.io/blog/2023/09/24/ebpf-journey-by-examples-perf-events-with-pyroscope/">
+
+
+<link rel="preload" href="/fonts/forkawesome-webfont.woff2?v=1.2.0" as="font" type="font/woff2" crossorigin>
+
+
+  
+  
+  <link rel="stylesheet" href="/css/coder.min.4218e9a82fcc372a4835bc96c50c77e11ac52ebe04361b7efd80f5f332ec3e89.css" integrity="sha256-QhjpqC/MNypINbyWxQx34RrFLr4ENht&#43;/YD18zLsPok=" crossorigin="anonymous" media="screen" />
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+<link rel="icon" type="image/svg+xml" href="/images/favicon.svg" sizes="any">
+<link rel="icon" type="image/png" href="/images/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="/images/favicon-16x16.png" sizes="16x16">
+
+<link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+<link rel="manifest" href="/site.webmanifest">
+<link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+
+
+
+
+
+
+</head>
+
+
+
+
+<body class="preload-transitions colorscheme-light">
+  
+<div class="float-container">
+    <a id="dark-mode-toggle" class="colorscheme-toggle">
+        <i class="fa fa-adjust fa-fw" aria-hidden="true"></i>
+    </a>
+</div>
+
+
+  <main class="wrapper">
+    <nav class="navigation">
+  <section class="container">
+    <a class="navigation-title" href="/">
+      My little software warehouse
+    </a>
+    
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/posts/">Blog</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/about/">About</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="mailto:fedepaol@gmail.com">Contact</a>
+            </li>
+          
+        
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+    <div class="content">
+      
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">
+            <a class="title-link" href="https://fedepaol.github.io/blog/2023/09/24/ebpf-journey-by-examples-perf-events-with-pyroscope/">
+              eBPF journey by examples: perf events with Pyroscope
+            </a>
+          </h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa fa-calendar" aria-hidden="true"></i>
+              <time datetime="2023-09-24T14:59:22&#43;02:00">
+                September 24, 2023
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa fa-clock-o" aria-hidden="true"></i>
+              9-minute read
+            </span>
+          </div>
+          
+          
+          
+        </div>
+      </header>
+
+      <div class="post-content">
+        
+        <h1 id="pyroscope">
+  Pyroscope
+  <a class="heading-link" href="#pyroscope">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h1>
+<p>After diving into <a href="https://fedepaol.github.io/blog/2023/08/21/ebpf-journey-by-examples-ebpf-tracepoints-with-falco/" >security with Falco</a> and <a href="https://fedepaol.github.io/blog/2023/09/06/ebpf-journey-by-examples-l4-load-balancing-with-xdp-and-katran/" >networking with XDP</a>, I wanted to explore a profiling application that leverages eBPF.</p>
+<p><strong><a href="https://grafana.com/oss/pyroscope/"  class="external-link" target="_blank" rel="noopener">Grafana Pyroscope</a> is an open source continuous profiling platform</strong>. It supports various backends, including Go&rsquo;s <code>pprof</code>,
+python via <code>py-spy</code> and many other languages. But the reason why I am writing this post is because it supports also an <code>eBPF</code>
+backend.</p>
+<h2 id="in-order-to-profile-we-need-to-understand-what-our-program-is-doing">
+  In order to profile, we need to understand what our program is doing
+  <a class="heading-link" href="#in-order-to-profile-we-need-to-understand-what-our-program-is-doing">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>I don&rsquo;t know much about <code>py-spy</code>, but I know how Go&rsquo;s pprof works and it&rsquo;s very simple: it takes a snapshot of the stack
+of every goroutine of the program over time. By aggregating such information we can understand where our program is
+consuming most of the CPU: if the same stack is captured over time, it means it belongs to a time consuming path.</p>
+<p>A common way to aggregate such information is via a <a href="https://www.brendangregg.com/flamegraphs.html"  class="external-link" target="_blank" rel="noopener">flamegraph</a>:</p>
+<ul>
+<li>The flamegraph does not represent the functions called over time, but all the functions captured in the sampling time</li>
+<li>Each level of the graph represents a level in the stack, with functions being called</li>
+<li>The width of each box represents how often that function appears in the dump (i.e. how long our program is busy in that function)</li>
+</ul>
+<p>This for example is a flamegraph generated out of a MetalLB&rsquo;s speaker execution via the embedded Go pprof endpoint:</p>
+<p><img src="/images/pyroscope/torch.svg" alt=""></p>
+<h2 id="with-ebpf">
+  With eBPF
+  <a class="heading-link" href="#with-ebpf">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>Pyroscope uses both native profiling (for interpreted languages such as python, for example) but also eBPF based one, which is
+the focus of this post.</p>
+<p>eBPF provides a nice (and generic!) way to inspect the user or the kernel stack of a given application, via the <code>bpf_get_stackid</code>
+eBPF helper.</p>
+<p>From the bpf-helper man page:</p>
+<blockquote>
+<p>Walk a user or a kernel stack and return its id. To
+achieve this, the helper needs ctx, which is a
+pointer to the context on which the tracing program
+is executed, and a pointer to a map of type
+BPF_MAP_TYPE_STACK_TRACE.</p>
+</blockquote>
+<p>So, the helper does two things:</p>
+<ul>
+<li>It walks the kernel (or user) stack and fills an element of the provided map of type <code>BPF_MAP_TYPE_STACK_TRACE</code></li>
+<li>It generates and returns the key corresponding to that stack to access the map</li>
+</ul>
+<p>This is just what we need to build our flamegraph: the eBPF program is notified when the sampling interval occurs and is
+able to both count the occurrences of a given stack and to collect the stack.</p>
+<p>The <code>pyroscope</code> eBPF side is pretty simple and self contained:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl"><span class="nf">SEC</span><span class="p">(</span><span class="s">&#34;perf_event&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">do_perf_event</span><span class="p">(</span><span class="k">struct</span> <span class="n">bpf_perf_event_data</span> <span class="o">*</span><span class="n">ctx</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">u64</span> <span class="n">id</span> <span class="o">=</span> <span class="nf">bpf_get_current_pid_tgid</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="n">u32</span> <span class="n">tgid</span> <span class="o">=</span> <span class="n">id</span> <span class="o">&gt;&gt;</span> <span class="mi">32</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">u32</span> <span class="n">pid</span> <span class="o">=</span> <span class="n">id</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">struct</span> <span class="n">sample_key</span> <span class="n">key</span> <span class="o">=</span> <span class="p">{</span> <span class="p">.</span><span class="n">pid</span> <span class="o">=</span> <span class="n">tgid</span><span class="p">};</span>
+</span></span><span class="line"><span class="cl">    <span class="n">key</span><span class="p">.</span><span class="n">kern_stack</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">key</span><span class="p">.</span><span class="n">user_stack</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">u32</span> <span class="o">*</span><span class="n">val</span><span class="p">,</span> <span class="n">one</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">zero</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">struct</span> <span class="n">bss_arg</span> <span class="o">*</span><span class="n">arg</span> <span class="o">=</span> <span class="nf">bpf_map_lookup_elem</span><span class="p">(</span><span class="o">&amp;</span><span class="n">args</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">zero</span><span class="p">);</span> <span class="c1">// 1
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">arg</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">pid</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">arg</span><span class="o">-&gt;</span><span class="n">tgid_filter</span> <span class="o">!=</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="n">tgid</span> <span class="o">!=</span> <span class="n">arg</span><span class="o">-&gt;</span><span class="n">tgid_filter</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">bpf_get_current_comm</span><span class="p">(</span><span class="o">&amp;</span><span class="n">key</span><span class="p">.</span><span class="n">comm</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">key</span><span class="p">.</span><span class="n">comm</span><span class="p">));</span> <span class="c1">// 2
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">arg</span><span class="o">-&gt;</span><span class="n">collect_kernel</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">key</span><span class="p">.</span><span class="n">kern_stack</span> <span class="o">=</span> <span class="nf">bpf_get_stackid</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">stacks</span><span class="p">,</span> <span class="n">KERN_STACKID_FLAGS</span><span class="p">);</span> <span class="c1">// 3
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">arg</span><span class="o">-&gt;</span><span class="n">collect_user</span><span class="p">)</span>  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">key</span><span class="p">.</span><span class="n">user_stack</span> <span class="o">=</span> <span class="nf">bpf_get_stackid</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">stacks</span><span class="p">,</span> <span class="n">USER_STACKID_FLAGS</span><span class="p">);</span> <span class="c1">// 3 
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">val</span> <span class="o">=</span> <span class="nf">bpf_map_lookup_elem</span><span class="p">(</span><span class="o">&amp;</span><span class="n">counts</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">key</span><span class="p">);</span> <span class="c1">// 4
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="n">val</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="p">(</span><span class="o">*</span><span class="n">val</span><span class="p">)</span><span class="o">++</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">else</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">bpf_map_update_elem</span><span class="p">(</span><span class="o">&amp;</span><span class="n">counts</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">key</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">one</span><span class="p">,</span> <span class="n">BPF_NOEXIST</span><span class="p">);</span> <span class="c1">// 4
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>What the program does is:</p>
+<ul>
+<li>it fetches the configuration (i.e. if filtering on the thread id must be performed) (1)</li>
+<li>it fetches the current command (2)</li>
+<li>depending on the configuration, fetches either the kernel stack or the user stack (3)</li>
+<li>it builds a key based on the command, the stack id and the thread id, and uses it to count how many
+time a given stack is occurring (4)</li>
+</ul>
+<p>The <code>stacks</code> map holds each different stack.</p>
+<h2 id="on-the-userspace-side">
+  On the userspace side
+  <a class="heading-link" href="#on-the-userspace-side">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>The userspace part is probably the most complex and interesting one. After registering the
+program, it translates the array of instruction pointers to the real stack.</p>
+<h3 id="attaching-the-program">
+  Attaching the program
+  <a class="heading-link" href="#attaching-the-program">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>For each CPU it creates the perf event:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">newPerfEvent</span><span class="p">(</span><span class="nx">cpu</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">sampleRate</span> <span class="kt">int</span><span class="p">)</span> <span class="p">(</span><span class="o">*</span><span class="nx">perfEvent</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">var</span> <span class="p">(</span>
+</span></span><span class="line"><span class="cl">       <span class="nx">fd</span>  <span class="kt">int</span>
+</span></span><span class="line"><span class="cl">       <span class="nx">err</span> <span class="kt">error</span>
+</span></span><span class="line"><span class="cl">    <span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">attr</span> <span class="o">:=</span> <span class="nx">unix</span><span class="p">.</span><span class="nx">PerfEventAttr</span><span class="p">{</span>
+</span></span><span class="line"><span class="cl">       <span class="nx">Type</span><span class="p">:</span>   <span class="nx">unix</span><span class="p">.</span><span class="nx">PERF_TYPE_SOFTWARE</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">       <span class="nx">Config</span><span class="p">:</span> <span class="nx">unix</span><span class="p">.</span><span class="nx">PERF_COUNT_SW_CPU_CLOCK</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">       <span class="nx">Bits</span><span class="p">:</span>   <span class="nx">unix</span><span class="p">.</span><span class="nx">PerfBitFreq</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">       <span class="nx">Sample</span><span class="p">:</span> <span class="nb">uint64</span><span class="p">(</span><span class="nx">sampleRate</span><span class="p">),</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">fd</span><span class="p">,</span> <span class="nx">err</span> <span class="p">=</span> <span class="nx">unix</span><span class="p">.</span><span class="nf">PerfEventOpen</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">attr</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="nx">cpu</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="nx">unix</span><span class="p">.</span><span class="nx">PERF_FLAG_FD_CLOEXEC</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">       <span class="k">return</span> <span class="kc">nil</span><span class="p">,</span> <span class="nx">fmt</span><span class="p">.</span><span class="nf">Errorf</span><span class="p">(</span><span class="s">&#34;open perf event: %w&#34;</span><span class="p">,</span> <span class="nx">err</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="o">&amp;</span><span class="nx">perfEvent</span><span class="p">{</span><span class="nx">fd</span><span class="p">:</span> <span class="nx">fd</span><span class="p">},</span> <span class="kc">nil</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>and then attaches the eBPF program to it:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl">       <span class="nx">err</span> <span class="p">=</span> <span class="nx">pe</span><span class="p">.</span><span class="nf">attachPerfEvent</span><span class="p">(</span><span class="nx">s</span><span class="p">.</span><span class="nx">bpf</span><span class="p">.</span><span class="nx">profilePrograms</span><span class="p">.</span><span class="nx">DoPerfEvent</span><span class="p">)</span>
+</span></span></code></pre></div><h2 id="building-the-flame-graph">
+  Building the flame graph
+  <a class="heading-link" href="#building-the-flame-graph">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>In order to build the flame graph it collects all the keys of all the stacks, reading the counter map</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl">    <span class="nx">keys</span><span class="p">,</span> <span class="nx">values</span><span class="p">,</span> <span class="nx">batch</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">s</span><span class="p">.</span><span class="nf">getCountsMapValues</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">       <span class="k">return</span> <span class="nx">fmt</span><span class="p">.</span><span class="nf">Errorf</span><span class="p">(</span><span class="s">&#34;get counts map: %w&#34;</span><span class="p">,</span> <span class="nx">err</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span></code></pre></div><p>For each key it accesses the stacks map and builds a record with the pid, the stack, the counter:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl">    <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">keys</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="cm">/*...*/</span>
+</span></span><span class="line"><span class="cl">       <span class="k">if</span> <span class="nx">s</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">CollectUser</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">         <span class="nx">uStack</span> <span class="p">=</span> <span class="nx">s</span><span class="p">.</span><span class="nf">getStack</span><span class="p">(</span><span class="nx">ck</span><span class="p">.</span><span class="nx">UserStack</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">       <span class="p">}</span>
+</span></span><span class="line"><span class="cl">       <span class="k">if</span> <span class="nx">s</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">CollectKernel</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">         <span class="nx">kStack</span> <span class="p">=</span> <span class="nx">s</span><span class="p">.</span><span class="nf">getStack</span><span class="p">(</span><span class="nx">ck</span><span class="p">.</span><span class="nx">KernStack</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">       <span class="p">}</span>
+</span></span><span class="line"><span class="cl">       <span class="nx">sfs</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">sfs</span><span class="p">,</span> <span class="nx">sf</span><span class="p">{</span>
+</span></span><span class="line"><span class="cl">         <span class="nx">pid</span><span class="p">:</span>    <span class="nx">ck</span><span class="p">.</span><span class="nx">Pid</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">         <span class="nx">uStack</span><span class="p">:</span> <span class="nx">uStack</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">         <span class="nx">kStack</span><span class="p">:</span> <span class="nx">kStack</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">         <span class="nx">count</span><span class="p">:</span>  <span class="nx">value</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">         <span class="nx">comm</span><span class="p">:</span>   <span class="nf">getComm</span><span class="p">(</span><span class="nx">ck</span><span class="p">),</span>
+</span></span><span class="line"><span class="cl">         <span class="nx">labels</span><span class="p">:</span> <span class="nx">labels</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">       <span class="p">})</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span></code></pre></div><p>Those <code>getStack</code> calls return the stack under the form of instruction pointers (as integers).</p>
+<p>For each element, the code then <em>walks</em> the stack of the corresponding pid, translates it to a readable form with the
+name of the symbols and returns it via a callback:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">it</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">sfs</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">       <span class="nx">stats</span> <span class="o">:=</span> <span class="nx">stackResolveStats</span><span class="p">{}</span>
+</span></span><span class="line"><span class="cl">       <span class="nx">sb</span><span class="p">.</span><span class="nf">rest</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">       <span class="nx">sb</span><span class="p">.</span><span class="nb">append</span><span class="p">(</span><span class="nx">it</span><span class="p">.</span><span class="nx">comm</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">       <span class="k">if</span> <span class="nx">s</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">CollectUser</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">         <span class="nx">s</span><span class="p">.</span><span class="nf">walkStack</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">sb</span><span class="p">,</span> <span class="nx">it</span><span class="p">.</span><span class="nx">uStack</span><span class="p">,</span> <span class="nx">it</span><span class="p">.</span><span class="nx">pid</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">stats</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">       <span class="p">}</span>
+</span></span><span class="line"><span class="cl">       <span class="k">if</span> <span class="nx">s</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">CollectKernel</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">         <span class="nx">s</span><span class="p">.</span><span class="nf">walkStack</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">sb</span><span class="p">,</span> <span class="nx">it</span><span class="p">.</span><span class="nx">kStack</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">stats</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">       <span class="p">}</span>
+</span></span><span class="line"><span class="cl">       <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nx">sb</span><span class="p">.</span><span class="nx">stack</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">         <span class="k">continue</span> <span class="c1">// only comm
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>       <span class="p">}</span>
+</span></span><span class="line"><span class="cl">       <span class="nx">lo</span><span class="p">.</span><span class="nf">Reverse</span><span class="p">(</span><span class="nx">sb</span><span class="p">.</span><span class="nx">stack</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">       <span class="nf">cb</span><span class="p">(</span><span class="nx">it</span><span class="p">.</span><span class="nx">labels</span><span class="p">,</span> <span class="nx">sb</span><span class="p">.</span><span class="nx">stack</span><span class="p">,</span> <span class="nb">uint64</span><span class="p">(</span><span class="nx">it</span><span class="p">.</span><span class="nx">count</span><span class="p">),</span> <span class="nx">it</span><span class="p">.</span><span class="nx">pid</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">       <span class="nx">s</span><span class="p">.</span><span class="nf">debugDump</span><span class="p">(</span><span class="nx">it</span><span class="p">,</span> <span class="nx">stats</span><span class="p">,</span> <span class="nx">sb</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span></code></pre></div><p><code>walkStack</code> is where the magic happens:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">func</span> <span class="p">(</span><span class="nx">s</span> <span class="o">*</span><span class="nx">session</span><span class="p">)</span> <span class="nf">walkStack</span><span class="p">(</span><span class="nx">sb</span> <span class="o">*</span><span class="nx">stackBuilder</span><span class="p">,</span> <span class="nx">stack</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">,</span> <span class="nx">pid</span> <span class="kt">uint32</span><span class="p">,</span> <span class="nx">stats</span> <span class="o">*</span><span class="nx">stackResolveStats</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nx">stack</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">       <span class="k">return</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">var</span> <span class="nx">stackFrames</span> <span class="p">[]</span><span class="kt">string</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="p">&lt;</span> <span class="mi">127</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">       <span class="nx">instructionPointerBytes</span> <span class="o">:=</span> <span class="nx">stack</span><span class="p">[</span><span class="nx">i</span><span class="o">*</span><span class="mi">8</span> <span class="p">:</span> <span class="nx">i</span><span class="o">*</span><span class="mi">8</span><span class="o">+</span><span class="mi">8</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">       <span class="nx">instructionPointer</span> <span class="o">:=</span> <span class="nx">binary</span><span class="p">.</span><span class="nx">LittleEndian</span><span class="p">.</span><span class="nf">Uint64</span><span class="p">(</span><span class="nx">instructionPointerBytes</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">       <span class="k">if</span> <span class="nx">instructionPointer</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">         <span class="k">break</span>
+</span></span><span class="line"><span class="cl">       <span class="p">}</span>
+</span></span><span class="line"><span class="cl">       <span class="nx">sym</span> <span class="o">:=</span> <span class="nx">s</span><span class="p">.</span><span class="nx">symCache</span><span class="p">.</span><span class="nf">Resolve</span><span class="p">(</span><span class="nx">pid</span><span class="p">,</span> <span class="nx">instructionPointer</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">       <span class="kd">var</span> <span class="nx">name</span> <span class="kt">string</span>
+</span></span><span class="line"><span class="cl">       <span class="k">if</span> <span class="nx">sym</span><span class="p">.</span><span class="nx">Name</span> <span class="o">!=</span> <span class="s">&#34;&#34;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">         <span class="nx">name</span> <span class="p">=</span> <span class="nx">sym</span><span class="p">.</span><span class="nx">Name</span>
+</span></span><span class="line"><span class="cl">         <span class="nx">stats</span><span class="p">.</span><span class="nx">known</span><span class="o">++</span>
+</span></span><span class="line"><span class="cl">       <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">         <span class="k">if</span> <span class="nx">sym</span><span class="p">.</span><span class="nx">Module</span> <span class="o">!=</span> <span class="s">&#34;&#34;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">          <span class="c1">//name = fmt.Sprintf(&#34;%s+%x&#34;, sym.Module, sym.Start) // todo expose an option to enable this
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>          <span class="nx">name</span> <span class="p">=</span> <span class="nx">sym</span><span class="p">.</span><span class="nx">Module</span>
+</span></span><span class="line"><span class="cl">          <span class="nx">stats</span><span class="p">.</span><span class="nx">unknownSymbols</span><span class="o">++</span>
+</span></span><span class="line"><span class="cl">         <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">          <span class="nx">name</span> <span class="p">=</span> <span class="s">&#34;[unknown]&#34;</span>
+</span></span><span class="line"><span class="cl">          <span class="nx">stats</span><span class="p">.</span><span class="nx">unknownModules</span><span class="o">++</span>
+</span></span><span class="line"><span class="cl">         <span class="p">}</span>
+</span></span><span class="line"><span class="cl">       <span class="p">}</span>
+</span></span><span class="line"><span class="cl">       <span class="nx">stackFrames</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">stackFrames</span><span class="p">,</span> <span class="nx">name</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span></code></pre></div><p>In order to be able to perform the translation, <code>pyroscope</code> fills this <code>symCache</code> object.</p>
+<p>It reads the content of <code>/proc/$pid/maps</code> which gives the details of each
+address region of the process&rsquo; address space to a data structure under the form:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl">    <span class="nx">ProcMap</span><span class="p">{</span>
+</span></span><span class="line"><span class="cl">       <span class="nx">StartAddr</span><span class="p">:</span> <span class="nx">saddr</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">       <span class="nx">EndAddr</span><span class="p">:</span>   <span class="nx">eaddr</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">       <span class="nx">Perms</span><span class="p">:</span>     <span class="nx">perms</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">       <span class="nx">Offset</span><span class="p">:</span>    <span class="nx">offset</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">       <span class="nx">Dev</span><span class="p">:</span>       <span class="nx">device</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">       <span class="nx">Inode</span><span class="p">:</span>     <span class="nx">inode</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">       <span class="nx">Pathname</span><span class="p">:</span>  <span class="nx">pathname</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span></code></pre></div><p>Given the file corresponding to a given region, it uses <code>elf.NewFile()</code> to parse it.
+The logic is then quite complex, so I will just provide the references on how pyroscope
+fills the <code>symCache</code>:</p>
+<ul>
+<li>looking all the ranges to find where our instruction pointer belongs to <a href="https://github.com/grafana/pyroscope/blob/07c51d833e73450c77800545ca0a3003d49fd049/ebpf/symtab/proc.go#L133"  class="external-link" target="_blank" rel="noopener">here</a></li>
+<li>building an elf table using the file that corresponds to the given range <a href="https://github.com/grafana/pyroscope/blob/07c51d833e73450c77800545ca0a3003d49fd049/ebpf/symtab/proc.go#L121"  class="external-link" target="_blank" rel="noopener">here</a></li>
+<li>getting the elf file&rsquo;s <code>buildID</code> <a href="https://github.com/grafana/pyroscope/blob/5acd4f8255ef154370e19bc8523aacf6531ad759/ebpf/symtab/elf.go#L98"  class="external-link" target="_blank" rel="noopener">here</a></li>
+<li>trying to find the corresponding debug file to use it for the symbols <a href="https://github.com/grafana/pyroscope/blob/5acd4f8255ef154370e19bc8523aacf6531ad759/ebpf/symtab/elf.go#L124"  class="external-link" target="_blank" rel="noopener">here</a></li>
+<li>fetching the symbols from the elf table <a href="https://github.com/grafana/pyroscope/blob/5acd4f8255ef154370e19bc8523aacf6531ad759/ebpf/symtab/elf.go#L156"  class="external-link" target="_blank" rel="noopener">here</a></li>
+</ul>
+<p>What we get at the end, is a list of stacks with their occurrences that can be stored somewhere and
+then presented to the user as a nice flamegraph.</p>
+<h2 id="poors-man-version">
+  Poor&rsquo;s man version
+  <a class="heading-link" href="#poors-man-version">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>As always, I tried to write a simple version using Go for the userspace and C for the eBPF side,
+stealing pieces from the project.</p>
+<p>The simplified version still interacts with <code>perf_event</code>s, but it doesn&rsquo;t do the super-hard work
+of translating the set of pointers to a human readable stack with names. It can be found in the usual
+<a href="https://github.com/fedepaol/ebpfexamples/tree/main/perfeventsample"  class="external-link" target="_blank" rel="noopener">github repo</a>.</p>
+<p>Let&rsquo;s have a look at the eBPF side:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl"><span class="nf">SEC</span><span class="p">(</span><span class="s">&#34;perf_event&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">do_perf_event</span><span class="p">(</span><span class="k">struct</span> <span class="n">bpf_perf_event_data</span> <span class="o">*</span><span class="n">ctx</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">u64</span> <span class="n">id</span> <span class="o">=</span> <span class="nf">bpf_get_current_pid_tgid</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="n">u32</span> <span class="n">tgid</span> <span class="o">=</span> <span class="n">id</span> <span class="o">&gt;&gt;</span> <span class="mi">32</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">u32</span> <span class="n">pid</span> <span class="o">=</span> <span class="n">id</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="k">struct</span> <span class="n">arguments</span> <span class="o">*</span><span class="n">args</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">__u32</span> <span class="n">argsKey</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="k">struct</span> <span class="n">arguments</span> <span class="o">*</span><span class="p">)</span><span class="nf">bpf_map_lookup_elem</span><span class="p">(</span><span class="o">&amp;</span><span class="n">params_array</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">argsKey</span><span class="p">);</span> <span class="c1">// 1
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">args</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">bpf_printk</span><span class="p">(</span><span class="s">&#34;no args&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="n">pid</span> <span class="o">!=</span> <span class="n">args</span><span class="o">-&gt;</span><span class="n">pid</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span> <span class="c1">// 2
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="nf">bpf_printk</span><span class="p">(</span><span class="s">&#34;got event for pid %d&#34;</span><span class="p">,</span> <span class="n">pid</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="k">struct</span> <span class="n">stack_key</span> <span class="n">key</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">key</span><span class="p">.</span><span class="n">pid</span> <span class="o">=</span> <span class="n">pid</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">bpf_get_current_comm</span><span class="p">(</span><span class="o">&amp;</span><span class="n">key</span><span class="p">.</span><span class="n">comm</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">key</span><span class="p">.</span><span class="n">comm</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">  <span class="n">key</span><span class="p">.</span><span class="n">stack_id</span> <span class="o">=</span> <span class="nf">bpf_get_stackid</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">stacks</span><span class="p">,</span> <span class="n">USER_STACKID_FLAGS</span><span class="p">);</span> <span class="c1">// 3
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  
+</span></span><span class="line"><span class="cl">  
+</span></span><span class="line"><span class="cl">  <span class="n">u32</span><span class="o">*</span> <span class="n">val</span> <span class="o">=</span> <span class="nf">bpf_map_lookup_elem</span><span class="p">(</span><span class="o">&amp;</span><span class="n">counts</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">key</span><span class="p">);</span> <span class="c1">// 4
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="k">if</span> <span class="p">(</span><span class="n">val</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">(</span><span class="o">*</span><span class="n">val</span><span class="p">)</span><span class="o">++</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">else</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">u32</span> <span class="n">one</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">bpf_map_update_elem</span><span class="p">(</span><span class="o">&amp;</span><span class="n">counts</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">key</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">one</span><span class="p">,</span> <span class="n">BPF_NOEXIST</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>Here we:</p>
+<ul>
+<li>get the pid we are asked to observe (1)</li>
+<li>return if the pid we got the event for doesn&rsquo;t match (2)</li>
+<li>get the stack id (and contextually, fill the <code>stacks</code> map) (3)</li>
+<li>count and store how many times that stack appear (4)</li>
+</ul>
+<p>On the userspace side we iterate over the CPUs, and set a perf event for
+each one of them (heavily inspired by the pyroscope code):</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">cpu</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">cpus</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">pe</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nf">newPerfEvent</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nx">cpu</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="nx">log</span><span class="p">.</span><span class="nf">Fatalf</span><span class="p">(</span><span class="s">&#34;new perf event: %v&#34;</span><span class="p">,</span> <span class="nx">err</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">opts</span> <span class="o">:=</span> <span class="nx">link</span><span class="p">.</span><span class="nx">RawLinkOptions</span><span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="nx">Target</span><span class="p">:</span>  <span class="nx">pe</span><span class="p">.</span><span class="nx">fd</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="nx">Program</span><span class="p">:</span> <span class="nx">objs</span><span class="p">.</span><span class="nx">DoPerfEvent</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="nx">Attach</span><span class="p">:</span>  <span class="nx">ebpf</span><span class="p">.</span><span class="nx">AttachPerfEvent</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="nx">pe</span><span class="p">.</span><span class="nx">link</span><span class="p">,</span> <span class="nx">err</span> <span class="p">=</span> <span class="nx">link</span><span class="p">.</span><span class="nf">AttachRawLink</span><span class="p">(</span><span class="nx">opts</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="nx">log</span><span class="p">.</span><span class="nf">Fatalf</span><span class="p">(</span><span class="s">&#34;attach raw link: %v&#34;</span><span class="p">,</span> <span class="nx">err</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span></code></pre></div><p>Then we collect the data from the map containing the number of occurrences
+for each different stack (still, of the same process we want to focus on):</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="p">&lt;</span> <span class="mi">10</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">time</span><span class="p">.</span><span class="nf">Sleep</span><span class="p">(</span><span class="nx">time</span><span class="p">.</span><span class="nx">Second</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">var</span> <span class="nx">mapKey</span> <span class="nx">perfStackKey</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">var</span> <span class="nx">count</span> <span class="kt">uint32</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">iter</span> <span class="o">:=</span> <span class="nx">objs</span><span class="p">.</span><span class="nx">Counts</span><span class="p">.</span><span class="nf">Iterate</span><span class="p">()</span> <span class="c1">// 1
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="nx">iter</span><span class="p">.</span><span class="nf">Next</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">mapKey</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">count</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="nx">count</span> <span class="p">&gt;</span> <span class="nx">maxCount</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="nx">maxCount</span> <span class="p">=</span> <span class="nx">count</span>
+</span></span><span class="line"><span class="cl">            <span class="nx">toDump</span> <span class="p">=</span> <span class="nf">mapKey</span> <span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>Here, for each round of polling we</p>
+<ul>
+<li>iterate over the <code>counts</code> map which contains the number of occurrences of any given stack (1)</li>
+<li>check if the count is the highest, and if so, we save the key (2)</li>
+</ul>
+<p>The map key is something like:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl"><span class="k">struct</span> <span class="n">stack_key</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">__u32</span> <span class="n">pid</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">__s64</span> <span class="n">stack_id</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">char</span>  <span class="n">comm</span><span class="p">[</span><span class="mi">16</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span></code></pre></div><p>So we can then fetch the actual stack using the stack_id part of the key, to find which is the stack that
+appeared the most during our sampling (hence, were we consume the majority of our CPU):</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl">    <span class="nx">stack</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">objs</span><span class="p">.</span><span class="nx">Stacks</span><span class="p">.</span><span class="nf">LookupBytes</span><span class="p">(</span><span class="nb">uint32</span><span class="p">(</span><span class="nx">toDump</span><span class="p">.</span><span class="nx">StackId</span><span class="p">))</span> <span class="c1">// 1
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">log</span><span class="p">.</span><span class="nf">Fatalf</span><span class="p">(</span><span class="s">&#34;stacks lookup: %v&#34;</span><span class="p">,</span> <span class="nx">err</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="p">&lt;</span> <span class="mi">127</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">{</span> <span class="c1">// 2
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nx">instructionPointerBytes</span> <span class="o">:=</span> <span class="nx">stack</span><span class="p">[</span><span class="nx">i</span><span class="o">*</span><span class="mi">8</span> <span class="p">:</span> <span class="nx">i</span><span class="o">*</span><span class="mi">8</span><span class="o">+</span><span class="mi">8</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">instructionPointer</span> <span class="o">:=</span> <span class="nx">binary</span><span class="p">.</span><span class="nx">LittleEndian</span><span class="p">.</span><span class="nf">Uint64</span><span class="p">(</span><span class="nx">instructionPointerBytes</span><span class="p">)</span> <span class="c1">// 3
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="k">if</span> <span class="nx">instructionPointer</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">break</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;Instruction pointer&#34;</span><span class="p">,</span> <span class="nx">instructionPointer</span><span class="p">)</span> <span class="c1">// 4
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="p">}</span>
+</span></span></code></pre></div><p>We:</p>
+<ul>
+<li>fetch the stack information as an array of bytes (1)</li>
+<li>iterate over the maximum depth (2)</li>
+<li>take a subslice containing the corresponding element of the stack (3)</li>
+<li>print the stack element out (4)</li>
+</ul>
+<h2 id="wrapping-up">
+  Wrapping Up
+  <a class="heading-link" href="#wrapping-up">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>This was <em>by far</em> the most complex project to dig into, not because of the complexity of the eBPF program,
+but because of the super hard job it makes to convert those instruction pointers to something meaninful to the
+end user.</p>
+<p>After digging into security with Falco and networking with Katran, here we explored another side
+of eBPF: observability.</p>
+<p>As always, this is the result of my personal observations reading the code. Feel free to comment if something is
+not accurate and might be presented in a better fashion.</p>
+
+      </div>
+
+
+      <footer>
+        
+
+
+        <div id="disqus_thread"></div>
+<script>
+  window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "fedepaolgithubio" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+    
+    document.addEventListener('themeChanged', function (e) { 
+        if (document.readyState == 'complete') {
+          DISQUS.reset({ reload: true, config: disqus_config });
+        }
+    });
+</script>
+        
+        
+        
+        
+      </footer>
+    </article>
+
+    
+  </section>
+
+    </div>
+
+    <footer class="footer">
+  <section class="container">
+    ©
+    
+    2023
+     Federico Paolinelli 
+    ·
+    
+    Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/" target="_blank" rel="noopener">Coder</a>.
+    
+  </section>
+</footer>
+
+  </main>
+
+  
+
+  
+  
+  <script src="/js/coder.min.6ae284be93d2d19dad1f02b0039508d9aab3180a12a06dcc71b0b0ef7825a317.js" integrity="sha256-auKEvpPS0Z2tHwKwA5UI2aqzGAoSoG3McbCw73gloxc="></script>
+  
+
+  
+
+  
+
+
+  
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-16514009-2', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+
+</html>

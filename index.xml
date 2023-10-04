@@ -6,7 +6,18 @@
     <description>Recent content on My little software warehouse</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Mon, 11 Sep 2023 23:26:17 +0200</lastBuildDate><atom:link href="https://fedepaol.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sun, 24 Sep 2023 14:59:22 +0200</lastBuildDate><atom:link href="https://fedepaol.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>eBPF journey by examples: perf events with Pyroscope</title>
+      <link>https://fedepaol.github.io/blog/2023/09/24/ebpf-journey-by-examples-perf-events-with-pyroscope/</link>
+      <pubDate>Sun, 24 Sep 2023 14:59:22 +0200</pubDate>
+      
+      <guid>https://fedepaol.github.io/blog/2023/09/24/ebpf-journey-by-examples-perf-events-with-pyroscope/</guid>
+      <description>Pyroscope Link to heading After diving into security with Falco and networking with XDP, I wanted to explore a profiling application that leverages eBPF.
+Grafana Pyroscope is an open source continuous profiling platform. It supports various backends, including Go&amp;rsquo;s pprof, python via py-spy and many other languages. But the reason why I am writing this post is because it supports also an eBPF backend.
+In order to profile, we need to understand what our program is doing Link to heading I don&amp;rsquo;t know much about py-spy, but I know how Go&amp;rsquo;s pprof works and it&amp;rsquo;s very simple: it takes a snapshot of the stack of every goroutine of the program over time.</description>
+    </item>
+    
     <item>
       <title>XDP ate my packets, and how I debugged it</title>
       <link>https://fedepaol.github.io/blog/2023/09/11/xdp-ate-my-packets-and-how-i-debugged-it/</link>
