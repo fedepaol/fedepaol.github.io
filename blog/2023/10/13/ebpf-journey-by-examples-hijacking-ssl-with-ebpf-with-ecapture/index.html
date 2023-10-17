@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>
+  eBPF journey by examples: hijacking SSL with ebpf with eCapture · My little software warehouse
+</title>
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+
+
+
+
+<meta name="author" content="Federico Paolinelli">
+<meta name="description" content="a post about how ecapture leverages eBPF uprobes and uretprobes in a very creative way, by intercepting and showing openssl traffic in clear">
+<meta name="keywords" content="">
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="eBPF journey by examples: hijacking SSL with ebpf with eCapture"/>
+<meta name="twitter:description" content="a post about how ecapture leverages eBPF uprobes and uretprobes in a very creative way, by intercepting and showing openssl traffic in clear"/>
+
+<meta property="og:title" content="eBPF journey by examples: hijacking SSL with ebpf with eCapture" />
+<meta property="og:description" content="a post about how ecapture leverages eBPF uprobes and uretprobes in a very creative way, by intercepting and showing openssl traffic in clear" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://fedepaol.github.io/blog/2023/10/13/ebpf-journey-by-examples-hijacking-ssl-with-ebpf-with-ecapture/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2023-10-13T15:41:18+02:00" />
+<meta property="article:modified_time" content="2023-10-13T15:41:18+02:00" />
+
+
+
+
+<link rel="canonical" href="https://fedepaol.github.io/blog/2023/10/13/ebpf-journey-by-examples-hijacking-ssl-with-ebpf-with-ecapture/">
+
+
+<link rel="preload" href="/fonts/forkawesome-webfont.woff2?v=1.2.0" as="font" type="font/woff2" crossorigin>
+
+
+  
+  
+  <link rel="stylesheet" href="/css/coder.min.4218e9a82fcc372a4835bc96c50c77e11ac52ebe04361b7efd80f5f332ec3e89.css" integrity="sha256-QhjpqC/MNypINbyWxQx34RrFLr4ENht&#43;/YD18zLsPok=" crossorigin="anonymous" media="screen" />
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+<link rel="icon" type="image/svg+xml" href="/images/favicon.svg" sizes="any">
+<link rel="icon" type="image/png" href="/images/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="/images/favicon-16x16.png" sizes="16x16">
+
+<link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+<link rel="manifest" href="/site.webmanifest">
+<link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+
+
+
+
+
+
+</head>
+
+
+
+
+<body class="preload-transitions colorscheme-light">
+  
+<div class="float-container">
+    <a id="dark-mode-toggle" class="colorscheme-toggle">
+        <i class="fa fa-adjust fa-fw" aria-hidden="true"></i>
+    </a>
+</div>
+
+
+  <main class="wrapper">
+    <nav class="navigation">
+  <section class="container">
+    <a class="navigation-title" href="/">
+      My little software warehouse
+    </a>
+    
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/posts/">Blog</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/about/">About</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="mailto:fedepaol@gmail.com">Contact</a>
+            </li>
+          
+        
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+    <div class="content">
+      
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">
+            <a class="title-link" href="https://fedepaol.github.io/blog/2023/10/13/ebpf-journey-by-examples-hijacking-ssl-with-ebpf-with-ecapture/">
+              eBPF journey by examples: hijacking SSL with ebpf with eCapture
+            </a>
+          </h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa fa-calendar" aria-hidden="true"></i>
+              <time datetime="2023-10-13T15:41:18&#43;02:00">
+                October 13, 2023
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa fa-clock-o" aria-hidden="true"></i>
+              8-minute read
+            </span>
+          </div>
+          
+          
+          <div class="tags">
+  <i class="fa fa-tag" aria-hidden="true"></i>
+    <span class="tag">
+      <a href="/tags/go/">go</a>
+    </span>
+      <span class="separator">•</span>
+    <span class="tag">
+      <a href="/tags/ebpf/">ebpf</a>
+    </span></div>
+
+        </div>
+      </header>
+
+      <div class="post-content">
+        
+        <h1 id="ecapture">
+  ECapture
+  <a class="heading-link" href="#ecapture">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h1>
+<p>Uprobes (user probes) and uretprobes are a way to attach an eBPF program to a user space application, specifically to the entry or exit point of a given function. By doing so, the program is able to get notified whenever a given function is called, and with which arguments. This information is often
+used to notify the user space side of the eBPF program, that handles it to serve the purpouse of the application.</p>
+<p><a href="https://github.com/gojue/ecapture"  class="external-link" target="_blank" rel="noopener">ECapture</a> provides a creative usage of eBPF: it leverages it to intercept ssl traffic before it actually gets encrypted, by using eBPF programs of type uprobe / uretprobe (mostly).</p>
+<p>Despite the natural total lack of guarantee of stability with uprobes (even less than <code>kprobe</code>s!), related to the fact that after a refactor
+a given function might go away, the exposed API of popular libraries have a better chance not to change across releases. <code>SSL_write</code> for example
+is likely to remaining stable.</p>
+<h2 id="intercepting-ssl-calls">
+  Intercepting SSL calls
+  <a class="heading-link" href="#intercepting-ssl-calls">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>ECapture offers different operational modes, including attaching to a network interface and printing the output to a wireshark parseable file, but in this post I will focus on the part that intercepts <code>SSL_write</code> to fetch the various arguments the function is called with (including the buffer being written).</p>
+<h2 id="the-ebpf-program">
+  The eBPF program
+  <a class="heading-link" href="#the-ebpf-program">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>The <code>ssl_write</code> pre / post hook looks a lot like the kprobe programs I described when I looked under falco&rsquo;s hood <a href="https://fedepaol.github.io/blog/2023/08/21/ebpf-journey-by-examples-ebpf-tracepoints-with-falco/" >here</a>.</p>
+<p>We have a program for when we enter the <code>SSL_write</code> function and one for when we exit.</p>
+<h3 id="the-uprobe-part">
+  The uprobe part
+  <a class="heading-link" href="#the-uprobe-part">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>The uprobe program fetches the current pid / gid and applies a filter:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl"><span class="nf">SEC</span><span class="p">(</span><span class="s">&#34;uprobe/SSL_write&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">probe_entry_SSL_write</span><span class="p">(</span><span class="k">struct</span> <span class="n">pt_regs</span><span class="o">*</span> <span class="n">ctx</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">u64</span> <span class="n">current_pid_tgid</span> <span class="o">=</span> <span class="nf">bpf_get_current_pid_tgid</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="n">u32</span> <span class="n">pid</span> <span class="o">=</span> <span class="n">current_pid_tgid</span> <span class="o">&gt;&gt;</span> <span class="mi">32</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">u64</span> <span class="n">current_uid_gid</span> <span class="o">=</span> <span class="nf">bpf_get_current_uid_gid</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="n">u32</span> <span class="n">uid</span> <span class="o">=</span> <span class="n">current_uid_gid</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cp">#ifndef KERNEL_LESS_5_2
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>    <span class="c1">// if target_ppid is 0 then we target all pids
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="n">target_pid</span> <span class="o">!=</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="n">target_pid</span> <span class="o">!=</span> <span class="n">pid</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">target_uid</span> <span class="o">!=</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="n">target_uid</span> <span class="o">!=</span> <span class="n">uid</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="cp">#endif
+</span></span></span></code></pre></div><h4 id="filtering-the-pid">
+  Filtering the pid
+  <a class="heading-link" href="#filtering-the-pid">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h4>
+<p>I&rsquo;ll spend a second describing how that pid to filter is injected from outside. Instead of using a map of type <code>BPF_ARRAY</code>
+as seen in other projects, here the pid value to match is a <a href="https://github.com/gojue/ecapture/blob/d5a768122b8343354c7a22b45ff0a19b5ffb4877/kern/common.h#L54"  class="external-link" target="_blank" rel="noopener">global constant</a>:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl"><span class="c1">// Optional Target PID and UID
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">const</span> <span class="k">volatile</span> <span class="n">u64</span> <span class="n">target_pid</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">const</span> <span class="k">volatile</span> <span class="n">u64</span> <span class="n">target_uid</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span></code></pre></div><p>The way eCapture sets it from userspace is via this <a href="https://github.com/gojue/ecapture/blob/d5a768122b8343354c7a22b45ff0a19b5ffb4877/user/module/probe_openssl.go#L247"  class="external-link" target="_blank" rel="noopener">constanteditor</a> that hammers the required value directly
+in the compiled eBPF program. It can obviously be done only before the program itself is loaded.</p>
+<p>The code used to rewrite the uint64 value of the program can be found in the <a href="https://github.com/gojue/ebpfmanager/blob/9a1bbe7454b0433455fdf6e31178f3744506a5c2/editor.go#L46"  class="external-link" target="_blank" rel="noopener">ebpfmanager library</a> used by ecapture.</p>
+<h3 id="fetching-the-ssl_write-arguments">
+  Fetching the ssl_write arguments
+  <a class="heading-link" href="#fetching-the-ssl_write-arguments">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>The ssl_write signature looks like: <code>int SSL_write(SSL *ssl, const void *buf, int num);</code>, and the program leverages
+the <code>PT_REGS_PARMXX</code> macros to fetch the arguments directly from the context.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl">    <span class="nf">debug_bpf_printk</span><span class="p">(</span><span class="s">&#34;openssl uprobe/SSL_write pid :%d</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">pid</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kt">void</span><span class="o">*</span> <span class="n">ssl</span> <span class="o">=</span> <span class="p">(</span><span class="kt">void</span><span class="o">*</span><span class="p">)</span><span class="nf">PT_REGS_PARM1</span><span class="p">(</span><span class="n">ctx</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// https://github.com/openssl/openssl/blob/OpenSSL_1_1_1-stable/crypto/bio/bio_local.h
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">struct</span> <span class="n">ssl_st</span> <span class="n">ssl_info</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">bpf_probe_read_user</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ssl_info</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">ssl_info</span><span class="p">),</span> <span class="n">ssl</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">struct</span> <span class="n">BIO</span> <span class="n">bio_w</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">bpf_probe_read_user</span><span class="p">(</span><span class="o">&amp;</span><span class="n">bio_w</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">bio_w</span><span class="p">),</span> <span class="n">ssl_info</span><span class="p">.</span><span class="n">wbio</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// get fd ssl-&gt;wbio-&gt;num
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">u32</span> <span class="n">fd</span> <span class="o">=</span> <span class="n">bio_w</span><span class="p">.</span><span class="n">num</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">debug_bpf_printk</span><span class="p">(</span><span class="s">&#34;openssl uprobe SSL_write FD:%d</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">fd</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">buf</span> <span class="o">=</span> <span class="p">(</span><span class="k">const</span> <span class="kt">char</span><span class="o">*</span><span class="p">)</span><span class="nf">PT_REGS_PARM2</span><span class="p">(</span><span class="n">ctx</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><h3 id="storing-the-relevant-information-to-be-used-in-the-uretprobe">
+  Storing the relevant information to be used in the uretprobe
+  <a class="heading-link" href="#storing-the-relevant-information-to-be-used-in-the-uretprobe">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>This is a common pattern in the kprobe / kretprobe too. We save the parameters in a map having the pid / tgid as the key,
+and the values we want to retrieve on exit as value (in this case the file descriptor, the buffer and the version).</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl">   <span class="k">struct</span> <span class="n">active_ssl_buf</span> <span class="kt">active_ssl_buf_t</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">__builtin_memset</span><span class="p">(</span><span class="o">&amp;</span><span class="kt">active_ssl_buf_t</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">active_ssl_buf_t</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">active_ssl_buf_t</span><span class="p">.</span><span class="n">fd</span> <span class="o">=</span> <span class="n">fd</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">active_ssl_buf_t</span><span class="p">.</span><span class="n">version</span> <span class="o">=</span> <span class="n">ssl_info</span><span class="p">.</span><span class="n">version</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">active_ssl_buf_t</span><span class="p">.</span><span class="n">buf</span> <span class="o">=</span> <span class="n">buf</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">bpf_map_update_elem</span><span class="p">(</span><span class="o">&amp;</span><span class="n">active_ssl_write_args_map</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">current_pid_tgid</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                        <span class="o">&amp;</span><span class="kt">active_ssl_buf_t</span><span class="p">,</span> <span class="n">BPF_ANY</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span></code></pre></div><h3 id="the-uretprobe-part">
+  The uretprobe part
+  <a class="heading-link" href="#the-uretprobe-part">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>The uretprobe is called when the <code>ssl_write</code> function returns.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl"><span class="nf">SEC</span><span class="p">(</span><span class="s">&#34;uretprobe/SSL_write&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">probe_ret_SSL_write</span><span class="p">(</span><span class="k">struct</span> <span class="n">pt_regs</span><span class="o">*</span> <span class="n">ctx</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">u64</span> <span class="n">current_pid_tgid</span> <span class="o">=</span> <span class="nf">bpf_get_current_pid_tgid</span><span class="p">();</span> <span class="c1">// 1
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">u32</span> <span class="n">pid</span> <span class="o">=</span> <span class="n">current_pid_tgid</span> <span class="o">&gt;&gt;</span> <span class="mi">32</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">u64</span> <span class="n">current_uid_gid</span> <span class="o">=</span> <span class="nf">bpf_get_current_uid_gid</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="n">u32</span> <span class="n">uid</span> <span class="o">=</span> <span class="n">current_uid_gid</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cp">#ifndef KERNEL_LESS_5_2
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>    <span class="c1">// if target_ppid is 0 then we target all pids
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="n">target_pid</span> <span class="o">!=</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="n">target_pid</span> <span class="o">!=</span> <span class="n">pid</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// 2
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">target_uid</span> <span class="o">!=</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="n">target_uid</span> <span class="o">!=</span> <span class="n">uid</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="cp">#endif
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>    <span class="nf">debug_bpf_printk</span><span class="p">(</span><span class="s">&#34;openssl uretprobe/SSL_write pid :%d</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">pid</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">struct</span> <span class="n">active_ssl_buf</span><span class="o">*</span> <span class="kt">active_ssl_buf_t</span> <span class="o">=</span> <span class="c1">// 3
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">bpf_map_lookup_elem</span><span class="p">(</span><span class="o">&amp;</span><span class="n">active_ssl_write_args_map</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">current_pid_tgid</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="kt">active_ssl_buf_t</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">buf</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">u32</span> <span class="n">fd</span> <span class="o">=</span> <span class="kt">active_ssl_buf_t</span><span class="o">-&gt;</span><span class="n">fd</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">s32</span> <span class="n">version</span> <span class="o">=</span> <span class="kt">active_ssl_buf_t</span><span class="o">-&gt;</span><span class="n">version</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">bpf_probe_read</span><span class="p">(</span><span class="o">&amp;</span><span class="n">buf</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="k">const</span> <span class="kt">char</span><span class="o">*</span><span class="p">),</span> <span class="o">&amp;</span><span class="kt">active_ssl_buf_t</span><span class="o">-&gt;</span><span class="n">buf</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">process_SSL_data</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">current_pid_tgid</span><span class="p">,</span> <span class="n">kSSLWrite</span><span class="p">,</span> <span class="n">buf</span><span class="p">,</span> <span class="n">fd</span><span class="p">,</span> <span class="n">version</span><span class="p">);</span> <span class="c1">// 4
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">bpf_map_delete_elem</span><span class="p">(</span><span class="o">&amp;</span><span class="n">active_ssl_write_args_map</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">current_pid_tgid</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>The uretprobe program is quite simple:</p>
+<ul>
+<li>it retrieves the pid / tgid (1)</li>
+<li>filters the pid (if the filter is set) (2)</li>
+<li>retrieves the data stored in the uprobe (3)</li>
+<li>invokes <code>process_SSL_data</code> (4)</li>
+<li>deletes the element from the map (5)</li>
+</ul>
+<p>Now, let&rsquo;s have a look at how the event is processed.</p>
+<h3 id="processing-the-ssl-write-data">
+  Processing the ssl write data
+  <a class="heading-link" href="#processing-the-ssl-write-data">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>The function leverages the <code>PT_REGS_RC</code> which allows to retrieve the return value of the function. If the <code>ssl_write</code> call failed (returning a value lower than 0)
+the function exits:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">int</span> <span class="nf">process_SSL_data</span><span class="p">(</span><span class="k">struct</span> <span class="n">pt_regs</span><span class="o">*</span> <span class="n">ctx</span><span class="p">,</span> <span class="n">u64</span> <span class="n">id</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                            <span class="k">enum</span> <span class="n">ssl_data_event_type</span> <span class="n">type</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">buf</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                            <span class="n">u32</span> <span class="n">fd</span><span class="p">,</span> <span class="n">s32</span> <span class="n">version</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">len</span> <span class="o">=</span> <span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="nf">PT_REGS_RC</span><span class="p">(</span><span class="n">ctx</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">len</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span></code></pre></div><p>Otherwise it builds an event entry with the command, the file descriptor, the ssl version and the buffer:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl">    <span class="k">struct</span> <span class="kt">ssl_data_event_t</span><span class="o">*</span> <span class="n">event</span> <span class="o">=</span> <span class="nf">create_ssl_data_event</span><span class="p">(</span><span class="n">id</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">event</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">event</span><span class="o">-&gt;</span><span class="n">type</span> <span class="o">=</span> <span class="n">type</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">event</span><span class="o">-&gt;</span><span class="n">fd</span> <span class="o">=</span> <span class="n">fd</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">event</span><span class="o">-&gt;</span><span class="n">version</span> <span class="o">=</span> <span class="n">version</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// This is a max function, but it is written in such a way to keep older BPF
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">// verifiers happy.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">event</span><span class="o">-&gt;</span><span class="n">data_len</span> <span class="o">=</span>
+</span></span><span class="line"><span class="cl">        <span class="p">(</span><span class="n">len</span> <span class="o">&lt;</span> <span class="n">MAX_DATA_SIZE_OPENSSL</span> <span class="o">?</span> <span class="p">(</span><span class="n">len</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">MAX_DATA_SIZE_OPENSSL</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">                                     <span class="o">:</span> <span class="n">MAX_DATA_SIZE_OPENSSL</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">bpf_probe_read_user</span><span class="p">(</span><span class="n">event</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">,</span> <span class="n">event</span><span class="o">-&gt;</span><span class="n">data_len</span><span class="p">,</span> <span class="n">buf</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">bpf_get_current_comm</span><span class="p">(</span><span class="o">&amp;</span><span class="n">event</span><span class="o">-&gt;</span><span class="n">comm</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">event</span><span class="o">-&gt;</span><span class="n">comm</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">bpf_perf_event_output</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">tls_events</span><span class="p">,</span> <span class="n">BPF_F_CURRENT_CPU</span><span class="p">,</span> <span class="n">event</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                          <span class="k">sizeof</span><span class="p">(</span><span class="k">struct</span> <span class="kt">ssl_data_event_t</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>By setting the <code>BPF_F_CURRENT_CPU</code> the event is written to the map entry related to the current cpu index.
+Another thing to note is how I already highlighted in the <a href="https://fedepaol.github.io/blog/2023/08/21/ebpf-journey-by-examples-ebpf-tracepoints-with-falco/" >post about falco</a>, that
+ringbuffers are a more performant alternatives over perf buffers.</p>
+<h3 id="the-userspace-side">
+  The userspace side
+  <a class="heading-link" href="#the-userspace-side">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>A goroutine <a href="https://github.com/gojue/ecapture/blob/dbc827e0eeeb84c233a022063e952ae2f68616b1/user/module/imodule.go#L200"  class="external-link" target="_blank" rel="noopener">polls the perfbuffer</a>,
+decodes it and processes it:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl"><span class="n">record</span><span class="p">,</span> <span class="nl">err</span> <span class="p">:</span><span class="o">=</span> <span class="n">rd</span><span class="p">.</span><span class="nf">Read</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="n">err</span> <span class="o">!=</span> <span class="n">nil</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="n">errors</span><span class="p">.</span><span class="nf">Is</span><span class="p">(</span><span class="n">err</span><span class="p">,</span> <span class="n">perf</span><span class="p">.</span><span class="n">ErrClosed</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="n">errChan</span> <span class="o">&lt;-</span> <span class="n">fmt</span><span class="p">.</span><span class="nf">Errorf</span><span class="p">(</span><span class="s">&#34;%s</span><span class="se">\t</span><span class="s">reading from perf event reader: %s&#34;</span><span class="p">,</span> <span class="n">m</span><span class="p">.</span><span class="n">child</span><span class="p">.</span><span class="nf">Name</span><span class="p">(),</span> <span class="n">err</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="n">record</span><span class="p">.</span><span class="n">LostSamples</span> <span class="o">!=</span> <span class="mi">0</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">m</span><span class="p">.</span><span class="n">logger</span><span class="p">.</span><span class="nf">Printf</span><span class="p">(</span><span class="s">&#34;%s</span><span class="se">\t</span><span class="s">perf event ring buffer full, dropped %d samples&#34;</span><span class="p">,</span> <span class="n">m</span><span class="p">.</span><span class="n">child</span><span class="p">.</span><span class="nf">Name</span><span class="p">(),</span> <span class="n">record</span><span class="p">.</span><span class="n">LostSamples</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="k">continue</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">var</span> <span class="n">e</span> <span class="n">event</span><span class="p">.</span><span class="n">IEventStruct</span>
+</span></span><span class="line"><span class="cl"><span class="n">e</span><span class="p">,</span> <span class="n">err</span> <span class="o">=</span> <span class="n">m</span><span class="p">.</span><span class="n">child</span><span class="p">.</span><span class="nf">Decode</span><span class="p">(</span><span class="n">em</span><span class="p">,</span> <span class="n">record</span><span class="p">.</span><span class="n">RawSample</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="n">err</span> <span class="o">!=</span> <span class="n">nil</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">m</span><span class="p">.</span><span class="n">logger</span><span class="p">.</span><span class="nf">Printf</span><span class="p">(</span><span class="s">&#34;%s</span><span class="se">\t</span><span class="s">m.child.decode error:%v&#34;</span><span class="p">,</span> <span class="n">m</span><span class="p">.</span><span class="n">child</span><span class="p">.</span><span class="nf">Name</span><span class="p">(),</span> <span class="n">err</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="k">continue</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// 上报数据
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">m</span><span class="p">.</span><span class="nf">Dispatcher</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+</span></span></code></pre></div><h4 id="decoding-and-processing-the-event">
+  Decoding and processing the event
+  <a class="heading-link" href="#decoding-and-processing-the-event">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h4>
+<p>Decoding just goes over the payload filling the structure. Code <a href="https://github.com/gojue/ecapture/blob/dbc827e0eeeb84c233a022063e952ae2f68616b1/user/event/event_openssl.go#L84"  class="external-link" target="_blank" rel="noopener">here</a></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">func</span> <span class="p">(</span><span class="nx">se</span> <span class="o">*</span><span class="nx">SSLDataEvent</span><span class="p">)</span> <span class="nf">Decode</span><span class="p">(</span><span class="nx">payload</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">)</span> <span class="p">(</span><span class="nx">err</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">buf</span> <span class="o">:=</span> <span class="nx">bytes</span><span class="p">.</span><span class="nf">NewBuffer</span><span class="p">(</span><span class="nx">payload</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="nx">err</span> <span class="p">=</span> <span class="nx">binary</span><span class="p">.</span><span class="nf">Read</span><span class="p">(</span><span class="nx">buf</span><span class="p">,</span> <span class="nx">binary</span><span class="p">.</span><span class="nx">LittleEndian</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">se</span><span class="p">.</span><span class="nx">DataType</span><span class="p">);</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="nx">err</span> <span class="p">=</span> <span class="nx">binary</span><span class="p">.</span><span class="nf">Read</span><span class="p">(</span><span class="nx">buf</span><span class="p">,</span> <span class="nx">binary</span><span class="p">.</span><span class="nx">LittleEndian</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">se</span><span class="p">.</span><span class="nx">Timestamp</span><span class="p">);</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="cm">/* other fields */</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="kc">nil</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>Processing the event just calls the <code>String()</code>ed version of the event, which at the end of the day <a href="https://github.com/gojue/ecapture/blob/dbc827e0eeeb84c233a022063e952ae2f68616b1/user/event/event_openssl.go#L152"  class="external-link" target="_blank" rel="noopener">prints the following</a>:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl">    <span class="nx">s</span> <span class="o">:=</span> <span class="nx">fmt</span><span class="p">.</span><span class="nf">Sprintf</span><span class="p">(</span><span class="s">&#34;PID:%d, Comm:%s, TID:%d, Version:%s, %s, Payload:\n%s%s%s&#34;</span><span class="p">,</span> <span class="nx">se</span><span class="p">.</span><span class="nx">Pid</span><span class="p">,</span> <span class="nx">bytes</span><span class="p">.</span><span class="nf">TrimSpace</span><span class="p">(</span><span class="nx">se</span><span class="p">.</span><span class="nx">Comm</span><span class="p">[:]),</span> <span class="nx">se</span><span class="p">.</span><span class="nx">Tid</span><span class="p">,</span> <span class="nx">v</span><span class="p">.</span><span class="nf">String</span><span class="p">(),</span> <span class="nx">connInfo</span><span class="p">,</span> <span class="nx">perfix</span><span class="p">,</span> <span class="nb">string</span><span class="p">(</span><span class="nx">se</span><span class="p">.</span><span class="nx">Data</span><span class="p">[:</span><span class="nx">se</span><span class="p">.</span><span class="nx">DataLen</span><span class="p">]),</span> <span class="nx">COLORRESET</span><span class="p">)</span>
+</span></span></code></pre></div><p>And that&rsquo;s it! The user expects the traffic to be encrypted, but here we intercept it after the client side called <code>SSL_write</code> but before it
+gets encrypted.</p>
+<h2 id="poor-mans-version">
+  Poor man&rsquo;s version
+  <a class="heading-link" href="#poor-mans-version">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>As per the other projects, I tried to reproduce the feature in a simplified fashion. The code can be found <a href="https://github.com/fedepaol/ebpfexamples/tree/main/sslwriteuprobe"  class="external-link" target="_blank" rel="noopener">here</a>.</p>
+<p>The ebpf programs are basically the same I showed up above, with a few tiny differences:</p>
+<ul>
+<li>we store only the buffer in the pre -&gt; post map</li>
+<li>we use a ring buffer to send the data back to userspace</li>
+</ul>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl"><span class="nf">SEC</span><span class="p">(</span><span class="s">&#34;uprobe/SSL_write&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">probe_entry_SSL_write</span><span class="p">(</span><span class="k">struct</span> <span class="n">pt_regs</span> <span class="o">*</span><span class="n">ctx</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">u64</span> <span class="n">current_pid_tgid</span> <span class="o">=</span> <span class="nf">bpf_get_current_pid_tgid</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="n">u32</span> <span class="n">pid</span> <span class="o">=</span> <span class="n">current_pid_tgid</span> <span class="o">&gt;&gt;</span> <span class="mi">32</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">struct</span> <span class="n">arguments</span> <span class="o">*</span><span class="n">args</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">__u32</span> <span class="n">argsKey</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="k">struct</span> <span class="n">arguments</span> <span class="o">*</span><span class="p">)</span><span class="nf">bpf_map_lookup_elem</span><span class="p">(</span><span class="o">&amp;</span><span class="n">params_array</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">argsKey</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">args</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">bpf_printk</span><span class="p">(</span><span class="s">&#34;no args&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">args</span><span class="o">-&gt;</span><span class="n">pid</span> <span class="o">!=</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="n">args</span><span class="o">-&gt;</span><span class="n">pid</span> <span class="o">!=</span> <span class="n">pid</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">bpf_printk</span><span class="p">(</span><span class="s">&#34;openssl uprobe/SSL_write pid :%d</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">pid</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">buf</span> <span class="o">=</span> <span class="p">(</span><span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="p">)</span><span class="nf">PT_REGS_PARM2</span><span class="p">(</span><span class="n">ctx</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">struct</span> <span class="n">active_ssl_buf</span> <span class="kt">active_ssl_buf_t</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">active_ssl_buf_t</span><span class="p">.</span><span class="n">buf</span> <span class="o">=</span> <span class="p">(</span><span class="kt">uintptr_t</span><span class="p">)</span><span class="n">buf</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">bpf_map_update_elem</span><span class="p">(</span><span class="o">&amp;</span><span class="n">active_ssl_write_args_map</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">current_pid_tgid</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                        <span class="o">&amp;</span><span class="kt">active_ssl_buf_t</span><span class="p">,</span> <span class="n">BPF_ANY</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>The pid to filter is taken from a map (of type ARRAY), and we only save the buffer to be retrieved by the uret probe call:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl"><span class="nf">SEC</span><span class="p">(</span><span class="s">&#34;uretprobe/SSL_write&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">probe_ret_SSL_write</span><span class="p">(</span><span class="k">struct</span> <span class="n">pt_regs</span> <span class="o">*</span><span class="n">ctx</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="cm">/** 
+</span></span></span><span class="line"><span class="cl"><span class="cm">    filter by pid 
+</span></span></span><span class="line"><span class="cl"><span class="cm">    **/</span>
+</span></span><span class="line"><span class="cl">    <span class="k">struct</span> <span class="n">active_ssl_buf</span> <span class="o">*</span><span class="kt">active_ssl_buf_t</span> <span class="o">=</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">bpf_map_lookup_elem</span><span class="p">(</span><span class="o">&amp;</span><span class="n">active_ssl_write_args_map</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">current_pid_tgid</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="kt">active_ssl_buf_t</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">buf</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">bpf_probe_read</span><span class="p">(</span><span class="o">&amp;</span><span class="n">buf</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="p">),</span> <span class="o">&amp;</span><span class="kt">active_ssl_buf_t</span><span class="o">-&gt;</span><span class="n">buf</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">process_SSL_data</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">current_pid_tgid</span><span class="p">,</span> <span class="n">buf</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">bpf_map_delete_elem</span><span class="p">(</span><span class="o">&amp;</span><span class="n">active_ssl_write_args_map</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">current_pid_tgid</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>On the uretprobe side we fetch the entry of the map related to the current execution, we build the event to send
+and then we eventually send it:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">int</span> <span class="nf">process_SSL_data</span><span class="p">(</span><span class="k">struct</span> <span class="n">pt_regs</span> <span class="o">*</span><span class="n">ctx</span><span class="p">,</span> <span class="n">u64</span> <span class="n">id</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                            <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">buf</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">len</span> <span class="o">=</span> <span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="nf">PT_REGS_RC</span><span class="p">(</span><span class="n">ctx</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">len</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">bpf_printk</span><span class="p">(</span><span class="s">&#34;openssl process_SSL_data len :%d buf %s</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">len</span><span class="p">,</span> <span class="n">buf</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">struct</span> <span class="kt">ssl_data_event_t</span> <span class="o">*</span><span class="n">event</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">event</span> <span class="o">=</span> <span class="nf">bpf_ringbuf_reserve</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ring_buffer</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="k">struct</span> <span class="kt">ssl_data_event_t</span><span class="p">),</span> <span class="mi">0</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">event</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">event</span><span class="o">-&gt;</span><span class="n">timestamp_ns</span> <span class="o">=</span> <span class="nf">bpf_ktime_get_ns</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="n">event</span><span class="o">-&gt;</span><span class="n">pid</span> <span class="o">=</span> <span class="n">id</span> <span class="o">&gt;&gt;</span> <span class="mi">32</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">event</span><span class="o">-&gt;</span><span class="n">data_len</span> <span class="o">=</span>
+</span></span><span class="line"><span class="cl">        <span class="p">(</span><span class="n">len</span> <span class="o">&lt;</span> <span class="n">MAX_DATA_SIZE_OPENSSL</span> <span class="o">?</span> <span class="p">(</span><span class="n">len</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">MAX_DATA_SIZE_OPENSSL</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">                                     <span class="o">:</span> <span class="n">MAX_DATA_SIZE_OPENSSL</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">bpf_probe_read_user</span><span class="p">(</span><span class="n">event</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">,</span> <span class="n">event</span><span class="o">-&gt;</span><span class="n">data_len</span><span class="p">,</span> <span class="n">buf</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">bpf_get_current_comm</span><span class="p">(</span><span class="o">&amp;</span><span class="n">event</span><span class="o">-&gt;</span><span class="n">comm</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">event</span><span class="o">-&gt;</span><span class="n">comm</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">bpf_ringbuf_submit</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>On the user space side we just register the two programs and loop over the ringbuffer. The simplified version
+looks like:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="nx">up</span><span class="p">,</span> <span class="nx">_</span> <span class="o">:=</span> <span class="nx">ex</span><span class="p">.</span><span class="nf">Uprobe</span><span class="p">(</span><span class="s">&#34;SSL_write&#34;</span><span class="p">,</span> <span class="nx">objs</span><span class="p">.</span><span class="nx">ProbeEntrySSL_write</span><span class="p">,</span> <span class="kc">nil</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="k">defer</span> <span class="nx">up</span><span class="p">.</span><span class="nf">Close</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl"><span class="nx">up1</span><span class="p">,</span> <span class="nx">_</span> <span class="o">:=</span> <span class="nx">ex</span><span class="p">.</span><span class="nf">Uretprobe</span><span class="p">(</span><span class="s">&#34;SSL_write&#34;</span><span class="p">,</span> <span class="nx">objs</span><span class="p">.</span><span class="nx">ProbeRetSSL_write</span><span class="p">,</span> <span class="kc">nil</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="k">defer</span> <span class="nx">up1</span><span class="p">.</span><span class="nf">Close</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl"><span class="nx">rd</span><span class="p">,</span> <span class="nx">_</span> <span class="o">:=</span> <span class="nx">ringbuf</span><span class="p">.</span><span class="nf">NewReader</span><span class="p">(</span><span class="nx">objs</span><span class="p">.</span><span class="nx">uprobeMaps</span><span class="p">.</span><span class="nx">RingBuffer</span><span class="p">)</span>
+</span></span></code></pre></div><p>we then iterate over the ring buffer and print the value.</p>
+<h2 id="wrapping-up">
+  Wrapping up
+  <a class="heading-link" href="#wrapping-up">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>Despite the structure being simple (or me getting used to how the verifier thinks and what needs to be done to have a working eBPF program), I really
+enjoyed doing this because of the creative use case of uprobes to steal encrypted data (and seeing it in action!).</p>
+<p>I hope this can serve as the base for any experimentation around uprobes.</p>
+
+      </div>
+
+
+      <footer>
+        
+
+
+        <div id="disqus_thread"></div>
+<script>
+  window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "fedepaolgithubio" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+    
+    document.addEventListener('themeChanged', function (e) { 
+        if (document.readyState == 'complete') {
+          DISQUS.reset({ reload: true, config: disqus_config });
+        }
+    });
+</script>
+        
+        
+        
+        
+      </footer>
+    </article>
+
+    
+  </section>
+
+    </div>
+
+    <footer class="footer">
+  <section class="container">
+    ©
+    
+    2023
+     Federico Paolinelli 
+    ·
+    
+    Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/" target="_blank" rel="noopener">Coder</a>.
+    
+  </section>
+</footer>
+
+  </main>
+
+  
+
+  
+  
+  <script src="/js/coder.min.6ae284be93d2d19dad1f02b0039508d9aab3180a12a06dcc71b0b0ef7825a317.js" integrity="sha256-auKEvpPS0Z2tHwKwA5UI2aqzGAoSoG3McbCw73gloxc="></script>
+  
+
+  
+
+  
+
+
+  
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-16514009-2', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+
+</html>
