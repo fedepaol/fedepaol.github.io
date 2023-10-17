@@ -3,7 +3,7 @@
 
 <head>
   <title>
-  eBPF journey by examples: hijacking SSL with ebpf with eCapture · My little software warehouse
+  eBPF journey by examples: hijacking SSL with eBPF with eCapture · My little software warehouse
 </title>
   <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,10 +17,10 @@
 <meta name="keywords" content="">
 
 <meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="eBPF journey by examples: hijacking SSL with ebpf with eCapture"/>
+<meta name="twitter:title" content="eBPF journey by examples: hijacking SSL with eBPF with eCapture"/>
 <meta name="twitter:description" content="a post about how ecapture leverages eBPF uprobes and uretprobes in a very creative way, by intercepting and showing openssl traffic in clear"/>
 
-<meta property="og:title" content="eBPF journey by examples: hijacking SSL with ebpf with eCapture" />
+<meta property="og:title" content="eBPF journey by examples: hijacking SSL with eBPF with eCapture" />
 <meta property="og:description" content="a post about how ecapture leverages eBPF uprobes and uretprobes in a very creative way, by intercepting and showing openssl traffic in clear" />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://fedepaol.github.io/blog/2023/10/13/ebpf-journey-by-examples-hijacking-ssl-with-ebpf-with-ecapture/" /><meta property="article:section" content="posts" />
@@ -126,7 +126,7 @@
         <div class="post-title">
           <h1 class="title">
             <a class="title-link" href="https://fedepaol.github.io/blog/2023/10/13/ebpf-journey-by-examples-hijacking-ssl-with-ebpf-with-ecapture/">
-              eBPF journey by examples: hijacking SSL with ebpf with eCapture
+              eBPF journey by examples: hijacking SSL with eBPF with eCapture
             </a>
           </h1>
         </div>
@@ -459,8 +459,8 @@ gets encrypted.</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl"><span class="nf">SEC</span><span class="p">(</span><span class="s">&#34;uretprobe/SSL_write&#34;</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">probe_ret_SSL_write</span><span class="p">(</span><span class="k">struct</span> <span class="n">pt_regs</span> <span class="o">*</span><span class="n">ctx</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl"><span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="cm">/** 
-</span></span></span><span class="line"><span class="cl"><span class="cm">    filter by pid 
+</span></span><span class="line"><span class="cl">    <span class="cm">/**
+</span></span></span><span class="line"><span class="cl"><span class="cm">    filter by pid
 </span></span></span><span class="line"><span class="cl"><span class="cm">    **/</span>
 </span></span><span class="line"><span class="cl">    <span class="k">struct</span> <span class="n">active_ssl_buf</span> <span class="o">*</span><span class="kt">active_ssl_buf_t</span> <span class="o">=</span>
 </span></span><span class="line"><span class="cl">        <span class="nf">bpf_map_lookup_elem</span><span class="p">(</span><span class="o">&amp;</span><span class="n">active_ssl_write_args_map</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">current_pid_tgid</span><span class="p">);</span>
