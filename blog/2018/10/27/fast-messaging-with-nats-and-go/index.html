@@ -17,8 +17,7 @@
 The slides of the talk can be found here: Link to heading What is Nats Link to heading Nats is a messaging system hosted under the CNCF umbrella, which is an open source software foundation dedicated to making cloud native computing universal and sustainable. It&rsquo;s my place-to-go while looking for software related to distributed systems.">
 <meta name="keywords" content="">
 
-<meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="Fast messaging with nats and go"/>
+<meta name="twitter:card" content="summary"/><meta name="twitter:title" content="Fast messaging with nats and go"/>
 <meta name="twitter:description" content="This is the first of follow up serie of the talk Fast messaging with Nats and Go I gave at golab 2018.
 The slides of the talk can be found here: Link to heading What is Nats Link to heading Nats is a messaging system hosted under the CNCF umbrella, which is an open source software foundation dedicated to making cloud native computing universal and sustainable. It&rsquo;s my place-to-go while looking for software related to distributed systems."/>
 
@@ -36,12 +35,14 @@ The slides of the talk can be found here: Link to heading What is Nats Link to h
 <link rel="canonical" href="https://fedepaol.github.io/blog/2018/10/27/fast-messaging-with-nats-and-go/">
 
 
-<link rel="preload" href="/fonts/forkawesome-webfont.woff2?v=1.2.0" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/fa-brands-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/fa-regular-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
 
 
   
   
-  <link rel="stylesheet" href="/css/coder.min.4218e9a82fcc372a4835bc96c50c77e11ac52ebe04361b7efd80f5f332ec3e89.css" integrity="sha256-QhjpqC/MNypINbyWxQx34RrFLr4ENht&#43;/YD18zLsPok=" crossorigin="anonymous" media="screen" />
+  <link rel="stylesheet" href="/css/coder.min.577e3c5ead537873430da16f0964b754a120fd87c4e2203a00686e7c75b51378.css" integrity="sha256-V348Xq1TeHNDDaFvCWS3VKEg/YfE4iA6AGhufHW1E3g=" crossorigin="anonymous" media="screen" />
 
 
 
@@ -82,7 +83,7 @@ The slides of the talk can be found here: Link to heading What is Nats Link to h
   
 <div class="float-container">
     <a id="dark-mode-toggle" class="colorscheme-toggle">
-        <i class="fa fa-adjust fa-fw" aria-hidden="true"></i>
+        <i class="fa-solid fa-adjust fa-fw" aria-hidden="true"></i>
     </a>
 </div>
 
@@ -90,27 +91,29 @@ The slides of the talk can be found here: Link to heading What is Nats Link to h
   <main class="wrapper">
     <nav class="navigation">
   <section class="container">
-    <a class="navigation-title" href="/">
+    
+    <a class="navigation-title" href="https://fedepaol.github.io/">
       My little software warehouse
     </a>
     
+    
       <input type="checkbox" id="menu-toggle" />
       <label class="menu-button float-right" for="menu-toggle">
-        <i class="fa fa-bars fa-fw" aria-hidden="true"></i>
+        <i class="fa-solid fa-bars fa-fw" aria-hidden="true"></i>
       </label>
       <ul class="navigation-list">
         
           
             <li class="navigation-item">
-              <a class="navigation-link" href="/posts/">Blog</a>
+              <a class="navigation-link " href="/posts/">Blog</a>
             </li>
           
             <li class="navigation-item">
-              <a class="navigation-link" href="/about/">About</a>
+              <a class="navigation-link " href="/about/">About</a>
             </li>
           
             <li class="navigation-item">
-              <a class="navigation-link" href="mailto:fedepaol@gmail.com">Contact</a>
+              <a class="navigation-link " href="mailto:fedepaol@gmail.com">Contact</a>
             </li>
           
         
@@ -136,13 +139,13 @@ The slides of the talk can be found here: Link to heading What is Nats Link to h
         <div class="post-meta">
           <div class="date">
             <span class="posted-on">
-              <i class="fa fa-calendar" aria-hidden="true"></i>
+              <i class="fa-solid fa-calendar" aria-hidden="true"></i>
               <time datetime="2018-10-27T00:00:00Z">
                 October 27, 2018
               </time>
             </span>
             <span class="reading-time">
-              <i class="fa fa-clock-o" aria-hidden="true"></i>
+              <i class="fa-solid fa-clock" aria-hidden="true"></i>
               6-minute read
             </span>
           </div>
@@ -158,7 +161,7 @@ The slides of the talk can be found here: Link to heading What is Nats Link to h
 <h3 id="the-slides-of-the-talk-can-be-found-here">
   The slides of the talk can be found here:
   <a class="heading-link" href="#the-slides-of-the-talk-can-be-found-here">
-    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
     <span class="sr-only">Link to heading</span>
   </a>
 </h3>
@@ -166,7 +169,7 @@ The slides of the talk can be found here: Link to heading What is Nats Link to h
 <h3 id="what-is-nats">
   What is Nats
   <a class="heading-link" href="#what-is-nats">
-    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
     <span class="sr-only">Link to heading</span>
   </a>
 </h3>
@@ -174,7 +177,7 @@ The slides of the talk can be found here: Link to heading What is Nats Link to h
 <h3 id="why-messaging">
   Why messaging
   <a class="heading-link" href="#why-messaging">
-    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
     <span class="sr-only">Link to heading</span>
   </a>
 </h3>
@@ -183,7 +186,7 @@ The slides of the talk can be found here: Link to heading What is Nats Link to h
 <h3 id="good-points-of-messaging">
   Good points of messaging
   <a class="heading-link" href="#good-points-of-messaging">
-    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
     <span class="sr-only">Link to heading</span>
   </a>
 </h3>
@@ -194,7 +197,7 @@ The slides of the talk can be found here: Link to heading What is Nats Link to h
 <h3 id="there-are-a-lot-of-messaging-systems-what-do-i-need-to-look-for-in-one-of-them">
   There are a lot of messaging systems, what do I need to look for in one of them?
   <a class="heading-link" href="#there-are-a-lot-of-messaging-systems-what-do-i-need-to-look-for-in-one-of-them">
-    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
     <span class="sr-only">Link to heading</span>
   </a>
 </h3>
@@ -209,7 +212,7 @@ The slides of the talk can be found here: Link to heading What is Nats Link to h
 <h3 id="what-makes-a-good-communication-system">
   What makes a good communication system?
   <a class="heading-link" href="#what-makes-a-good-communication-system">
-    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
     <span class="sr-only">Link to heading</span>
   </a>
 </h3>
@@ -217,7 +220,7 @@ The slides of the talk can be found here: Link to heading What is Nats Link to h
 <h4 id="the-enterprise-service-bus">
   The Enterprise Service Bus:
   <a class="heading-link" href="#the-enterprise-service-bus">
-    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
     <span class="sr-only">Link to heading</span>
   </a>
 </h4>
@@ -225,7 +228,7 @@ The slides of the talk can be found here: Link to heading What is Nats Link to h
 <h4 id="what-martin-fowler-says">
   What Martin Fowler says:
   <a class="heading-link" href="#what-martin-fowler-says">
-    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
     <span class="sr-only">Link to heading</span>
   </a>
 </h4>
@@ -234,7 +237,7 @@ The slides of the talk can be found here: Link to heading What is Nats Link to h
 <h2 id="the-protocol">
   The protocol
   <a class="heading-link" href="#the-protocol">
-    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
     <span class="sr-only">Link to heading</span>
   </a>
 </h2>
@@ -245,7 +248,7 @@ The slides of the talk can be found here: Link to heading What is Nats Link to h
 <h4 id="the-protocol-supports-wildcards">
   The protocol supports wildcards
   <a class="heading-link" href="#the-protocol-supports-wildcards">
-    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
     <span class="sr-only">Link to heading</span>
   </a>
 </h4>
@@ -254,7 +257,7 @@ The slides of the talk can be found here: Link to heading What is Nats Link to h
 <h2 id="the-server-or-the-ops-point-of-view">
   The server (or, the ops point of view)
   <a class="heading-link" href="#the-server-or-the-ops-point-of-view">
-    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
     <span class="sr-only">Link to heading</span>
   </a>
 </h2>
@@ -264,7 +267,7 @@ The slides of the talk can be found here: Link to heading What is Nats Link to h
 <h4 id="autodiscovery">
   Autodiscovery
   <a class="heading-link" href="#autodiscovery">
-    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
     <span class="sr-only">Link to heading</span>
   </a>
 </h4>
@@ -275,7 +278,7 @@ gnatsd -p 5222 -routes nats://localhost:4248
 </code></pre><h4 id="all-the-servers-form-a-full-mesh">
   All the servers form a full mesh:
   <a class="heading-link" href="#all-the-servers-form-a-full-mesh">
-    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
     <span class="sr-only">Link to heading</span>
   </a>
 </h4>
@@ -284,7 +287,7 @@ gnatsd -p 5222 -routes nats://localhost:4248
 <h2 id="delivery-guarantees">
   Delivery guarantees
   <a class="heading-link" href="#delivery-guarantees">
-    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
     <span class="sr-only">Link to heading</span>
   </a>
 </h2>
@@ -301,7 +304,7 @@ gnatsd -p 5222 -routes nats://localhost:4248
 <h2 id="availability">
   Availability
   <a class="heading-link" href="#availability">
-    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
     <span class="sr-only">Link to heading</span>
   </a>
 </h2>
@@ -311,7 +314,7 @@ gnatsd -p 5222 -routes nats://localhost:4248
 <h2 id="thats-it-for-now">
   That&rsquo;s it for now
   <a class="heading-link" href="#thats-it-for-now">
-    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
     <span class="sr-only">Link to heading</span>
   </a>
 </h2>
@@ -352,6 +355,8 @@ gnatsd -p 5222 -routes nats://localhost:4248
         
         
         
+
+        
       </footer>
     </article>
 
@@ -364,7 +369,7 @@ gnatsd -p 5222 -routes nats://localhost:4248
   <section class="container">
     ©
     
-    2023
+    2024
      Federico Paolinelli 
     ·
     
@@ -388,7 +393,7 @@ gnatsd -p 5222 -routes nats://localhost:4248
 
 
   
-<script type="application/javascript">
+<script>
 var doNotTrack = false;
 if (!doNotTrack) {
 	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -400,6 +405,8 @@ if (!doNotTrack) {
 	ga('send', 'pageview');
 }
 </script>
+
+  
 
   
 

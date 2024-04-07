@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>
+  Creating release notes for your GitHub Project · My little software warehouse
+</title>
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+
+
+
+
+<meta name="author" content="Federico Paolinelli">
+<meta name="description" content="How to create automated release notes for GitHub projects">
+<meta name="keywords" content="">
+
+<meta name="twitter:card" content="summary"/><meta name="twitter:title" content="Creating release notes for your GitHub Project"/>
+<meta name="twitter:description" content="How to create automated release notes for GitHub projects"/>
+
+<meta property="og:title" content="Creating release notes for your GitHub Project" />
+<meta property="og:description" content="How to create automated release notes for GitHub projects" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://fedepaol.github.io/blog/2024/04/06/creating-release-notes-for-your-github-project/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2024-04-06T18:31:52+02:00" />
+<meta property="article:modified_time" content="2024-04-06T18:31:52+02:00" />
+
+
+
+
+<link rel="canonical" href="https://fedepaol.github.io/blog/2024/04/06/creating-release-notes-for-your-github-project/">
+
+
+<link rel="preload" href="/fonts/fa-brands-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/fa-regular-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
+
+
+  
+  
+  <link rel="stylesheet" href="/css/coder.min.577e3c5ead537873430da16f0964b754a120fd87c4e2203a00686e7c75b51378.css" integrity="sha256-V348Xq1TeHNDDaFvCWS3VKEg/YfE4iA6AGhufHW1E3g=" crossorigin="anonymous" media="screen" />
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+<link rel="icon" type="image/svg+xml" href="/images/favicon.svg" sizes="any">
+<link rel="icon" type="image/png" href="/images/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="/images/favicon-16x16.png" sizes="16x16">
+
+<link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+<link rel="manifest" href="/site.webmanifest">
+<link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+
+
+
+
+
+
+</head>
+
+
+
+
+<body class="preload-transitions colorscheme-light">
+  
+<div class="float-container">
+    <a id="dark-mode-toggle" class="colorscheme-toggle">
+        <i class="fa-solid fa-adjust fa-fw" aria-hidden="true"></i>
+    </a>
+</div>
+
+
+  <main class="wrapper">
+    <nav class="navigation">
+  <section class="container">
+    
+    <a class="navigation-title" href="https://fedepaol.github.io/">
+      My little software warehouse
+    </a>
+    
+    
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa-solid fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/posts/">Blog</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/about/">About</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="mailto:fedepaol@gmail.com">Contact</a>
+            </li>
+          
+        
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+    <div class="content">
+      
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">
+            <a class="title-link" href="https://fedepaol.github.io/blog/2024/04/06/creating-release-notes-for-your-github-project/">
+              Creating release notes for your GitHub Project
+            </a>
+          </h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa-solid fa-calendar" aria-hidden="true"></i>
+              <time datetime="2024-04-06T18:31:52&#43;02:00">
+                April 6, 2024
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa-solid fa-clock" aria-hidden="true"></i>
+              6-minute read
+            </span>
+          </div>
+          
+          
+          
+        </div>
+      </header>
+
+      <div class="post-content">
+        
+        <h1 id="tldr">
+  TL;DR
+  <a class="heading-link" href="#tldr">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h1>
+<p>The <a href="https://github.com/kubernetes/release/tree/master/cmd/release-notes"  class="external-link" target="_blank" rel="noopener">kubernetes release notes generator</a> is really nice. I managed to use it without Prow with MetalLB, by setting a proper <a href="https://github.com/metallb/metallb/blob/main/.github/pull_request_template.md"  class="external-link" target="_blank" rel="noopener">pull request template</a> and a <a href="https://github.com/metallb/metallb/blob/main/.github/workflows/classify.yaml"  class="external-link" target="_blank" rel="noopener">Github Action workflow</a> that adds the proper label and validates the PR body.</p>
+<p>Finally, a <a href="https://github.com/metallb/metallb/blob/main/website/gen_relnotes.sh"  class="external-link" target="_blank" rel="noopener">glue bash script</a> wraps the call to the release notes generator.</p>
+<h1 id="a-bit-of-context">
+  A bit of context
+  <a class="heading-link" href="#a-bit-of-context">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h1>
+<p>Since I started maintaining MetalLB in 2021, invested significantly in automating various processes. This was made possible with the help
+of a vibrant community of contributors that helped in <a href="https://github.com/metallb/metallb/pull/1105"  class="external-link" target="_blank" rel="noopener">moving from circleci to github actions</a>, <a href="https://github.com/metallb/metallb/pull/1437"  class="external-link" target="_blank" rel="noopener">signing the images with cosign</a> and many others.</p>
+<p>One thing that was left out was crafting a proper release notes list.</p>
+<p>The manual process was long, tedious and error prone. The releaser (me, mostly) would have to go over all the commits between the last released version and the new version to be released, add a note for each line and classify whether it was a bug or a feature (plus retrieving the corresponding pull request and / or feature).</p>
+<p>I must admit that having to craft the release notes for the MetalLB project was the biggest reason for procrastinating a release. And the more I was waiting, the more things I had to release! This, until I began seeking alternatives.</p>
+<h2 id="enforcing-release-notes-to-the-pr-authors">
+  Enforcing release notes to the PR authors
+  <a class="heading-link" href="#enforcing-release-notes-to-the-pr-authors">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>The first iteration of this mechanism was to add a Github Action job that would fail if the PR author <a href="https://github.com/metallb/metallb/pull/2191"  class="external-link" target="_blank" rel="noopener">wasn&rsquo;t touching the release notes file</a>. Although this was simple, it served its purpouse <strong>with an exception</strong>: this requirement caused conflicts between pull requests, basically blocking us to use the really powerful github merge queues mechanism that allows to merge (compatible) PRs in parallel.</p>
+<h2 id="trying-to-mimic-kubernetes">
+  Trying to mimic Kubernetes
+  <a class="heading-link" href="#trying-to-mimic-kubernetes">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>After giving up with the idea of reinventing the wheel and writing my tool for generating the release notes, I started looking for existing solutions, and I found the <a href="https://github.com/kubernetes/release/tree/master/cmd/release-notes"  class="external-link" target="_blank" rel="noopener">kubernetes release notes generator</a>. The behaviour is pretty simple: it takes a range of commits, a github token, and the tool will use the github APIs to harvest the content of the pull requests looking for informations about the various changes.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ <span class="nb">export</span> <span class="nv">GITHUB_TOKEN</span><span class="o">=</span>a_github_api_token
+</span></span><span class="line"><span class="cl">$ release-notes <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --start-sha 02dc3d713dd7f945a8b6f7ef3e008f3d29c2d549 <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --end-sha   23649560c060ad6cd82da8da42302f8f7e38cf1e
+</span></span></code></pre></div><p>And it generates an output like</p>
+<pre tabindex="0"><code class="language-raw" data-lang="raw">
+### New Features
+
+- Add a field to the FRRConfiguration CRD to disable MP BGP for the given peer (#128, @AlinaSecret)
+
+### Bug fixes
+
+- Fix the case where merging an FRRConfiguration with no hold / keepalive / connect Time set with one where the time is set to default fails. (#120, @fedepaol)
+</code></pre><p>(this is actually taken from the release notes of <a href="https://raw.githubusercontent.com/metallb/frr-k8s/main/RELEASE_NOTES.md"  class="external-link" target="_blank" rel="noopener">frr-k8s</a>, a MetalLB spin off project).</p>
+<h2 id="what-does-the-tool-need">
+  What does the tool need
+  <a class="heading-link" href="#what-does-the-tool-need">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>In order to generate the release notes out of a github repository, the tool relies on two things:</p>
+<ul>
+<li>A classification of the various PRs, under the form of labels <code>kind/something</code></li>
+<li>A release-note section with the comment for this PR, similar to what <a href="https://raw.githubusercontent.com/metallb/metallb/main/.github/pull_request_template.md"  class="external-link" target="_blank" rel="noopener">I added in MetalLB</a></li>
+</ul>
+<h3 id="the-pr-template">
+  The PR template
+  <a class="heading-link" href="#the-pr-template">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>The first step to enable the tool is to provide a PR template that contains the instructions to fill the description of the change for the release notes:</p>
+<pre tabindex="0"><code class="language-raw" data-lang="raw">**Release note**:
+&lt;!--  Write your release note:
+1. Enter your extended release note in the below block. If the PR requires additional action from users switching to the new release, include the string &#34;action required&#34;.
+2. Follow the instructions for writing a release note from k8s: https://git.k8s.io/community/contributors/guide/release-notes.md
+3. If no release note is required, just write &#34;NONE&#34;.
+--&gt;
+
+``````release-note
+</code></pre><p>And then the hard part is convince the contributors not to delete the wall of text but actually read and fill it :P .</p>
+<h3 id="the-labels">
+  The labels
+  <a class="heading-link" href="#the-labels">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>I wanted to enforce the presence of the labels, and to have them automatically added.
+Kubernetes and the other projects of the k8s.io organization can rely on Prow (the kubernetes CI/CD system) doing that, based on the other section of the pull request template that asks the contributor to pick
+a kind:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-markdown" data-lang="markdown"><span class="line"><span class="cl">**Is this a BUG FIX or a FEATURE ?**:
+</span></span><span class="line"><span class="cl"><span class="k">
+</span></span></span><span class="line"><span class="cl"><span class="k">&gt; </span><span class="ge">Uncomment only one, leave it on its own line:
+</span></span></span><span class="line"><span class="cl"><span class="ge"></span><span class="k">&gt;
+</span></span></span><span class="line"><span class="cl"><span class="k"></span><span class="ge">&gt; /kind bug
+</span></span></span><span class="line"><span class="cl"><span class="ge"></span><span class="k">&gt; </span><span class="ge">/kind cleanup
+</span></span></span><span class="line"><span class="cl"><span class="ge"></span><span class="k">&gt; </span><span class="ge">/kind feature
+</span></span></span><span class="line"><span class="cl"><span class="ge"></span><span class="k">&gt; </span><span class="ge">/kind design
+</span></span></span><span class="line"><span class="cl"><span class="ge"></span><span class="k">&gt; </span><span class="ge">/kind flake
+</span></span></span><span class="line"><span class="cl"><span class="ge"></span><span class="k">&gt; </span><span class="ge">/kind failing
+</span></span></span><span class="line"><span class="cl"><span class="ge"></span><span class="k">&gt; </span><span class="ge">/kind documentation
+</span></span></span><span class="line"><span class="cl"><span class="ge"></span><span class="k">&gt; </span><span class="ge">/kind regression
+</span></span></span></code></pre></div><p>So within kubernetes, a contributor uncomments the right kind (or kinds) and the labels are added to the PR automagically.</p>
+<p>Unfortunately, without Prow this does not have any effect on the labels, so I had to be a bit creative and I came up with a solution based on <a href="https://github.com/metallb/metallb/blob/main/.github/workflows/classify.yaml"  class="external-link" target="_blank" rel="noopener">github actions</a>.</p>
+<p>I will comment here each step of the workflow:</p>
+<p>For each creation update of the Pull Request:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">Add Labels</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">on</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">pull_request_target</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">types</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="l">opened, edited]</span><span class="w">
+</span></span></span></code></pre></div><p>It looks for the uncommented kind:</p>
+<pre tabindex="0"><code>      - uses: actions-ecosystem/action-regex-match@v2
+        id: regex-match
+        with:
+          text: ${{ github.event.pull_request.body }}
+          regex: &#39;(?&lt;!&gt; )\/kind (\w+)&#39;
+</code></pre><p>Validates the kind to be one of the allowed ones:</p>
+<pre tabindex="0"><code>      - name: Check
+        run: |
+          if [[ ! &#34;${{ steps.regex-match.outputs.group1 }}&#34; =~ ^(api-change|bug|cleanup|deprecation|design|documentation|failing|feature|flake|regression)$ ]]; then
+            echo &#34;kind must belong to
+                  - api-change \
+                  - bug \
+                  - cleanup \
+                  - deprecation \
+                  - design \
+                  - documentation \
+                  - failing \
+                  - feature \
+                  - flake \
+                  - regression \
+            please add /kind [type] to the body of the PR&#34;
+            exit 1
+          fi
+</code></pre><p>and add the label:</p>
+<pre tabindex="0"><code>      - uses: actions-ecosystem/action-add-labels@v1
+        with:
+          labels: kind/${{ steps.regex-match.outputs.group1 }}
+</code></pre><p>Finally, it ensures the user did not delete the release notes section:</p>
+<pre tabindex="0"><code>      - name: Check release notes were not deleted
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number
+            });
+            if (!pr.data.body.includes(&#34;```release-note&#34;)) {
+              throw new Error(&#34;Please don&#39;t cancel the ```release-note ``` section as it is used to build the release notes&#34;);
+            }
+</code></pre><h2 id="invoking-the-tool">
+  Invoking the tool
+  <a class="heading-link" href="#invoking-the-tool">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>Now that the Pull Requests contain all the informations required by the release notes generator, we can invoke the tool to generate the release notes:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="nv">GOFLAGS</span><span class="o">=</span>-mod<span class="o">=</span>mod go run k8s.io/release/cmd/release-notes@v0.16.5 <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>    --branch <span class="nv">$branch</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>    --required-author <span class="s2">&#34;&#34;</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>    --org metallb <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>    --dependencies<span class="o">=</span><span class="nb">false</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>    --repo metallb <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>    --start-sha <span class="nv">$from</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>    --end-sha <span class="nv">$to</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>    --output <span class="nv">$release_notes</span>
+</span></span></code></pre></div><p>At the moment, the process of copying the generated release notes to the actual markdown files containing them is done manually, but I don&rsquo;t exclude some automation will be handle that part as well.</p>
+<h2 id="conclusion">
+  Conclusion
+  <a class="heading-link" href="#conclusion">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>Automation is the key for maintaining a project healthy. Manual operations don&rsquo;t scale well, and I try to keep the bar high for any type of
+manual activity done in the projects I help with. Although sporadic, the activity of generating the release notes manually was really painful, and
+having a way to generate them automatically using (almost) existing tools will allow other maintainers to be able to generate them without feeling
+that pain.</p>
+<p>Here, I showed how by mixing the kubernetes generator tool and a bit of github actions I am now able to generate the release notes without much effort.</p>
+
+      </div>
+
+
+      <footer>
+        
+
+
+        <div id="disqus_thread"></div>
+<script>
+  window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "fedepaolgithubio" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+    
+    document.addEventListener('themeChanged', function (e) { 
+        if (document.readyState == 'complete') {
+          DISQUS.reset({ reload: true, config: disqus_config });
+        }
+    });
+</script>
+        
+        
+        
+        
+
+        
+      </footer>
+    </article>
+
+    
+  </section>
+
+    </div>
+
+    <footer class="footer">
+  <section class="container">
+    ©
+    
+    2024
+     Federico Paolinelli 
+    ·
+    
+    Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/" target="_blank" rel="noopener">Coder</a>.
+    
+  </section>
+</footer>
+
+  </main>
+
+  
+
+  
+  
+  <script src="/js/coder.min.6ae284be93d2d19dad1f02b0039508d9aab3180a12a06dcc71b0b0ef7825a317.js" integrity="sha256-auKEvpPS0Z2tHwKwA5UI2aqzGAoSoG3McbCw73gloxc="></script>
+  
+
+  
+
+  
+
+
+  
+<script>
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-16514009-2', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+
+</html>
