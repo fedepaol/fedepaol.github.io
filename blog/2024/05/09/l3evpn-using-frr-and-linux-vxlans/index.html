@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>
+  L3EVPN using FRR and Linux VXLans · My little software warehouse
+</title>
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+
+
+
+
+<meta name="author" content="Federico Paolinelli">
+<meta name="description" content="How to configure FRR and Linux VXLans to implement EVPN L3 tunnels">
+<meta name="keywords" content="">
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="L3EVPN using FRR and Linux VXLans"/>
+<meta name="twitter:description" content="How to configure FRR and Linux VXLans to implement EVPN L3 tunnels"/>
+
+<meta property="og:title" content="L3EVPN using FRR and Linux VXLans" />
+<meta property="og:description" content="How to configure FRR and Linux VXLans to implement EVPN L3 tunnels" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://fedepaol.github.io/blog/2024/05/09/l3evpn-using-frr-and-linux-vxlans/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2024-05-09T12:01:51+01:00" />
+<meta property="article:modified_time" content="2024-05-09T12:01:51+01:00" />
+
+
+
+
+<link rel="canonical" href="https://fedepaol.github.io/blog/2024/05/09/l3evpn-using-frr-and-linux-vxlans/">
+
+
+<link rel="preload" href="/fonts/forkawesome-webfont.woff2?v=1.2.0" as="font" type="font/woff2" crossorigin>
+
+
+  
+  
+  <link rel="stylesheet" href="/css/coder.min.4218e9a82fcc372a4835bc96c50c77e11ac52ebe04361b7efd80f5f332ec3e89.css" integrity="sha256-QhjpqC/MNypINbyWxQx34RrFLr4ENht&#43;/YD18zLsPok=" crossorigin="anonymous" media="screen" />
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+<link rel="icon" type="image/svg+xml" href="/images/favicon.svg" sizes="any">
+<link rel="icon" type="image/png" href="/images/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="/images/favicon-16x16.png" sizes="16x16">
+
+<link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+<link rel="manifest" href="/site.webmanifest">
+<link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+
+
+
+
+
+
+</head>
+
+
+
+
+<body class="preload-transitions colorscheme-light">
+  
+<div class="float-container">
+    <a id="dark-mode-toggle" class="colorscheme-toggle">
+        <i class="fa fa-adjust fa-fw" aria-hidden="true"></i>
+    </a>
+</div>
+
+
+  <main class="wrapper">
+    <nav class="navigation">
+  <section class="container">
+    <a class="navigation-title" href="/">
+      My little software warehouse
+    </a>
+    
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/posts/">Blog</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/about/">About</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="mailto:fedepaol@gmail.com">Contact</a>
+            </li>
+          
+        
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+    <div class="content">
+      
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">
+            <a class="title-link" href="https://fedepaol.github.io/blog/2024/05/09/l3evpn-using-frr-and-linux-vxlans/">
+              L3EVPN using FRR and Linux VXLans
+            </a>
+          </h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa fa-calendar" aria-hidden="true"></i>
+              <time datetime="2024-05-09T12:01:51&#43;01:00">
+                May 9, 2024
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa fa-clock-o" aria-hidden="true"></i>
+              8-minute read
+            </span>
+          </div>
+          
+          
+          
+        </div>
+      </header>
+
+      <div class="post-content">
+        
+        <h1 id="tinkering-with-evpn">
+  Tinkering with EVPN
+  <a class="heading-link" href="#tinkering-with-evpn">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h1>
+<p>EVPN and VXLan tunnels (and how FRR gets along with those) are something I wanted to explore, so
+I thought it&rsquo;d make sense to document my journey as a serie of blogposts (which can also serve as a help to my memory).</p>
+<p>The result of this first rambling is available on my <a href="https://github.com/fedepaol/evpnlab/tree/main/01_clab_l3"  class="external-link" target="_blank" rel="noopener">github repository</a>.</p>
+<h2 id="the-topology">
+  The topology
+  <a class="heading-link" href="#the-topology">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>The first attempt is to have a spine - leaves topology with two hosts connected to two different leaves
+via a L3 connection.</p>
+<pre tabindex="0"><code class="language-raw" data-lang="raw">                     ┌─────────┐
+                     │         │
+                     │  64612  │
+                     │         │
+                     └────┬────┘
+                          │
+                          │
+                  ┌───────┴────────┐
+                  │                │
+             ┌────┴────┐      ┌────┴────┐
+             │         │      │         │
+             │  64512  │      │  64512  │
+             │         │      │         │
+             └────┬────┘      └────┬────┘
+192.168.10.0/24   │                │ L3     192.168.11.0/24
+             ┌────┴────┐      ┌────┴────┐
+             │         │      │         │
+             │  Host1  │      │  Host2  │
+             │         │      │         │
+             └─────────┘      └─────────┘
+</code></pre><p>We want to connect the two hosts via a VXLan tunnel using L3Evpn routes:</p>
+<pre tabindex="0"><code class="language-raw" data-lang="raw">
+
+                  ┌─────────┐              ┌─────────┐
+                  │         │              │         │
+                  │  64512  │     VXLan    │  64512  │
+                  │       ┌─┼──────────────┼─┐       │
+                  └────┬──┴─┘              └─┴──┬────┘
+     192.168.10.0/24   │                        │ L3     192.168.11.0/24
+                  ┌────┴────┐              ┌────┴────┐
+                  │         │              │         │
+                  │  Host1  │              │  Host2  │
+                  │         │              │         │
+                  └─────────┘              └─────────┘
+</code></pre><h2 id="containerlab">
+  ContainerLab
+  <a class="heading-link" href="#containerlab">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>In order to test the configuration on my laptop, I am using <a href="https://containerlab.dev/"  class="external-link" target="_blank" rel="noopener">containerlab</a>, which provides a
+nice way to setup any topology using just containers. The main difference from using straight docker-compose, is that the various containers implementing
+the routing devices are connected together via veth pairs, making the whole lab more adherent to the reality.</p>
+<p>Additionally, we can choose from a variety of implementations, but for the time being I am interested in <a href="https://docs.frrouting.org"  class="external-link" target="_blank" rel="noopener">FRR</a>.</p>
+<h3 id="the-container-lab-configuration">
+  The container lab configuration
+  <a class="heading-link" href="#the-container-lab-configuration">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>The configuration is pretty straightforward. We define nodes, where we can map files inside the containers:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">topology</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">nodes</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">leaf1</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l">linux</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l">quay.io/frrouting/frr:9.0.0</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">binds</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span>- <span class="l">leaf1/daemons:/etc/frr/daemons</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span>- <span class="l">leaf1/frr.conf:/etc/frr/frr.conf</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span>- <span class="l">leaf1/vtysh.conf:/etc/frr/vtysh.conf</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span>- <span class="l">leaf1/setup.sh:/setup.sh</span><span class="w">
+</span></span></span></code></pre></div><p>and a set of links, to connect the nodes:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="w">  </span><span class="nt">links</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span>- <span class="nt">endpoints</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&#34;leaf1:eth1&#34;</span><span class="p">,</span><span class="w"> </span><span class="s2">&#34;spine:eth1&#34;</span><span class="p">]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span>- <span class="nt">endpoints</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&#34;leaf2:eth1&#34;</span><span class="p">,</span><span class="w"> </span><span class="s2">&#34;spine:eth2&#34;</span><span class="p">]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span>- <span class="nt">endpoints</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&#34;HOST1:eth1&#34;</span><span class="p">,</span><span class="w"> </span><span class="s2">&#34;leaf1:eth2&#34;</span><span class="p">]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span>- <span class="nt">endpoints</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&#34;HOST2:eth1&#34;</span><span class="p">,</span><span class="w"> </span><span class="s2">&#34;leaf2:eth2&#34;</span><span class="p">]</span><span class="w">
+</span></span></span></code></pre></div><p><strong>Note how eth0 is not mentioned</strong>, as it&rsquo;s the default interface connecting the containers to the docker bridge, which serves no purpouses for our
+topology.</p>
+<h3 id="setting-up-the-hosts">
+  Setting up the hosts
+  <a class="heading-link" href="#setting-up-the-hosts">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>Although Containerlab creates the veth pairs for us, it does not assign the IP to each leg:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">ip addr add 192.168.10.1/24 dev eth1
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># set the default gw via eth1</span>
+</span></span><span class="line"><span class="cl">ip r del default
+</span></span><span class="line"><span class="cl">ip r add default via 192.168.10.2
+</span></span><span class="line"><span class="cl">sleep INF
+</span></span></code></pre></div><p>On top of that, we set the default route to go through the leaf and not through the docker bridge.</p>
+<p>Additionally, given no entry point is defined for our &ldquo;plain linux&rdquo; container, we can embed the
+entry point directly in the clab declaration.</p>
+<h3 id="setting-up-the-leaves">
+  Setting up the leaves
+  <a class="heading-link" href="#setting-up-the-leaves">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>FRR <a href="https://docs.frrouting.org/en/latest/evpn.html"  class="external-link" target="_blank" rel="noopener">has a strong opinion</a> in how the host layout should look like in order to support EVPN, delegating the responsibility of the tunneling part to the linux kernel. I won&rsquo;t repeat what the FRR documentation describes in detail, but will list the required steps:</p>
+<ul>
+<li>assign the VTEP IP address to the loopback interface</li>
+<li>Assign IPs to both the veth connecting the leaf to the spine and the one connecting the &ldquo;HOST&rdquo; to the leaf</li>
+<li>Create a linux VRF corresponding to the L3 VRF and enslave the veth leg connected to the &ldquo;HOST&rdquo;</li>
+<li>Create all the machinery to make the EVPN / VXLan tunnel work, including a linux bridge and a VXLan interface</li>
+</ul>
+<h3 id="the-leaves-frr-configuration">
+  The leaves FRR configuration
+  <a class="heading-link" href="#the-leaves-frr-configuration">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>The leaves FRR configuration resembles pretty much what the <a href="https://docs.frrouting.org/en/latest/evpn.html"  class="external-link" target="_blank" rel="noopener">FRR documentation</a> describes. The difference
+is where we allow the leaves to accept routes coming from the local ASN (from the spine):</p>
+<pre tabindex="0"><code class="language-raw" data-lang="raw"> address-family l2vpn evpn
+  neighbor 192.168.1.0 activate
+  neighbor 192.168.1.0 allowas-in origin
+  advertise-all-vni
+  advertise-svi-ip
+ exit-address-family
+</code></pre><p>Also, note how we enable allowas-in for both the l2vpn and ip address families, as need to receive both the route to the VTEP hosted on the other leaf and the Type 5 EVPN routes advertised by the other leaves.</p>
+<p>Additionally, we redistribute the connected routes so each leaf can distribute the route directed to the hosts:</p>
+<pre tabindex="0"><code class="language-raw" data-lang="raw">router bgp 64512 vrf red
+ !
+ address-family ipv4 unicast
+  redistribute connected
+ exit-address-family
+</code></pre><h3 id="the-spine-frr-configuration">
+  The spine FRR configuration
+  <a class="heading-link" href="#the-spine-frr-configuration">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>The spine configuration is pretty simple. It&rsquo;s ASN is different from the one of the leaves, so no route reflection mechanism is needed.
+The spine router must redirect the routes towards the VTEPs (for the underlay network) and the EVPN Type 5 routes.</p>
+<pre tabindex="0"><code class="language-raw" data-lang="raw"> neighbor 192.168.1.1 remote-as 64512
+ neighbor 192.168.1.3 remote-as 64512
+
+ address-family ipv4 unicast
+  neighbor 192.168.1.1 activate
+  neighbor 192.168.1.3 activate
+ exit-address-family
+ !
+ address-family l2vpn evpn
+  neighbor 192.168.1.1 activate
+  neighbor 192.168.1.3 activate
+  advertise-all-vni
+  advertise-svi-ip
+ exit-address-family
+</code></pre><h2 id="bringing-it-up">
+  Bringing it up
+  <a class="heading-link" href="#bringing-it-up">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>A convenience <a href="https://github.com/fedepaol/evpnlab/blob/main/01_clab_l3/setup.sh"  class="external-link" target="_blank" rel="noopener">setup.sh</a> script is provided:
+it brings up the lab and then runs the extra commands required to assign ips and create the vxlan setup in the leaves.</p>
+<h2 id="troubleshooting-vxlan-and-evpn">
+  Troubleshooting VXLan and EVPN
+  <a class="heading-link" href="#troubleshooting-vxlan-and-evpn">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>I made an incredible number of fat-finger related mistakes, so here I will try to reproduce some common troubleshooting
+steps to make sure both the underlay network and the overlay network work.</p>
+<p>Things to check on both the leaves and the spine include:</p>
+<p>Checking the BGP routes for the underlay network:</p>
+<pre tabindex="0"><code>leaf1:/# vtysh -c &#34;show bgp ipv4&#34;
+BGP table version is 2, local router ID is 100.64.0.1, vrf id 0
+Default local pref 100, local AS 64512
+Status codes:  s suppressed, d damped, h history, * valid, &gt; best, = multipath,
+               i internal, r RIB-failure, S Stale, R Removed
+Nexthop codes: @NNN nexthop&#39;s vrf id, &lt; announce-nh-self
+Origin codes:  i - IGP, e - EGP, ? - incomplete
+RPKI validation codes: V valid, I invalid, N Not found
+
+    Network          Next Hop            Metric LocPrf Weight Path
+ *  100.64.0.1/32    192.168.1.0                            0 64612 64512 i
+ *&gt;                  0.0.0.0                  0         32768 i
+ *&gt; 100.65.0.2/32    192.168.1.0                            0 64612 64512 i
+
+Displayed  2 routes and 3 total paths
+</code></pre><p>Checking the VNI setup:</p>
+<pre tabindex="0"><code>leaf1:/# vtysh -c &#34;show vrf vni&#34;
+VRF                                   VNI        VxLAN IF             L3-SVI               State Rmac
+red                                   100        vni100               br100                Up    aa:bb:cc:00:00:65
+l
+</code></pre><p>Checking the status of the session:</p>
+<pre tabindex="0"><code>leaf1:/# vtysh -c &#34;show bgp l2vpn evpn summary&#34;
+BGP router identifier 100.64.0.1, local AS number 64512 vrf-id 0
+BGP table version 0
+RIB entries 3, using 576 bytes of memory
+Peers 1, using 13 KiB of memory
+
+Neighbor        V         AS   MsgRcvd   MsgSent   TblVer  InQ OutQ  Up/Down State/PfxRcd   PfxSnt Desc
+192.168.1.0     4      64612       153       153        1    0    0 02:25:21            1        2 N/A
+
+Total number of neighbors 1
+</code></pre><p>Checking the type5 routes:</p>
+<pre tabindex="0"><code>leaf1:/# vtysh -c &#34;show bgp l2vpn evpn&#34;
+BGP table version is 1, local router ID is 100.64.0.1
+Status codes: s suppressed, d damped, h history, * valid, &gt; best, i - internal
+Origin codes: i - IGP, e - EGP, ? - incomplete
+EVPN type-1 prefix: [1]:[EthTag]:[ESI]:[IPlen]:[VTEP-IP]:[Frag-id]
+EVPN type-2 prefix: [2]:[EthTag]:[MAClen]:[MAC]:[IPlen]:[IP]
+EVPN type-3 prefix: [3]:[EthTag]:[IPlen]:[OrigIP]
+EVPN type-4 prefix: [4]:[ESI]:[IPlen]:[OrigIP]
+EVPN type-5 prefix: [5]:[EthTag]:[IPlen]:[IP]
+
+   Network          Next Hop            Metric LocPrf Weight Path
+Route Distinguisher: 192.168.10.2:2
+ *&gt; [5]:[0]:[24]:[192.168.10.0]
+                    100.64.0.1               0         32768 ?
+                    ET:8 RT:64512:100 Rmac:aa:bb:cc:00:00:65
+Route Distinguisher: 192.168.11.2:2
+ *&gt; [5]:[0]:[24]:[192.168.11.0]
+                    100.65.0.2                             0 64612 64512 ?
+                    RT:64512:100 ET:8 Rmac:aa:bb:cc:00:00:64
+
+Displayed 2 out of 2 total prefixes
+</code></pre><p>If it&rsquo;s still not clear why routes are not going through, I strongly suggest to have a look at the FRR logs. Despite intimidating, they offered the solution straight away the majority of the cases.</p>
+<p>This included having selected the same mac address for the Linux bridge on both leaves, and not allowing routes for the local ASN for the l2vpn address family.</p>
+<h2 id="checking-if-it-actually-works">
+  Checking if it actually works
+  <a class="heading-link" href="#checking-if-it-actually-works">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>If we try to ping HOST2 from HOST1:</p>
+<pre tabindex="0"><code>bash-5.1# ping 192.168.11.1
+PING 192.168.11.1 (192.168.11.1) 56(84) bytes of data.
+64 bytes from 192.168.11.1: icmp_seq=1 ttl=62 time=0.321 ms
+64 bytes from 192.168.11.1: icmp_seq=2 ttl=62 time=0.198 ms
+</code></pre><p>It works!</p>
+<p>Now, if we check what&rsquo;s happening on the link between the host and the leaf:</p>
+<pre tabindex="0"><code class="language-raw" data-lang="raw">                     ┌─────────┐
+                     │         │
+                     │  64612  │
+                     │         │
+                     └────┬────┘
+                          │
+                          │
+                  ┌───────┴────────┐
+                  │                │
+             ┌────┴────┐      ┌────┴────┐
+             │         │      │         │
+             │  64512  │      │  64512  │  &lt;---- LEAF
+             │         │      │         │
+             └────┬────┘      └────┬────┘
+192.168.10.0/24   │                │ L3     &lt;---- HERE
+             ┌────┴────┐      ┌────┴────┐
+             │         │      │         │
+             │  Host1  │      │  Host2  │
+             │         │      │         │
+             └─────────┘      └─────────┘
+</code></pre><pre tabindex="0"><code># sudo ip netns exec clab-evpnl3-leaf1 tcpdump -nn -i eth2
+dropped privs to tcpdump
+tcpdump: verbose output suppressed, use -v[v]... for full protocol decode
+listening on eth2, link-type EN10MB (Ethernet), snapshot length 262144 bytes
+12:04:37.836699 IP 192.168.10.1 &gt; 192.168.11.1: ICMP echo request, id 6, seq 5, length 64
+12:04:37.836868 IP 192.168.11.1 &gt; 192.168.10.1: ICMP echo reply, id 6, seq 5, length 64
+</code></pre><p>Probably more interesting is what&rsquo;s happening on the leg connecting the leaf to the spine:</p>
+<pre tabindex="0"><code class="language-raw" data-lang="raw">                     ┌─────────┐
+                     │         │
+                     │  64612  │
+                     │         │
+                     └────┬────┘
+                          │
+                          │
+                  ┌───────┴────────┐
+                  │                │   &lt;---- HERE
+             ┌────┴────┐      ┌────┴────┐
+             │         │      │         │
+             │  64512  │      │  64512  │ &lt;---- LEAF
+             │         │      │         │
+             └────┬────┘      └────┬────┘
+192.168.10.0/24   │                │ L3
+             ┌────┴────┐      ┌────┴────┐
+             │         │      │         │
+             │  Host1  │      │  Host2  │
+             │         │      │         │
+             └─────────┘      └─────────┘
+</code></pre><pre tabindex="0"><code class="language-raw" data-lang="raw">sudo ip netns exec clab-evpnl3-leaf1 tcpdump -nn -i eth1
+dropped privs to tcpdump
+tcpdump: verbose output suppressed, use -v[v]... for full protocol decode
+listening on eth1, link-type EN10MB (Ethernet), snapshot length 262144 bytes
+12:01:51.759318 IP 100.64.0.1.48561 &gt; 100.65.0.2.4789: VXLAN, flags [I] (0x08), vni 100
+IP 192.168.10.1 &gt; 192.168.11.1: ICMP echo request, id 5, seq 1, length 64
+12:01:51.759433 IP 100.65.0.2.48561 &gt; 100.64.0.1.4789: VXLAN, flags [I] (0x08), vni 100
+IP 192.168.11.1 &gt; 192.168.10.1: ICMP echo reply, id 5, seq 1, length 64
+</code></pre><p>So, we see that we are sending a VXLan packet directed to the VTEP on the other leaf embedding the ICMP request.</p>
+<h1 id="conclusion">
+  Conclusion
+  <a class="heading-link" href="#conclusion">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h1>
+<p>ContainerLab made it super easy to validate topologies and configurations, and thanks to that I managed (not without obstacles) to setup a proper
+spine leaves topology with EVPN. Next step is to add L2Evpn tunneling, and possibly replacing the eBGP spine with a route reflector.</p>
+<p>Also, as a beginner, I am pretty sure there are better ways to implement the same result. If you think it can be improved, please reach out or file a pull request!</p>
+
+      </div>
+
+
+      <footer>
+        
+
+
+        <div id="disqus_thread"></div>
+<script>
+  window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "fedepaolgithubio" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+    
+    document.addEventListener('themeChanged', function (e) { 
+        if (document.readyState == 'complete') {
+          DISQUS.reset({ reload: true, config: disqus_config });
+        }
+    });
+</script>
+        
+        
+        
+        
+      </footer>
+    </article>
+
+    
+  </section>
+
+    </div>
+
+    <footer class="footer">
+  <section class="container">
+    ©
+    
+    2024
+     Federico Paolinelli 
+    ·
+    
+    Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/" target="_blank" rel="noopener">Coder</a>.
+    
+  </section>
+</footer>
+
+  </main>
+
+  
+
+  
+  
+  <script src="/js/coder.min.6ae284be93d2d19dad1f02b0039508d9aab3180a12a06dcc71b0b0ef7825a317.js" integrity="sha256-auKEvpPS0Z2tHwKwA5UI2aqzGAoSoG3McbCw73gloxc="></script>
+  
+
+  
+
+  
+
+
+  
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-16514009-2', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+
+</html>

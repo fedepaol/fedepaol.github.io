@@ -2,13 +2,16 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>https://fedepaol.github.io/blog/2024/04/06/creating-release-notes-for-your-github-project/</loc>
-    <lastmod>2024-04-06T18:31:52+02:00</lastmod>
+    <loc>https://fedepaol.github.io/blog/2024/05/09/l3evpn-using-frr-and-linux-vxlans/</loc>
+    <lastmod>2024-05-09T12:01:51+01:00</lastmod>
   </url><url>
     <loc>https://fedepaol.github.io/</loc>
-    <lastmod>2024-04-06T18:31:52+02:00</lastmod>
+    <lastmod>2024-05-09T12:01:51+01:00</lastmod>
   </url><url>
     <loc>https://fedepaol.github.io/posts/</loc>
+    <lastmod>2024-05-09T12:01:51+01:00</lastmod>
+  </url><url>
+    <loc>https://fedepaol.github.io/blog/2024/04/06/creating-release-notes-for-your-github-project/</loc>
     <lastmod>2024-04-06T18:31:52+02:00</lastmod>
   </url><url>
     <loc>https://fedepaol.github.io/tags/ebpf/</loc>
