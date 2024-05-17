@@ -6,7 +6,18 @@
     <description>Recent content on My little software warehouse</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Thu, 09 May 2024 12:01:51 +0100</lastBuildDate><atom:link href="https://fedepaol.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Fri, 17 May 2024 12:14:10 +0200</lastBuildDate><atom:link href="https://fedepaol.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>L2EVPN using FRR and Linux VXLans</title>
+      <link>https://fedepaol.github.io/blog/2024/05/17/l2evpn-using-frr-and-linux-vxlans/</link>
+      <pubDate>Fri, 17 May 2024 12:14:10 +0200</pubDate>
+      
+      <guid>https://fedepaol.github.io/blog/2024/05/17/l2evpn-using-frr-and-linux-vxlans/</guid>
+      <description>EVPN - L2 tunnels Link to heading This is a follow up of the previous post about L3 tunnels with EVPN and VXLans.
+I started with L3 because, as much as counter intuitive it was (since VXLan is about tunneling L2 links), it felt more similar to what I am used to with BGP.
+In my evpn lab github repository I added a new entry where I set up a L2 only topology using FRR and Containerlab.</description>
+    </item>
+    
     <item>
       <title>L3EVPN using FRR and Linux VXLans</title>
       <link>https://fedepaol.github.io/blog/2024/05/09/l3evpn-using-frr-and-linux-vxlans/</link>

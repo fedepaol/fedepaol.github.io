@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+  <title>
+  Some notes about ARP suppression in L2EVPN using FRR and Linux VXLans · My little software warehouse
+</title>
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+
+
+
+
+<meta name="author" content="Federico Paolinelli">
+<meta name="description" content="Details on ARP suppression in Linux with FRR and L2EVPN VXLans">
+<meta name="keywords" content="">
+
+<meta name="twitter:card" content="summary"/><meta name="twitter:title" content="Some notes about ARP suppression in L2EVPN using FRR and Linux VXLans"/>
+<meta name="twitter:description" content="Details on ARP suppression in Linux with FRR and L2EVPN VXLans"/>
+
+<meta property="og:title" content="Some notes about ARP suppression in L2EVPN using FRR and Linux VXLans" />
+<meta property="og:description" content="Details on ARP suppression in Linux with FRR and L2EVPN VXLans" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://localhost:1313/blog/2024/05/17/some-notes-about-arp-suppression-in-l2evpn-using-frr-and-linux-vxlans/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2024-05-17T12:14:10+02:00" />
+<meta property="article:modified_time" content="2024-05-17T12:14:10+02:00" />
+
+
+
+
+<link rel="canonical" href="http://localhost:1313/blog/2024/05/17/some-notes-about-arp-suppression-in-l2evpn-using-frr-and-linux-vxlans/">
+
+
+<link rel="preload" href="/fonts/forkawesome-webfont.woff2?v=1.2.0" as="font" type="font/woff2" crossorigin>
+
+
+  
+  
+  <link rel="stylesheet" href="/css/coder.css" media="screen">
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+<link rel="icon" type="image/svg+xml" href="/images/favicon.svg" sizes="any">
+<link rel="icon" type="image/png" href="/images/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="/images/favicon-16x16.png" sizes="16x16">
+
+<link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+<link rel="manifest" href="/site.webmanifest">
+<link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+
+
+
+
+
+
+</head>
+
+
+
+
+<body class="preload-transitions colorscheme-light">
+  
+<div class="float-container">
+    <a id="dark-mode-toggle" class="colorscheme-toggle">
+        <i class="fa fa-adjust fa-fw" aria-hidden="true"></i>
+    </a>
+</div>
+
+
+  <main class="wrapper">
+    <nav class="navigation">
+  <section class="container">
+    <a class="navigation-title" href="/">
+      My little software warehouse
+    </a>
+    
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/posts/">Blog</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/about/">About</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="mailto:fedepaol@gmail.com">Contact</a>
+            </li>
+          
+        
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+    <div class="content">
+      
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">
+            <a class="title-link" href="http://localhost:1313/blog/2024/05/17/some-notes-about-arp-suppression-in-l2evpn-using-frr-and-linux-vxlans/">
+              Some notes about ARP suppression in L2EVPN using FRR and Linux VXLans
+            </a>
+          </h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa fa-calendar" aria-hidden="true"></i>
+              <time datetime="2024-05-17T12:14:10&#43;02:00">
+                May 17, 2024
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa fa-clock-o" aria-hidden="true"></i>
+              6-minute read
+            </span>
+          </div>
+          
+          
+          
+        </div>
+      </header>
+
+      <div class="post-content">
+        
+        <h1 id="evpn---arp-suppression">
+  EVPN - ARP suppression
+  <a class="heading-link" href="#evpn---arp-suppression">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h1>
+<p>This post was meant to be a section of my previous <a href="/blog/2024/05/17/l2evpn-using-frr-and-linux-vxlans/" >post about L2 tunnels with EVPN and VXLans</a>,
+but this particular topic kept me so busy that is probably worth a section of its own. Because of this, the topology this post
+is referring to is still the same:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">                      ┌─────────┐
+</span></span><span class="line"><span class="cl">                      │         │
+</span></span><span class="line"><span class="cl">       SPINE          │  <span class="m">64612</span>  │
+</span></span><span class="line"><span class="cl">                      │         │
+</span></span><span class="line"><span class="cl">                      └────┬────┘
+</span></span><span class="line"><span class="cl">                           │
+</span></span><span class="line"><span class="cl">                           │
+</span></span><span class="line"><span class="cl">                   ┌───────┴────────┐
+</span></span><span class="line"><span class="cl">                   │                │
+</span></span><span class="line"><span class="cl">              ┌────┴────┐      ┌────┴────┐
+</span></span><span class="line"><span class="cl">              │         │      │         │
+</span></span><span class="line"><span class="cl">LEAVES        │  ┌───┐  │      │  ┌───┐  │
+</span></span><span class="line"><span class="cl">              │  │   │  │      │  │   ├──┼───────┐
+</span></span><span class="line"><span class="cl">              └──┴─┬─┴──┘      └──┴─┬─┴──┘       │
+</span></span><span class="line"><span class="cl">                   │                │            │    &lt;-- L2
+</span></span><span class="line"><span class="cl">              ┌────┴────┐     ┌─────┴────┐  ┌────┴─────┐
+</span></span><span class="line"><span class="cl">              │         │     │          │  │          │
+</span></span><span class="line"><span class="cl">              │  Host1  │     │   Host2  │  │   Host3  │
+</span></span><span class="line"><span class="cl">              │         │     │          │  │          │
+</span></span><span class="line"><span class="cl">              └─────────┘     └──────────┘  └──────────┘
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">          192.168.10.2/24    192.168.10.3/24   192.168.10.4/24
+</span></span></code></pre></div><h2 id="what-arp-suppression-is">
+  What ARP suppression is
+  <a class="heading-link" href="#what-arp-suppression-is">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>Arp suppression is a mechanism where a given EVPN endpoint proxies the replies to ARP requests to avoid flooding the underlay with
+multicast messages directed to all the VTEPs (virtual endpoints). The reply should be based on the information received via the
+Type 2 EVPN routes.</p>
+<h2 id="arp-suppression-and-frr">
+  ARP suppression and FRR
+  <a class="heading-link" href="#arp-suppression-and-frr">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>The <a href="https://docs.frrouting.org/en/latest/evpn.html#linux-interface-configuration"  class="external-link" target="_blank" rel="noopener">FRR documentation</a> say clearly that ARP suppression
+is not FRR&rsquo;s responsibility:</p>
+<pre tabindex="0"><code class="language-raw" data-lang="raw">    An SVI for an L2VNI is only needed for routing (IRB) or ARP/ND suppression.
+    ARP/ND suppression is a kernel function, it is not managed  FRR.
+    ARP/ND suppression is enabled per bridge_slave via neigh_suppress.
+    ARP/ND suppression should only be enabled on vxlan interfaces.
+</code></pre><p>The documentation of the <code>neigh_suppress</code> parameter is quite blurry:</p>
+<p><strong>Controls whether neighbor discovery (arp and nd) proxy and suppression is enabled on the port. By default this flag is off.</strong></p>
+<p>although, it doesn&rsquo;t tell how.</p>
+<h2 id="lets-try-it">
+  Let&rsquo;s try it
+  <a class="heading-link" href="#lets-try-it">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>Let&rsquo;s assign an IP to the bridges and see what&rsquo;s happening to the ARP requests.</p>
+<p>Arping from HOST2 to HOST1 works:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">docker <span class="nb">exec</span> clab-evpnl2-HOST2 arping -c <span class="m">3</span> 192.168.10.2
+</span></span><span class="line"><span class="cl">ARPING 192.168.10.2 from 192.168.10.3 eth1
+</span></span><span class="line"><span class="cl">Unicast reply from 192.168.10.2 <span class="o">[</span>AA:C1:AB:99:2A:66<span class="o">]</span>  0.613ms
+</span></span><span class="line"><span class="cl">Unicast reply from 192.168.10.2 <span class="o">[</span>AA:C1:AB:99:2A:66<span class="o">]</span>  0.569ms
+</span></span><span class="line"><span class="cl">Unicast reply from 192.168.10.2 <span class="o">[</span>AA:C1:AB:99:2A:66<span class="o">]</span>  0.583ms
+</span></span><span class="line"><span class="cl">Sent <span class="m">3</span> probes <span class="o">(</span><span class="m">1</span> broadcast<span class="o">(</span>s<span class="o">))</span>
+</span></span><span class="line"><span class="cl">Received <span class="m">3</span> response<span class="o">(</span>s<span class="o">)</span>
+</span></span></code></pre></div><p>If we tcpdump leaf2 though:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">16:57:27.874295 eth2  B   ARP, Request who-has 192.168.10.2 <span class="o">(</span>ff:ff:ff:ff:ff:ff<span class="o">)</span> tell 192.168.10.3, length <span class="m">28</span>
+</span></span><span class="line"><span class="cl">16:57:27.874304 eth3  Out ARP, Request who-has 192.168.10.2 <span class="o">(</span>ff:ff:ff:ff:ff:ff<span class="o">)</span> tell 192.168.10.3, length <span class="m">28</span>
+</span></span><span class="line"><span class="cl">16:57:27.874306 vni110 Out ARP, Request who-has 192.168.10.2 <span class="o">(</span>ff:ff:ff:ff:ff:ff<span class="o">)</span> tell 192.168.10.3, length <span class="m">28</span>
+</span></span><span class="line"><span class="cl">16:57:27.874336 eth1  Out IP 100.65.0.2.52640 &gt; 100.64.0.1.4789: VXLAN, flags <span class="o">[</span>I<span class="o">]</span> <span class="o">(</span>0x08<span class="o">)</span>, vni <span class="m">110</span>
+</span></span><span class="line"><span class="cl">ARP, Request who-has 192.168.10.2 <span class="o">(</span>ff:ff:ff:ff:ff:ff<span class="o">)</span> tell 192.168.10.3, length <span class="m">28</span>
+</span></span><span class="line"><span class="cl">16:57:27.874337 br10  B   ARP, Request who-has 192.168.10.2 <span class="o">(</span>ff:ff:ff:ff:ff:ff<span class="o">)</span> tell 192.168.10.3, length <span class="m">28</span>
+</span></span><span class="line"><span class="cl">16:57:27.874377 eth1  In  IP 100.64.0.1.52640 &gt; 100.65.0.2.4789: VXLAN, flags <span class="o">[</span>I<span class="o">]</span> <span class="o">(</span>0x08<span class="o">)</span>, vni <span class="m">110</span>
+</span></span><span class="line"><span class="cl">ARP, Reply 192.168.10.2 is-at aa:c1:ab:99:2a:66, length <span class="m">28</span>
+</span></span><span class="line"><span class="cl">16:57:27.874381 vni110 P   ARP, Reply 192.168.10.2 is-at aa:c1:ab:99:2a:66, length <span class="m">28</span>
+</span></span><span class="line"><span class="cl">16:57:27.874382 eth2  Out ARP, Reply 192.168.10.2 is-at aa:c1:ab:99:2a:66, length <span class="m">28</span>
+</span></span></code></pre></div><p>We can see that the ARP request is always forwarded through the tunnel instead of getting proxied locally.</p>
+<h2 id="type-2-evpn-routes-and-ip-addresses">
+  Type 2 EVPN Routes and IP Addresses
+  <a class="heading-link" href="#type-2-evpn-routes-and-ip-addresses">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>The association between the MAC and the IP should be propagated via the type 2 EVPN routes.</p>
+<p>As we saw in the previous post though, the one received  leaf2 contain only
+the MAC address learnt from the FIB of the leaf1&rsquo;s bridge (note that the iplen is 0 and the IP is not being set).</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">*&gt; <span class="o">[</span>2<span class="o">]</span>:<span class="o">[</span>0<span class="o">]</span>:<span class="o">[</span>48<span class="o">]</span>:<span class="o">[</span>aa:c1:ab:99:2a:66<span class="o">]</span>
+</span></span><span class="line"><span class="cl">                      100.64.0.1                             <span class="m">0</span> <span class="m">64612</span> <span class="m">64512</span> i
+</span></span><span class="line"><span class="cl">                      RT:64512:110 ET:8
+</span></span></code></pre></div><p>After a bit of digging and desperation, and I learned that FRR&rsquo;s ZEBRA fills the information with the content of the local neighbor table.</p>
+<p>At the same time, I checked the <a href="https://github.com/torvalds/linux/blob/9a169c267e946b0f47f67e8ccc70134708ccf3d4/tools/testing/selftests/net/test_bridge_neigh_suppress.sh#L312"  class="external-link" target="_blank" rel="noopener">tests of the kernel for the neigh_suppress option</a>
+(and tried to look at the source code as well).</p>
+<p>In order fill the ARP table of <code>leaf1</code> with the IP of HOST1, I arping-ed HOST1 from <code>leaf1</code>:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">sudo ip netns <span class="nb">exec</span> clab-evpnl2-leaf1 ping -I br10 -c <span class="m">2</span> 192.168.10.2
+</span></span><span class="line"><span class="cl">PING 192.168.10.2 <span class="o">(</span>192.168.10.2<span class="o">)</span> from 192.168.10.0 br10: 56<span class="o">(</span>84<span class="o">)</span> bytes of data.
+</span></span><span class="line"><span class="cl"><span class="m">64</span> bytes from 192.168.10.2: <span class="nv">icmp_seq</span><span class="o">=</span><span class="m">1</span> <span class="nv">ttl</span><span class="o">=</span><span class="m">64</span> <span class="nv">time</span><span class="o">=</span>0.088 ms
+</span></span><span class="line"><span class="cl"><span class="m">64</span> bytes from 192.168.10.2: <span class="nv">icmp_seq</span><span class="o">=</span><span class="m">2</span> <span class="nv">ttl</span><span class="o">=</span><span class="m">64</span> <span class="nv">time</span><span class="o">=</span>0.087 m
+</span></span></code></pre></div><p>Now, looking at the EVPN routes again:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">docker <span class="nb">exec</span> -it clab-evpnl2-leaf2 vtysh -c <span class="s2">&#34;show bgp l2vpn evpn&#34;</span> <span class="p">|</span> grep -A2 192.168.10.2
+</span></span><span class="line"><span class="cl"> *&gt; <span class="o">[</span>2<span class="o">]</span>:<span class="o">[</span>0<span class="o">]</span>:<span class="o">[</span>48<span class="o">]</span>:<span class="o">[</span>aa:c1:ab:99:2a:66<span class="o">]</span>:<span class="o">[</span>32<span class="o">]</span>:<span class="o">[</span>192.168.10.2<span class="o">]</span>
+</span></span><span class="line"><span class="cl">                    100.64.0.1                             <span class="m">0</span> <span class="m">64612</span> <span class="m">64512</span> i
+</span></span><span class="line"><span class="cl">                    RT:64512:110 ET:8
+</span></span></code></pre></div><p>Now leaf2 is aware not only about the MAC of HOST1, but also of it&rsquo;s IP!</p>
+<p>We also see that ZEBRA filled the neigh table of leaf2:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">docker <span class="nb">exec</span> -it clab-evpnl2-leaf2 ip neigh show
+</span></span><span class="line"><span class="cl">192.168.1.2 dev eth1 lladdr aa:c1:ab:94:1f:14 REACHABLE
+</span></span><span class="line"><span class="cl">192.168.10.2 dev br10 lladdr aa:c1:ab:99:2a:66 extern_learn NOARP proto zebra
+</span></span><span class="line"><span class="cl">192.168.10.0 dev br10 lladdr aa:bb:cc:00:00:65 extern_learn NOARP proto zebra
+</span></span></code></pre></div><p>Trying to arping HOST1 from HOST2 and checking what happens on leaf2, we can now see
+that the ARP resolution happens without going through the underlay:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">sudo ip netns <span class="nb">exec</span> clab-evpnl2-leaf2 tcpdump -nn -i any
+</span></span><span class="line"><span class="cl">tcpdump: data link <span class="nb">type</span> LINUX_SLL2
+</span></span><span class="line"><span class="cl">dropped privs to tcpdump
+</span></span><span class="line"><span class="cl">tcpdump: verbose output suppressed, use -v<span class="o">[</span>v<span class="o">]</span>... <span class="k">for</span> full protocol decode
+</span></span><span class="line"><span class="cl">listening on any, link-type LINUX_SLL2 <span class="o">(</span>Linux cooked v2<span class="o">)</span>, snapshot length <span class="m">262144</span> bytes
+</span></span><span class="line"><span class="cl">17:25:20.521252 eth2  B   ARP, Request who-has 192.168.10.2 <span class="o">(</span>ff:ff:ff:ff:ff:ff<span class="o">)</span> tell 192.168.10.3, length <span class="m">28</span>
+</span></span><span class="line"><span class="cl">17:25:20.521259 eth2  Out ARP, Reply 192.168.10.2 is-at aa:c1:ab:99:2a:66, length <span class="m">28</span>
+</span></span></code></pre></div><p>As a counter-test, let&rsquo;s delete the neighbor entry from <code>leaf1</code> and check the neigh entry is removed both from
+leaf1 and leaf2:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">✗ docker <span class="nb">exec</span> clab-evpnl2-HOST2 arping -I eth1 -c <span class="m">1</span> 192.168.10.2
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">✗ docker <span class="nb">exec</span> -it clab-evpnl2-leaf2 ip neigh show
+</span></span><span class="line"><span class="cl">192.168.1.2 dev eth1 lladdr aa:c1:ab:94:1f:14 REACHABLE
+</span></span><span class="line"><span class="cl">192.168.10.0 dev br10 lladdr aa:bb:cc:00:00:65 extern_learn NOARP proto zebra
+</span></span><span class="line"><span class="cl">fe80::a8bb:ccff:fe00:65 dev br10 lladdr aa:bb:cc:00:00:65 extern_learn NOARP proto zebra
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">✗ docker <span class="nb">exec</span> -it clab-evpnl2-leaf1 ip neigh show
+</span></span><span class="line"><span class="cl">192.168.1.0 dev eth1 lladdr aa:c1:ab:8e:65:1b REACHABLE
+</span></span><span class="line"><span class="cl">fe80::a8bb:ccff:fe00:64 dev br10 lladdr aa:bb:cc:00:00:64 extern_learn NOARP proto zebra
+</span></span></code></pre></div><p>If we tcpdump again while running arping from HOST2, we can see that now the ARP request
+makes its way through the other host via the tunnel again:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">sudo ip netns <span class="nb">exec</span> clab-evpnl2-leaf2 tcpdump -nn -i any
+</span></span><span class="line"><span class="cl">tcpdump: data link <span class="nb">type</span> LINUX_SLL2
+</span></span><span class="line"><span class="cl">dropped privs to tcpdump
+</span></span><span class="line"><span class="cl">tcpdump: verbose output suppressed, use -v<span class="o">[</span>v<span class="o">]</span>... <span class="k">for</span> full protocol decode
+</span></span><span class="line"><span class="cl">listening on any, link-type LINUX_SLL2 <span class="o">(</span>Linux cooked v2<span class="o">)</span>, snapshot length <span class="m">262144</span> bytes
+</span></span><span class="line"><span class="cl">17:28:42.645234 eth2  B   ARP, Request who-has 192.168.10.2 <span class="o">(</span>ff:ff:ff:ff:ff:ff<span class="o">)</span> tell 192.168.10.3, length <span class="m">28</span>
+</span></span><span class="line"><span class="cl">17:28:42.645241 eth3  Out ARP, Request who-has 192.168.10.2 <span class="o">(</span>ff:ff:ff:ff:ff:ff<span class="o">)</span> tell 192.168.10.3, length <span class="m">28</span>
+</span></span><span class="line"><span class="cl">17:28:42.645242 vni110 Out ARP, Request who-has 192.168.10.2 <span class="o">(</span>ff:ff:ff:ff:ff:ff<span class="o">)</span> tell 192.168.10.3, length <span class="m">28</span>
+</span></span><span class="line"><span class="cl">17:28:42.645258 eth1  Out IP 100.65.0.2.52640 &gt; 100.64.0.1.4789: VXLAN, flags <span class="o">[</span>I<span class="o">]</span> <span class="o">(</span>0x08<span class="o">)</span>, vni <span class="m">110</span>
+</span></span><span class="line"><span class="cl">ARP, Request who-has 192.168.10.2 <span class="o">(</span>ff:ff:ff:ff:ff:ff<span class="o">)</span> tell 192.168.10.3, length <span class="m">28</span>
+</span></span><span class="line"><span class="cl">17:28:42.645262 br10  B   ARP, Request who-has 192.168.10.2 <span class="o">(</span>ff:ff:ff:ff:ff:ff<span class="o">)</span> tell 192.168.10.3, length <span class="m">28</span>
+</span></span><span class="line"><span class="cl">17:28:42.645329 eth1  In  IP 100.64.0.1.52640 &gt; 100.65.0.2.4789: VXLAN, flags <span class="o">[</span>I<span class="o">]</span> <span class="o">(</span>0x08<span class="o">)</span>, vni <span class="m">110</span>
+</span></span><span class="line"><span class="cl">ARP, Reply 192.168.10.2 is-at aa:c1:ab:99:2a:66, length <span class="m">28</span>
+</span></span><span class="line"><span class="cl">17:28:42.645334 vni110 P   ARP, Reply 192.168.10.2 is-at aa:c1:ab:99:2a:66, length <span class="m">28</span>
+</span></span><span class="line"><span class="cl">17:28:42.645335 eth2  Out ARP, Reply 192.168.10.2 is-at aa:c1:ab:99:2a:66, length <span class="m">28</span>
+</span></span></code></pre></div>
+      </div>
+
+
+      <footer>
+        
+
+
+        <div id="disqus_thread"></div>
+<script>
+  window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "fedepaolgithubio" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+    
+    document.addEventListener('themeChanged', function (e) { 
+        if (document.readyState == 'complete') {
+          DISQUS.reset({ reload: true, config: disqus_config });
+        }
+    });
+</script>
+        
+        
+        
+        
+      </footer>
+    </article>
+
+    
+  </section>
+
+    </div>
+
+    <footer class="footer">
+  <section class="container">
+    ©
+    
+    2024
+     Federico Paolinelli 
+    ·
+    
+    Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/" target="_blank" rel="noopener">Coder</a>.
+    
+  </section>
+</footer>
+
+  </main>
+
+  
+
+  
+  
+  <script src="/js/coder.js"></script>
+  
+
+  
+
+  
+
+
+  
+<script>
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-16514009-2', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+
+</html>
