@@ -6,7 +6,18 @@
     <description>Recent content in Posts on My little software warehouse</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Fri, 17 May 2024 12:14:10 +0200</lastBuildDate><atom:link href="https://fedepaol.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Tue, 21 May 2024 12:14:10 +0200</lastBuildDate><atom:link href="https://fedepaol.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Some notes about ARP suppression in L2EVPN using FRR and Linux VXLans</title>
+      <link>https://fedepaol.github.io/blog/2024/05/21/some-notes-about-arp-suppression-in-l2evpn-using-frr-and-linux-vxlans/</link>
+      <pubDate>Tue, 21 May 2024 12:14:10 +0200</pubDate>
+      
+      <guid>https://fedepaol.github.io/blog/2024/05/21/some-notes-about-arp-suppression-in-l2evpn-using-frr-and-linux-vxlans/</guid>
+      <description>EVPN - ARP suppression and Type 2 networks with IP Link to heading This post started as a section of my previous post about L2 tunnels with EVPN and VXLans, but this particular topic kept me so busy that is probably worth a section of its own.
+The topology this post is referring to is still the same:
+┌─────────┐ │ │ SPINE │ 64612 │ │ │ └────┬────┘ │ │ ┌───────┴────────┐ │ │ ┌────┴────┐ ┌────┴────┐ │ │ │ │ LEAVES │ ┌───┐ │ │ ┌───┐ │ │ │ │ │ │ │ ├──┼───────┐ └──┴─┬─┴──┘ └──┴─┬─┴──┘ │ │ │ │ &amp;lt;-- L2 ┌────┴────┐ ┌─────┴────┐ ┌────┴─────┐ │ │ │ │ │ │ │ Host1 │ │ Host2 │ │ Host3 │ │ │ │ │ │ │ └─────────┘ └──────────┘ └──────────┘ 192.</description>
+    </item>
+    
     <item>
       <title>L2EVPN using FRR and Linux VXLans</title>
       <link>https://fedepaol.github.io/blog/2024/05/17/l2evpn-using-frr-and-linux-vxlans/</link>
