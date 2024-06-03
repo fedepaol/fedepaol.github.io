@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>
+  Fixing ARP suppression in Linux L2EVPN with eBPF · My little software warehouse
+</title>
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+
+
+
+
+<meta name="author" content="Federico Paolinelli">
+<meta name="description" content="Making ARP suppression work with eBPF in Linux with FRR">
+<meta name="keywords" content="">
+
+<meta name="twitter:card" content="summary"/><meta name="twitter:title" content="Fixing ARP suppression in Linux L2EVPN with eBPF"/>
+<meta name="twitter:description" content="Making ARP suppression work with eBPF in Linux with FRR"/>
+
+<meta property="og:title" content="Fixing ARP suppression in Linux L2EVPN with eBPF" />
+<meta property="og:description" content="Making ARP suppression work with eBPF in Linux with FRR" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://fedepaol.github.io/blog/2024/06/01/fixing-arp-suppression-in-linux-l2evpn-with-ebpf/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2024-06-01T12:14:10+02:00" />
+<meta property="article:modified_time" content="2024-06-01T12:14:10+02:00" />
+
+
+
+
+<link rel="canonical" href="https://fedepaol.github.io/blog/2024/06/01/fixing-arp-suppression-in-linux-l2evpn-with-ebpf/">
+
+
+<link rel="preload" href="/fonts/fa-brands-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/fa-regular-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
+
+
+  
+  
+  <link rel="stylesheet" href="/css/coder.min.577e3c5ead537873430da16f0964b754a120fd87c4e2203a00686e7c75b51378.css" integrity="sha256-V348Xq1TeHNDDaFvCWS3VKEg/YfE4iA6AGhufHW1E3g=" crossorigin="anonymous" media="screen" />
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+<link rel="icon" type="image/svg+xml" href="/images/favicon.svg" sizes="any">
+<link rel="icon" type="image/png" href="/images/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="/images/favicon-16x16.png" sizes="16x16">
+
+<link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+<link rel="manifest" href="/site.webmanifest">
+<link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+
+
+
+
+
+
+</head>
+
+
+
+
+<body class="preload-transitions colorscheme-light">
+  
+<div class="float-container">
+    <a id="dark-mode-toggle" class="colorscheme-toggle">
+        <i class="fa-solid fa-adjust fa-fw" aria-hidden="true"></i>
+    </a>
+</div>
+
+
+  <main class="wrapper">
+    <nav class="navigation">
+  <section class="container">
+    
+    <a class="navigation-title" href="https://fedepaol.github.io/">
+      My little software warehouse
+    </a>
+    
+    
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa-solid fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/posts/">Blog</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/about/">About</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="mailto:fedepaol@gmail.com">Contact</a>
+            </li>
+          
+        
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+    <div class="content">
+      
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">
+            <a class="title-link" href="https://fedepaol.github.io/blog/2024/06/01/fixing-arp-suppression-in-linux-l2evpn-with-ebpf/">
+              Fixing ARP suppression in Linux L2EVPN with eBPF
+            </a>
+          </h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa-solid fa-calendar" aria-hidden="true"></i>
+              <time datetime="2024-06-01T12:14:10&#43;02:00">
+                June 1, 2024
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa-solid fa-clock" aria-hidden="true"></i>
+              5-minute read
+            </span>
+          </div>
+          
+          
+          
+        </div>
+      </header>
+
+      <div class="post-content">
+        
+        <h1 id="making-arp-suppression-work-with-pure-l2-evpn-with-linux-and-frr">
+  Making ARP suppression work with pure L2 EVPN with Linux and FRR
+  <a class="heading-link" href="#making-arp-suppression-work-with-pure-l2-evpn-with-linux-and-frr">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h1>
+<p>In my <a href="/blog/2024/05/21/some-notes-about-arp-suppression-in-l2evpn-using-frr-and-linux-vxlans/" >previous post</a>, I described the issues of making ARP suppression work with an L2 only EVPN topology,
+with Linux and FRR.</p>
+<p>Here I am going to describe how a small process running on each leaf can fix the problem.</p>
+<h2 id="the-problem">
+  The problem
+  <a class="heading-link" href="#the-problem">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>Here I&rsquo;ll quickly summarize the problem. Given a topology like the following:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">                  ┌────────────────────────────────┐
+</span></span><span class="line"><span class="cl">                  │                                │
+</span></span><span class="line"><span class="cl">                  │                                │
+</span></span><span class="line"><span class="cl">                  │                                │
+</span></span><span class="line"><span class="cl">┌───────────┐ ARP │           ┌───────────────┐    │
+</span></span><span class="line"><span class="cl">│           │     ├──────┐    │               │    │
+</span></span><span class="line"><span class="cl">│  host2    │◄────┤ eth1 ├────┤     br-10     │    │
+</span></span><span class="line"><span class="cl">│           │     ├──────┘    │               │    │
+</span></span><span class="line"><span class="cl">└───────────┘     │           └──────────▲────┘    │
+</span></span><span class="line"><span class="cl">                  │                      │         │
+</span></span><span class="line"><span class="cl">                  │                      │         │
+</span></span><span class="line"><span class="cl">                  │                      │         │
+</span></span><span class="line"><span class="cl">                  │             leaf2    │         │
+</span></span><span class="line"><span class="cl">                  └──────────────────────┼─────────┘
+</span></span><span class="line"><span class="cl">                                         │
+</span></span><span class="line"><span class="cl">                                         │   VXLan
+</span></span><span class="line"><span class="cl">                                         │
+</span></span><span class="line"><span class="cl">                  ┌──────────────────────┼─────────┐
+</span></span><span class="line"><span class="cl">                  │                      │         │
+</span></span><span class="line"><span class="cl">                  │                      │         │
+</span></span><span class="line"><span class="cl">                  │                      │         │
+</span></span><span class="line"><span class="cl">┌───────────┐ARP  │           ┌──────────┴────┐    │
+</span></span><span class="line"><span class="cl">│           │     ├──────┐    │               │    │
+</span></span><span class="line"><span class="cl">│  host1    ├────►│ eth1 ├────┤     br-10     │    │
+</span></span><span class="line"><span class="cl">│           │     ├──────┘    │               │    │
+</span></span><span class="line"><span class="cl">└───────────┘     │           └───────────────┘    │
+</span></span><span class="line"><span class="cl">                  │                                │
+</span></span><span class="line"><span class="cl">                  │                                │
+</span></span><span class="line"><span class="cl">                  │                                │
+</span></span><span class="line"><span class="cl">                  │             leaf1              │
+</span></span><span class="line"><span class="cl">                  └────────────────────────────────┘
+</span></span></code></pre></div><ul>
+<li>being unicast, the ARP replies won&rsquo;t land on <code>leaf1</code></li>
+<li><code>leaf1</code>&rsquo;s neighbor table is never filled</li>
+<li>the Zebra instance on the <code>leaf1</code> endpoint won&rsquo;t learn the MAC / IP association</li>
+<li>FRR won&rsquo;t send the MAC / IP association to <code>leaf2</code> as type 2 EVPN route</li>
+<li>ARP suppression on <code>leaf2</code> won&rsquo;t work, and every ARP request is going to be forwarded through the fabric</li>
+</ul>
+<h2 id="filling-the-neighbor-table">
+  Filling the neighbor table
+  <a class="heading-link" href="#filling-the-neighbor-table">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>In my <a href="/blog/2024/05/21/some-notes-about-arp-suppression-in-l2evpn-using-frr-and-linux-vxlans/" >previous post</a>, I explained how the root cause of ARP suppression not working
+was the fact hat <code>leaf1</code> neihgbor table wasn&rsquo;t getting filled, and I showed how pinging <code>host1</code> from <code>leaf1</code>
+would fill <code>leaf1</code>&rsquo;s neighbor table, making all the machinery effectively work.</p>
+<p>Additionally, this <a href="https://github.com/FRRouting/frr/issues/12574#issuecomment-1458953110"  class="external-link" target="_blank" rel="noopener">issue comment on the FRR github repo</a> explains how
+cumulus Linux solves this problem by listening at ARP requests and messing up with the local neighbor table.</p>
+<h2 id="ebpf-to-the-rescue">
+  eBPF to the rescue!
+  <a class="heading-link" href="#ebpf-to-the-rescue">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>Ebpf is not as cool as AI, but can certainly be more effective in this scenario.
+The plan is simple: write a program that leverages eBPF to listen to ARP requests / replies and fills the neighbor table from user space.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">                        ┌────────────────────────────────┐
+</span></span><span class="line"><span class="cl">                        │                                │
+</span></span><span class="line"><span class="cl">                        │                 ┌────────────┐ │
+</span></span><span class="line"><span class="cl">                        │                 │ neigh table│ │
+</span></span><span class="line"><span class="cl">                        │                 │            │ │
+</span></span><span class="line"><span class="cl">                        │                 │            │ │
+</span></span><span class="line"><span class="cl">                        │                 │            │ │
+</span></span><span class="line"><span class="cl">                        │                 │            │ │
+</span></span><span class="line"><span class="cl">                        │    ┌─────────┐  └────────────┘ │
+</span></span><span class="line"><span class="cl">                        │  ┌►│  ebpf   │         ▲       │
+</span></span><span class="line"><span class="cl">                        │  │ └─────┬───┘         │       │
+</span></span><span class="line"><span class="cl">                        │  │       │       ┌─────┴─────┐ │
+</span></span><span class="line"><span class="cl">                        │  │       └──────►│ userspace │ │
+</span></span><span class="line"><span class="cl">                        │  │               └───────────┘ │
+</span></span><span class="line"><span class="cl">      ┌───────────┐ARP  │  │                             │
+</span></span><span class="line"><span class="cl">      │           │     │  │        ┌───────────────┐    │
+</span></span><span class="line"><span class="cl">      │  host1    ├────►├──┴───┐    │               │    │
+</span></span><span class="line"><span class="cl">      │           │     │ eth1 ├────┤     br-10     │    │
+</span></span><span class="line"><span class="cl">      └───────────┘     ├──────┘    │               │    │
+</span></span><span class="line"><span class="cl">                        │           └───────────────┘    │
+</span></span><span class="line"><span class="cl">                        │                                │
+</span></span><span class="line"><span class="cl">                        │                                │
+</span></span><span class="line"><span class="cl">                        │             leaf1              │
+</span></span><span class="line"><span class="cl">                        └────────────────────────────────┘
+</span></span></code></pre></div><p>The poc can be found on <a href="https://github.com/fedepaol/fill-neighbors"  class="external-link" target="_blank" rel="noopener">my github repo</a>.</p>
+<h4 id="the-ebpf-part">
+  The eBPF part
+  <a class="heading-link" href="#the-ebpf-part">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h4>
+<p>The <a href="https://github.com/fedepaol/fill-neighbors/blob/main/ebpf/tc_arplistener.c"  class="external-link" target="_blank" rel="noopener">eBPF part</a> is pretty simple (omitting all the checks to
+make the verifier happy):</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl">  <span class="n">__u16</span> <span class="n">hlen</span> <span class="o">=</span> <span class="n">arph</span><span class="o">-&gt;</span><span class="n">ar_hln</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">__u16</span> <span class="n">plen</span> <span class="o">=</span> <span class="n">arph</span><span class="o">-&gt;</span><span class="n">ar_pln</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">__u32</span> <span class="n">opCode</span> <span class="o">=</span> <span class="nf">bpf_ntohs</span><span class="p">(</span><span class="n">arph</span><span class="o">-&gt;</span><span class="n">ar_op</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="kt">void</span> <span class="o">*</span><span class="n">senderHwAddress</span> <span class="o">=</span> <span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="p">)</span><span class="n">arph</span> <span class="o">+</span> <span class="k">sizeof</span><span class="p">(</span><span class="k">struct</span> <span class="n">arphdr</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">void</span> <span class="o">*</span><span class="n">senderProtoAddress</span> <span class="o">=</span> <span class="n">senderHwAddress</span> <span class="o">+</span> <span class="n">hlen</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="k">struct</span> <span class="n">event</span> <span class="o">*</span><span class="n">arp_event</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="n">arp_event</span> <span class="o">=</span> <span class="nf">bpf_ringbuf_reserve</span><span class="p">(</span><span class="o">&amp;</span><span class="n">events</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="k">struct</span> <span class="n">event</span><span class="p">),</span> <span class="mi">0</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="nf">bpf_core_read_str</span><span class="p">(</span><span class="n">arp_event</span><span class="o">-&gt;</span><span class="n">senderHWvalue</span><span class="p">,</span> <span class="n">hlen</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">senderHwAddress</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">bpf_core_read_str</span><span class="p">(</span><span class="n">arp_event</span><span class="o">-&gt;</span><span class="n">senderProtoValue</span><span class="p">,</span> <span class="n">plen</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">senderProtoAddress</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">arp_event</span><span class="o">-&gt;</span><span class="n">opCode</span> <span class="o">=</span> <span class="n">opCode</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="nf">bpf_ringbuf_submit</span><span class="p">(</span><span class="n">arp_event</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+</span></span></code></pre></div><p>It gets the sender IP and MAC address from the ARP request, fills an event and sends it to user space via a ring buffer.</p>
+<p>Simple and bulletproof.</p>
+<h4 id="on-user-space">
+  On user space
+  <a class="heading-link" href="#on-user-space">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h4>
+<p>The <a href="https://github.com/fedepaol/fill-neighbors/commit/43e071c61510c55cc617c649933e963d4dac1c90#diff-2873f79a86c0d8b3335cd7731b0ecf7dd4301eb19a82ef7a1cba7589b5252261R78"  class="external-link" target="_blank" rel="noopener">user space side</a> is simple as well (with purged error handling):</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="k">for</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">record</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">rd</span><span class="p">.</span><span class="nf">Read</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">		<span class="kd">var</span> <span class="nx">event</span> <span class="nx">arpEvent</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">binary</span><span class="p">.</span><span class="nf">Read</span><span class="p">(</span><span class="nx">bytes</span><span class="p">.</span><span class="nf">NewBuffer</span><span class="p">(</span><span class="nx">record</span><span class="p">.</span><span class="nx">RawSample</span><span class="p">),</span> <span class="nx">binary</span><span class="p">.</span><span class="nx">LittleEndian</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">event</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">		<span class="nx">ip</span> <span class="o">:=</span> <span class="nf">bytesToIP</span><span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">SenderProtoValue</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">mac</span> <span class="o">:=</span> <span class="nf">bytesToMac</span><span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">SenderHWvalue</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">when</span> <span class="o">:=</span> <span class="nx">added</span><span class="p">[</span><span class="nx">ip</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">now</span> <span class="o">:=</span> <span class="nx">time</span><span class="p">.</span><span class="nf">Now</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">		<span class="k">if</span> <span class="nx">now</span><span class="p">.</span><span class="nf">Sub</span><span class="p">(</span><span class="nx">when</span><span class="p">)</span> <span class="p">&gt;</span> <span class="nx">time</span><span class="p">.</span><span class="nx">Minute</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">			<span class="nx">added</span><span class="p">[</span><span class="nx">ip</span><span class="p">]</span> <span class="p">=</span> <span class="nx">now</span>
+</span></span><span class="line"><span class="cl">			<span class="nf">neighborAdd</span><span class="p">(</span><span class="nx">devID</span><span class="p">.</span><span class="nx">Index</span><span class="p">,</span> <span class="nx">ip</span><span class="p">,</span> <span class="nx">mac</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">		<span class="p">}</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span>
+</span></span></code></pre></div><p>It:</p>
+<ul>
+<li>receives the ARP related information from Kernel space</li>
+<li>checks if it received one in the last minute</li>
+<li>if not, adds the record to the neighbor table</li>
+</ul>
+<h2 id="does-it-work">
+  Does it work?
+  <a class="heading-link" href="#does-it-work">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>Let&rsquo;s try with the same layout presented in <a href="/blog/2024/05/17/l2evpn-using-frr-and-linux-vxlans/" >the l2 evpn post</a>:</p>
+<p>When we start, the neigh table is does not contain the entries related to <code>HOST1</code> or <code>HOST2</code>:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">docker <span class="nb">exec</span> -it clab-evpnl2-leaf1 ip neigh show
+</span></span><span class="line"><span class="cl">192.168.1.0 dev eth1 lladdr aa:c1:ab:94:bd:76 REACHABLE
+</span></span><span class="line"><span class="cl">fe80::a8bb:ccff:fe00:64 dev br10 lladdr aa:bb:cc:00:00:64 extern_learn NOARP proto zebra
+</span></span></code></pre></div><p>We run the program on both the leaves:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">leaf1:/# ./fill-neighbor --attach-to eth2 --from-interface br10
+</span></span><span class="line"><span class="cl">leaf2:/# ./fill-neighbor --attach-to eth2 --from-interface br10
+</span></span></code></pre></div><p>And then we ping <code>HOST2</code> from <code>HOST1</code>:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">docker <span class="nb">exec</span> clab-evpnl2-HOST1 bash -c <span class="s2">&#34;ping -c 1 192.168.10.3&#34;</span>
+</span></span><span class="line"><span class="cl">PING 192.168.10.3 <span class="o">(</span>192.168.10.3<span class="o">)</span> 56<span class="o">(</span>84<span class="o">)</span> bytes of data.
+</span></span><span class="line"><span class="cl"><span class="m">64</span> bytes from 192.168.10.3: <span class="nv">icmp_seq</span><span class="o">=</span><span class="m">1</span> <span class="nv">ttl</span><span class="o">=</span><span class="m">64</span> <span class="nv">time</span><span class="o">=</span>0.616 ms
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">--- 192.168.10.3 ping statistics ---
+</span></span><span class="line"><span class="cl"><span class="m">1</span> packets transmitted, <span class="m">1</span> received, 0% packet loss, <span class="nb">time</span> 0ms
+</span></span><span class="line"><span class="cl">rtt min/avg/max/mdev <span class="o">=</span> 0.616/0.616/0.616/0.000 ms
+</span></span></code></pre></div><p>Let&rsquo;s check the neighbor table of leaf1:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">docker <span class="nb">exec</span> -it clab-evpnl2-leaf1 ip neigh show
+</span></span><span class="line"><span class="cl">192.168.10.2 dev br10 lladdr aa:c1:ab:3b:a1:fd STALE
+</span></span><span class="line"><span class="cl">192.168.1.0 dev eth1 lladdr aa:c1:ab:94:bd:76 STALE
+</span></span><span class="line"><span class="cl">192.168.10.3 dev br10 lladdr aa:c1:ab:69:b5:9e extern_learn NOARP proto zebra
+</span></span><span class="line"><span class="cl">fe80::a8bb:ccff:fe00:64 dev br10 lladdr aa:bb:cc:00:00:64 extern_learn NOARP proto zebra
+</span></span></code></pre></div><p><code>leaf1</code>&rsquo;s neighbor table now contains:</p>
+<ul>
+<li>an entry related to <code>HOST1</code> (192.168.10.2), filled by the local <code>fill-neighbor</code> as an effect of the ARP request coming through eth2</li>
+<li>an entry related to <code>HOST2</code>, because <code>leaf2</code>&rsquo;s local table was filled by its <code>fill-neighbor</code> as an effect of the ARP reply coming through its <code>eth2</code>, and then
+FRR announced it as type 2 EVPN route to <code>leaf1</code></li>
+</ul>
+<p>Arping is resolved locally to leaf2, suppressing ARP broadcasts around the fabric.</p>
+<h4 id="things-to-improve">
+  Things to improve
+  <a class="heading-link" href="#things-to-improve">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h4>
+<p>This is a simple example, that clearly needs to be extended. It lacks IPV6 support, and more importantly the table must be kept in sync in two ways:</p>
+<ul>
+<li>by pinging the neighbor, to understand if the neighbor is still there and to refresh the local neigh table</li>
+<li>by purging the entry of the map in case the neighbor is not there anymore</li>
+</ul>
+<h2 id="conclusion">
+  Conclusion
+  <a class="heading-link" href="#conclusion">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>This is yet another example of how eBPF programs can be very simple but enable powerful features of the kernel. Here we just observe
+(and parse) the ARP requests, and use this information to keep the neighbor table using netlink commands.</p>
+
+      </div>
+
+
+      <footer>
+        
+
+
+        <div id="disqus_thread"></div>
+<script>
+  window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "fedepaolgithubio" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+    
+    document.addEventListener('themeChanged', function (e) { 
+        if (document.readyState == 'complete') {
+          DISQUS.reset({ reload: true, config: disqus_config });
+        }
+    });
+</script>
+        
+        
+        
+        
+
+        
+      </footer>
+    </article>
+
+    
+  </section>
+
+    </div>
+
+    <footer class="footer">
+  <section class="container">
+    ©
+    
+    2024
+     Federico Paolinelli 
+    ·
+    
+    Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/" target="_blank" rel="noopener">Coder</a>.
+    
+  </section>
+</footer>
+
+  </main>
+
+  
+
+  
+  
+  <script src="/js/coder.min.6ae284be93d2d19dad1f02b0039508d9aab3180a12a06dcc71b0b0ef7825a317.js" integrity="sha256-auKEvpPS0Z2tHwKwA5UI2aqzGAoSoG3McbCw73gloxc="></script>
+  
+
+  
+
+  
+
+
+  
+<script>
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-16514009-2', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+
+</html>

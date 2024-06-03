@@ -6,637 +6,420 @@
     <description>Recent content in Posts on My little software warehouse</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Tue, 21 May 2024 12:14:10 +0200</lastBuildDate><atom:link href="https://fedepaol.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sat, 01 Jun 2024 12:14:10 +0200</lastBuildDate>
+    <atom:link href="https://fedepaol.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Fixing ARP suppression in Linux L2EVPN with eBPF</title>
+      <link>https://fedepaol.github.io/blog/2024/06/01/fixing-arp-suppression-in-linux-l2evpn-with-ebpf/</link>
+      <pubDate>Sat, 01 Jun 2024 12:14:10 +0200</pubDate>
+      <guid>https://fedepaol.github.io/blog/2024/06/01/fixing-arp-suppression-in-linux-l2evpn-with-ebpf/</guid>
+      <description>Making ARP suppression work with pure L2 EVPN with Linux and FRR Link to heading In my previous post, I described the issues of making ARP suppression work with an L2 only EVPN topology, with Linux and FRR.&#xA;Here I am going to describe how a small process running on each leaf can fix the problem.&#xA;The problem Link to heading Here I&amp;rsquo;ll quickly summarize the problem. Given a topology like the following:</description>
+    </item>
     <item>
       <title>Some notes about ARP suppression in L2EVPN using FRR and Linux VXLans</title>
       <link>https://fedepaol.github.io/blog/2024/05/21/some-notes-about-arp-suppression-in-l2evpn-using-frr-and-linux-vxlans/</link>
       <pubDate>Tue, 21 May 2024 12:14:10 +0200</pubDate>
-      
       <guid>https://fedepaol.github.io/blog/2024/05/21/some-notes-about-arp-suppression-in-l2evpn-using-frr-and-linux-vxlans/</guid>
-      <description>EVPN - ARP suppression and Type 2 networks with IP Link to heading This post started as a section of my previous post about L2 tunnels with EVPN and VXLans, but this particular topic kept me so busy that is probably worth a section of its own.
-The topology this post is referring to is still the same:
-┌─────────┐ │ │ SPINE │ 64612 │ │ │ └────┬────┘ │ │ ┌───────┴────────┐ │ │ ┌────┴────┐ ┌────┴────┐ │ │ │ │ LEAVES │ ┌───┐ │ │ ┌───┐ │ │ │ │ │ │ │ ├──┼───────┐ └──┴─┬─┴──┘ └──┴─┬─┴──┘ │ │ │ │ &amp;lt;-- L2 ┌────┴────┐ ┌─────┴────┐ ┌────┴─────┐ │ │ │ │ │ │ │ Host1 │ │ Host2 │ │ Host3 │ │ │ │ │ │ │ └─────────┘ └──────────┘ └──────────┘ 192.</description>
+      <description>EVPN - ARP suppression and Type 2 networks with IP Link to heading This post started as a section of my previous post about L2 tunnels with EVPN and VXLans, but this particular topic kept me so busy that is probably worth a section of its own.&#xA;The topology this post is referring to is still the same:&#xA;┌─────────┐ │ │ SPINE │ 64612 │ │ │ └────┬────┘ │ │ ┌───────┴────────┐ │ │ ┌────┴────┐ ┌────┴────┐ │ │ │ │ LEAVES │ ┌───┐ │ │ ┌───┐ │ │ │ │ │ │ │ ├──┼───────┐ └──┴─┬─┴──┘ └──┴─┬─┴──┘ │ │ │ │ &amp;lt;-- L2 ┌────┴────┐ ┌─────┴────┐ ┌────┴─────┐ │ │ │ │ │ │ │ Host1 │ │ Host2 │ │ Host3 │ │ │ │ │ │ │ └─────────┘ └──────────┘ └──────────┘ 192.</description>
     </item>
-    
     <item>
       <title>L2EVPN using FRR and Linux VXLans</title>
       <link>https://fedepaol.github.io/blog/2024/05/17/l2evpn-using-frr-and-linux-vxlans/</link>
       <pubDate>Fri, 17 May 2024 12:14:10 +0200</pubDate>
-      
       <guid>https://fedepaol.github.io/blog/2024/05/17/l2evpn-using-frr-and-linux-vxlans/</guid>
-      <description>EVPN - L2 tunnels Link to heading This is a follow up of the previous post about L3 tunnels with EVPN and VXLans.
-I started with L3 because, as much as counter intuitive it was (since VXLan is about tunneling L2 links), it felt more similar to what I am used to with BGP.
-In my evpn lab github repository I added a new entry where I set up a L2 only topology using FRR and Containerlab.</description>
+      <description>EVPN - L2 tunnels Link to heading This is a follow up of the previous post about L3 tunnels with EVPN and VXLans.&#xA;I started with L3 because, as much as counter intuitive it was (since VXLan is about tunneling L2 links), it felt more similar to what I am used to with BGP.&#xA;In my evpn lab github repository I added a new entry where I set up a L2 only topology using FRR and Containerlab.</description>
     </item>
-    
     <item>
       <title>L3EVPN using FRR and Linux VXLans</title>
       <link>https://fedepaol.github.io/blog/2024/05/09/l3evpn-using-frr-and-linux-vxlans/</link>
       <pubDate>Thu, 09 May 2024 12:01:51 +0100</pubDate>
-      
       <guid>https://fedepaol.github.io/blog/2024/05/09/l3evpn-using-frr-and-linux-vxlans/</guid>
-      <description>Tinkering with EVPN Link to heading EVPN and VXLan tunnels (and how FRR gets along with those) are something I wanted to explore, so I thought it&amp;rsquo;d make sense to document my journey as a serie of blogposts (which can also serve as a help to my memory).
-The result of this first rambling is available on my github repository.
-The topology Link to heading The first attempt is to have a spine - leaves topology with two hosts connected to two different leaves via a L3 connection.</description>
+      <description>Tinkering with EVPN Link to heading EVPN and VXLan tunnels (and how FRR gets along with those) are something I wanted to explore, so I thought it&amp;rsquo;d make sense to document my journey as a serie of blogposts (which can also serve as a help to my memory).&#xA;The result of this first rambling is available on my github repository.&#xA;The topology Link to heading The first attempt is to have a spine - leaves topology with two hosts connected to two different leaves via a L3 connection.</description>
     </item>
-    
     <item>
       <title>Creating release notes for your GitHub Project</title>
       <link>https://fedepaol.github.io/blog/2024/04/06/creating-release-notes-for-your-github-project/</link>
       <pubDate>Sat, 06 Apr 2024 18:31:52 +0200</pubDate>
-      
       <guid>https://fedepaol.github.io/blog/2024/04/06/creating-release-notes-for-your-github-project/</guid>
-      <description>TL;DR Link to heading The kubernetes release notes generator is really nice. I managed to use it without Prow with MetalLB, by setting a proper pull request template and a Github Action workflow that adds the proper label and validates the PR body.
-Finally, a glue bash script wraps the call to the release notes generator.
-A bit of context Link to heading Since I started maintaining MetalLB in 2021, invested significantly in automating various processes.</description>
+      <description>TL;DR Link to heading The kubernetes release notes generator is really nice. I managed to use it without Prow with MetalLB, by setting a proper pull request template and a Github Action workflow that adds the proper label and validates the PR body.&#xA;Finally, a glue bash script wraps the call to the release notes generator.&#xA;A bit of context Link to heading Since I started maintaining MetalLB in 2021, invested significantly in automating various processes.</description>
     </item>
-    
     <item>
       <title>eBPF journey by examples: hijacking SSL with eBPF with eCapture</title>
       <link>https://fedepaol.github.io/blog/2023/10/13/ebpf-journey-by-examples-hijacking-ssl-with-ebpf-with-ecapture/</link>
       <pubDate>Fri, 13 Oct 2023 15:41:18 +0200</pubDate>
-      
       <guid>https://fedepaol.github.io/blog/2023/10/13/ebpf-journey-by-examples-hijacking-ssl-with-ebpf-with-ecapture/</guid>
       <description>ECapture Link to heading Uprobes (user probes) and uretprobes are a way to attach an eBPF program to a user space application, specifically to the entry or exit point of a given function. By doing so, the program is able to get notified whenever a given function is called, and with which arguments. This information is often used to notify the user space side of the eBPF program, that handles it to serve the purpouse of the application.</description>
     </item>
-    
     <item>
       <title>eBPF journey by examples: perf events with Pyroscope</title>
       <link>https://fedepaol.github.io/blog/2023/09/24/ebpf-journey-by-examples-perf-events-with-pyroscope/</link>
       <pubDate>Sun, 24 Sep 2023 14:59:22 +0200</pubDate>
-      
       <guid>https://fedepaol.github.io/blog/2023/09/24/ebpf-journey-by-examples-perf-events-with-pyroscope/</guid>
-      <description>Pyroscope Link to heading After diving into security with Falco and networking with XDP, I wanted to explore a profiling application that leverages eBPF.
-Grafana Pyroscope is an open source continuous profiling platform. It supports various backends, including Go&amp;rsquo;s pprof, python via py-spy and many other languages. But the reason why I am writing this post is because it supports also an eBPF backend.
-In order to profile, we need to understand what our program is doing Link to heading I don&amp;rsquo;t know much about py-spy, but I know how Go&amp;rsquo;s pprof works and it&amp;rsquo;s very simple: it takes a snapshot of the stack of every goroutine of the program over time.</description>
+      <description>Pyroscope Link to heading After diving into security with Falco and networking with XDP, I wanted to explore a profiling application that leverages eBPF.&#xA;Grafana Pyroscope is an open source continuous profiling platform. It supports various backends, including Go&amp;rsquo;s pprof, python via py-spy and many other languages. But the reason why I am writing this post is because it supports also an eBPF backend.&#xA;In order to profile, we need to understand what our program is doing Link to heading I don&amp;rsquo;t know much about py-spy, but I know how Go&amp;rsquo;s pprof works and it&amp;rsquo;s very simple: it takes a snapshot of the stack of every goroutine of the program over time.</description>
     </item>
-    
     <item>
       <title>XDP ate my packets, and how I debugged it</title>
       <link>https://fedepaol.github.io/blog/2023/09/11/xdp-ate-my-packets-and-how-i-debugged-it/</link>
       <pubDate>Mon, 11 Sep 2023 23:26:17 +0200</pubDate>
-      
       <guid>https://fedepaol.github.io/blog/2023/09/11/xdp-ate-my-packets-and-how-i-debugged-it/</guid>
-      <description>Debugging XDP Link to heading This is a side post from my &amp;ldquo;learning eBPF from popular projects&amp;rdquo; initiative. Here I am going to describe the issues I had while trying to replicate locally an XDP based loadbalancer (see my previous post).
-It doesn&amp;rsquo;t work! Link to heading I strongly believe that the only thing that takes little to be done is something that already works and does not require any action.</description>
+      <description>Debugging XDP Link to heading This is a side post from my &amp;ldquo;learning eBPF from popular projects&amp;rdquo; initiative. Here I am going to describe the issues I had while trying to replicate locally an XDP based loadbalancer (see my previous post).&#xA;It doesn&amp;rsquo;t work! Link to heading I strongly believe that the only thing that takes little to be done is something that already works and does not require any action.</description>
     </item>
-    
     <item>
       <title>eBPF journey by examples: L4 load balancing with XDP and Katran</title>
       <link>https://fedepaol.github.io/blog/2023/09/06/ebpf-journey-by-examples-l4-load-balancing-with-xdp-and-katran/</link>
       <pubDate>Wed, 06 Sep 2023 15:01:51 +0100</pubDate>
-      
       <guid>https://fedepaol.github.io/blog/2023/09/06/ebpf-journey-by-examples-l4-load-balancing-with-xdp-and-katran/</guid>
-      <description>Katran Link to heading This is my second post about digging into popular eBPF projects. You can see the first post about Falco and tracepoints here.
-This time I am looking at katran, an xdp based loadbalancer opensourced by Meta.
-A loadbalancer works in a very simple way: it translates network packets directed towards a single virtual IP (VIP) toward a serie of endpoints (reals, in katran&amp;rsquo;s lingo), while maintaining session consistency (meaning, all the packets belonging to a given tcp session are sent to the same real).</description>
+      <description>Katran Link to heading This is my second post about digging into popular eBPF projects. You can see the first post about Falco and tracepoints here.&#xA;This time I am looking at katran, an xdp based loadbalancer opensourced by Meta.&#xA;A loadbalancer works in a very simple way: it translates network packets directed towards a single virtual IP (VIP) toward a serie of endpoints (reals, in katran&amp;rsquo;s lingo), while maintaining session consistency (meaning, all the packets belonging to a given tcp session are sent to the same real).</description>
     </item>
-    
     <item>
       <title>Managing Kubernetes Resources with Controller Runtime&#39;s Field Manager</title>
       <link>https://fedepaol.github.io/blog/2023/08/24/managing-kubernetes-resources-with-controller-runtimes-field-manager/</link>
       <pubDate>Thu, 24 Aug 2023 21:45:30 +0200</pubDate>
-      
       <guid>https://fedepaol.github.io/blog/2023/08/24/managing-kubernetes-resources-with-controller-runtimes-field-manager/</guid>
-      <description>The problem with mutated fields Link to heading Having kubernetes resources that do not sync is a common problem when dealing with a continuos delivery system such as ArgoCD and external components that change those resources.
-What happens is:
-the CD system applies a change based on some configuration the change is overridden by some controller the CD system sees a difference between the observed state and the desired state (the mutation from the step above) and this goes on forever, unless the CD system is instructed to ignore the differences.</description>
+      <description>The problem with mutated fields Link to heading Having kubernetes resources that do not sync is a common problem when dealing with a continuos delivery system such as ArgoCD and external components that change those resources.&#xA;What happens is:&#xA;the CD system applies a change based on some configuration the change is overridden by some controller the CD system sees a difference between the observed state and the desired state (the mutation from the step above) and this goes on forever, unless the CD system is instructed to ignore the differences.</description>
     </item>
-    
     <item>
       <title>eBPF journey by examples: eBPF tracepoints with Falco</title>
       <link>https://fedepaol.github.io/blog/2023/08/21/ebpf-journey-by-examples-ebpf-tracepoints-with-falco/</link>
       <pubDate>Mon, 21 Aug 2023 15:01:51 +0100</pubDate>
-      
       <guid>https://fedepaol.github.io/blog/2023/08/21/ebpf-journey-by-examples-ebpf-tracepoints-with-falco/</guid>
-      <description>Learning from existing projects Link to heading This is the first post of my journey into learning eBPF by samples. My idea here is to dig into how popular projects use eBPF to solve various problems, in order to benefit from real implementations and leverage existing scenarios rather than simple tutorials.
-I will proceed as follows:
-I will dig into the source code of each project I am examining, trying to understand both the logic of the project itself but most importantly the ebpf bits I will try to list the relevant code and review it I will implement a simplified version of the relevant logic using go for the user space logic In the spirit of covering the Pareto&amp;rsquo;s 80%, I won&amp;rsquo;t:</description>
+      <description>Learning from existing projects Link to heading This is the first post of my journey into learning eBPF by samples. My idea here is to dig into how popular projects use eBPF to solve various problems, in order to benefit from real implementations and leverage existing scenarios rather than simple tutorials.&#xA;I will proceed as follows:&#xA;I will dig into the source code of each project I am examining, trying to understand both the logic of the project itself but most importantly the ebpf bits I will try to list the relevant code and review it I will implement a simplified version of the relevant logic using go for the user space logic In the spirit of covering the Pareto&amp;rsquo;s 80%, I won&amp;rsquo;t:</description>
     </item>
-    
     <item>
       <title>EBPF TC filters for egress traffic</title>
       <link>https://fedepaol.github.io/blog/2023/04/06/ebpf-tc-filters-for-egress-traffic/</link>
       <pubDate>Thu, 06 Apr 2023 15:01:51 +0100</pubDate>
-      
       <guid>https://fedepaol.github.io/blog/2023/04/06/ebpf-tc-filters-for-egress-traffic/</guid>
-      <description>Network filters with EBPF and TC Link to heading EBPF has been on my radar for a while, and given my involvement with MetalLB, starting from a network hook felt natural.
-So, I started with a very simple idea in mind: writing a hook that drives the egress traffic to a different next hop, based on some criteria. This comes from a real problem that a few MetalLB users raised: we have an asymmetric return path when the traffic comes to the node via a secondary (i.</description>
+      <description>Network filters with EBPF and TC Link to heading EBPF has been on my radar for a while, and given my involvement with MetalLB, starting from a network hook felt natural.&#xA;So, I started with a very simple idea in mind: writing a hook that drives the egress traffic to a different next hop, based on some criteria. This comes from a real problem that a few MetalLB users raised: we have an asymmetric return path when the traffic comes to the node via a secondary (i.</description>
     </item>
-    
     <item>
       <title>Mixing cluster scoped resources and namespaced resources with kubebuilder and controller runtime</title>
       <link>https://fedepaol.github.io/blog/2022/03/27/mixing-cluster-scoped-resources-and-namespaced-resources-with-kubebuilder-and-controller-runtime/</link>
       <pubDate>Sun, 27 Mar 2022 14:22:36 +0200</pubDate>
-      
       <guid>https://fedepaol.github.io/blog/2022/03/27/mixing-cluster-scoped-resources-and-namespaced-resources-with-kubebuilder-and-controller-runtime/</guid>
-      <description>Out of the box Link to heading If we look at the kubebuilder tutorial, it&amp;rsquo;s possible to define a namespace (or a set of namespaces, when using MultiNamespacedCacheBuilder) for our controller to listen on.
-If we don&amp;rsquo;t set the namespace, our controller is meant to be cluster scoped and will listen (and need priviledges) to the resources in all the namespaces.
-The problem Link to heading While working on MetalLB, we had to add an alternative password field of type secret reference.</description>
+      <description>Out of the box Link to heading If we look at the kubebuilder tutorial, it&amp;rsquo;s possible to define a namespace (or a set of namespaces, when using MultiNamespacedCacheBuilder) for our controller to listen on.&#xA;If we don&amp;rsquo;t set the namespace, our controller is meant to be cluster scoped and will listen (and need priviledges) to the resources in all the namespaces.&#xA;The problem Link to heading While working on MetalLB, we had to add an alternative password field of type secret reference.</description>
     </item>
-    
     <item>
       <title>Writing a Kubernetes Controller: part 2</title>
       <link>https://fedepaol.github.io/blog/2021/01/07/writing-a-kubernetes-controller-part-2/</link>
       <pubDate>Thu, 07 Jan 2021 23:01:51 +0100</pubDate>
-      
       <guid>https://fedepaol.github.io/blog/2021/01/07/writing-a-kubernetes-controller-part-2/</guid>
-      <description>This is the second part of my &amp;ldquo;writing a kubernetes controller&amp;rdquo; blogpost.
-Here, I will explain how to put what was explained int the first part in go code.
-Setting the informer and the workqueue Link to heading This is the first step, where you listen for events and send them to the consumers via the workqueue:
-kubeInformerFactory := kubeinformers.NewSharedInformerFactory(kubeClient, time.Second*30) informer := kubeInformerFactory.Core().V1().Pods() informer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{ AddFunc: func(obj interface{}) { pod := obj.</description>
+      <description>This is the second part of my &amp;ldquo;writing a kubernetes controller&amp;rdquo; blogpost.&#xA;Here, I will explain how to put what was explained int the first part in go code.&#xA;Setting the informer and the workqueue Link to heading This is the first step, where you listen for events and send them to the consumers via the workqueue:&#xA;kubeInformerFactory := kubeinformers.NewSharedInformerFactory(kubeClient, time.Second*30) informer := kubeInformerFactory.Core().V1().Pods() informer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{ AddFunc: func(obj interface{}) { pod := obj.</description>
     </item>
-    
     <item>
       <title>Writing a Kubernetes Controller: part 1</title>
       <link>https://fedepaol.github.io/blog/2020/12/07/writing-a-kubernetes-controller-part-1/</link>
       <pubDate>Mon, 07 Dec 2020 23:01:51 +0100</pubDate>
-      
       <guid>https://fedepaol.github.io/blog/2020/12/07/writing-a-kubernetes-controller-part-1/</guid>
-      <description>Even when knowing Go, writing a Kubernetes controller is intimidating.
-In this post, I&amp;rsquo;ll introduce the Kubernetes operating model, how objects are mapped and what are the tools provided by the go-client framework to write bullet proof controllers. In a following post I will explain how to put all the pieces together and how to define and consume custom types.
-I will describe the core components like:
-ClientSets Informers Work Queues (and RateLimiting Work Queues) and how they fit together in writing a Kubernetes controller.</description>
+      <description>Even when knowing Go, writing a Kubernetes controller is intimidating.&#xA;In this post, I&amp;rsquo;ll introduce the Kubernetes operating model, how objects are mapped and what are the tools provided by the go-client framework to write bullet proof controllers. In a following post I will explain how to put all the pieces together and how to define and consume custom types.&#xA;I will describe the core components like:&#xA;ClientSets Informers Work Queues (and RateLimiting Work Queues) and how they fit together in writing a Kubernetes controller.</description>
     </item>
-    
     <item>
       <title>How and why to contribute to Open Source</title>
       <link>https://fedepaol.github.io/blog/2020/02/13/how-and-why-to-contribute-to-open-source/</link>
       <pubDate>Thu, 13 Feb 2020 21:07:08 +0100</pubDate>
-      
       <guid>https://fedepaol.github.io/blog/2020/02/13/how-and-why-to-contribute-to-open-source/</guid>
-      <description>Today I am writing about contributing to open source, an argoment that I particularly care about.
-Contributing to opensource is giving something to get something back Link to heading You give away your time and your expertise and you&amp;rsquo;ll eventually get something back.
-Approaching an open source project may be daunting at first Link to heading We find a lot of reasons for that:
-We don&amp;rsquo;t feel good enough We think the project is too complex We are afraid of rejections The truth is, everyone can find a project to add value to, starting from small things to more complex ones.</description>
+      <description>Today I am writing about contributing to open source, an argoment that I particularly care about.&#xA;Contributing to opensource is giving something to get something back Link to heading You give away your time and your expertise and you&amp;rsquo;ll eventually get something back.&#xA;Approaching an open source project may be daunting at first Link to heading We find a lot of reasons for that:&#xA;We don&amp;rsquo;t feel good enough We think the project is too complex We are afraid of rejections The truth is, everyone can find a project to add value to, starting from small things to more complex ones.</description>
     </item>
-    
     <item>
       <title>GoLab 2019</title>
       <link>https://fedepaol.github.io/blog/2019/10/23/golab-2019/</link>
       <pubDate>Wed, 23 Oct 2019 22:23:55 +0200</pubDate>
-      
       <guid>https://fedepaol.github.io/blog/2019/10/23/golab-2019/</guid>
-      <description>Intro Link to heading In this post I&amp;rsquo;ll try to write about my experience at GoLab 2019.
-As per the 2018 edition, I had the honor to give a talk during the Italian Go conference GoLab. There are many reasons why I loved the conference:
-The organization was flawless. The people from Develer have been organizing conferences for a long time and it&amp;rsquo;s pretty clear they know how to do them.</description>
+      <description>Intro Link to heading In this post I&amp;rsquo;ll try to write about my experience at GoLab 2019.&#xA;As per the 2018 edition, I had the honor to give a talk during the Italian Go conference GoLab. There are many reasons why I loved the conference:&#xA;The organization was flawless. The people from Develer have been organizing conferences for a long time and it&amp;rsquo;s pretty clear they know how to do them.</description>
     </item>
-    
     <item>
       <title>A concurrency experiment</title>
       <link>https://fedepaol.github.io/blog/2019/03/30/a-concurrency-experiment/</link>
       <pubDate>Sat, 30 Mar 2019 00:00:00 +0000</pubDate>
-      
       <guid>https://fedepaol.github.io/blog/2019/03/30/a-concurrency-experiment/</guid>
-      <description>There are some scenarios where the order matters Link to heading Let&amp;rsquo;s say that you have an api that can receive &amp;ldquo;actions&amp;rdquo; to be performed on a given endpoint.
-Think about you buying something on Amazon and then changing your mind and revoking your order. You don&amp;rsquo;t want those two actions to be swapped, otherwise the cancellation will be refused (the order you want to cancel do not exists yet) and then the item you don&amp;rsquo;t want anymore will be ordered (since the action of ordering the item receives the backend after the cancelation).</description>
+      <description>There are some scenarios where the order matters Link to heading Let&amp;rsquo;s say that you have an api that can receive &amp;ldquo;actions&amp;rdquo; to be performed on a given endpoint.&#xA;Think about you buying something on Amazon and then changing your mind and revoking your order. You don&amp;rsquo;t want those two actions to be swapped, otherwise the cancellation will be refused (the order you want to cancel do not exists yet) and then the item you don&amp;rsquo;t want anymore will be ordered (since the action of ordering the item receives the backend after the cancelation).</description>
     </item>
-    
     <item>
       <title>Fast messaging with nats and go part 2</title>
       <link>https://fedepaol.github.io/blog/2018/12/11/fast-messaging-with-nats-and-go-part-2/</link>
       <pubDate>Tue, 11 Dec 2018 00:00:00 +0000</pubDate>
-      
       <guid>https://fedepaol.github.io/blog/2018/12/11/fast-messaging-with-nats-and-go-part-2/</guid>
-      <description>This is the second of a follow up serie of the talk Fast messaging with Nats and Go I gave at golab 2018. The first part can be found here
-What can we do with nats? Link to heading Pub sub Link to heading As you can probably guess, given that Nats is a pure pub / sub system, we can easily implement pub / sub.
-Please remember that a nats publisher does not assume the audience.</description>
+      <description>This is the second of a follow up serie of the talk Fast messaging with Nats and Go I gave at golab 2018. The first part can be found here&#xA;What can we do with nats? Link to heading Pub sub Link to heading As you can probably guess, given that Nats is a pure pub / sub system, we can easily implement pub / sub.&#xA;Please remember that a nats publisher does not assume the audience.</description>
     </item>
-    
     <item>
       <title>Fast messaging with nats and go</title>
       <link>https://fedepaol.github.io/blog/2018/10/27/fast-messaging-with-nats-and-go/</link>
       <pubDate>Sat, 27 Oct 2018 00:00:00 +0000</pubDate>
-      
       <guid>https://fedepaol.github.io/blog/2018/10/27/fast-messaging-with-nats-and-go/</guid>
-      <description>This is the first of follow up serie of the talk Fast messaging with Nats and Go I gave at golab 2018.
-The slides of the talk can be found here: Link to heading What is Nats Link to heading Nats is a messaging system hosted under the CNCF umbrella, which is an open source software foundation dedicated to making cloud native computing universal and sustainable. It&amp;rsquo;s my place-to-go while looking for software related to distributed systems.</description>
+      <description>This is the first of follow up serie of the talk Fast messaging with Nats and Go I gave at golab 2018.&#xA;The slides of the talk can be found here: Link to heading What is Nats Link to heading Nats is a messaging system hosted under the CNCF umbrella, which is an open source software foundation dedicated to making cloud native computing universal and sustainable. It&amp;rsquo;s my place-to-go while looking for software related to distributed systems.</description>
     </item>
-    
     <item>
       <title>A new chapter</title>
       <link>https://fedepaol.github.io/blog/2018/10/26/a-new-chapter/</link>
       <pubDate>Fri, 26 Oct 2018 00:00:00 +0000</pubDate>
-      
       <guid>https://fedepaol.github.io/blog/2018/10/26/a-new-chapter/</guid>
-      <description>It&amp;rsquo;s been a while Link to heading It&amp;rsquo;s more than a year since my last blogpost which incidentally (or not) it happened right a month before the birth of my second child. In the past year I lost a lot of sleep, and now I am kind of getting back to normality (which means new side gigs :-)).
-My interests moved from Android and mobile in general to Go and distributed systems, which is what I am probably going to write about in the next blogpost.</description>
+      <description>It&amp;rsquo;s been a while Link to heading It&amp;rsquo;s more than a year since my last blogpost which incidentally (or not) it happened right a month before the birth of my second child. In the past year I lost a lot of sleep, and now I am kind of getting back to normality (which means new side gigs :-)).&#xA;My interests moved from Android and mobile in general to Go and distributed systems, which is what I am probably going to write about in the next blogpost.</description>
     </item>
-    
     <item>
       <title>Android okhttp and websockets</title>
       <link>https://fedepaol.github.io/blog/2017/04/30/android-okhttp-and-websockets/</link>
       <pubDate>Sun, 30 Apr 2017 00:00:00 +0000</pubDate>
-      
       <guid>https://fedepaol.github.io/blog/2017/04/30/android-okhttp-and-websockets/</guid>
-      <description>Websockets Link to heading Rest http calls are the most common interaction between Android apps and remote servers. However, there are some scenarios where the interaction is better handled via a persistent connection: think about a chat, or a multiplayer game where data flows in both directions and the server needs to push data to the clients and to be aware of which client are connected.
-This kind of scenario can be implemented through Websockets.</description>
+      <description>Websockets Link to heading Rest http calls are the most common interaction between Android apps and remote servers. However, there are some scenarios where the interaction is better handled via a persistent connection: think about a chat, or a multiplayer game where data flows in both directions and the server needs to push data to the clients and to be aware of which client are connected.&#xA;This kind of scenario can be implemented through Websockets.</description>
     </item>
-    
     <item>
       <title>Android mvp testing</title>
       <link>https://fedepaol.github.io/blog/2016/08/27/android-mvp-testing/</link>
       <pubDate>Sat, 27 Aug 2016 00:00:00 +0000</pubDate>
-      
       <guid>https://fedepaol.github.io/blog/2016/08/27/android-mvp-testing/</guid>
-      <description>MVP is Model View Presenter Link to heading .. which is a pattern that is very popular among Android developers nowdays.
-I don&amp;rsquo;t intend to write (yet) another guide about MVP in Android, because others have done a better job, for example:
-Antonio Leiva&amp;rsquo;s introduction to MVP Hannes Dorfmann&amp;rsquo;s introduction to Mosby Fernando Cejas&amp;rsquo; post on clean architecture A lot have been said about MVP (and other similar patterns), like:</description>
+      <description>MVP is Model View Presenter Link to heading .. which is a pattern that is very popular among Android developers nowdays.&#xA;I don&amp;rsquo;t intend to write (yet) another guide about MVP in Android, because others have done a better job, for example:&#xA;Antonio Leiva&amp;rsquo;s introduction to MVP Hannes Dorfmann&amp;rsquo;s introduction to Mosby Fernando Cejas&amp;rsquo; post on clean architecture A lot have been said about MVP (and other similar patterns), like:</description>
     </item>
-    
     <item>
       <title>How to a timer</title>
       <link>https://fedepaol.github.io/blog/2016/06/20/how-to-a-timer/</link>
       <pubDate>Mon, 20 Jun 2016 00:00:00 +0000</pubDate>
-      
       <guid>https://fedepaol.github.io/blog/2016/06/20/how-to-a-timer/</guid>
-      <description>Ok, I must confess Link to heading the title is built to draw people&amp;rsquo;s attention, because you know, nowdays everything is done in a reactive fashion. RxJava is superhelpful, but if we forget the ecosystem our apps are running into, we risk to forget the proper way to implement certain tasks in Android.
-Why do we need a whole post about timers? Link to heading Recently, I had to implement a countdown timer in Android.</description>
+      <description>Ok, I must confess Link to heading the title is built to draw people&amp;rsquo;s attention, because you know, nowdays everything is done in a reactive fashion. RxJava is superhelpful, but if we forget the ecosystem our apps are running into, we risk to forget the proper way to implement certain tasks in Android.&#xA;Why do we need a whole post about timers? Link to heading Recently, I had to implement a countdown timer in Android.</description>
     </item>
-    
     <item>
       <title>Happines is relative</title>
       <link>https://fedepaol.github.io/blog/2016/04/20/happines-is-relative/</link>
       <pubDate>Wed, 20 Apr 2016 00:00:00 +0000</pubDate>
-      
       <guid>https://fedepaol.github.io/blog/2016/04/20/happines-is-relative/</guid>
-      <description>Using relative layout is bad Link to heading .. or at least they say so. The truth is, it is relatively easy to build complex layouts using RelativeLayouts, but this ease of use comes with a cost: in order to provide that kind of flexibility, RelativeLayout does two measurement passes.
-There are a lot of talks and posts explaining that if you have nested relative layouts, you&amp;rsquo;ll end up with many measurement passes that will consume your cpu and will contribute to miss the dreaded 16 ms threshold.</description>
+      <description>Using relative layout is bad Link to heading .. or at least they say so. The truth is, it is relatively easy to build complex layouts using RelativeLayouts, but this ease of use comes with a cost: in order to provide that kind of flexibility, RelativeLayout does two measurement passes.&#xA;There are a lot of talks and posts explaining that if you have nested relative layouts, you&amp;rsquo;ll end up with many measurement passes that will consume your cpu and will contribute to miss the dreaded 16 ms threshold.</description>
     </item>
-    
     <item>
       <title>Cached rest requests with rxjava</title>
       <link>https://fedepaol.github.io/blog/2016/01/01/cached-rest-requests-with-rxjava/</link>
       <pubDate>Fri, 01 Jan 2016 00:00:00 +0000</pubDate>
-      
       <guid>https://fedepaol.github.io/blog/2016/01/01/cached-rest-requests-with-rxjava/</guid>
-      <description>Disclaimer: Link to heading In this post I am trying to cover a proper approach to a common problem. I am still in the process of wrapping my head around RxJava so what I write here might not be the best way to solve the problem.
-Cached requests with RxJava Link to heading Lately I&amp;rsquo;ve been trying to develop a rest backed app using RxJava. I must admit that once you get in the proper mental mood, RxJava almost feels like cheating.</description>
+      <description>Disclaimer: Link to heading In this post I am trying to cover a proper approach to a common problem. I am still in the process of wrapping my head around RxJava so what I write here might not be the best way to solve the problem.&#xA;Cached requests with RxJava Link to heading Lately I&amp;rsquo;ve been trying to develop a rest backed app using RxJava. I must admit that once you get in the proper mental mood, RxJava almost feels like cheating.</description>
     </item>
-    
     <item>
       <title>Testing rxjava observables subscriptions</title>
       <link>https://fedepaol.github.io/blog/2015/09/13/testing-rxjava-observables-subscriptions/</link>
       <pubDate>Sun, 13 Sep 2015 00:00:00 +0000</pubDate>
-      
       <guid>https://fedepaol.github.io/blog/2015/09/13/testing-rxjava-observables-subscriptions/</guid>
-      <description>Testing RxJava Link to heading While catching up with the latest Android novelties I could not ignore RxJava, which seems to grow in popularity between android developers.
-If you just heard about it, and you want to get your feet wet, I really recommend Dan Lew&amp;rsquo;s Grokking with RxJava series as a starting point.
-RxJava is asynchronous by nature, so unit testing it might seem a daunting at first, especially if you use that asynchronous interaction to test stuff.</description>
+      <description>Testing RxJava Link to heading While catching up with the latest Android novelties I could not ignore RxJava, which seems to grow in popularity between android developers.&#xA;If you just heard about it, and you want to get your feet wet, I really recommend Dan Lew&amp;rsquo;s Grokking with RxJava series as a starting point.&#xA;RxJava is asynchronous by nature, so unit testing it might seem a daunting at first, especially if you use that asynchronous interaction to test stuff.</description>
     </item>
-    
     <item>
       <title>Mocking with robolectric and dagger 2</title>
       <link>https://fedepaol.github.io/blog/2015/09/05/mocking-with-robolectric-and-dagger-2/</link>
       <pubDate>Sat, 05 Sep 2015 00:00:00 +0000</pubDate>
-      
       <guid>https://fedepaol.github.io/blog/2015/09/05/mocking-with-robolectric-and-dagger-2/</guid>
-      <description>Why robolectric Link to heading I&amp;rsquo;ve been a fan of robolectric since the old days, since when Android Studio was not an option and few developers embraced IntelliJ. I left it a bit behind after the introduction of Android Studio, since its support was far from optimal.
-Things have changed, and after listening Corey Latislaw advocating its usage during this fragmented podcast episode I wanted to give it a spin.</description>
+      <description>Why robolectric Link to heading I&amp;rsquo;ve been a fan of robolectric since the old days, since when Android Studio was not an option and few developers embraced IntelliJ. I left it a bit behind after the introduction of Android Studio, since its support was far from optimal.&#xA;Things have changed, and after listening Corey Latislaw advocating its usage during this fragmented podcast episode I wanted to give it a spin.</description>
     </item>
-    
     <item>
       <title>Its been a while</title>
       <link>https://fedepaol.github.io/blog/2015/09/04/its-been-a-while/</link>
       <pubDate>Fri, 04 Sep 2015 00:00:00 +0000</pubDate>
-      
       <guid>https://fedepaol.github.io/blog/2015/09/04/its-been-a-while/</guid>
-      <description>.. since my last blogpost. Link to heading I&amp;rsquo;ve done a few things in the meanwhile, I wrote a game with LibGdx, I tinkered with various frameworks, but on top of all these things I&amp;rsquo;ve been taking care of my one (and a half) year old daughter.
-I do certainly have less time to devote to side projects, but I still like to learn new things and Android is exciting from that point of view.</description>
+      <description>.. since my last blogpost. Link to heading I&amp;rsquo;ve done a few things in the meanwhile, I wrote a game with LibGdx, I tinkered with various frameworks, but on top of all these things I&amp;rsquo;ve been taking care of my one (and a half) year old daughter.&#xA;I do certainly have less time to devote to side projects, but I still like to learn new things and Android is exciting from that point of view.</description>
     </item>
-    
     <item>
       <title>Dragging with viewdraghelper</title>
       <link>https://fedepaol.github.io/blog/2014/09/01/dragging-with-viewdraghelper/</link>
       <pubDate>Mon, 01 Sep 2014 00:00:00 +0000</pubDate>
-      
       <guid>https://fedepaol.github.io/blog/2014/09/01/dragging-with-viewdraghelper/</guid>
-      <description>While working on my last side gig, a patch to Firefox for Android to allow the urlbar to be dragged in order to show content hidden behind the main view, I had to deal with ViewDragHelper and understand how it works.
-The final result (please note that the patch is still under review) is something like this:
-It caused me more than one headache, and for this reason I am writing this post hoping it might be helpful to anybody wanting to tinker with it.</description>
+      <description>While working on my last side gig, a patch to Firefox for Android to allow the urlbar to be dragged in order to show content hidden behind the main view, I had to deal with ViewDragHelper and understand how it works.&#xA;The final result (please note that the patch is still under review) is something like this:&#xA;It caused me more than one headache, and for this reason I am writing this post hoping it might be helpful to anybody wanting to tinker with it.</description>
     </item>
-    
     <item>
       <title>Migrating from blogger to octopress done</title>
       <link>https://fedepaol.github.io/blog/2014/08/24/migrating-from-blogger-to-octopress-done/</link>
       <pubDate>Sun, 24 Aug 2014 00:00:00 +0000</pubDate>
-      
       <guid>https://fedepaol.github.io/blog/2014/08/24/migrating-from-blogger-to-octopress-done/</guid>
-      <description>It feels a bit like this but when I had to write a new blogpost and had to embed some code snippets into my blogger hosted blog, I got so pissed of that I chose to migrate my existing blog to a github hosted instance of octopress.
-Jason Jarrett made a pretty nice tutorial about the whole process here. However, I had to change a couple of things and I thought those might be helpful to anybody who faces the same problems.</description>
+      <description>It feels a bit like this but when I had to write a new blogpost and had to embed some code snippets into my blogger hosted blog, I got so pissed of that I chose to migrate my existing blog to a github hosted instance of octopress.&#xA;Jason Jarrett made a pretty nice tutorial about the whole process here. However, I had to change a couple of things and I thought those might be helpful to anybody who faces the same problems.</description>
     </item>
-    
     <item>
       <title>Generating preloaded sqlite data</title>
       <link>https://fedepaol.github.io/blog/2014/04/08/generating-preloaded-sqlite-data/</link>
       <pubDate>Tue, 08 Apr 2014 00:00:00 +0000</pubDate>
-      
       <guid>https://fedepaol.github.io/blog/2014/04/08/generating-preloaded-sqlite-data/</guid>
-      <description>Preloading data in Sqlite is a common problem during android development.
-The most common solutions are:
-hardcode the insert statements and execute them (possibly inside a transaction) the first time the db is openedplace the data inside a csv file, load it the first time the db gets opened, parse the rows and populate the dbprepare a pre-built sqlite file, ship it along with your app and load it the first time the db is opened</description>
+      <description>Preloading data in Sqlite is a common problem during android development.&#xA;The most common solutions are:&#xA;hardcode the insert statements and execute them (possibly inside a transaction) the first time the db is openedplace the data inside a csv file, load it the first time the db gets opened, parse the rows and populate the dbprepare a pre-built sqlite file, ship it along with your app and load it the first time the db is opened</description>
     </item>
-    
     <item>
       <title>Rest interaction in Android </title>
       <link>https://fedepaol.github.io/blog/2014/02/20/rest-interaction-in-android/</link>
       <pubDate>Thu, 20 Feb 2014 00:00:00 +0000</pubDate>
-      
       <guid>https://fedepaol.github.io/blog/2014/02/20/rest-interaction-in-android/</guid>
-      <description>In last December (&#39;13) I was asked to submit a talk proposal for the first Italian Droidcon, which I did. It got accepted, so in Febraury I gave my first public speech speaking of &#34;(O)Authenticated Rest Interaction in Android&#34; in front of real people. This post is meant to be a follow up with the information that can&#39;t be found in the slides
-I hoped to sum all the talk up in a post, but it got too long so I am going to split it in several pieces.</description>
+      <description>In last December (&#39;13) I was asked to submit a talk proposal for the first Italian Droidcon, which I did. It got accepted, so in Febraury I gave my first public speech speaking of &#34;(O)Authenticated Rest Interaction in Android&#34; in front of real people. This post is meant to be a follow up with the information that can&#39;t be found in the slides&#xA;I hoped to sum all the talk up in a post, but it got too long so I am going to split it in several pieces.</description>
     </item>
-    
     <item>
       <title>Contributing to Firefox for Android</title>
       <link>https://fedepaol.github.io/blog/2013/07/29/contributing-to-firefox-for-android/</link>
       <pubDate>Mon, 29 Jul 2013 00:00:00 +0000</pubDate>
-      
       <guid>https://fedepaol.github.io/blog/2013/07/29/contributing-to-firefox-for-android/</guid>
-      <description>In the past two / three years I have been (mostly) developing Android code, even before it was cool(tm), as a way to do something different from what I do during my day time job.
-I wrote some apps, a couple of libraries, and some 80% finished projects I really hope I will finish some day.
-Recently I thought that joining some big android related open source project could have been interesting, and I went for them.</description>
+      <description>In the past two / three years I have been (mostly) developing Android code, even before it was cool(tm), as a way to do something different from what I do during my day time job.&#xA;I wrote some apps, a couple of libraries, and some 80% finished projects I really hope I will finish some day.&#xA;Recently I thought that joining some big android related open source project could have been interesting, and I went for them.</description>
     </item>
-    
     <item>
       <title>PostMan (RingsTwice) Reloaded - Android rest and oauth make easy(er) </title>
       <link>https://fedepaol.github.io/blog/2013/03/06/postman-ringstwice-reloaded-android-rest-and-oauth-make-easyer/</link>
       <pubDate>Wed, 06 Mar 2013 00:00:00 +0000</pubDate>
-      
       <guid>https://fedepaol.github.io/blog/2013/03/06/postman-ringstwice-reloaded-android-rest-and-oauth-make-easyer/</guid>
-      <description>Android and Rest
-My PostManLib android library had a quite troubled genesis. Some infos can be found in this old post&amp;nbsp;, but bear in mind that I only kept the skeleton of what I wrote at that time (which, by the way, was inspired by&amp;nbsp;this&amp;nbsp;talk).
-The api was (to be kind) a bit clunky, and I recently chose to rewrite / finish it. Apart from its clunkyness, one thing was missing:</description>
+      <description>Android and Rest&#xA;My PostManLib android library had a quite troubled genesis. Some infos can be found in this old post&amp;nbsp;, but bear in mind that I only kept the skeleton of what I wrote at that time (which, by the way, was inspired by&amp;nbsp;this&amp;nbsp;talk).&#xA;The api was (to be kind) a bit clunky, and I recently chose to rewrite / finish it. Apart from its clunkyness, one thing was missing:</description>
     </item>
-    
     <item>
       <title>DroidAlone - reloaded</title>
       <link>https://fedepaol.github.io/blog/2012/11/25/droidalone-reloaded/</link>
       <pubDate>Sun, 25 Nov 2012 00:00:00 +0000</pubDate>
-      
       <guid>https://fedepaol.github.io/blog/2012/11/25/droidalone-reloaded/</guid>
-      <description>Whenever I speak with another android developer, the occasional chat goes to &#34;what did you develop?&#34; question.
-Last time it happened at droidcon uk, and for the first time I felt something wasn&#39;t completely right when I showed my DroidAlone app.
-DroidAlone is a useful app (so they say) that comes into play whenever you forget your phone at home. With a simple sms protected by a password choosen by the user, it can be activated.</description>
+      <description>Whenever I speak with another android developer, the occasional chat goes to &#34;what did you develop?&#34; question.&#xA;Last time it happened at droidcon uk, and for the first time I felt something wasn&#39;t completely right when I showed my DroidAlone app.&#xA;DroidAlone is a useful app (so they say) that comes into play whenever you forget your phone at home. With a simple sms protected by a password choosen by the user, it can be activated.</description>
     </item>
-    
     <item>
       <title>Android Content Providers Generator</title>
       <link>https://fedepaol.github.io/blog/2012/11/11/android-content-providers-generator/</link>
       <pubDate>Sun, 11 Nov 2012 00:00:00 +0000</pubDate>
-      
       <guid>https://fedepaol.github.io/blog/2012/11/11/android-content-providers-generator/</guid>
-      <description>During the refactoring of my two years old app DroidAlone, I decided to try to access to the storage through a ContentProvider.
-Even if the official documentation warns that there is no need to use content providers if your app does not want to export it&#39;s data against other apps, there are a bunch of advantages in using a content provider in your app.
-The main and more obvious advantage is that you can use a Loader with your data.</description>
+      <description>During the refactoring of my two years old app DroidAlone, I decided to try to access to the storage through a ContentProvider.&#xA;Even if the official documentation warns that there is no need to use content providers if your app does not want to export it&#39;s data against other apps, there are a bunch of advantages in using a content provider in your app.&#xA;The main and more obvious advantage is that you can use a Loader with your data.</description>
     </item>
-    
     <item>
       <title>DroidconUk 2012</title>
       <link>https://fedepaol.github.io/blog/2012/10/29/droidconuk-2012/</link>
       <pubDate>Mon, 29 Oct 2012 00:00:00 +0000</pubDate>
-      
       <guid>https://fedepaol.github.io/blog/2012/10/29/droidconuk-2012/</guid>
-      <description>Here I am, back again from my third DroidconUk experience.
-I can still remember explaining to my non tech friends what Android was the evening of the 1st droidcon, and since then it became a sort of ritual, a couple of days when I can take some rest from my day time job and take part to the community of some of the best android developers coming from all over the Europe.</description>
+      <description>Here I am, back again from my third DroidconUk experience.&#xA;I can still remember explaining to my non tech friends what Android was the evening of the 1st droidcon, and since then it became a sort of ritual, a couple of days when I can take some rest from my day time job and take part to the community of some of the best android developers coming from all over the Europe.</description>
     </item>
-    
     <item>
       <title>Gridlayout support library with maven</title>
       <link>https://fedepaol.github.io/blog/2012/09/15/gridlayout-support-library-with-maven/</link>
       <pubDate>Sat, 15 Sep 2012 00:00:00 +0000</pubDate>
-      
       <guid>https://fedepaol.github.io/blog/2012/09/15/gridlayout-support-library-with-maven/</guid>
-      <description>EDIT 17/10/2012:
-Gridlayout support is now working natively with maven android deployer. I strongly suggest to use it instead of my method.
----------------------------
-Gridlayout has been introduced since api level 14, and is being suggested layout as a more efficient alternative over nested linear layouts and relative layout.
-It has also been recently added as part of the android support library, in order to have it available on older devices.</description>
+      <description>EDIT 17/10/2012:&#xA;Gridlayout support is now working natively with maven android deployer. I strongly suggest to use it instead of my method.&#xA;---------------------------&#xA;Gridlayout has been introduced since api level 14, and is being suggested layout as a more efficient alternative over nested linear layouts and relative layout.&#xA;It has also been recently added as part of the android support library, in order to have it available on older devices.</description>
     </item>
-    
     <item>
       <title>Intellij, Robolectric and Android</title>
       <link>https://fedepaol.github.io/blog/2012/07/23/intellij-robolectric-and-android/</link>
       <pubDate>Mon, 23 Jul 2012 00:00:00 +0000</pubDate>
-      
       <guid>https://fedepaol.github.io/blog/2012/07/23/intellij-robolectric-and-android/</guid>
-      <description>I have been curious about intellij since droicon uk 2011, where I noticed that some of the speakers were using IntelliJ instead of eclipse.
-A post from Richard Hyndman, who is a developer advocate from Google, was the final straw that pushed me to download IntelliJ and give it a try.
-The first thing an eclipse user will notice in intellij is how slick and fast compares to the behemoth which is eclipse.</description>
+      <description>I have been curious about intellij since droicon uk 2011, where I noticed that some of the speakers were using IntelliJ instead of eclipse.&#xA;A post from Richard Hyndman, who is a developer advocate from Google, was the final straw that pushed me to download IntelliJ and give it a try.&#xA;The first thing an eclipse user will notice in intellij is how slick and fast compares to the behemoth which is eclipse.</description>
     </item>
-    
     <item>
       <title>Tcp connections in Android</title>
       <link>https://fedepaol.github.io/blog/2012/05/01/tcp-connections-in-android/</link>
       <pubDate>Tue, 01 May 2012 00:00:00 +0000</pubDate>
-      
       <guid>https://fedepaol.github.io/blog/2012/05/01/tcp-connections-in-android/</guid>
-      <description>Or how to keep your app connected and stop worrying.&amp;nbsp;
-Disclaimer:
-This is not another place where you can find java code snippet to open a socket and read and write to some server.
-If you need that, go back to your favorite search engine and look for another result. But be careful: while looking for &#34;inspiration&#34; I found a lot of examples where the connection was held inside the UI thread.</description>
+      <description>Or how to keep your app connected and stop worrying.&amp;nbsp;&#xA;Disclaimer:&#xA;This is not another place where you can find java code snippet to open a socket and read and write to some server.&#xA;If you need that, go back to your favorite search engine and look for another result. But be careful: while looking for &#34;inspiration&#34; I found a lot of examples where the connection was held inside the UI thread.</description>
     </item>
-    
     <item>
       <title>PostmanLib - Android and Rest Web Services</title>
       <link>https://fedepaol.github.io/blog/2012/01/30/postmanlib-android-and-rest-web-services/</link>
       <pubDate>Mon, 30 Jan 2012 00:00:00 +0000</pubDate>
-      
       <guid>https://fedepaol.github.io/blog/2012/01/30/postmanlib-android-and-rest-web-services/</guid>
-      <description>Edit 2013-03-10: I&#39;ve performed a substancial refactoring of postmanlib, and the details can be found in this new post
-With the development of MyDearSanta app, I needed to fetch and put some data to a rest service developed using django python framework with a simple set of json based rest apis.
-The development of the interaction between android and the rest web service was a bit messy because I was in hurry to release the app before Christmas (giving it&#39;s xmas related nature), but while developing it I thought it could have been a good start for my first android library.</description>
+      <description>Edit 2013-03-10: I&#39;ve performed a substancial refactoring of postmanlib, and the details can be found in this new post&#xA;With the development of MyDearSanta app, I needed to fetch and put some data to a rest service developed using django python framework with a simple set of json based rest apis.&#xA;The development of the interaction between android and the rest web service was a bit messy because I was in hurry to release the app before Christmas (giving it&#39;s xmas related nature), but while developing it I thought it could have been a good start for my first android library.</description>
     </item>
-    
     <item>
       <title>Pastimer - Android Kitchen Timer (Released)</title>
       <link>https://fedepaol.github.io/blog/2012/01/22/pastimer-android-kitchen-timer-released/</link>
       <pubDate>Sun, 22 Jan 2012 00:00:00 +0000</pubDate>
-      
       <guid>https://fedepaol.github.io/blog/2012/01/22/pastimer-android-kitchen-timer-released/</guid>
-      <description> Pastimer, my barcode based kitchen timer is now on the market.
-The basic idea is to scan the barcode on the box to set the time.
-The url to download it from the market is
-https://market.android.com/details?id=com.whiterabbit.pastimer
-or this for the lite version
-https://market.android.com/details?id=com.whiterabbit.pastimer.lite
-The description of the product can be found here&amp;nbsp;Android Kitchen Timer </description>
+      <description> Pastimer, my barcode based kitchen timer is now on the market.&#xA;The basic idea is to scan the barcode on the box to set the time.&#xA;The url to download it from the market is&#xA;https://market.android.com/details?id=com.whiterabbit.pastimer&#xA;or this for the lite version&#xA;https://market.android.com/details?id=com.whiterabbit.pastimer.lite&#xA;The description of the product can be found here&amp;nbsp;Android Kitchen Timer </description>
     </item>
-    
     <item>
       <title>MyDearSanta</title>
       <link>https://fedepaol.github.io/blog/2011/12/05/mydearsanta/</link>
       <pubDate>Mon, 05 Dec 2011 00:00:00 +0000</pubDate>
-      
       <guid>https://fedepaol.github.io/blog/2011/12/05/mydearsanta/</guid>
-      <description>This time, while PastTimer has not been released yet, I started an experiment with an old friend. We wanted not just to release another standalone app, but interact in some way with a backend.
-The result is&amp;nbsp;www.mydearsanta.info&amp;nbsp;, a web based Christmas list, which comes together with and Android app&amp;nbsp;https://market.android.com/details?id=com.smokingbytes.santas&amp;nbsp;and an Iphone app (currently under the approval process) .
-The backend was written using the Django framework, and the apps interact with it using a json based rest api.</description>
+      <description>This time, while PastTimer has not been released yet, I started an experiment with an old friend. We wanted not just to release another standalone app, but interact in some way with a backend.&#xA;The result is&amp;nbsp;www.mydearsanta.info&amp;nbsp;, a web based Christmas list, which comes together with and Android app&amp;nbsp;https://market.android.com/details?id=com.smokingbytes.santas&amp;nbsp;and an Iphone app (currently under the approval process) .&#xA;The backend was written using the Django framework, and the apps interact with it using a json based rest api.</description>
     </item>
-    
     <item>
       <title>A new app - Android Kitchen Timer</title>
       <link>https://fedepaol.github.io/blog/2011/10/18/a-new-app-android-kitchen-timer/</link>
       <pubDate>Tue, 18 Oct 2011 00:00:00 +0000</pubDate>
-      
       <guid>https://fedepaol.github.io/blog/2011/10/18/a-new-app-android-kitchen-timer/</guid>
-      <description>Pastimer is my 4th app. It&#39;s a simple (but nice) Android Kitchen Timer based on barcode scanning.
-I learned some things during my journey of android development, but this time I wanted to focus on user interface and ease of use.
-As always, it starts as a simple idea, the you start putting some code in it, it&#39;s &#34;almost&#34; working, and the difference between almost working and finished, is something like two months or more.</description>
+      <description>Pastimer is my 4th app. It&#39;s a simple (but nice) Android Kitchen Timer based on barcode scanning.&#xA;I learned some things during my journey of android development, but this time I wanted to focus on user interface and ease of use.&#xA;As always, it starts as a simple idea, the you start putting some code in it, it&#39;s &#34;almost&#34; working, and the difference between almost working and finished, is something like two months or more.</description>
     </item>
-    
     <item>
       <title>What I have been working on.. Android Kitchen Timer</title>
       <link>https://fedepaol.github.io/blog/2011/06/24/what-i-have-been-working-on..-android-kitchen-timer/</link>
       <pubDate>Fri, 24 Jun 2011 00:00:00 +0000</pubDate>
-      
       <guid>https://fedepaol.github.io/blog/2011/06/24/what-i-have-been-working-on..-android-kitchen-timer/</guid>
-      <description>Apart from some rest, and reading some good books (like excellent Kent Beck&#39;s Test Driven development by example, and &#34;growing object-oriented software guided by tests&#34;), I have been working on a new app in the last month or so.
-A week end locked at home because my gf was ill, was a good excuse to start a deep programming session. The app I am about to release (well, to be honest it still lacks all the nice ui parts, it just look like a bunch of grey buttons thrown on the screen) solves (or at least tries to simplify) a problem I have every time I need to cook pasta.</description>
+      <description>Apart from some rest, and reading some good books (like excellent Kent Beck&#39;s Test Driven development by example, and &#34;growing object-oriented software guided by tests&#34;), I have been working on a new app in the last month or so.&#xA;A week end locked at home because my gf was ill, was a good excuse to start a deep programming session. The app I am about to release (well, to be honest it still lacks all the nice ui parts, it just look like a bunch of grey buttons thrown on the screen) solves (or at least tries to simplify) a problem I have every time I need to cook pasta.</description>
     </item>
-    
     <item>
       <title>Behind activities: android, services, background operations and threads</title>
       <link>https://fedepaol.github.io/blog/2011/04/25/behind-activities-android-services-background-operations-and-threads/</link>
       <pubDate>Mon, 25 Apr 2011 00:00:00 +0000</pubDate>
-      
       <guid>https://fedepaol.github.io/blog/2011/04/25/behind-activities-android-services-background-operations-and-threads/</guid>
-      <description>This time I want to share something I learned about working in background on android.
-One of the biggest advantages of android over ios (or, at least, some ios version ago) is that your app is not sandboxed and can continue to live in background.
-To perform background (not visible) work, all you need to know is how to use android services.
-A service is a piece of an application that is allowed to be active even if the application is not in foreground anymore.</description>
+      <description>This time I want to share something I learned about working in background on android.&#xA;One of the biggest advantages of android over ios (or, at least, some ios version ago) is that your app is not sandboxed and can continue to live in background.&#xA;To perform background (not visible) work, all you need to know is how to use android services.&#xA;A service is a piece of an application that is allowed to be active even if the application is not in foreground anymore.</description>
     </item>
-    
     <item>
       <title>first 18 days of pegdroid</title>
       <link>https://fedepaol.github.io/blog/2011/03/21/first-18-days-of-pegdroid/</link>
       <pubDate>Mon, 21 Mar 2011 00:00:00 +0000</pubDate>
-      
       <guid>https://fedepaol.github.io/blog/2011/03/21/first-18-days-of-pegdroid/</guid>
-      <description>It&#39;s already been 18 days, and it&#39;s time to make some considerations.
-For those who don&#39;t know what pegdroid is, it&#39;s a simple peg solitaire for android. I released it 18 days ago, it&#39;s free and it&#39;s basically ad-supported (but I don&#39;t get much from that).
-I integrated google analytics in my app, so I can get some help from the statistics I get every day. In the meanwhile, the market dashboard got updated and I also can see which kind of device are the most popular.</description>
+      <description>It&#39;s already been 18 days, and it&#39;s time to make some considerations.&#xA;For those who don&#39;t know what pegdroid is, it&#39;s a simple peg solitaire for android. I released it 18 days ago, it&#39;s free and it&#39;s basically ad-supported (but I don&#39;t get much from that).&#xA;I integrated google analytics in my app, so I can get some help from the statistics I get every day. In the meanwhile, the market dashboard got updated and I also can see which kind of device are the most popular.</description>
     </item>
-    
     <item>
       <title>PegDroid - Android simple game</title>
       <link>https://fedepaol.github.io/blog/2011/03/03/pegdroid-android-simple-game/</link>
       <pubDate>Thu, 03 Mar 2011 00:00:00 +0000</pubDate>
-      
       <guid>https://fedepaol.github.io/blog/2011/03/03/pegdroid-android-simple-game/</guid>
       <description>I just released a new game. It&#39;s (yet another) version of the popular solitaire game. I thought its name was &#34;Chinese checkers&#34;, but it looks like it&#39;s most common name is &#34;Peg&#34;. Anyway, it didn&#39;t take (too) much to develop it, I really enjoyed learning something about the powerful andengine framework, but I am still proceeding at a slow pace since I can work on android only after my daytime job.</description>
     </item>
-    
     <item>
       <title>Mobile game development</title>
       <link>https://fedepaol.github.io/blog/2011/02/18/mobile-game-development/</link>
       <pubDate>Fri, 18 Feb 2011 00:00:00 +0000</pubDate>
-      
       <guid>https://fedepaol.github.io/blog/2011/02/18/mobile-game-development/</guid>
-      <description>Another thing I always wanted to do was game programming. Moving objects and interacting with the game, as well as having fun with them, gives great satisfaction.
-I think the fun part is that you have immediate feedback of what is happening, it&#39;s just not like filling an edit text and pressing a button (or server side programming).
-Given that I am spending much of my spare time in (trying to) learning mobile development, I tried to merge the two things, and I came across to andengine framework.</description>
+      <description>Another thing I always wanted to do was game programming. Moving objects and interacting with the game, as well as having fun with them, gives great satisfaction.&#xA;I think the fun part is that you have immediate feedback of what is happening, it&#39;s just not like filling an edit text and pressing a button (or server side programming).&#xA;Given that I am spending much of my spare time in (trying to) learning mobile development, I tried to merge the two things, and I came across to andengine framework.</description>
     </item>
-    
     <item>
       <title>Why I do like developing mobile</title>
       <link>https://fedepaol.github.io/blog/2011/01/13/why-i-do-like-developing-mobile/</link>
       <pubDate>Thu, 13 Jan 2011 00:00:00 +0000</pubDate>
-      
       <guid>https://fedepaol.github.io/blog/2011/01/13/why-i-do-like-developing-mobile/</guid>
-      <description>Well, I stopped and started thinking what&#39;s so cool about mobile development and mobile apps, and I would like to share my thoughts.
-Before modern smartphones, most software was written to be consumed in desktop environment, where the user was sitting in front of his computer interacting with it.
-Smartphones make now easy doing something new: interacting with the environment the user belongs to. That is what I think is the most exciting thing of mobile dev.</description>
+      <description>Well, I stopped and started thinking what&#39;s so cool about mobile development and mobile apps, and I would like to share my thoughts.&#xA;Before modern smartphones, most software was written to be consumed in desktop environment, where the user was sitting in front of his computer interacting with it.&#xA;Smartphones make now easy doing something new: interacting with the environment the user belongs to. That is what I think is the most exciting thing of mobile dev.</description>
     </item>
-    
     <item>
       <title>DroidAlone - Opensourced</title>
       <link>https://fedepaol.github.io/blog/2010/12/27/droidalone-opensourced/</link>
       <pubDate>Mon, 27 Dec 2010 00:00:00 +0000</pubDate>
-      
       <guid>https://fedepaol.github.io/blog/2010/12/27/droidalone-opensourced/</guid>
-      <description>I released DroidAlone on the market in the early summer. You can find a description at the following url&amp;nbsp;DroidAlone - Missed call for Android
-It is a paid app, and it costs something like 0.99 euros. It has been downloaded something like 150 times since then.
-I also had some issues in choosing its name: at first it was homealone, but I was afraid to Mr Culkin knokin&#39; to my door for royalties, then it was phonealone but there was already one, and then it moved to DroidAlone.</description>
+      <description>I released DroidAlone on the market in the early summer. You can find a description at the following url&amp;nbsp;DroidAlone - Missed call for Android&#xA;It is a paid app, and it costs something like 0.99 euros. It has been downloaded something like 150 times since then.&#xA;I also had some issues in choosing its name: at first it was homealone, but I was afraid to Mr Culkin knokin&#39; to my door for royalties, then it was phonealone but there was already one, and then it moved to DroidAlone.</description>
     </item>
-    
     <item>
       <title>The importance of little details</title>
       <link>https://fedepaol.github.io/blog/2010/12/08/the-importance-of-little-details/</link>
       <pubDate>Wed, 08 Dec 2010 00:00:00 +0000</pubDate>
-      
       <guid>https://fedepaol.github.io/blog/2010/12/08/the-importance-of-little-details/</guid>
-      <description>This won&#39;t be a strictly technical post, but something related to some of my impressions during android development.
-I read a lot of stuff about android, and how at first it looks so easy to deploy an android application.
-What I realized in the last year is that releasing something that &#34;almost&#34; work is not enough. Your app will be buried under bad reviews and, since android does not make any filter on app quality, it will just be one of the many apps out there or, even worse, it will be under below of the apps out there.</description>
+      <description>This won&#39;t be a strictly technical post, but something related to some of my impressions during android development.&#xA;I read a lot of stuff about android, and how at first it looks so easy to deploy an android application.&#xA;What I realized in the last year is that releasing something that &#34;almost&#34; work is not enough. Your app will be buried under bad reviews and, since android does not make any filter on app quality, it will just be one of the many apps out there or, even worse, it will be under below of the apps out there.</description>
     </item>
-    
     <item>
       <title>Testing an intent service</title>
       <link>https://fedepaol.github.io/blog/2010/11/25/testing-an-intent-service/</link>
       <pubDate>Thu, 25 Nov 2010 00:00:00 +0000</pubDate>
-      
       <guid>https://fedepaol.github.io/blog/2010/11/25/testing-an-intent-service/</guid>
-      <description>It may sound weird, but I discovered java development while trying to learn android development itself.
-Along with Java, eclipse and all this nice stuff, I discovered junit too.
-One of the problems I encountered while developing my second app, droidalone, was to test intent services.
-Intent services are a powerful way to handle background task. They basically are services that run in their own thread and die (like non sticky services) after they finished their job.</description>
+      <description>It may sound weird, but I discovered java development while trying to learn android development itself.&#xA;Along with Java, eclipse and all this nice stuff, I discovered junit too.&#xA;One of the problems I encountered while developing my second app, droidalone, was to test intent services.&#xA;Intent services are a powerful way to handle background task. They basically are services that run in their own thread and die (like non sticky services) after they finished their job.</description>
     </item>
-    
     <item>
       <title>My sqllite helper builder</title>
       <link>https://fedepaol.github.io/blog/2010/11/18/my-sqllite-helper-builder/</link>
       <pubDate>Thu, 18 Nov 2010 00:00:00 +0000</pubDate>
-      
       <guid>https://fedepaol.github.io/blog/2010/11/18/my-sqllite-helper-builder/</guid>
-      <description>EDIT 11/11/2012: as described in this new blog post, I modified the script to generate a content provider as well
-This is my first post about something related to android.
-Just to break the ice, I would like to introduce a simple helper script I developed this summer.
-Android ships with a very nice local storage, which is sqllite. It&#39;s said almost everywhere that, in order to make your life easier, you should develop an helper class.</description>
+      <description>EDIT 11/11/2012: as described in this new blog post, I modified the script to generate a content provider as well&#xA;This is my first post about something related to android.&#xA;Just to break the ice, I would like to introduce a simple helper script I developed this summer.&#xA;Android ships with a very nice local storage, which is sqllite. It&#39;s said almost everywhere that, in order to make your life easier, you should develop an helper class.</description>
     </item>
-    
     <item>
       <title>Something more about me...</title>
       <link>https://fedepaol.github.io/blog/2010/11/10/something-more-about-me.../</link>
       <pubDate>Wed, 10 Nov 2010 00:00:00 +0000</pubDate>
-      
       <guid>https://fedepaol.github.io/blog/2010/11/10/something-more-about-me.../</guid>
-      <description>Well, maintaining a blog looks harder than I thought, but this is another attempt to keep it alive.
-I&#39;ll say something more about me, just to break the ice: I live in Italy, I am a software engineer, and my current employer is a company whose main products are related to finance.
-I&#39;m currently working to maintain and to evolve the brokerage platform of one major italian bank. After developing it&#39;s main core components, I had the honor (?</description>
+      <description>Well, maintaining a blog looks harder than I thought, but this is another attempt to keep it alive.&#xA;I&#39;ll say something more about me, just to break the ice: I live in Italy, I am a software engineer, and my current employer is a company whose main products are related to finance.&#xA;I&#39;m currently working to maintain and to evolve the brokerage platform of one major italian bank. After developing it&#39;s main core components, I had the honor (?</description>
     </item>
-    
     <item>
       <title>It&#39;s been a long time...</title>
       <link>https://fedepaol.github.io/blog/2010/07/06/its-been-a-long-time.../</link>
       <pubDate>Tue, 06 Jul 2010 00:00:00 +0000</pubDate>
-      
       <guid>https://fedepaol.github.io/blog/2010/07/06/its-been-a-long-time.../</guid>
-      <description>A lot of things have changed since my last post, but some are still the same.
-One of them is my curiosity and my passion for technologies.
-Why I am back here? Because I am trying to understand and develop some applications with Android framework, and I think it would be useful for me to have a place where collect the new things I learn. At the same time I hope these things will be useful for somebody out there.</description>
+      <description>A lot of things have changed since my last post, but some are still the same.&#xA;One of them is my curiosity and my passion for technologies.&#xA;Why I am back here? Because I am trying to understand and develop some applications with Android framework, and I think it would be useful for me to have a place where collect the new things I learn. At the same time I hope these things will be useful for somebody out there.</description>
     </item>
-    
     <item>
       <title>Developing python on symbian from a linux box</title>
       <link>https://fedepaol.github.io/blog/2008/06/10/developing-python-on-symbian-from-a-linux-box/</link>
       <pubDate>Tue, 10 Jun 2008 00:00:00 +0000</pubDate>
-      
       <guid>https://fedepaol.github.io/blog/2008/06/10/developing-python-on-symbian-from-a-linux-box/</guid>
-      <description>Since my mobile device is a s60v3 one (Nokia E61), I found particulary difficult to develop any simple python script on the phone. The hardest thing to do was the write - test cycle.
-On linux you can&#39;t simply send the file to the phone with obex, since it will be stored in your incoming messages.
-From the excellent Jürgen Scheible&#39;s tutorial website I discovered the existance of the nice putools for making easier the development cycle here</description>
+      <description>Since my mobile device is a s60v3 one (Nokia E61), I found particulary difficult to develop any simple python script on the phone. The hardest thing to do was the write - test cycle.&#xA;On linux you can&#39;t simply send the file to the phone with obex, since it will be stored in your incoming messages.&#xA;From the excellent Jürgen Scheible&#39;s tutorial website I discovered the existance of the nice putools for making easier the development cycle here</description>
     </item>
-    
     <item>
       <title>Why this blog</title>
       <link>https://fedepaol.github.io/blog/2008/06/10/why-this-blog/</link>
       <pubDate>Tue, 10 Jun 2008 00:00:00 +0000</pubDate>
-      
       <guid>https://fedepaol.github.io/blog/2008/06/10/why-this-blog/</guid>
-      <description> I often try to do something with various tech stuff. I thought that this could be a nice place to share my experiences with others, and also a good place to write everything I will need in the future.
-At the moment I am trying to work on a little project using python interpreter for symbian applications..... </description>
+      <description> I often try to do something with various tech stuff. I thought that this could be a nice place to share my experiences with others, and also a good place to write everything I will need in the future.&#xA;At the moment I am trying to work on a little project using python interpreter for symbian applications..... </description>
     </item>
-    
   </channel>
 </rss>
