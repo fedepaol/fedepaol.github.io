@@ -358,7 +358,7 @@ FRR, receiving prefixes to it and advertising the pod CIDR:</p>
 </span></span><span class="line"><span class="cl">                    RT:64512:100 ET:8 Rmac:aa:bb:cc:00:00:66
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">Displayed <span class="m">2</span> out of <span class="m">2</span> total prefixes
-</span></span></code></pre></div><p>So, leaf1 learned about the pod CIDR advertised by FRR-K8s!</p>
+</span></span></code></pre></div><p>So, leaf1 learned about the pod CIDR (<code>10.244.0.0/24</code> advertised by FRR-K8s!</p>
 <p>Let&rsquo;s check on the other side, inside FRR-K8s first:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">k0-control-plane# show bgp ipv4
 </span></span><span class="line"><span class="cl">BGP table version is 2, <span class="nb">local</span> router ID is 192.169.10.0, vrf id <span class="m">0</span>
