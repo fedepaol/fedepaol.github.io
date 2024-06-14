@@ -268,10 +268,16 @@ a host connected to the <code>leaf2</code>, here we have the node of a cluster:<
     <span class="sr-only">Link to heading</span>
   </a>
 </h3>
-<p>I won&rsquo;t share the details of the setup of the container, moving the interface to the container&rsquo;s namespace, creating the veth and all the rest as they are available
-in the <a href="https://github.com/fedepaol/evpnlab/blob/main/04_from_kind/kind/setup.sh"  class="external-link" target="_blank" rel="noopener">setup.sh file related to the node setup</a> and the <a href="https://github.com/fedepaol/evpnlab/blob/main/04_from_kind/kind/frr/setup.sh"  class="external-link" target="_blank" rel="noopener">setup.sh file related to the container setup</a>.</p>
+<p>I won&rsquo;t share the details of the setup of the container:</p>
+<ul>
+<li>moving the interface to the container&rsquo;s namespace</li>
+<li>creating the veth and putting one leg inside the container</li>
+<li>setting up routes</li>
+<li>setting up the VRFs, bridge and VXLans required to FRR to make EVPN to work</li>
+</ul>
+<p>They are available in the <a href="https://github.com/fedepaol/evpnlab/blob/main/04_from_kind/kind/setup.sh"  class="external-link" target="_blank" rel="noopener">setup.sh file related to the node setup</a> and the <a href="https://github.com/fedepaol/evpnlab/blob/main/04_from_kind/kind/frr/setup.sh"  class="external-link" target="_blank" rel="noopener">setup.sh file related to the container setup</a>.</p>
 <p>What might be interesting is the <a href="https://github.com/fedepaol/evpnlab/blob/main/04_from_kind/kind/frr/frr.conf"  class="external-link" target="_blank" rel="noopener">FRR configuration of the namespaced FRR</a>:</p>
-<p>The section related to the default VRF contains the details of the underlay. It establishes a session with <code>leaf2</code> and advertises the <code>VTEP</code> ip (<code>100.65.0.2/32</code>)
+<p>The section related to the default VRF contains the details of the underlay. It establishes a session with <code>leaf2</code>, advertises the local <code>VTEP</code> ip (<code>100.65.0.2/32</code>)
 via BGP, and enables the l2vpn address-family:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">address-family ipv4 unicast
 </span></span><span class="line"><span class="cl">  neighbor 192.168.11.2 activate
