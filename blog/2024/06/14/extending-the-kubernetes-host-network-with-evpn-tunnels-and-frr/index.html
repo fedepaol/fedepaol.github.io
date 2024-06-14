@@ -140,7 +140,7 @@
             </span>
             <span class="reading-time">
               <i class="fa fa-clock-o" aria-hidden="true"></i>
-              8-minute read
+              7-minute read
             </span>
           </div>
           
@@ -220,61 +220,6 @@ linux VRF</li>
 <h3 id="the-dataplane">
   The dataplane
   <a class="heading-link" href="#the-dataplane">
-    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
-    <span class="sr-only">Link to heading</span>
-  </a>
-</h3>
-<p>The VXLan VTEP is hosted inside the container. Packets directed to the routes adverised by the FRR container are tunneled towards the local VTEP, decapsulated
-from the VXLan interface and then routed accordingly to the routes (likely, the ones published by FRR-K8s).</p>
-<p>At the same time, FRR-K8s learns about the type 5 routes advertised by the fabric, so egress traffic goes through the veth and then gets encapsulated towards the proper VTEP.</p>
-<p><img src="/images/evpnkind/routerkind-dataplane.png" alt=""></p>
-<h2 id="the-setup-1">
-  The setup
-  <a class="heading-link" href="#the-setup-1">
-    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
-    <span class="sr-only">Link to heading</span>
-  </a>
-</h2>
-<p>What we want to implement inside kind is somehow complex:</p>
-<ul>
-<li>an FRR instance running inside a container, connected to the leaf</li>
-<li>a Veth leg (ideally, one per VRF) to connect the containerized FRR to the host</li>
-<li>an <a href="https://github.com/metallb/frr-k8s/"  class="external-link" target="_blank" rel="noopener">FRR-K8s instance</a> running on the node, peered with the other FRR through the Veth</li>
-</ul>
-<p>In this scenario:</p>
-<ul>
-<li>the leaf connected to the veth relays the type 5 routes up to the FRR instance running on Kind</li>
-<li>the &ldquo;host&rdquo; FRR instance redistributes the routes to the FRR-K8s instance via BGP</li>
-</ul>
-<h3 id="inside-the-kind-node-1">
-  Inside the Kind node
-  <a class="heading-link" href="#inside-the-kind-node-1">
-    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
-    <span class="sr-only">Link to heading</span>
-  </a>
-</h3>
-<p>Let&rsquo;s have a look at what&rsquo;s inside the FRR container:</p>
-<p><img src="/images/evpnkind/routerkind-inside.png" alt=""></p>
-<ul>
-<li>The interface connecting the &ldquo;node&rdquo; to the leaf is moved inside the namespace</li>
-<li>A linux VRF is created and corresponds to the L3 VNI</li>
-<li>All the machinery required <a href="https://docs.frrouting.org/en/latest/evpn.html"  class="external-link" target="_blank" rel="noopener">to FRR to work with EVPN</a> is created inside the
-linux VRF</li>
-<li>A veth pair connects the container to the host</li>
-</ul>
-<h3 id="the-controlplane-1">
-  The controlplane
-  <a class="heading-link" href="#the-controlplane-1">
-    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
-    <span class="sr-only">Link to heading</span>
-  </a>
-</h3>
-<p>The FRR container translates BGP routes to EVPN Type 5 routes, and advertises them in both directions.</p>
-<p>By doing this, FRR-K8s is able to advertise any IP from the node as Type5 route without bothering with linux VRFs on the host</p>
-<p><img src="/images/evpnkind/routerkind-controlplane.png" alt=""></p>
-<h3 id="the-dataplane-1">
-  The dataplane
-  <a class="heading-link" href="#the-dataplane-1">
     <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
     <span class="sr-only">Link to heading</span>
   </a>
