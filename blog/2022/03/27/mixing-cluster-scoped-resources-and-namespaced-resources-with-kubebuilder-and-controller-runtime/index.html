@@ -18,7 +18,8 @@ If we don&rsquo;t set the namespace, our controller is meant to be cluster scope
 The problem Link to heading While working on MetalLB, we had to add an alternative password field of type secret reference.">
 <meta name="keywords" content="">
 
-<meta name="twitter:card" content="summary"/><meta name="twitter:title" content="Mixing cluster scoped resources and namespaced resources with kubebuilder and controller runtime"/>
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Mixing cluster scoped resources and namespaced resources with kubebuilder and controller runtime"/>
 <meta name="twitter:description" content="Out of the box Link to heading If we look at the kubebuilder tutorial, it&rsquo;s possible to define a namespace (or a set of namespaces, when using MultiNamespacedCacheBuilder) for our controller to listen on.
 If we don&rsquo;t set the namespace, our controller is meant to be cluster scoped and will listen (and need priviledges) to the resources in all the namespaces.
 The problem Link to heading While working on MetalLB, we had to add an alternative password field of type secret reference."/>
@@ -38,14 +39,12 @@ The problem Link to heading While working on MetalLB, we had to add an alternati
 <link rel="canonical" href="https://fedepaol.github.io/blog/2022/03/27/mixing-cluster-scoped-resources-and-namespaced-resources-with-kubebuilder-and-controller-runtime/">
 
 
-<link rel="preload" href="/fonts/fa-brands-400.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="/fonts/fa-regular-400.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="/fonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/forkawesome-webfont.woff2?v=1.2.0" as="font" type="font/woff2" crossorigin>
 
 
   
   
-  <link rel="stylesheet" href="/css/coder.min.577e3c5ead537873430da16f0964b754a120fd87c4e2203a00686e7c75b51378.css" integrity="sha256-V348Xq1TeHNDDaFvCWS3VKEg/YfE4iA6AGhufHW1E3g=" crossorigin="anonymous" media="screen" />
+  <link rel="stylesheet" href="/css/coder.min.4218e9a82fcc372a4835bc96c50c77e11ac52ebe04361b7efd80f5f332ec3e89.css" integrity="sha256-QhjpqC/MNypINbyWxQx34RrFLr4ENht&#43;/YD18zLsPok=" crossorigin="anonymous" media="screen" />
 
 
 
@@ -86,7 +85,7 @@ The problem Link to heading While working on MetalLB, we had to add an alternati
   
 <div class="float-container">
     <a id="dark-mode-toggle" class="colorscheme-toggle">
-        <i class="fa-solid fa-adjust fa-fw" aria-hidden="true"></i>
+        <i class="fa fa-adjust fa-fw" aria-hidden="true"></i>
     </a>
 </div>
 
@@ -94,29 +93,27 @@ The problem Link to heading While working on MetalLB, we had to add an alternati
   <main class="wrapper">
     <nav class="navigation">
   <section class="container">
-    
-    <a class="navigation-title" href="https://fedepaol.github.io/">
+    <a class="navigation-title" href="/">
       My little software warehouse
     </a>
     
-    
       <input type="checkbox" id="menu-toggle" />
       <label class="menu-button float-right" for="menu-toggle">
-        <i class="fa-solid fa-bars fa-fw" aria-hidden="true"></i>
+        <i class="fa fa-bars fa-fw" aria-hidden="true"></i>
       </label>
       <ul class="navigation-list">
         
           
             <li class="navigation-item">
-              <a class="navigation-link " href="/posts/">Blog</a>
+              <a class="navigation-link" href="/posts/">Blog</a>
             </li>
           
             <li class="navigation-item">
-              <a class="navigation-link " href="/about/">About</a>
+              <a class="navigation-link" href="/about/">About</a>
             </li>
           
             <li class="navigation-item">
-              <a class="navigation-link " href="mailto:fedepaol@gmail.com">Contact</a>
+              <a class="navigation-link" href="mailto:fedepaol@gmail.com">Contact</a>
             </li>
           
         
@@ -142,13 +139,13 @@ The problem Link to heading While working on MetalLB, we had to add an alternati
         <div class="post-meta">
           <div class="date">
             <span class="posted-on">
-              <i class="fa-solid fa-calendar" aria-hidden="true"></i>
+              <i class="fa fa-calendar" aria-hidden="true"></i>
               <time datetime="2022-03-27T14:22:36&#43;02:00">
                 March 27, 2022
               </time>
             </span>
             <span class="reading-time">
-              <i class="fa-solid fa-clock" aria-hidden="true"></i>
+              <i class="fa fa-clock-o" aria-hidden="true"></i>
               2-minute read
             </span>
           </div>
@@ -163,7 +160,7 @@ The problem Link to heading While working on MetalLB, we had to add an alternati
         <h1 id="out-of-the-box">
   Out of the box
   <a class="heading-link" href="#out-of-the-box">
-    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
     <span class="sr-only">Link to heading</span>
   </a>
 </h1>
@@ -172,7 +169,7 @@ The problem Link to heading While working on MetalLB, we had to add an alternati
 <h2 id="the-problem">
   The problem
   <a class="heading-link" href="#the-problem">
-    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
     <span class="sr-only">Link to heading</span>
   </a>
 </h2>
@@ -180,7 +177,7 @@ The problem Link to heading While working on MetalLB, we had to add an alternati
 <h3 id="the-solution">
   The solution
   <a class="heading-link" href="#the-solution">
-    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
     <span class="sr-only">Link to heading</span>
   </a>
 </h3>
@@ -189,7 +186,7 @@ The problem Link to heading While working on MetalLB, we had to add an alternati
 <h3 id="the-code">
   The code
   <a class="heading-link" href="#the-code">
-    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
     <span class="sr-only">Link to heading</span>
   </a>
 </h3>
@@ -252,8 +249,6 @@ The problem Link to heading While working on MetalLB, we had to add an alternati
         
         
         
-
-        
       </footer>
     </article>
 
@@ -290,7 +285,7 @@ The problem Link to heading While working on MetalLB, we had to add an alternati
 
 
   
-<script>
+<script type="application/javascript">
 var doNotTrack = false;
 if (!doNotTrack) {
 	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -302,8 +297,6 @@ if (!doNotTrack) {
 	ga('send', 'pageview');
 }
 </script>
-
-  
 
   
 

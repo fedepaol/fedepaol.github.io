@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>
+  Extending the Kubernetes (host) network with EVPN tunnels (and FRR) · My little software warehouse
+</title>
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+
+
+
+
+<meta name="author" content="Federico Paolinelli">
+<meta name="description" content="How to run FRR on the host to add VXLans tunnels on Kubernetes nodes">
+<meta name="keywords" content="">
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Extending the Kubernetes (host) network with EVPN tunnels (and FRR)"/>
+<meta name="twitter:description" content="How to run FRR on the host to add VXLans tunnels on Kubernetes nodes"/>
+
+<meta property="og:title" content="Extending the Kubernetes (host) network with EVPN tunnels (and FRR)" />
+<meta property="og:description" content="How to run FRR on the host to add VXLans tunnels on Kubernetes nodes" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://fedepaol.github.io/blog/2024/06/14/extending-the-kubernetes-host-network-with-evpn-tunnels-and-frr/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2024-06-14T12:01:51+01:00" />
+<meta property="article:modified_time" content="2024-06-14T12:01:51+01:00" />
+
+
+
+
+<link rel="canonical" href="https://fedepaol.github.io/blog/2024/06/14/extending-the-kubernetes-host-network-with-evpn-tunnels-and-frr/">
+
+
+<link rel="preload" href="/fonts/forkawesome-webfont.woff2?v=1.2.0" as="font" type="font/woff2" crossorigin>
+
+
+  
+  
+  <link rel="stylesheet" href="/css/coder.min.4218e9a82fcc372a4835bc96c50c77e11ac52ebe04361b7efd80f5f332ec3e89.css" integrity="sha256-QhjpqC/MNypINbyWxQx34RrFLr4ENht&#43;/YD18zLsPok=" crossorigin="anonymous" media="screen" />
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+<link rel="icon" type="image/svg+xml" href="/images/favicon.svg" sizes="any">
+<link rel="icon" type="image/png" href="/images/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="/images/favicon-16x16.png" sizes="16x16">
+
+<link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+<link rel="manifest" href="/site.webmanifest">
+<link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+
+
+
+
+
+
+</head>
+
+
+
+
+<body class="preload-transitions colorscheme-light">
+  
+<div class="float-container">
+    <a id="dark-mode-toggle" class="colorscheme-toggle">
+        <i class="fa fa-adjust fa-fw" aria-hidden="true"></i>
+    </a>
+</div>
+
+
+  <main class="wrapper">
+    <nav class="navigation">
+  <section class="container">
+    <a class="navigation-title" href="/">
+      My little software warehouse
+    </a>
+    
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/posts/">Blog</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/about/">About</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="mailto:fedepaol@gmail.com">Contact</a>
+            </li>
+          
+        
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+    <div class="content">
+      
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">
+            <a class="title-link" href="https://fedepaol.github.io/blog/2024/06/14/extending-the-kubernetes-host-network-with-evpn-tunnels-and-frr/">
+              Extending the Kubernetes (host) network with EVPN tunnels (and FRR)
+            </a>
+          </h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa fa-calendar" aria-hidden="true"></i>
+              <time datetime="2024-06-14T12:01:51&#43;01:00">
+                June 14, 2024
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa fa-clock-o" aria-hidden="true"></i>
+              8-minute read
+            </span>
+          </div>
+          
+          
+          
+        </div>
+      </header>
+
+      <div class="post-content">
+        
+        <h1 id="running-on-kubernetes">
+  Running on Kubernetes
+  <a class="heading-link" href="#running-on-kubernetes">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h1>
+<p>The ultimate goal of my ramblings about FRR and EVPN (previous posts <a href="/blog/2024/05/09/l3evpn-using-frr-and-linux-vxlans/" >here</a>, <a href="/blog/2024/05/17/l2evpn-using-frr-and-linux-vxlans/" >here</a>) was to extend
+Kubernetes node networks with EVPN, in such a way that is both dynamic and configurable in a cloud native manner.</p>
+<p>Additionally, I wanted to setup an environment that was easy to extend and configure so I could validate all the possible variations of the configuration.</p>
+<h2 id="the-setup">
+  The setup
+  <a class="heading-link" href="#the-setup">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>The whole setup can be found under my personal <a href="https://github.com/fedepaol/evpnlab/tree/main/04_from_kind"  class="external-link" target="_blank" rel="noopener">evpn lab</a> repository,
+and as before it still uses <a href="https://containerlab.dev/"  class="external-link" target="_blank" rel="noopener">containerlab</a>, which supports also <a href="https://github.com/kubernetes-sigs/kind"  class="external-link" target="_blank" rel="noopener">Kind</a> as a node type (and which is awesome!).</p>
+<p>My end goal is to have something like the following picture (couldn&rsquo;t go ascii this time!):</p>
+<p><img src="/images/evpnkind/routerkind.png" alt=""></p>
+<p>The interesing part is that, thanks to Kind, the node itself is a container which runs containers inside!</p>
+<h2 id="zooming-inside-kind">
+  Zooming inside kind
+  <a class="heading-link" href="#zooming-inside-kind">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>In this first experiment, What I want to implement inside kind is somehow complex:</p>
+<ul>
+<li>an FRR instance running inside a container, connected to the leaf</li>
+<li>a Veth leg (ideally, one per VRF) to connect the containerized FRR to the host</li>
+<li>an <a href="https://github.com/metallb/frr-k8s/"  class="external-link" target="_blank" rel="noopener">FRR-K8s instance</a> running on the node, peered with the other FRR through the Veth</li>
+</ul>
+<p>In this scenario:</p>
+<ul>
+<li>the leaf connected to the veth relays the type 5 routes up to the FRR instance running on Kind</li>
+<li>the &ldquo;host&rdquo; FRR instance redistributes the routes to the FRR-K8s instance via BGP</li>
+</ul>
+<h3 id="inside-the-kind-node">
+  Inside the Kind node
+  <a class="heading-link" href="#inside-the-kind-node">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>Let&rsquo;s have a look at what&rsquo;s inside the FRR container:</p>
+<p><img src="/images/evpnkind/routerkind-inside.png" alt=""></p>
+<ul>
+<li>The interface connecting the &ldquo;node&rdquo; to the leaf is moved inside the namespace</li>
+<li>A linux VRF is created and corresponds to the L3 VNI</li>
+<li>All the machinery required <a href="https://docs.frrouting.org/en/latest/evpn.html"  class="external-link" target="_blank" rel="noopener">to FRR to work with EVPN</a> is created inside the
+linux VRF</li>
+<li>A veth pair connects the container to the host</li>
+</ul>
+<h3 id="the-controlplane">
+  The controlplane
+  <a class="heading-link" href="#the-controlplane">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>The FRR container translates BGP routes to EVPN Type 5 routes, and advertises them in both directions.</p>
+<p>By doing this, FRR-K8s is able to advertise any IP from the node as Type5 route without bothering with linux VRFs on the host</p>
+<p><img src="/images/evpnkind/routerkind-controlplane.png" alt=""></p>
+<h3 id="the-dataplane">
+  The dataplane
+  <a class="heading-link" href="#the-dataplane">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>The VXLan VTEP is hosted inside the container. Packets directed to the routes adverised by the FRR container are tunneled towards the local VTEP, decapsulated
+from the VXLan interface and then routed accordingly to the routes (likely, the ones published by FRR-K8s).</p>
+<p>At the same time, FRR-K8s learns about the type 5 routes advertised by the fabric, so egress traffic goes through the veth and then gets encapsulated towards the proper VTEP.</p>
+<p><img src="/images/evpnkind/routerkind-dataplane.png" alt=""></p>
+<h2 id="the-setup-1">
+  The setup
+  <a class="heading-link" href="#the-setup-1">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>What we want to implement inside kind is somehow complex:</p>
+<ul>
+<li>an FRR instance running inside a container, connected to the leaf</li>
+<li>a Veth leg (ideally, one per VRF) to connect the containerized FRR to the host</li>
+<li>an <a href="https://github.com/metallb/frr-k8s/"  class="external-link" target="_blank" rel="noopener">FRR-K8s instance</a> running on the node, peered with the other FRR through the Veth</li>
+</ul>
+<p>In this scenario:</p>
+<ul>
+<li>the leaf connected to the veth relays the type 5 routes up to the FRR instance running on Kind</li>
+<li>the &ldquo;host&rdquo; FRR instance redistributes the routes to the FRR-K8s instance via BGP</li>
+</ul>
+<h3 id="inside-the-kind-node-1">
+  Inside the Kind node
+  <a class="heading-link" href="#inside-the-kind-node-1">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>Let&rsquo;s have a look at what&rsquo;s inside the FRR container:</p>
+<p><img src="/images/evpnkind/routerkind-inside.png" alt=""></p>
+<ul>
+<li>The interface connecting the &ldquo;node&rdquo; to the leaf is moved inside the namespace</li>
+<li>A linux VRF is created and corresponds to the L3 VNI</li>
+<li>All the machinery required <a href="https://docs.frrouting.org/en/latest/evpn.html"  class="external-link" target="_blank" rel="noopener">to FRR to work with EVPN</a> is created inside the
+linux VRF</li>
+<li>A veth pair connects the container to the host</li>
+</ul>
+<h3 id="the-controlplane-1">
+  The controlplane
+  <a class="heading-link" href="#the-controlplane-1">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>The FRR container translates BGP routes to EVPN Type 5 routes, and advertises them in both directions.</p>
+<p>By doing this, FRR-K8s is able to advertise any IP from the node as Type5 route without bothering with linux VRFs on the host</p>
+<p><img src="/images/evpnkind/routerkind-controlplane.png" alt=""></p>
+<h3 id="the-dataplane-1">
+  The dataplane
+  <a class="heading-link" href="#the-dataplane-1">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>The VXLan VTEP is hosted inside the container. Packets directed to the routes adverised by the FRR container are tunneled towards the local VTEP, decapsulated
+from the VXLan interface and then routed accordingly to the routes (likely, the ones published by FRR-K8s).</p>
+<p>At the same time, FRR-K8s learns about the type 5 routes advertised by the fabric, so egress traffic goes through the veth and then gets encapsulated towards the proper VTEP.</p>
+<p><img src="/images/evpnkind/routerkind-dataplane.png" alt=""></p>
+<h2 id="configuring-everything">
+  Configuring everything
+  <a class="heading-link" href="#configuring-everything">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<h3 id="the-topology">
+  The topology
+  <a class="heading-link" href="#the-topology">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>The topology is quite similar to the one described before in the <a href="/blog/2024/05/09/l3evpn-using-frr-and-linux-vxlans/" >previous article about L3-EVPN</a>. The main difference being, instead of
+a host connected to the <code>leaf2</code>, here we have the node of a cluster:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">    k0:
+</span></span><span class="line"><span class="cl">      kind: k8s-kind
+</span></span><span class="line"><span class="cl">      image: kindwithdocker:v1.29.2
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    k0-control-plane:
+</span></span><span class="line"><span class="cl">      kind: ext-container
+</span></span><span class="line"><span class="cl">      binds:
+</span></span><span class="line"><span class="cl">        - kind/setup.sh:/setup.sh
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  links:
+</span></span><span class="line"><span class="cl">    - endpoints: <span class="o">[</span><span class="s2">&#34;leaf1:eth1&#34;</span>, <span class="s2">&#34;spine:eth1&#34;</span><span class="o">]</span>
+</span></span><span class="line"><span class="cl">    - endpoints: <span class="o">[</span><span class="s2">&#34;leaf2:eth1&#34;</span>, <span class="s2">&#34;spine:eth2&#34;</span><span class="o">]</span>
+</span></span><span class="line"><span class="cl">    - endpoints: <span class="o">[</span><span class="s2">&#34;HOST1:eth1&#34;</span>, <span class="s2">&#34;leaf1:eth2&#34;</span><span class="o">]</span>
+</span></span><span class="line"><span class="cl">    - endpoints: <span class="o">[</span><span class="s2">&#34;k0-control-plane:eth1&#34;</span>, <span class="s2">&#34;leaf2:eth2&#34;</span><span class="o">]</span>
+</span></span></code></pre></div><p>One extra thing to notice is that, since I needed to start the FRR container from the host, I am providing a custom image with docker already deployed.</p>
+<p>Then, a link is defined between <code>leaf2</code> and the <code>k0-control-plane</code> node.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">    - endpoints: <span class="o">[</span><span class="s2">&#34;k0-control-plane:eth1&#34;</span>, <span class="s2">&#34;leaf2:eth2&#34;</span><span class="o">]</span>
+</span></span></code></pre></div><h3 id="the-frr-configuration-of-the-namespaced-frr">
+  The FRR Configuration of the namespaced FRR
+  <a class="heading-link" href="#the-frr-configuration-of-the-namespaced-frr">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>I won&rsquo;t share the details of the setup of the container, moving the interface to the container&rsquo;s namespace, creating the veth and all the rest as they are available
+in the <a href="https://github.com/fedepaol/evpnlab/blob/main/04_from_kind/kind/setup.sh"  class="external-link" target="_blank" rel="noopener">setup.sh file related to the node setup</a> and the <a href="https://github.com/fedepaol/evpnlab/blob/main/04_from_kind/kind/frr/setup.sh"  class="external-link" target="_blank" rel="noopener">setup.sh file related to the container setup</a>.</p>
+<p>What might be interesting is the <a href="https://github.com/fedepaol/evpnlab/blob/main/04_from_kind/kind/frr/frr.conf"  class="external-link" target="_blank" rel="noopener">FRR configuration of the namespaced FRR</a>:</p>
+<p>The section related to the default VRF contains the details of the underlay. It establishes a session with <code>leaf2</code> and advertises the <code>VTEP</code> ip (<code>100.65.0.2/32</code>)
+via BGP, and enables the l2vpn address-family:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">address-family ipv4 unicast
+</span></span><span class="line"><span class="cl">  neighbor 192.168.11.2 activate
+</span></span><span class="line"><span class="cl">  network 100.65.0.2/32
+</span></span><span class="line"><span class="cl"> exit-address-family
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"> address-family l2vpn evpn
+</span></span><span class="line"><span class="cl">  neighbor 192.168.11.2 activate
+</span></span><span class="line"><span class="cl">  neighbor 192.168.11.2 allowas-in origin
+</span></span><span class="line"><span class="cl">  advertise-all-vni
+</span></span><span class="line"><span class="cl">  advertise-svi-ip
+</span></span><span class="line"><span class="cl"> exit-address-family
+</span></span></code></pre></div><p>On the VRF side, we advertise the unicast ipv4 / ipv6 addresses to the evpn address family:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">router bgp <span class="m">64512</span> vrf red
+</span></span><span class="line"><span class="cl"> address-family l2vpn evpn
+</span></span><span class="line"><span class="cl">  advertise ipv4 unicast
+</span></span><span class="line"><span class="cl">  advertise ipv6 unicast
+</span></span><span class="line"><span class="cl"> exit-address-family
+</span></span></code></pre></div><p>but most importantly, we also establish a BGP session with the local FRR-K8s container from the
+<code>red</code> VRF, and we redistribute the routes from / to it via BGP:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">router bgp <span class="m">64512</span> vrf red
+</span></span><span class="line"><span class="cl"> neighbor 192.169.10.0 remote-as <span class="m">64515</span>
+</span></span><span class="line"><span class="cl"> !
+</span></span><span class="line"><span class="cl"> address-family ipv4 unicast
+</span></span><span class="line"><span class="cl">  neighbor 192.169.10.0 activate
+</span></span><span class="line"><span class="cl">  neighbor 192.169.10.0 activate
+</span></span><span class="line"><span class="cl">  neighbor 192.169.10.0 route-map allowall in
+</span></span><span class="line"><span class="cl">  neighbor 192.169.10.0 route-map allowall out
+</span></span><span class="line"><span class="cl"> exit-address-family
+</span></span><span class="line"><span class="cl"> !
+</span></span><span class="line"><span class="cl"> address-family l2vpn evpn
+</span></span><span class="line"><span class="cl">  advertise ipv4 unicast
+</span></span><span class="line"><span class="cl">  advertise ipv6 unicast
+</span></span><span class="line"><span class="cl"> exit-address-family
+</span></span></code></pre></div><p>Lastly, the <a href="https://github.com/fedepaol/evpnlab/blob/main/04_from_kind/kind/frr-k8s/frr-k8sconfig.yaml"  class="external-link" target="_blank" rel="noopener">FRR-K8s configuration</a> is also straightforward, establishing a session with the containerized
+FRR, receiving prefixes to it and advertising the pod CIDR:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l">frrk8s.metallb.io/v1beta1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l">FRRConfiguration</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">metadata</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">test</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l">frr-k8s-system</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">spec</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">bgp</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">routers</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span>- <span class="nt">asn</span><span class="p">:</span><span class="w"> </span><span class="m">64515</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">neighbors</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="nt">address</span><span class="p">:</span><span class="w"> </span><span class="m">192.169.10.1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">asn</span><span class="p">:</span><span class="w"> </span><span class="m">64512</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">toReceive</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span><span class="nt">allowed</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l">all</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">toAdvertise</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span><span class="nt">allowed</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l">all</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">prefixes</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="m">10.244.0.0</span><span class="l">/24</span><span class="w">
+</span></span></span></code></pre></div><h2 id="does-it-work">
+  Does it work?
+  <a class="heading-link" href="#does-it-work">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>Getting back to the high level picture, the goal here is to have a pod reach <code>HOST</code> and viceversa:</p>
+<p><img src="/images/evpnkind/routerkind.png" alt=""></p>
+<h3 id="checking-the-routes-on-leaf1">
+  Checking the routes on leaf1
+  <a class="heading-link" href="#checking-the-routes-on-leaf1">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">docker <span class="nb">exec</span> -it clab-kind-leaf1 vtysh -c <span class="s2">&#34;show bgp l2vpn evpn&#34;</span>
+</span></span><span class="line"><span class="cl">   Network          Next Hop            Metric LocPrf Weight Path
+</span></span><span class="line"><span class="cl">Route Distinguisher: 192.169.10.1:2
+</span></span><span class="line"><span class="cl"> *&gt; <span class="o">[</span>5<span class="o">]</span>:<span class="o">[</span>0<span class="o">]</span>:<span class="o">[</span>24<span class="o">]</span>:<span class="o">[</span>10.244.0.0<span class="o">]</span>
+</span></span><span class="line"><span class="cl">                    100.65.0.2                             <span class="m">0</span> <span class="m">64612</span> <span class="m">64512</span> <span class="m">64514</span> <span class="m">64515</span> i
+</span></span><span class="line"><span class="cl">                    RT:64512:100 ET:8 Rmac:aa:bb:cc:00:00:66
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Displayed <span class="m">2</span> out of <span class="m">2</span> total prefixes
+</span></span></code></pre></div><p>So, leaf1 learned about the pod CIDR advertised by FRR-K8s!</p>
+<p>Let&rsquo;s check on the other side, inside FRR-K8s first:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">k0-control-plane# show bgp ipv4
+</span></span><span class="line"><span class="cl">BGP table version is 2, <span class="nb">local</span> router ID is 192.169.10.0, vrf id <span class="m">0</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    Network          Next Hop            Metric LocPrf Weight Path
+</span></span><span class="line"><span class="cl"> *&gt; 10.244.0.0/24    0.0.0.0                  <span class="m">0</span>         <span class="m">32768</span> i
+</span></span><span class="line"><span class="cl"> *&gt; 192.168.10.0/24  192.169.10.1                           <span class="m">0</span> <span class="m">64512</span> <span class="m">64512</span> <span class="m">64612</span> <span class="m">64512</span> ?
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Displayed  <span class="m">2</span> routes and <span class="m">2</span> total paths
+</span></span></code></pre></div><p>FRR-K8s learned the route towards <code>HOST1</code> via the veth leg connecting it to the containerized FRR.</p>
+<p>Lastly, let&rsquo;s check what we have in the containerized FRR, acting as Leaf in this case:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">   Network          Next Hop            Metric LocPrf Weight Path
+</span></span><span class="line"><span class="cl">Route Distinguisher: 192.168.10.2:2
+</span></span><span class="line"><span class="cl"> *&gt; <span class="o">[</span>5<span class="o">]</span>:<span class="o">[</span>0<span class="o">]</span>:<span class="o">[</span>24<span class="o">]</span>:<span class="o">[</span>192.168.10.0<span class="o">]</span>
+</span></span><span class="line"><span class="cl">                    100.64.0.1                             <span class="m">0</span> <span class="m">64512</span> <span class="m">64612</span> <span class="m">64512</span> ?
+</span></span><span class="line"><span class="cl">                    RT:64512:100 ET:8 Rmac:aa:bb:cc:00:00:65
+</span></span><span class="line"><span class="cl">Route Distinguisher: 192.169.10.1:2
+</span></span><span class="line"><span class="cl"> *&gt; <span class="o">[</span>5<span class="o">]</span>:<span class="o">[</span>0<span class="o">]</span>:<span class="o">[</span>24<span class="o">]</span>:<span class="o">[</span>10.244.0.0<span class="o">]</span>
+</span></span><span class="line"><span class="cl">                    100.65.0.2               <span class="m">0</span>             <span class="m">0</span> <span class="m">64515</span> i
+</span></span><span class="line"><span class="cl">                    ET:8 RT:64512:100 Rmac:aa:bb:cc:00:00:66
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Displayed <span class="m">2</span> out of <span class="m">2</span> total prefixes
+</span></span></code></pre></div><p>Here we have the HOST1 network advertised with the <code>leaf1</code>&rsquo;s VTEP IP and the pod network CIDR advertised with the local VTEP.</p>
+<h3 id="does-it-really-work">
+  Does it really work?
+  <a class="heading-link" href="#does-it-really-work">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>Let&rsquo;s try:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">docker <span class="nb">exec</span> -it clab-kind-HOST1 ping 10.244.0.6
+</span></span><span class="line"><span class="cl">PING 10.244.0.6 <span class="o">(</span>10.244.0.6<span class="o">)</span> 56<span class="o">(</span>84<span class="o">)</span> bytes of data.
+</span></span><span class="line"><span class="cl"><span class="m">64</span> bytes from 10.244.0.6: <span class="nv">icmp_seq</span><span class="o">=</span><span class="m">1</span> <span class="nv">ttl</span><span class="o">=</span><span class="m">61</span> <span class="nv">time</span><span class="o">=</span>0.148 ms
+</span></span><span class="line"><span class="cl"><span class="m">64</span> bytes from 10.244.0.6: <span class="nv">icmp_seq</span><span class="o">=</span><span class="m">2</span> <span class="nv">ttl</span><span class="o">=</span><span class="m">61</span> <span class="nv">time</span><span class="o">=</span>0.090 ms
+</span></span><span class="line"><span class="cl">^C
+</span></span><span class="line"><span class="cl">--- 10.244.0.6 ping statistics ---
+</span></span><span class="line"><span class="cl"><span class="m">2</span> packets transmitted, <span class="m">2</span> received, 0% packet loss, <span class="nb">time</span> 1052ms
+</span></span><span class="line"><span class="cl">rtt min/avg/max/mdev <span class="o">=</span> 0.090/0.119/0.148/0.029 ms
+</span></span></code></pre></div><p>Checking on leaf2 we see that both the request and the reply are encapsulated, which makes sense as
+the tunneling happens locally to the node.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">sudo ip netns <span class="nb">exec</span> clab-kind-leaf2 tcpdump -nn -i any
+</span></span><span class="line"><span class="cl">tcpdump: data link <span class="nb">type</span> LINUX_SLL2
+</span></span><span class="line"><span class="cl">dropped privs to tcpdump
+</span></span><span class="line"><span class="cl">tcpdump: verbose output suppressed, use -v<span class="o">[</span>v<span class="o">]</span>... <span class="k">for</span> full protocol decode
+</span></span><span class="line"><span class="cl">listening on any, link-type LINUX_SLL2 <span class="o">(</span>Linux cooked v2<span class="o">)</span>, snapshot length <span class="m">262144</span> bytes
+</span></span><span class="line"><span class="cl">17:24:55.850570 eth1  In  IP 100.64.0.1.52099 &gt; 100.65.0.2.4789: VXLAN, flags <span class="o">[</span>I<span class="o">]</span> <span class="o">(</span>0x08<span class="o">)</span>, vni <span class="m">100</span>
+</span></span><span class="line"><span class="cl">IP 192.168.10.1 &gt; 10.244.0.6: ICMP <span class="nb">echo</span> request, id 4, seq 1, length <span class="m">64</span>
+</span></span><span class="line"><span class="cl">17:24:55.850576 eth2  Out IP 100.64.0.1.52099 &gt; 100.65.0.2.4789: VXLAN, flags <span class="o">[</span>I<span class="o">]</span> <span class="o">(</span>0x08<span class="o">)</span>, vni <span class="m">100</span>
+</span></span><span class="line"><span class="cl">IP 192.168.10.1 &gt; 10.244.0.6: ICMP <span class="nb">echo</span> request, id 4, seq 1, length <span class="m">64</span>
+</span></span></code></pre></div><h2 id="wrapping-up">
+  Wrapping Up
+  <a class="heading-link" href="#wrapping-up">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>The path of this packet is quite complex, and I never felt so happy to see a ping work :-)</p>
+<p>Host -&gt; Leaf1 -&gt; VXLan encapsulation -&gt; Spine -&gt; Leaf2 -&gt; FRRContainer -&gt; VXLan decapsulation -&gt; Veth -&gt; Node -&gt; Pod</p>
+<p><img src="/images/evpnkind/packetpath.png" alt=""></p>
+<p>This was just a POC to showcase how to handle a PE Router of some sort on a kubernetes node, and accessing the EVPN network through a veth leg can
+get rid of the complications introduced by having several Linux VRFs on the host.</p>
+<p>I will probably experiment again a solution where everything is shared and handled by the same FRR instance on the node.</p>
+<p>Also, to make things more complex, there is already an example of <a href="https://github.com/fedepaol/evpnlab/tree/main/05_from_kind_multiple_vrfs"  class="external-link" target="_blank" rel="noopener">connecting the cluster to multiple EVPN / VXLans</a> on my <a href="https://github.com/fedepaol/evpnlab"  class="external-link" target="_blank" rel="noopener">evpn lab</a> github repository.</p>
+
+      </div>
+
+
+      <footer>
+        
+
+
+        <div id="disqus_thread"></div>
+<script>
+  window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "fedepaolgithubio" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+    
+    document.addEventListener('themeChanged', function (e) { 
+        if (document.readyState == 'complete') {
+          DISQUS.reset({ reload: true, config: disqus_config });
+        }
+    });
+</script>
+        
+        
+        
+        
+      </footer>
+    </article>
+
+    
+  </section>
+
+    </div>
+
+    <footer class="footer">
+  <section class="container">
+    ©
+    
+    2024
+     Federico Paolinelli 
+    ·
+    
+    Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/" target="_blank" rel="noopener">Coder</a>.
+    
+  </section>
+</footer>
+
+  </main>
+
+  
+
+  
+  
+  <script src="/js/coder.min.6ae284be93d2d19dad1f02b0039508d9aab3180a12a06dcc71b0b0ef7825a317.js" integrity="sha256-auKEvpPS0Z2tHwKwA5UI2aqzGAoSoG3McbCw73gloxc="></script>
+  
+
+  
+
+  
+
+
+  
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-16514009-2', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+
+</html>
