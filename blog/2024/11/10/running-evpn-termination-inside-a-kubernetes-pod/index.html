@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>
+  Running EVPN termination inside a kubernetes pod · My little software warehouse
+</title>
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+
+
+
+
+<meta name="author" content="Federico Paolinelli">
+<meta name="description" content="How to run FRR on the host to add VXLans tunnels on Kubernetes nodes, using pods">
+<meta name="keywords" content="">
+
+<meta name="twitter:card" content="summary"/><meta name="twitter:title" content="Running EVPN termination inside a kubernetes pod"/>
+<meta name="twitter:description" content="How to run FRR on the host to add VXLans tunnels on Kubernetes nodes, using pods"/>
+
+<meta property="og:title" content="Running EVPN termination inside a kubernetes pod" />
+<meta property="og:description" content="How to run FRR on the host to add VXLans tunnels on Kubernetes nodes, using pods" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://fedepaol.github.io/blog/2024/11/10/running-evpn-termination-inside-a-kubernetes-pod/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2024-11-10T12:01:51+01:00" />
+<meta property="article:modified_time" content="2024-11-10T12:01:51+01:00" />
+
+
+
+
+<link rel="canonical" href="https://fedepaol.github.io/blog/2024/11/10/running-evpn-termination-inside-a-kubernetes-pod/">
+
+
+<link rel="preload" href="/fonts/fa-brands-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/fa-regular-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
+
+
+  
+  
+  <link rel="stylesheet" href="/css/coder.min.577e3c5ead537873430da16f0964b754a120fd87c4e2203a00686e7c75b51378.css" integrity="sha256-V348Xq1TeHNDDaFvCWS3VKEg/YfE4iA6AGhufHW1E3g=" crossorigin="anonymous" media="screen" />
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+<link rel="icon" type="image/svg+xml" href="/images/favicon.svg" sizes="any">
+<link rel="icon" type="image/png" href="/images/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="/images/favicon-16x16.png" sizes="16x16">
+
+<link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+<link rel="manifest" href="/site.webmanifest">
+<link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+
+
+
+
+
+
+</head>
+
+
+
+
+<body class="preload-transitions colorscheme-light">
+  
+<div class="float-container">
+    <a id="dark-mode-toggle" class="colorscheme-toggle">
+        <i class="fa-solid fa-adjust fa-fw" aria-hidden="true"></i>
+    </a>
+</div>
+
+
+  <main class="wrapper">
+    <nav class="navigation">
+  <section class="container">
+    
+    <a class="navigation-title" href="https://fedepaol.github.io/">
+      My little software warehouse
+    </a>
+    
+    
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa-solid fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/posts/">Blog</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/about/">About</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="mailto:fedepaol@gmail.com">Contact</a>
+            </li>
+          
+        
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+    <div class="content">
+      
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">
+            <a class="title-link" href="https://fedepaol.github.io/blog/2024/11/10/running-evpn-termination-inside-a-kubernetes-pod/">
+              Running EVPN termination inside a kubernetes pod
+            </a>
+          </h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa-solid fa-calendar" aria-hidden="true"></i>
+              <time datetime="2024-11-10T12:01:51&#43;01:00">
+                November 10, 2024
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa-solid fa-clock" aria-hidden="true"></i>
+              5-minute read
+            </span>
+          </div>
+          
+          
+          
+        </div>
+      </header>
+
+      <div class="post-content">
+        
+        <h1 id="following-up">
+  Following up
+  <a class="heading-link" href="#following-up">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h1>
+<p>As I wrote in my <a href="/blog/2024/06/14/extending-the-kubernetes-host-network-with-evpn-tunnels-and-frr/" >last post</a>, one thing I have been experimenting with is to run EVPN termination inside a Kubernetes node. I demonstrated how to achieve it by running a container on the host as per the following image:</p>
+<p><img src="/images/evpnkind/routerkind-inside.png" alt=""></p>
+<p>This clearly brings some deployment and lifecycle challenges that include:</p>
+<ul>
+<li>running the container and keeping it running</li>
+<li>updating it</li>
+<li>configuring it</li>
+</ul>
+<p>All these things are clearly solved by Kubernetes itself, so why not trying to run the whole ensamble inside pods? This may sounds a bit crazy, as it involves dynamically moving interfaces into a different namespace and creating veths and all the rest it was previously described.</p>
+<h2 id="the-architecture">
+  The architecture
+  <a class="heading-link" href="#the-architecture">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>The architecture is a bit as follows:</p>
+<p><img src="/images/evpnkindpods/routerkind-pods.png" alt=""></p>
+<h3 id="a-pod-running-frr">
+  A pod running FRR
+  <a class="heading-link" href="#a-pod-running-frr">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>This is the same as the container showed in the previous examples, just running inside a regular pod (which means, running in a separate network namespace).</p>
+<p>The pod definition can be found under <a href="https://github.com/fedepaol/evpnlab/blob/main/06_from_kind_with_pods/frrpods/frr/frr.yaml"  class="external-link" target="_blank" rel="noopener">my evpn lab repo</a>.</p>
+<h3 id="a-powered-up-host-networked-pod-the-controller">
+  A powered up host-networked pod (the controller)
+  <a class="heading-link" href="#a-powered-up-host-networked-pod-the-controller">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>The pod definition can be found under <a href="https://github.com/fedepaol/evpnlab/blob/main/06_from_kind_with_pods/frrpods/controller/controller.yaml"  class="external-link" target="_blank" rel="noopener">my evpn lab repo</a>.</p>
+<p>This pod is able to interact with the host network, in particular for:</p>
+<ul>
+<li>Creating the Veth pair and moving one end inside the FRR pod</li>
+<li>Moving the interface used for the underlay network inside the FRR pod</li>
+</ul>
+<h5 id="knowing-which-namespace-to-move-the-interfaces-into">
+  Knowing which namespace to move the interfaces into
+  <a class="heading-link" href="#knowing-which-namespace-to-move-the-interfaces-into">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h5>
+<p>In order to know what is the network namespace of the FRR pod, some crictl commands are performed, but it&rsquo;s quite straightforward (or it is now, after sweating a lot on it :-) ):</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="nv">POD_ID</span><span class="o">=</span><span class="k">$(</span>crictl -r /var/run/containerd/containerd.sock pods  --name<span class="o">=</span>frr --namespace<span class="o">=</span>frrtest -q --no-trunc<span class="k">)</span>                                                                                                          <span class="nv">NSPATH</span><span class="o">=</span><span class="k">$(</span>crictl -r /var/run/containerd/containerd.sock inspectp <span class="si">${</span><span class="nv">POD_ID</span><span class="si">}</span> <span class="p">|</span> jq -r <span class="s1">&#39;.info.runtimeSpec.linux.namespaces[] |select(.type==&#34;network&#34;) | .path&#39;</span><span class="k">)</span>
+</span></span><span class="line"><span class="cl"><span class="nv">NETNS</span><span class="o">=</span><span class="k">$(</span>basename <span class="nv">$NSPATH</span><span class="k">)</span>
+</span></span></code></pre></div><p>Note that this assumes both the containerd socket and the host namespaces to be mounted inside the container:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="w">      </span><span class="nt">volumeMounts</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="nt">mountPath</span><span class="p">:</span><span class="w"> </span><span class="l">/run/containerd/containerd.sock</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">varrun</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">subPath</span><span class="p">:</span><span class="w"> </span><span class="l">containerd.sock</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="nt">mountPath</span><span class="p">:</span><span class="w"> </span><span class="l">/run/netns</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">runns</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">mountPropagation</span><span class="p">:</span><span class="w"> </span><span class="l">HostToContainer</span><span class="w">
+</span></span></span></code></pre></div><h3 id="configuring-the-whole-thing">
+  Configuring the whole thing
+  <a class="heading-link" href="#configuring-the-whole-thing">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<h4 id="configuring-the-interfaces">
+  Configuring the interfaces
+  <a class="heading-link" href="#configuring-the-interfaces">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h4>
+<p>The configuration (and the orchestration) is deferred to the external execution of a script on each container, in the <a href="https://github.com/fedepaol/evpnlab/blob/main/06_from_kind_with_pods/setup.sh#L42"  class="external-link" target="_blank" rel="noopener">base setup.sh file</a>.</p>
+<p>We run commands from the controller first, from its <a href="https://github.com/fedepaol/evpnlab/blob/main/06_from_kind_with_pods/frrpods/controller/setup.sh"  class="external-link" target="_blank" rel="noopener">setup.sh</a> file, where we:</p>
+<ul>
+<li>find the target network namespace</li>
+<li>create the veth pair and move one end into the other pod</li>
+<li>move the underlay interface into the other pod</li>
+</ul>
+<p>Then, we configure frr with the corresponding <a href="https://github.com/fedepaol/evpnlab/blob/main/06_from_kind_with_pods/frrpods/frr/setup.sh"  class="external-link" target="_blank" rel="noopener">setup.sh</a> script, where we configure the host network to make EVPN work, including:</p>
+<ul>
+<li>creating a linux VRF</li>
+<li>creating a VXLan interface and a linux bridge</li>
+<li>adding a VTEP ip to the loopback interface</li>
+</ul>
+<h4 id="the-frr-configuration">
+  The FRR configuration
+  <a class="heading-link" href="#the-frr-configuration">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h4>
+<p>The FRR configuration is provided as a <a href="https://github.com/fedepaol/evpnlab/blob/main/06_from_kind_with_pods/frrpods/frr/frrpod.yaml#L43"  class="external-link" target="_blank" rel="noopener">configmap</a> and resembles what was described previously, including:</p>
+<ul>
+<li>an underlay session with the leaf on the default VRF, where we advertise L3VPN routes</li>
+<li>a BGP session with FRR-K8s via the added veth leg</li>
+</ul>
+<p>I won&rsquo;t enter into the details of how the packets are flowing as it&rsquo;s covered in detail in <a href="/blog/2024/06/14/extending-the-kubernetes-host-network-with-evpn-tunnels-and-frr/" >my previous post</a>, and here I am doing the same thing, but with pods instead of host processes / containers. The whole flow is as before, just with these pods around:</p>
+<p><img src="/images/evpnkindpods/packetpath-pods.png" alt=""></p>
+<h2 id="limitations">
+  Limitations
+  <a class="heading-link" href="#limitations">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<h3 id="we-are-giving-up-one-host-interface">
+  We are giving up one host interface
+  <a class="heading-link" href="#we-are-giving-up-one-host-interface">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>This was true also with the previous iterations, but it&rsquo;s important to notice that each node is expected to have one other running interface used for example to reach the API server in order to fetch the various resources.</p>
+<p>I wrote a <a href="https://github.com/fedepaol/evpnlab/tree/main/07_from_kind_with_pods_vlan"  class="external-link" target="_blank" rel="noopener">variant of this lab</a> where a VLan interface is created out of the &ldquo;physical&rdquo; one and used for the underlay connection.</p>
+<h3 id="we-cant-use-evpn-for-all-the-types-of-traffic">
+  We can&rsquo;t use EVPN for all the types of traffic
+  <a class="heading-link" href="#we-cant-use-evpn-for-all-the-types-of-traffic">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>Because of the chicken - egg problem mentioned above, if we make a controller out of this, we can&rsquo;t delegate all the type of traffic as EVPN traffic:</p>
+<ul>
+<li>the controller will have to read the configuration in order to enable the EVPN / vxlan tunnel</li>
+<li>the node needs EVPN to read the configuration</li>
+</ul>
+<p>In any case, this is a good first step that would enable extending the Kubernetes node network by just throwing the usual bunch of yamls against it :-)</p>
+<p>I will write a new blogpost in the near future on how we can have this whole thing deployed before the kubelet starts.</p>
+<h2 id="it-really-works">
+  It really works
+  <a class="heading-link" href="#it-really-works">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>As per all the previous examples, I am leveraing the super handy <a href="https://containerlab.dev"  class="external-link" target="_blank" rel="noopener">containerlab</a> and by running the <a href="https://github.com/fedepaol/evpnlab/blob/main/06_from_kind_with_pods/setup.sh"  class="external-link" target="_blank" rel="noopener">setup.sh</a> script from my repo you&rsquo;ll get what&rsquo;s described above.</p>
+<p>The usual <em>ping the pod from the remote host</em> works fine because the pod CIDR is carries as a L3EVPN route to the other leaf:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">docker <span class="nb">exec</span> -it clab-kindpods-HOST1 ping 10.244.0.6
+</span></span><span class="line"><span class="cl">PING 10.244.0.6 <span class="o">(</span>10.244.0.6<span class="o">)</span> 56<span class="o">(</span>84<span class="o">)</span> bytes of data.
+</span></span><span class="line"><span class="cl"><span class="m">64</span> bytes from 10.244.0.6: <span class="nv">icmp_seq</span><span class="o">=</span><span class="m">1</span> <span class="nv">ttl</span><span class="o">=</span><span class="m">61</span> <span class="nv">time</span><span class="o">=</span>0.649 ms
+</span></span><span class="line"><span class="cl"><span class="m">64</span> bytes from 10.244.0.6: <span class="nv">icmp_seq</span><span class="o">=</span><span class="m">2</span> <span class="nv">ttl</span><span class="o">=</span><span class="m">61</span> <span class="nv">time</span><span class="o">=</span>0.378 ms
+</span></span><span class="line"><span class="cl">^C
+</span></span><span class="line"><span class="cl">--- 10.244.0.6 ping statistics ---
+</span></span><span class="line"><span class="cl"><span class="m">2</span> packets transmitted, <span class="m">2</span> received, 0% packet loss, <span class="nb">time</span> 1037ms
+</span></span><span class="line"><span class="cl">rtt min/avg/max/mdev <span class="o">=</span> 0.378/0.513/0.649/0.135 ms
+</span></span></code></pre></div><p>And by tcpdumping, we ensure the packet is really being encapsulated via VXLan and is not taking some rougue route:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"> tcpdump -i eth2 -nn
+</span></span><span class="line"><span class="cl">tcpdump: verbose output suppressed, use -v<span class="o">[</span>v<span class="o">]</span>... <span class="k">for</span> full protocol decode
+</span></span><span class="line"><span class="cl">listening on eth2, link-type EN10MB <span class="o">(</span>Ethernet<span class="o">)</span>, snapshot length <span class="m">262144</span> bytes
+</span></span><span class="line"><span class="cl">11:20:26.825604 IP 100.64.0.1.40319 &gt; 100.65.0.2.4789: VXLAN, flags <span class="o">[</span>I<span class="o">]</span> <span class="o">(</span>0x08<span class="o">)</span>, vni <span class="m">100</span>
+</span></span><span class="line"><span class="cl">IP 192.168.10.1 &gt; 10.244.0.6: ICMP <span class="nb">echo</span> request, id 2, seq 33, length <span class="m">64</span>
+</span></span><span class="line"><span class="cl">11:20:26.825724 IP 100.65.0.2.40319 &gt; 100.64.0.1.4789: VXLAN, flags <span class="o">[</span>I<span class="o">]</span> <span class="o">(</span>0x08<span class="o">)</span>, vni <span class="m">100</span>
+</span></span><span class="line"><span class="cl">IP 10.244.0.6 &gt; 192.168.10.1: ICMP <span class="nb">echo</span> reply, id 2, seq 33, length <span class="m">64</span>
+</span></span></code></pre></div><h2 id="to-sum-up">
+  To sum up
+  <a class="heading-link" href="#to-sum-up">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>Making a kubernetes controller out of this will enable some fancy networking capabilities for our clusters, such as joining EVPN networks in a dynamic (and crd controlled!) fashion.</p>
+<p>Let&rsquo;s see what&rsquo;s at the end of this rabbit hole, as every time it reveals itself to be deeper!</p>
+
+      </div>
+
+
+      <footer>
+        
+
+
+        <div id="disqus_thread"></div>
+<script>
+  window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "fedepaolgithubio" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+    
+    document.addEventListener('themeChanged', function (e) { 
+        if (document.readyState == 'complete') {
+          DISQUS.reset({ reload: true, config: disqus_config });
+        }
+    });
+</script>
+        
+        
+        
+        
+
+        
+      </footer>
+    </article>
+
+    
+  </section>
+
+    </div>
+
+    <footer class="footer">
+  <section class="container">
+    ©
+    
+    2024
+     Federico Paolinelli 
+    ·
+    
+    Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/" target="_blank" rel="noopener">Coder</a>.
+    
+  </section>
+</footer>
+
+  </main>
+
+  
+
+  
+  
+  <script src="/js/coder.min.6ae284be93d2d19dad1f02b0039508d9aab3180a12a06dcc71b0b0ef7825a317.js" integrity="sha256-auKEvpPS0Z2tHwKwA5UI2aqzGAoSoG3McbCw73gloxc="></script>
+  
+
+  
+
+  
+
+
+  
+<script>
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-16514009-2', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+
+</html>
