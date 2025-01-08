@@ -6,8 +6,15 @@
     <description>Recent content in Posts on My little software warehouse</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Sun, 10 Nov 2024 12:01:51 +0100</lastBuildDate>
+    <lastBuildDate>Mon, 06 Jan 2025 21:33:24 +0100</lastBuildDate>
     <atom:link href="https://fedepaol.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Enabling EVPN termination with Podman pods as systemd units</title>
+      <link>https://fedepaol.github.io/blog/2025/01/06/enabling-evpn-termination-with-podman-pods-as-systemd-units/</link>
+      <pubDate>Mon, 06 Jan 2025 21:33:24 +0100</pubDate>
+      <guid>https://fedepaol.github.io/blog/2025/01/06/enabling-evpn-termination-with-podman-pods-as-systemd-units/</guid>
+      <description>Quick Recap Link to heading This is a follow up to my lengthy EVPN series. In my last post I demonstrated how I managed to have EVPN termination inside Kubernetes nodes, hosting FRR inside a regular network-namespaced pod interacting with the host via BGP through veth pairs.&#xA;Overcoming the limitations Link to heading I also described how running inside a pod is limiting this architecture and prototype to serve the node&amp;rsquo;s main interface, because of the chicken egg-y issue of needing the underlay network to allow each node to reach the API server, while at the same time the configuration required to establish the underlay must be retrieved from the API server itself.</description>
+    </item>
     <item>
       <title>Running EVPN termination inside a kubernetes pod</title>
       <link>https://fedepaol.github.io/blog/2024/11/10/running-evpn-termination-inside-a-kubernetes-pod/</link>

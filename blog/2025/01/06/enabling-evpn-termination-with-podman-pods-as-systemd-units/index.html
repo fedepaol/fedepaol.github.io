@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>
+  Enabling EVPN termination with Podman pods as systemd units · My little software warehouse
+</title>
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+
+
+
+
+<meta name="author" content="Federico Paolinelli">
+<meta name="description" content="Quick Recap Link to heading This is a follow up to my lengthy EVPN series. In my last post I demonstrated how I managed to have EVPN termination inside Kubernetes nodes, hosting FRR inside a regular network-namespaced pod interacting with the host via BGP through veth pairs.
+Overcoming the limitations Link to heading I also described how running inside a pod is limiting this architecture and prototype to serve the node&rsquo;s main interface, because of the chicken egg-y issue of needing the underlay network to allow each node to reach the API server, while at the same time the configuration required to establish the underlay must be retrieved from the API server itself.">
+<meta name="keywords" content="">
+
+<meta name="twitter:card" content="summary"/><meta name="twitter:title" content="Enabling EVPN termination with Podman pods as systemd units"/>
+<meta name="twitter:description" content="Quick Recap Link to heading This is a follow up to my lengthy EVPN series. In my last post I demonstrated how I managed to have EVPN termination inside Kubernetes nodes, hosting FRR inside a regular network-namespaced pod interacting with the host via BGP through veth pairs.
+Overcoming the limitations Link to heading I also described how running inside a pod is limiting this architecture and prototype to serve the node&rsquo;s main interface, because of the chicken egg-y issue of needing the underlay network to allow each node to reach the API server, while at the same time the configuration required to establish the underlay must be retrieved from the API server itself."/>
+
+<meta property="og:title" content="Enabling EVPN termination with Podman pods as systemd units" />
+<meta property="og:description" content="Quick Recap Link to heading This is a follow up to my lengthy EVPN series. In my last post I demonstrated how I managed to have EVPN termination inside Kubernetes nodes, hosting FRR inside a regular network-namespaced pod interacting with the host via BGP through veth pairs.
+Overcoming the limitations Link to heading I also described how running inside a pod is limiting this architecture and prototype to serve the node&rsquo;s main interface, because of the chicken egg-y issue of needing the underlay network to allow each node to reach the API server, while at the same time the configuration required to establish the underlay must be retrieved from the API server itself." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://fedepaol.github.io/blog/2025/01/06/enabling-evpn-termination-with-podman-pods-as-systemd-units/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2025-01-06T21:33:24+01:00" />
+<meta property="article:modified_time" content="2025-01-06T21:33:24+01:00" />
+
+
+
+
+<link rel="canonical" href="https://fedepaol.github.io/blog/2025/01/06/enabling-evpn-termination-with-podman-pods-as-systemd-units/">
+
+
+<link rel="preload" href="/fonts/forkawesome-webfont.woff2?v=1.2.0" as="font" type="font/woff2" crossorigin>
+
+
+  
+  
+  <link rel="stylesheet" href="/css/coder.min.4218e9a82fcc372a4835bc96c50c77e11ac52ebe04361b7efd80f5f332ec3e89.css" integrity="sha256-QhjpqC/MNypINbyWxQx34RrFLr4ENht&#43;/YD18zLsPok=" crossorigin="anonymous" media="screen" />
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+<link rel="icon" type="image/svg+xml" href="/images/favicon.svg" sizes="any">
+<link rel="icon" type="image/png" href="/images/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="/images/favicon-16x16.png" sizes="16x16">
+
+<link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+<link rel="manifest" href="/site.webmanifest">
+<link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+
+
+
+
+
+
+</head>
+
+
+
+
+<body class="preload-transitions colorscheme-light">
+  
+<div class="float-container">
+    <a id="dark-mode-toggle" class="colorscheme-toggle">
+        <i class="fa fa-adjust fa-fw" aria-hidden="true"></i>
+    </a>
+</div>
+
+
+  <main class="wrapper">
+    <nav class="navigation">
+  <section class="container">
+    <a class="navigation-title" href="/">
+      My little software warehouse
+    </a>
+    
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/posts/">Blog</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/about/">About</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="mailto:fedepaol@gmail.com">Contact</a>
+            </li>
+          
+        
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+    <div class="content">
+      
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">
+            <a class="title-link" href="https://fedepaol.github.io/blog/2025/01/06/enabling-evpn-termination-with-podman-pods-as-systemd-units/">
+              Enabling EVPN termination with Podman pods as systemd units
+            </a>
+          </h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa fa-calendar" aria-hidden="true"></i>
+              <time datetime="2025-01-06T21:33:24&#43;01:00">
+                January 6, 2025
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa fa-clock-o" aria-hidden="true"></i>
+              5-minute read
+            </span>
+          </div>
+          
+          
+          
+        </div>
+      </header>
+
+      <div class="post-content">
+        
+        <h1 id="quick-recap">
+  Quick Recap
+  <a class="heading-link" href="#quick-recap">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h1>
+<p>This is a follow up to my lengthy EVPN series. In my <a href="/blog/2024/06/14/extending-the-kubernetes-host-network-with-evpn-tunnels-and-frr/" >last post</a> I demonstrated how I managed to have EVPN termination inside Kubernetes nodes,
+hosting FRR inside a regular network-namespaced pod interacting with the host via BGP through veth pairs.</p>
+<p><img src="/images/evpnkindpods/packetpath-pods.png" alt=""></p>
+<h2 id="overcoming-the-limitations">
+  Overcoming the limitations
+  <a class="heading-link" href="#overcoming-the-limitations">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>I also described how running inside a pod is limiting this architecture and prototype to serve the node&rsquo;s main interface, because of the chicken egg-y issue of needing the underlay network to allow each node to reach the API server, while at the same time the configuration required to establish the underlay must be retrieved from the API server itself.</p>
+<p>In this post, I am going to take a step further by <strong>running the two pods as podman systemd units</strong>. The architecture is more or less the same, with the biggest difference being of having podman pods running as systemd units.</p>
+<h2 id="rethinking-the-architecture">
+  Rethinking the architecture
+  <a class="heading-link" href="#rethinking-the-architecture">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>Before jumping into how to run podman pods, I&rsquo;ll describe how this was a chance to rethink the architecture of the various actors, making the FRR container dumber and delegating all the network configuration logic to the <code>controller</code>
+container.</p>
+<h3 id="the-previous-version">
+  The previous version
+  <a class="heading-link" href="#the-previous-version">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>In previous iterations</p>
+<p><img src="/images/podman-systemd-unit/routerkind-podmanunits-interactions.png" alt=""></p>
+<ul>
+<li>we had a static <code>frr.conf</code> configuration, tailored to the poc and read by FRR at startup and provided to the pod as a <a href="https://github.com/fedepaol/evpnlab/blob/main/06_from_kind_with_pods/frrpods/frr/frrpod.yaml#L43"  class="external-link" target="_blank" rel="noopener">ConfigMap</a></li>
+<li>the controller pod was responsible of moving the interface to be used for the underlay network, to create the veth pairs and to move one end inside the container</li>
+<li>the FRR pod was responsible of configuring the network side required to make FRR happy and have EVPN working (see <a href="https://github.com/fedepaol/evpnlab/blob/main/06_from_kind_with_pods/frrpods/frr/setup.sh"  class="external-link" target="_blank" rel="noopener">the frr pod setup.sh script</a> for example)</li>
+</ul>
+<p>Note also that this last step assumes the veth leg and the main interface to be available, requiring some kind of orchestration between the two separate components (because the controller must have done its part before
+the veth leg and the main interface can be configured accordingly).</p>
+<h3 id="the-new-version">
+  The new version
+  <a class="heading-link" href="#the-new-version">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>I wanted to evolve the components in a cleaner way (because the goal is still to automate all this logic :-)), so it felt better and less racy to have one single component in charge of all the configuration.</p>
+<p>In this new iteration:</p>
+<p><img src="/images/podman-systemd-unit/routerkind-podmanunits-dumbfrr.png" alt=""></p>
+<ul>
+<li>the FRR container is responsible <strong>only</strong> for the routing part</li>
+<li>a sidecar container is listening to a signal and reload the FRR configuration (following the same pattern we implemented in MetalLB and FRR-K8s)</li>
+<li>all the logic happens in the <code>controller</code> container:
+<ul>
+<li>creating and moving the veths into the FRR namespace</li>
+<li>moving the interface used for the underlay into the FRR namespace</li>
+<li>creating the bridge, the VXLan interfaces and assigning a VTEP IP in the FRR namespace</li>
+<li>moving the FRR configuration to a shared volume</li>
+<li>sending a signal to the reloader sidecar</li>
+</ul>
+</li>
+</ul>
+<p>By doing this, we can run sequentially all the actions required to have the same setup shown in the previous posts, without risking to have races.</p>
+<h3 id="emulating-with-scripts">
+  Emulating with scripts
+  <a class="heading-link" href="#emulating-with-scripts">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>I managed to have a decent prototype of the described behaviour by:</p>
+<ul>
+<li>starting the FRR container with an empty <code>frr.conf</code>, providing the final <code>frr.conf</code> to the controller and then <a href="https://github.com/fedepaol/evpnlab/blob/main/08_from_kind_with_systemdunits/podmanunit/controller/setup.sh#L8"  class="external-link" target="_blank" rel="noopener">copying it</a></li>
+<li>having a script listening for connections and reloading</li>
+<li>having the controller running a bunch of <code>ip netns exec</code> commands to configure the interfaces in the FRR namespace</li>
+</ul>
+<h2 id="running-podman-pods-as-systemd-units">
+  Running Podman pods as systemd units
+  <a class="heading-link" href="#running-podman-pods-as-systemd-units">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>Now that we know the moving parts, let&rsquo;s deploy them as podman pods / systemd units.</p>
+<p>What we need is:</p>
+<ul>
+<li>a regular <code>FRR</code> pod</li>
+<li>a <code>network=host</code>, lot of capabilities <code>controller</code> pod</li>
+<li>shared folders (to copy the frr configuration)</li>
+<li>a way to let the <code>controller</code> pod know the network namespace of the <code>frr</code> pod</li>
+</ul>
+<p>Following <a href="https://www.redhat.com/en/blog/podman-run-pods-systemd-services"  class="external-link" target="_blank" rel="noopener">this post</a>, the steps are:</p>
+<p>Create the pod:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">podman pod create --share<span class="o">=</span>+pid --name<span class="o">=</span>frrpod -p 7080:7080
+</span></span></code></pre></div><p>Create the containers belonging to the pod:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">podman create --pod<span class="o">=</span>frrpod --pidfile<span class="o">=</span>/root/frr/frrpid --name<span class="o">=</span>frr --cap-add<span class="o">=</span>CAP_NET_BIND_SERVICE,CAP_NET_ADMIN,CAP_NET_RAW,CAP_SYS_ADMIN -v<span class="o">=</span>/root/frr:/etc/frr -v<span class="o">=</span>varfrr:/var/run/frr:Z -t quay.io/frrouting/frr:10.0
+</span></span><span class="line"><span class="cl">.1 /etc/frr/start.sh
+</span></span><span class="line"><span class="cl">podman create --pod<span class="o">=</span>frrpod --name<span class="o">=</span>reloader -v<span class="o">=</span>/root/frr:/etc/frr -v<span class="o">=</span>varfrr:/var/run/frr:Z --entrypoint<span class="o">=</span>/etc/frr/reloader.sh -t quay.io/frrouting/frr:10.0.1
+</span></span></code></pre></div><p>Generate the corresponding systemd units:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">podman generate systemd --new --files --name frrpod
+</span></span></code></pre></div><p>Starting the systemd unit:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">systemctl start pod-controllerpod
+</span></span></code></pre></div><p>By doing this, we give up the configurability via CRD offered by Kubernetes, but we gain independence from a kubernetes node lifecycle. In particular, this systemd units can be enabled and those containers can be started as soon as a node starts.</p>
+<h2 id="first-hurdle-finding-the-right-network-namespace">
+  First hurdle: finding the right network namespace
+  <a class="heading-link" href="#first-hurdle-finding-the-right-network-namespace">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>This is something that kept me busy for a bit, because here we can&rsquo;t use the CRI API to find the network namespace of the pod, simply because these containers are not running as pods.</p>
+<p>The solution I found was to tell podman to create a pid file for the FRR container</p>
+<pre tabindex="0"><code>podman create --pod=frrpod --pidfile=/root/frr/frrpid
+</code></pre><p>and then to use that from the controller to find the target namespace</p>
+<pre tabindex="0"><code>FRRPID=$(cat /etc/frr/frrpid)
+NETNS=$(ip netns identify $FRRPID)
+</code></pre><p>With that, I was able to consume the target namespace and provide the configuration required.</p>
+<h2 id="seeing-it-in-action-with-podman-containerlab-and-kind">
+  Seeing it in action with Podman, ContainerLab and Kind
+  <a class="heading-link" href="#seeing-it-in-action-with-podman-containerlab-and-kind">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>Surprisingly, it works! I have an (almost) working prototype under my <a href="https://github.com/fedepaol/evpnlab/tree/main/08_from_kind_with_systemdunits"  class="external-link" target="_blank" rel="noopener">evpn lab</a> repo, where I was able to test the topology described in the previous post with
+ContainerLab, Kind and podman running inside the Kind node (a docker container !!!!).</p>
+<p>The ContainerLab setup looks like this</p>
+<p><img src="/images/podman-systemd-unit/clabsystemdpods.png" alt=""></p>
+<p>In order to start it, it is enough to run the <a href="https://github.com/fedepaol/evpnlab/blob/main/08_from_kind_with_systemdunits/setup.sh"  class="external-link" target="_blank" rel="noopener">setup.sh</a> file.</p>
+<p>It will:</p>
+<ul>
+<li>start ContainerLab and kind</li>
+<li>deploy frr-k8s</li>
+<li>configure the podman pods as systemd units (entry point <a href="https://github.com/fedepaol/evpnlab/blob/main/08_from_kind_with_systemdunits/podmanunit/start_podman.sh"  class="external-link" target="_blank" rel="noopener">here</a>)</li>
+</ul>
+<h3 id="testing-it">
+  Testing it
+  <a class="heading-link" href="#testing-it">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>The way the routes are exchanged are no different from what I described in <a href="/blog/2024/06/14/extending-the-kubernetes-host-network-with-evpn-tunnels-and-frr/" >my previous post</a>. The ping test works here too!</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">docker <span class="nb">exec</span> -it clab-kindpods-HOST1 bash
+</span></span><span class="line"><span class="cl">bash-5.1# ping 10.244.0.6
+</span></span><span class="line"><span class="cl">PING 10.244.0.6 <span class="o">(</span>10.244.0.6<span class="o">)</span> 56<span class="o">(</span>84<span class="o">)</span> bytes of data.
+</span></span><span class="line"><span class="cl"><span class="m">64</span> bytes from 10.244.0.6: <span class="nv">icmp_seq</span><span class="o">=</span><span class="m">1</span> <span class="nv">ttl</span><span class="o">=</span><span class="m">61</span> <span class="nv">time</span><span class="o">=</span>0.171 ms
+</span></span><span class="line"><span class="cl"><span class="m">64</span> bytes from 10.244.0.6: <span class="nv">icmp_seq</span><span class="o">=</span><span class="m">2</span> <span class="nv">ttl</span><span class="o">=</span><span class="m">61</span> <span class="nv">time</span><span class="o">=</span>0.070 ms
+</span></span></code></pre></div><h2 id="wrapping-up">
+  Wrapping up
+  <a class="heading-link" href="#wrapping-up">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>Having the flexibility of Kubernetes for handling the lifecycle of our EVPN pod is great, but comes with a limitation, as I wrote in the beginning. Having it running as a systemd unit allows to provide connectivity that goes beyond extra networks.</p>
+<p>Additionally, we revisited the architecture and how the components interact, providing a better separation of responsibilities.</p>
+
+      </div>
+
+
+      <footer>
+        
+
+
+        <div id="disqus_thread"></div>
+<script>
+  window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "fedepaolgithubio" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+    
+    document.addEventListener('themeChanged', function (e) { 
+        if (document.readyState == 'complete') {
+          DISQUS.reset({ reload: true, config: disqus_config });
+        }
+    });
+</script>
+        
+        
+        
+        
+      </footer>
+    </article>
+
+    
+  </section>
+
+    </div>
+
+    <footer class="footer">
+  <section class="container">
+    ©
+    
+    2025
+     Federico Paolinelli 
+    ·
+    
+    Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/" target="_blank" rel="noopener">Coder</a>.
+    
+  </section>
+</footer>
+
+  </main>
+
+  
+
+  
+  
+  <script src="/js/coder.min.6ae284be93d2d19dad1f02b0039508d9aab3180a12a06dcc71b0b0ef7825a317.js" integrity="sha256-auKEvpPS0Z2tHwKwA5UI2aqzGAoSoG3McbCw73gloxc="></script>
+  
+
+  
+
+  
+
+
+  
+<script>
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-16514009-2', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+
+</html>
