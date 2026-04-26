@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>
+  How I use AI in 2026 · My little software warehouse
+</title>
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+
+
+
+
+<meta name="author" content="Federico Paolinelli">
+<meta name="description" content="How I use AI in my daily work as a maintainer and developer, from coding to triaging PRs and CI failures">
+<meta name="keywords" content="">
+
+<meta name="twitter:card" content="summary"/><meta name="twitter:title" content="How I use AI in 2026"/>
+<meta name="twitter:description" content="How I use AI in my daily work as a maintainer and developer, from coding to triaging PRs and CI failures"/>
+
+<meta property="og:title" content="How I use AI in 2026" />
+<meta property="og:description" content="How I use AI in my daily work as a maintainer and developer, from coding to triaging PRs and CI failures" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://fedepaol.github.io/blog/2026/04/25/how-i-use-ai-in-2026/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2026-04-25T12:14:10+02:00" />
+<meta property="article:modified_time" content="2026-04-25T12:14:10+02:00" />
+
+
+
+
+<link rel="canonical" href="https://fedepaol.github.io/blog/2026/04/25/how-i-use-ai-in-2026/">
+
+
+<link rel="preload" href="/fonts/fa-brands-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/fa-regular-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
+
+
+  
+  
+  <link rel="stylesheet" href="/css/coder.min.577e3c5ead537873430da16f0964b754a120fd87c4e2203a00686e7c75b51378.css" integrity="sha256-V348Xq1TeHNDDaFvCWS3VKEg/YfE4iA6AGhufHW1E3g=" crossorigin="anonymous" media="screen" />
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+<link rel="icon" type="image/svg+xml" href="/images/favicon.svg" sizes="any">
+<link rel="icon" type="image/png" href="/images/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="/images/favicon-16x16.png" sizes="16x16">
+
+<link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+<link rel="manifest" href="/site.webmanifest">
+<link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+
+
+
+
+
+
+</head>
+
+
+
+
+<body class="preload-transitions colorscheme-light">
+  
+<div class="float-container">
+    <a id="dark-mode-toggle" class="colorscheme-toggle">
+        <i class="fa-solid fa-adjust fa-fw" aria-hidden="true"></i>
+    </a>
+</div>
+
+
+  <main class="wrapper">
+    <nav class="navigation">
+  <section class="container">
+    
+    <a class="navigation-title" href="https://fedepaol.github.io/">
+      My little software warehouse
+    </a>
+    
+    
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa-solid fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/posts/">Blog</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="/about/">About</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link " href="mailto:fedepaol@gmail.com">Contact</a>
+            </li>
+          
+        
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+    <div class="content">
+      
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">
+            <a class="title-link" href="https://fedepaol.github.io/blog/2026/04/25/how-i-use-ai-in-2026/">
+              How I use AI in 2026
+            </a>
+          </h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa-solid fa-calendar" aria-hidden="true"></i>
+              <time datetime="2026-04-25T12:14:10&#43;02:00">
+                April 25, 2026
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa-solid fa-clock" aria-hidden="true"></i>
+              9-minute read
+            </span>
+          </div>
+          
+          
+          
+        </div>
+      </header>
+
+      <div class="post-content">
+        
+        <h1 id="its-funny">
+  It&rsquo;s funny
+  <a class="heading-link" href="#its-funny">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h1>
+<p>I had a draft post sitting in my local repo for a while, where I was about to scream about how AI is overestimated. Well, that post aged pretty badly. I never published it, and looking back at the notes I&rsquo;m glad I didn&rsquo;t. So what I&rsquo;m going to write today will only be about my current workflow and how I actually use AI in my daily work — no hype, no predictions, just what I&rsquo;ve found useful.</p>
+<h2 id="my-setup">
+  My setup
+  <a class="heading-link" href="#my-setup">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>I run Claude Code with <code>--dangerously-skip-permissions</code> inside a libvirt VM. Running it in a VM adds a layer of isolation I&rsquo;m comfortable with when giving an agent broad permissions to run commands. My configuration and scripts for setting this up live at <a href="https://github.com/fedepaol/clauderunner"  class="external-link" target="_blank" rel="noopener">clauderunner</a>.</p>
+<p>I work with tmux and keep at most 3 sessions running in parallel, each working on a different task. Beyond that, it becomes hard to keep up — I want to review what each agent produces before moving forward, and three is about the limit where I can do that without losing track. I found Mitchell&rsquo;s Hashimoto suggestion to always have an agent running interesting, and trying to build my own variation of it. It&rsquo;s also true that sometimes I need to stop and gather all the open threads I left hanging, so I don&rsquo;t want to have too many of them.</p>
+<p>I also use <a href="https://github.com/nickvdyck/caveman"  class="external-link" target="_blank" rel="noopener">caveman</a> to cut down Claude&rsquo;s verbosity and reduce the number of tokens a bit. By default it narrates everything it&rsquo;s doing in great detail, which I find more distracting than helpful. I don&rsquo;t need the narration, I just need the results.</p>
+<h2 id="adding-new-features-to-the-projects-i-am-working-on">
+  Adding new features to the projects I am working on
+  <a class="heading-link" href="#adding-new-features-to-the-projects-i-am-working-on">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>This is the most obvious use case and probably where I get the most value. I work primarily on <a href="https://github.com/metallb/metallb"  class="external-link" target="_blank" rel="noopener">MetalLB</a> and <a href="https://github.com/openperouter/openperouter"  class="external-link" target="_blank" rel="noopener">OpenPerouter</a>, both of which are non-trivial Go projects with real users, so the bar for quality is high.</p>
+<p>I use <a href="https://github.com/fedepaol/speckit"  class="external-link" target="_blank" rel="noopener">speckit</a> intensively. Unsurprisingly, the more time I spend upfront drafting a precise spec and carefully reviewing each intermediate artifact — the plan, the task breakdown — the less I need to iterate on the generated code. Vague instructions produce vague code. A well-structured spec acts as a forcing function that keeps the agent on track and reduces the number of correction cycles significantly. Also, if I have a specific structure or architecture in mind and I describe it carefully, the quality of the output is much better.</p>
+<p>For larger features I enable <code>CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1</code> and spin up a team: typically 3 coding agents working in parallel, 1 reviewer, and 1 QE agent writing tests alongside the implementation. For smaller, well-scoped changes a <code>context.md</code> file with hand-written instructions is sufficient — no need to over-engineer the scaffolding.</p>
+<p>Once the code is generated I use <a href="https://github.com/fedepaol/diffity"  class="external-link" target="_blank" rel="noopener">diffity</a> to review it. It gives me a convenient way to annotate the diff with comments and then ask the agents to iterate on them. It&rsquo;s a tighter feedback loop than editing files by hand.</p>
+<p>The initial draft, even after I&rsquo;ve reviewed it, is never the finished product. It still has to pass CI, and it still has to survive the GitHub review process. Real reviewers (or other agents) catch things that neither I nor the agent noticed. When a comment is straightforward to address, I just tell the agent to read the review and fix it. For anything more subtle, I stay involved.</p>
+<h2 id="on-pushing-code-without-reviewing-it">
+  On pushing code without reviewing it
+  <a class="heading-link" href="#on-pushing-code-without-reviewing-it">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>I feel it&rsquo;s unfair to push code I haven&rsquo;t read. Not reviewing your own PR means deferring the work you were supposed to do in the first place to the reviewer — that&rsquo;s disrespectful of their time, and it offloads the cognitive burden of understanding the change onto someone else.</p>
+<p>I&rsquo;m often on the other side, and I can immediately tell when a PR was generated and pushed without any care. The signals are familiar: inconsistent naming, code that can be moved to functions, tests that don&rsquo;t really test anything. Low-quality, unreviewed AI output is one of the more frustrating things landing in open source review queues right now.</p>
+<h2 id="triaging-ci-failures">
+  Triaging CI failures
+  <a class="heading-link" href="#triaging-ci-failures">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>All my projects use <a href="https://github.com/onsi/ginkgo"  class="external-link" target="_blank" rel="noopener">Ginkgo</a> for e2e tests. I care a lot about CI reliability — a flaky test suite is worse than no test suite, because it trains contributors to ignore failures and merge anyway.</p>
+<p>To make failures actionable, whenever a test fails the system dumps the current state of the cluster plus the last 10 minutes of logs from all relevant components. That&rsquo;s a lot of data, and manually correlating it across multiple files is tedious and error-prone.</p>
+<p>I built <a href="https://github.com/fedepaol/artifactsdownloader"  class="external-link" target="_blank" rel="noopener">artifactsdownloader</a> to fetch those artifacts from a failed PR run, and wrote a skill at <a href="https://github.com/fedepaol/skills/tree/main/analyze-test-failures"  class="external-link" target="_blank" rel="noopener">analyze-test-failures</a> that ties the whole thing together: given a PR, it downloads the artifacts and asks Claude to identify the most probable root cause and whether there&rsquo;s a quick fix available.</p>
+<p>Even when the suggested root cause turns out to be wrong, it&rsquo;s still genuinely useful. Claude is very good at correlating events across multiple log files and reconstructing the timeline of what happened when. Even when I don&rsquo;t buy the proposed explanation, I already have an instance with all the right context loaded — I can just ask follow-up questions and explore the failure interactively. That&rsquo;s significantly faster than doing it by hand, taking manual notes, and building a mental model of the failure from scratch each time.</p>
+<h2 id="triaging-prs">
+  Triaging PRs
+  <a class="heading-link" href="#triaging-prs">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>I took inspiration from Steve Yegge&rsquo;s <a href="https://steve-yegge.medium.com/vibe-maintainer-a2273a841040"  class="external-link" target="_blank" rel="noopener">Vibe Maintainer</a> post and started using CI to automatically classify incoming PRs — understanding at a glance whether a PR is mergeable, needs work, or has structural issues that require a conversation.</p>
+<p>The classification saves time on the triage step. Rather than reading every PR cold, I have a starting point: a summary of what the PR does, whether it&rsquo;s consistent with the project&rsquo;s conventions, and any obvious issues. I can then focus my attention on the PRs that actually need it.</p>
+<p>On a few occasions I&rsquo;ve also taken the approach Yegge describes: picking up a contributor&rsquo;s PR, improving it, and merging it directly rather than waiting on multiple review cycles. It&rsquo;s not the right call for every PR — sometimes the back-and-forth is the right process — but for stalled contributions it can cut the round-trip time considerably and be a better experience for the contributor too.</p>
+<p>The skill I use for this is at <a href="https://github.com/fedepaol/skills/tree/main/triage-prs"  class="external-link" target="_blank" rel="noopener">triage-prs</a>.</p>
+<h2 id="improving-the-workflow">
+  Improving the workflow
+  <a class="heading-link" href="#improving-the-workflow">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>A side effect of generating more code is that more PRs end up in review, both from myself and from contributors. I started noticing that a significant chunk of my review comments were the same things over and over — the same patterns, the same nitpicks, the same structural issues.</p>
+<p>So I asked Claude to go through my past review comments and identify the 10 most common ones. Then I asked which of those could realistically be caught automatically with a linter or a script. Several of them could. I implemented those checks and wired them into the CI pipeline, so they fail fast rather than showing up in a human review.</p>
+<p>For the remaining patterns — the ones that are too contextual for a static check — I updated my Gemini reviewer configuration to flag them. The goal is to move as much of the mechanical feedback as possible out of the human review loop, so that by the time I&rsquo;m reading a PR, the low-level stuff is already handled and I can focus on the things that actually require judgment.</p>
+<h2 id="learning">
+  Learning
+  <a class="heading-link" href="#learning">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>I use Gemini to get up to speed on new protocols and technologies. Recently that meant things like IS-IS routing internals and the OpenShift installer architecture — topics where the official documentation is dense, scattered, or assumes a lot of background knowledge I didn&rsquo;t have.</p>
+<p>Being able to ask questions interactively, get explanations pitched at the right level, and then immediately drill into the parts I didn&rsquo;t follow is a much faster ramp-up than reading specs or documentation linearly. It&rsquo;s not a replacement for eventually reading the primary sources, but it&rsquo;s a much better way to build the initial mental model before you do.</p>
+<h2 id="building-stuff-locally">
+  Building stuff locally
+  <a class="heading-link" href="#building-stuff-locally">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>Tools like <a href="https://containerlab.dev/"  class="external-link" target="_blank" rel="noopener">containerlab</a> and <a href="https://kind.sigs.k8s.io/"  class="external-link" target="_blank" rel="noopener">kind</a> are great for spinning up local network environments, but configuring them from scratch can be fiddly. Claude makes this much more practical — I describe the topology I want at a high level and let it handle the configuration details.</p>
+<p>One thing that works particularly well here is providing examples to take inspiration from. The output is noticeably better when Claude has a concrete reference rather than building from scratch.</p>
+<p>A good example of this in practice: I wanted to build a lab mixing EVPN and SRv6 — a topology that requires getting several moving parts to talk to each other correctly. Rather than working through it manually, I wrote some reference configs and asked Claude to assemble the topology I had in mind. The result is at <a href="https://github.com/fedepaol/srv6lab/tree/srv6evpn"  class="external-link" target="_blank" rel="noopener">srv6lab</a>. What I found particularly satisfying was watching Claude triage and fix misconfigurations on its own — identifying why two nodes weren&rsquo;t establishing a session, adjusting the config, and verifying the fix. That kind of iterative debugging loop on network configuration is exactly the sort of thing that used to eat up a lot of time.</p>
+<h2 id="conclusion">
+  Conclusion
+  <a class="heading-link" href="#conclusion">
+    <i class="fa-solid fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>AI is saving me a real amount of time, although I&rsquo;d find quite hard to say &ldquo;how much&rdquo; (but this is material for another post!). That&rsquo;s not marketing — it&rsquo;s just where I am today.</p>
+<p>That said, I still validate the output. Both for correctness and for maintainability. Code that works but is impossible to reason about creates problems down the line (and I am pretty vocal on caring about <a href="https://archive.fosdem.org/2023/schedule/event/goreducecognitive/"  class="external-link" target="_blank" rel="noopener">keeping the cognitive load low</a>), and those problems land on maintainers — often the same people who already put time into the original review. Skipping that validation step is a short-term gain with a long tail of costs.</p>
+<p>I was deeply skeptical when all of this started, so I&rsquo;m not going to make bold predictions about where it&rsquo;s headed. My skepticism was wrong before and I don&rsquo;t trust my own forecasting here. What I can say is where things stand today, for me, in my specific workflow.</p>
+<p>The way I work has genuinely changed. I spend more time in maintainer mode — writing detailed specs, reviewing generated code, thinking about structure and architecture — and less time writing code directly. I&rsquo;m at a point in my career where that trade-off suits me fine. Writing less code and focusing more on the shape of a system is something I find more interesting anyway.</p>
+<p>This is still a new field and I&rsquo;m learning as I go. A lot of what shaped my current workflow came from sources that incidentally landed in my timeline rather than from any deliberate research: <a href="https://steve-yegge.medium.com/"  class="external-link" target="_blank" rel="noopener">Steve Yegge</a> and <a href="https://addyosmani.com/blog/"  class="external-link" target="_blank" rel="noopener">Addy Osmani</a> wrote things that changed how I think about this. The <a href="https://www.pragmaticengineer.com/podcast/"  class="external-link" target="_blank" rel="noopener">Pragmatic Engineer podcast</a> has also been a good signal in a space full of noise.</p>
+<p>If you have better approaches, know reputable sources I should be following, or think something I&rsquo;m doing could be improved, I&rsquo;d genuinely like to hear it. You can reach me at <a href="mailto:fedepaol@gmail.com" >fedepaol@gmail.com</a> or leave a comment below.</p>
+
+      </div>
+
+
+      <footer>
+        
+
+
+        <div id="disqus_thread"></div>
+<script>
+  window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "fedepaolgithubio" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+    
+    document.addEventListener('themeChanged', function (e) { 
+        if (document.readyState == 'complete') {
+          DISQUS.reset({ reload: true, config: disqus_config });
+        }
+    });
+</script>
+        
+        
+        
+        
+
+        
+      </footer>
+    </article>
+
+    
+  </section>
+
+    </div>
+
+    <footer class="footer">
+  <section class="container">
+    ©
+    
+    2026
+     Federico Paolinelli 
+    ·
+    
+    Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/" target="_blank" rel="noopener">Coder</a>.
+    
+  </section>
+</footer>
+
+  </main>
+
+  
+
+  
+  
+  <script src="/js/coder.min.6ae284be93d2d19dad1f02b0039508d9aab3180a12a06dcc71b0b0ef7825a317.js" integrity="sha256-auKEvpPS0Z2tHwKwA5UI2aqzGAoSoG3McbCw73gloxc="></script>
+  
+
+  
+
+  
+
+
+  
+<script>
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-16514009-2', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+
+</html>

@@ -6,8 +6,15 @@
     <description>Recent content in Posts on My little software warehouse</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Mon, 06 Jan 2025 21:33:24 +0100</lastBuildDate>
+    <lastBuildDate>Sat, 25 Apr 2026 12:14:10 +0200</lastBuildDate>
     <atom:link href="https://fedepaol.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>How I use AI in 2026</title>
+      <link>https://fedepaol.github.io/blog/2026/04/25/how-i-use-ai-in-2026/</link>
+      <pubDate>Sat, 25 Apr 2026 12:14:10 +0200</pubDate>
+      <guid>https://fedepaol.github.io/blog/2026/04/25/how-i-use-ai-in-2026/</guid>
+      <description>It&amp;rsquo;s funny Link to heading I had a draft post sitting in my local repo for a while, where I was about to scream about how AI is overestimated. Well, that post aged pretty badly. I never published it, and looking back at the notes I&amp;rsquo;m glad I didn&amp;rsquo;t. So what I&amp;rsquo;m going to write today will only be about my current workflow and how I actually use AI in my daily work — no hype, no predictions, just what I&amp;rsquo;ve found useful.</description>
+    </item>
     <item>
       <title>Enabling EVPN termination with Podman pods as systemd units</title>
       <link>https://fedepaol.github.io/blog/2025/01/06/enabling-evpn-termination-with-podman-pods-as-systemd-units/</link>
