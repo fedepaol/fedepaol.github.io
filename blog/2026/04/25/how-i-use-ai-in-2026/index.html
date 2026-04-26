@@ -143,7 +143,7 @@
             </span>
             <span class="reading-time">
               <i class="fa-solid fa-clock" aria-hidden="true"></i>
-              9-minute read
+              10-minute read
             </span>
           </div>
           
@@ -183,7 +183,7 @@
 <p>I use <a href="https://github.com/fedepaol/speckit"  class="external-link" target="_blank" rel="noopener">speckit</a> intensively. Unsurprisingly, the more time I spend upfront drafting a precise spec and carefully reviewing each intermediate artifact — the plan, the task breakdown — the less I need to iterate on the generated code. Vague instructions produce vague code. A well-structured spec acts as a forcing function that keeps the agent on track and reduces the number of correction cycles significantly. Also, if I have a specific structure or architecture in mind and I describe it carefully, the quality of the output is much better.</p>
 <p>For larger features I enable <code>CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1</code> and spin up a team: typically 3 coding agents working in parallel, 1 reviewer, and 1 QE agent writing tests alongside the implementation. For smaller, well-scoped changes a <code>context.md</code> file with hand-written instructions is sufficient — no need to over-engineer the scaffolding.</p>
 <p>Once the code is generated I use <a href="https://github.com/fedepaol/diffity"  class="external-link" target="_blank" rel="noopener">diffity</a> to review it. It gives me a convenient way to annotate the diff with comments and then ask the agents to iterate on them. It&rsquo;s a tighter feedback loop than editing files by hand.</p>
-<p>The initial draft, even after I&rsquo;ve reviewed it, is never the finished product. It still has to pass CI, and it still has to survive the GitHub review process. Real reviewers (or other agents) catch things that neither I nor the agent noticed. When a comment is straightforward to address, I just tell the agent to read the review and fix it. For anything more subtle, I stay involved.</p>
+<p>So why I am not pushing out one thing after the other? The initial outcome, even after I&rsquo;ve reviewed it, is never the finished product. It still has to pass CI (and we know it&rsquo;s painful!), and it still has to survive the GitHub review process. Real reviewers (or other agents) catch things that neither I nor the agent noticed. When a comment is straightforward to address, I just tell the agent to read the review and fix it. For anything more subtle, I stay involved.</p>
 <h2 id="on-pushing-code-without-reviewing-it">
   On pushing code without reviewing it
   <a class="heading-link" href="#on-pushing-code-without-reviewing-it">
@@ -200,7 +200,7 @@
     <span class="sr-only">Link to heading</span>
   </a>
 </h2>
-<p>All my projects use <a href="https://github.com/onsi/ginkgo"  class="external-link" target="_blank" rel="noopener">Ginkgo</a> for e2e tests. I care a lot about CI reliability — a flaky test suite is worse than no test suite, because it trains contributors to ignore failures and merge anyway.</p>
+<p>All my projects use <a href="https://github.com/onsi/ginkgo"  class="external-link" target="_blank" rel="noopener">Ginkgo</a> for e2e tests. I care a lot about CI reliability — a flaky test suite is worse than no test suite, because it&rsquo;s not reliable. One rerun here, on rerun there and suddently you don&rsquo;t know anymore what works and what doesn&rsquo;t.</p>
 <p>To make failures actionable, whenever a test fails the system dumps the current state of the cluster plus the last 10 minutes of logs from all relevant components. That&rsquo;s a lot of data, and manually correlating it across multiple files is tedious and error-prone.</p>
 <p>I built <a href="https://github.com/fedepaol/artifactsdownloader"  class="external-link" target="_blank" rel="noopener">artifactsdownloader</a> to fetch those artifacts from a failed PR run, and wrote a skill at <a href="https://github.com/fedepaol/skills/tree/main/analyze-test-failures"  class="external-link" target="_blank" rel="noopener">analyze-test-failures</a> that ties the whole thing together: given a PR, it downloads the artifacts and asks Claude to identify the most probable root cause and whether there&rsquo;s a quick fix available.</p>
 <p>Even when the suggested root cause turns out to be wrong, it&rsquo;s still genuinely useful. Claude is very good at correlating events across multiple log files and reconstructing the timeline of what happened when. Even when I don&rsquo;t buy the proposed explanation, I already have an instance with all the right context loaded — I can just ask follow-up questions and explore the failure interactively. That&rsquo;s significantly faster than doing it by hand, taking manual notes, and building a mental model of the failure from scratch each time.</p>
@@ -232,7 +232,7 @@
     <span class="sr-only">Link to heading</span>
   </a>
 </h2>
-<p>I use Gemini to get up to speed on new protocols and technologies. Recently that meant things like IS-IS routing internals and the OpenShift installer architecture — topics where the official documentation is dense, scattered, or assumes a lot of background knowledge I didn&rsquo;t have.</p>
+<p>I use Gemini to get up to speed on things like new protocols and technologies. Recently that meant things like IS-IS routing internals or the OpenShift installer architecture — topics where the official documentation is dense, or assumes a lot of background knowledge I didn&rsquo;t have.</p>
 <p>Being able to ask questions interactively, get explanations pitched at the right level, and then immediately drill into the parts I didn&rsquo;t follow is a much faster ramp-up than reading specs or documentation linearly. It&rsquo;s not a replacement for eventually reading the primary sources, but it&rsquo;s a much better way to build the initial mental model before you do.</p>
 <h2 id="building-stuff-locally">
   Building stuff locally
@@ -251,10 +251,10 @@
     <span class="sr-only">Link to heading</span>
   </a>
 </h2>
-<p>AI is saving me a real amount of time, although I&rsquo;d find quite hard to say &ldquo;how much&rdquo; (but this is material for another post!). That&rsquo;s not marketing — it&rsquo;s just where I am today.</p>
+<p>AI is saving me a real amount of time, although I&rsquo;d find quite hard to say &ldquo;how much&rdquo; (but this is material for another post!).</p>
 <p>That said, I still validate the output. Both for correctness and for maintainability. Code that works but is impossible to reason about creates problems down the line (and I am pretty vocal on caring about <a href="https://archive.fosdem.org/2023/schedule/event/goreducecognitive/"  class="external-link" target="_blank" rel="noopener">keeping the cognitive load low</a>), and those problems land on maintainers — often the same people who already put time into the original review. Skipping that validation step is a short-term gain with a long tail of costs.</p>
 <p>I was deeply skeptical when all of this started, so I&rsquo;m not going to make bold predictions about where it&rsquo;s headed. My skepticism was wrong before and I don&rsquo;t trust my own forecasting here. What I can say is where things stand today, for me, in my specific workflow.</p>
-<p>The way I work has genuinely changed. I spend more time in maintainer mode — writing detailed specs, reviewing generated code, thinking about structure and architecture — and less time writing code directly. I&rsquo;m at a point in my career where that trade-off suits me fine. Writing less code and focusing more on the shape of a system is something I find more interesting anyway.</p>
+<p>The way I work has changed a lot. I spend more time in maintainer mode — writing detailed specs, reviewing generated code, thinking about structure and architecture — and less time writing code directly. I&rsquo;m at a point in my career where that trade-off suits me fine. Writing less code and focusing more on the shape of a system is something I find more interesting anyway.</p>
 <p>This is still a new field and I&rsquo;m learning as I go. A lot of what shaped my current workflow came from sources that incidentally landed in my timeline rather than from any deliberate research: <a href="https://steve-yegge.medium.com/"  class="external-link" target="_blank" rel="noopener">Steve Yegge</a> and <a href="https://addyosmani.com/blog/"  class="external-link" target="_blank" rel="noopener">Addy Osmani</a> wrote things that changed how I think about this. The <a href="https://www.pragmaticengineer.com/podcast/"  class="external-link" target="_blank" rel="noopener">Pragmatic Engineer podcast</a> has also been a good signal in a space full of noise.</p>
 <p>If you have better approaches, know reputable sources I should be following, or think something I&rsquo;m doing could be improved, I&rsquo;d genuinely like to hear it. You can reach me at <a href="mailto:fedepaol@gmail.com" >fedepaol@gmail.com</a> or leave a comment below.</p>
 
